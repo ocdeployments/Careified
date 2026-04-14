@@ -1,26 +1,90 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+ Careified Design System v1.0
+ ============================================ */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+ --navy: #0D1B3E;
+ --navy-dark: #080F1E;
+ --royal: #1E3A8A;
+ --royal-light: #2563EB;
+ --gold: #C9973A;
+ --gold-light: #E8B86D;
+ --gold-dark: #92400E;
+ --amber: #B45309;
+ --bg-warm: #F7F4F0;
+ --bg-gold: #FDF6EC;
+ --text-primary: #0D1B3E;
+ --text-secondary: #475569;
+ --text-muted: #64748B;
+ --border-light: rgba(13,27,62,0.07);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+ background-color: var(--bg-warm);
+ color: var(--text-primary);
+}
+
+html {
+ scroll-behavior: smooth;
+}
+
+::selection {
+ background: rgba(201,151,58,0.2);
+ color: var(--navy);
+}
+
+*:focus-visible {
+ outline: 2px solid var(--gold);
+ outline-offset: 2px;
+ border-radius: 4px;
+}
+
+/* Caregiver flows - mobile-first */
+.caregiver-container {
+ padding: 0.75rem 1rem;
+}
+
+@media (min-width: 768px) {
+ .caregiver-container {
+ padding: 1rem 1.5rem;
+ max-width: 42rem;
+ margin: 0 auto;
+ }
+}
+
+/* Agency flows - desktop-first */
+.agency-container {
+ padding: 1.5rem 2rem;
+ max-width: 80rem;
+ margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+ .agency-container {
+ padding: 0.75rem 1rem;
+ }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+ input[type="text"],
+ input[type="email"],
+ input[type="tel"],
+ input[type="password"],
+ textarea,
+ select {
+ font-size: 16px;
+ }
+ 
+ button, a {
+ min-height: 44px;
+ }
+ 
+ * {
+ -webkit-tap-highlight-color: transparent;
+ }
 }

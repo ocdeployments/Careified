@@ -1,0 +1,200 @@
+// Careified Database Schema
+// Generated: April 13, 2026
+// Note: Connection URL is in prisma.config.ts (Prisma 7 requirement)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User accounts (base table for all user types)
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  role          UserRole  @default(CAREGIVER)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  caregiver     Caregiver?
+  agency        Agency?
+  family        Family?
+
+  @@map("users")
+}
+
+enum UserRole {
+  CAREGIVER
+  AGENCY
+  FAMILY
+  ADMIN
+}
+
+// Caregiver profiles
+model Caregiver {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  firstName       String
+  middleName      String?
+  lastName        String
+  preferredName   String?
+  phone           String
+  city            String
+  state           String
+  postalCode      String
+  gender          String
+  pronouns        String?
+  bio             String?
+  yearsExperience Int       @default(0)
+  hourlyRate      Float?
+  isAvailable     Boolean   @default(true)
+  profilePhotoUrl String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  languages       String[]
+  certifications  CaregiverCertification[]
+  references      CaregiverReference[]
+  security        CaregiverSecurity?
+  documents       CaregiverDocument[]
+  ratings         CaregiverRating[]
+
+  @@map("caregivers")
+}
+
+model CaregiverCertification {
+  id            String    @id @default(cuid())
+  caregiverId   String
+  certification String
+  issuingOrg    String
+  issueDate     DateTime
+  expiryDate    DateTime?
+  documentUrl   String?
+  createdAt     DateTime  @default(now())
+
+  caregiver     Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  @@map("caregiver_certifications")
+}
+
+model CaregiverReference {
+  id            String    @id @default(cuid())
+  caregiverId   String
+  name          String
+  relationship  String
+  phone         String
+  email         String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  caregiver     Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  @@map("caregiver_references")
+}
+
+model CaregiverSecurity {
+  id                String    @id @default(cuid())
+  caregiverId       String    @unique
+  backgroundCheck   String?
+  backgroundCheckDate DateTime?
+  backgroundCheckUrl String?
+  socialSecurity    String?
+  driversLicense    String?
+  driversLicenseState String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  caregiver         Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  @@map("caregiver_security")
+}
+
+model CaregiverDocument {
+  id          String    @id @default(cuid())
+  caregiverId String
+  type        String
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  @@map("caregiver_documents")
+}
+
+model Agency {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  name          String
+  description   String?
+  phone         String?
+  website       String?
+  logoUrl       String?
+  address       String?
+  city          String?
+  state         String?
+  postalCode    String?
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("agencies")
+}
+
+model CaregiverRating {
+  id          String    @id @default(cuid())
+  caregiverId String
+  rating      Int
+  review      String?
+  reviewerName String?
+  createdAt   DateTime  @default(now())
+
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  @@map("caregiver_ratings")
+}
+
+model Family {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  firstName       String
+  lastName        String
+  phone           String?
+  address         String?
+  city            String?
+  state           String?
+  postalCode      String?
+  careNeeds       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("families")
+}
+
+model AdminAuditLog {
+  id          String    @id @default(cuid())
+  action      String
+  entityType  String?
+  entityId    String?
+  userId      String?
+  details     String?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  @@map("admin_audit_log")
+}
