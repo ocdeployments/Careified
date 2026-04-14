@@ -26,6 +26,28 @@ const SPECIALTIES = [
  "Hospice support", "Wound care awareness",
 ]
 
+// US ZIP to City lookup (free API)
+async function lookupZIP(zip: string): Promise<{city: string, state: string} | null> {
+  try {
+    const cleanZip = zip.replace(/\D/g, '').substring(0, 5)
+    if (cleanZip.length < 5) return null
+    
+    const res = await fetch(`https://api.zippopotam.us/us/${cleanZip}`)
+    if (!res.ok) return null
+    
+    const data = await res.json()
+    if (data.places && data.places[0]) {
+      return {
+        city: data.places[0]['place name'],
+        state: data.places[0]['state abbreviation']
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export default function Step3Availability({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [status, setStatus] = useState(initialData?.availabilityStatus || '')
  const [specialties, setSpecialties] = useState<string[]>(initialData?.specializations || [])
@@ -34,9 +56,12 @@ export default function Step3Availability({ initialData, onSave }: { initialData
  const [willingOvernight, setWillingOvernight] = useState(initialData?.willingOvernight || false)
  const [hasVehicle, setHasVehicle] = useState(initialData?.hasVehicle || false)
  const [city, setCity] = useState(initialData?.city || '')
- const [postalCode, setPostalCode] = useState(initialData?.postalCode || '')
+ const [state, setState] = useState(initialData?.state || '')
+ const [zipCode, setZipCode] = useState(initialData?.postalCode || '')
+ const [address, setAddress] = useState(initialData?.address || '')
  const [languages, setLanguages] = useState<string[]>(initialData?.additionalLanguages || [])
  const [saving, setSaving] = useState(false)
+ const [lookingUp, setLookingUp] = useState(false)
 
  const saveData = async (updates: Partial<any>) => {
    setSaving(true)
@@ -49,12 +74,43 @@ export default function Step3Availability({ initialData, onSave }: { initialData
      hasVehicle,
      travelRadius: 15,
      city,
-     postalCode,
+     state,
+     postalCode: zipCode,
+     address,
      additionalLanguages: languages,
      specializations: specialties,
      ...updates,
    })
    setSaving(false)
+ }
+
+ const handleZipChange = async (zip: string) => {
+   setZipCode(zip)
+   
+   // Auto-lookup city when ZIP is 5+ digits
+   if (zip.replace(/\D/g, '').length >= 5) {
+     setLookingUp(true)
+     const result = await lookupZIP(zip)
+     if (result) {
+       setCity(result.city)
+       setState(result.state)
+       // Save immediately
+       await saveData({ postalCode: zip, city: result.city, state: result.state })
+     }
+     setLookingUp(false)
+   }
+ }
+
+ const handleCityChange = async (newCity: string) => {
+   setCity(newCity)
+   
+   // If city is entered and no ZIP, we can't auto-fill without an API
+   // But we can still save
+   if (newCity.length >= 2 && zipCode) {
+     await saveData({ city: newCity })
+   } else if (newCity.length >= 2) {
+     // Save without ZIP - user can fill ZIP later
+   }
  }
 
  const toggleSpecialty = (spec: string) => {
@@ -83,10 +139,10 @@ export default function Step3Availability({ initialData, onSave }: { initialData
 
  return (
    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-     {/* Clinical Specialties - IMPORTANT: saves to DB */}
+     {/* Clinical Specialties */}
      <div>
        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Clinical Specialties ⭐</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Select areas where you have specific training or experience. You'll need certifications to prove these!</p>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Select areas where you have specific training or experience.</p>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px' }}>
          {SPECIALTIES.map((spec) => (
            <button
@@ -109,17 +165,11 @@ export default function Step3Availability({ initialData, onSave }: { initialData
            </button>
          ))}
        </div>
-       {specialties.length > 0 && (
-         <p style={{ fontSize: '11px', color: '#C9973A', marginTop: '8px' }}>
-           ✓ {specialties.length} specialty(ies) selected - you'll add certifications in Step 4
-         </p>
-       )}
      </div>
 
      {/* Availability Status */}
      <div>
        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Availability status</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>How soon can you start?</p>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
          {STATUSES.map((s) => (
            <label key={s.value} style={{ 
@@ -148,27 +198,53 @@ export default function Step3Availability({ initialData, onSave }: { initialData
        </div>
      </div>
 
-     {/* Location */}
+     {/* Location - Auto-lookup */}
      <div>
-       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Location</h3>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Location 📍</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Enter your ZIP code - we'll auto-fill city and state!</p>
+       
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+         <div>
+           <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>
+             ZIP Code * {lookingUp && <span style={{ color: '#C9973A' }}>🔄 Looking up...</span>}
+           </label>
+           <input 
+             type="text" 
+             value={zipCode}
+             onChange={(e) => handleZipChange(e.target.value)}
+             placeholder="75034"
+             maxLength={5}
+             style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px' }}
+           />
+         </div>
          <div>
            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>City *</label>
            <input 
              type="text" 
              value={city}
-             onChange={(e) => { setCity(e.target.value); saveData({ city: e.target.value }) }}
+             onChange={(e) => handleCityChange(e.target.value)}
              placeholder="Frisco"
              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px' }}
            />
          </div>
          <div>
-           <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>ZIP Code *</label>
+           <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>State</label>
            <input 
              type="text" 
-             value={postalCode}
-             onChange={(e) => { setPostalCode(e.target.value); saveData({ postalCode: e.target.value }) }}
-             placeholder="75034"
+             value={state}
+             onChange={(e) => { setState(e.target.value); saveData({ state: e.target.value }) }}
+             placeholder="TX"
+             maxLength={2}
+             style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px' }}
+           />
+         </div>
+         <div style={{ gridColumn: '1 / -1' }}>
+           <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Street Address (optional)</label>
+           <input 
+             type="text" 
+             value={address}
+             onChange={(e) => { setAddress(e.target.value); saveData({ address: e.target.value }) }}
+             placeholder="123 Main St, Apt 4"
              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px' }}
            />
          </div>
@@ -178,7 +254,6 @@ export default function Step3Availability({ initialData, onSave }: { initialData
      {/* Placement Types */}
      <div>
        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Placement types</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>What type of placements are you open to?</p>
        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
          {PLACEMENT_TYPES.map((type) => (
            <button
@@ -202,7 +277,7 @@ export default function Step3Availability({ initialData, onSave }: { initialData
        </div>
      </div>
 
-     {/* Additional Languages */}
+     {/* Languages */}
      <div>
        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Additional languages</h3>
        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
