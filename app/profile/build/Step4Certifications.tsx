@@ -9,6 +9,12 @@ const CERT_TYPES = [
  'Dementia Training', 'Alzheimer\'s Certification', 'Hospice Training', 'PCA Certification',
 ]
 
+const CREDENTIAL_TYPES = [
+ 'High School Diploma', 'GED', 'Associate\'s Degree (Healthcare)', 'Bachelor\'s Degree (Healthcare)',
+ 'Nursing Degree (ADN/BSN)', 'Social Work Degree', 'Medical Assistant Cert', 'Phlebotomy Cert',
+ 'EKG Technician', 'Patient Care Technician', 'Home Health Aide Cert', 'Certified Nursing Assistant (CNA)',
+]
+
 const NO_CERT_REASONS = [
  'Currently in training / studying',
  'Just started career',
@@ -26,7 +32,8 @@ interface Certification {
 }
 
 export default function Step4Certifications({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
- const [certifications, setCertifications] = useState<Certification[]>(initialData || [])
+ const [certifications, setCertifications] = useState<Certification[]>(initialData?.certifications || [])
+ const [credentials, setCredentials] = useState<Certification[]>(initialData?.credentials || [])
  const [hasNoCertReason, setHasNoCertReason] = useState(false)
  const [noCertReason, setNoCertReason] = useState('')
  const [saving, setSaving] = useState(false)
@@ -40,44 +47,61 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
    }
  }, [])
 
- const saveData = async (certData: Certification[], noCert: string = '') => {
+ const saveData = async (certData: Certification[], credData: Certification[], noCert: string = '') => {
    setSaving(true)
-   await saveStep4(certData)
+   await saveStep4(certData, credData)
    setSaving(false)
  }
 
  const addCertification = () => {
-   const updated = [...certifications, { type: '', issuingBody: '', issueDate: '', noExpiry: false }]
-   setCertifications(updated)
+   setCertifications([...certifications, { type: '', issuingBody: '', issueDate: '', noExpiry: false }])
  }
 
  const updateCertification = (index: number, field: string, value: any) => {
    const updated = [...certifications]
    updated[index] = { ...updated[index], [field]: value }
    setCertifications(updated)
-   saveData(updated.filter(c => c.type && c.issueDate))
+   saveData(updated.filter(c => c.type && c.issueDate), credentials.filter(c => c.type && c.issueDate))
  }
 
  const removeCertification = (index: number) => {
    const updated = certifications.filter((_, i) => i !== index)
    setCertifications(updated)
-   saveData(updated.filter(c => c.type && c.issueDate))
+   saveData(updated.filter(c => c.type && c.issueDate), credentials.filter(c => c.type && c.issueDate))
+ }
+
+ const addCredential = () => {
+   setCredentials([...credentials, { type: '', issuingBody: '', issueDate: '', noExpiry: false }])
+ }
+
+ const updateCredential = (index: number, field: string, value: any) => {
+   const updated = [...credentials]
+   updated[index] = { ...updated[index], [field]: value }
+   setCredentials(updated)
+   saveData(certifications.filter(c => c.type && c.issueDate), updated.filter(c => c.type && c.issueDate))
+ }
+
+ const removeCredential = (index: number) => {
+   const updated = credentials.filter((_, i) => i !== index)
+   setCredentials(updated)
+   saveData(certifications.filter(c => c.type && c.issueDate), updated.filter(c => c.type && c.issueDate))
  }
 
  const handleNoCertReason = (reason: string) => {
    setNoCertReason(reason)
-   saveData([], reason)
+   saveData([], [], reason)
  }
 
- // Check if claimed specialties match certifications
+ // Check if claimed specialties match certifications OR credentials
  const claimedSpecialties = specialties.length > 0
  const hasCerts = certifications.filter(c => c.type && c.issueDate).length > 0
- const missingCertsWarning = claimedSpecialties && !hasCerts && !hasNoCertReason
+ const hasCreds = credentials.filter(c => c.type && c.issueDate).length > 0
+ const missingProofWarning = claimedSpecialties && !hasCerts && !hasCreds && !hasNoCertReason
 
  return (
    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-     {/* Warning if specialties claimed but no certs */}
-     {missingCertsWarning && (
+     {/* Warning if specialties claimed but no certs OR credentials */}
+     {missingProofWarning && (
        <div style={{ 
          padding: '16px', 
          borderRadius: '12px', 
@@ -90,25 +114,19 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
          <div style={{ color: '#92400E', fontSize: '20px' }}>⚠️</div>
          <div>
            <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400E' }}>
-             You claimed {specialties.length} specialty(ies) in Step 3 but have no certifications listed!
+             You claimed {specialties.length} specialty(ies) in Step 3 but have no certifications or credentials listed!
            </div>
            <div style={{ fontSize: '12px', color: '#B45309', marginTop: '4px' }}>
-             Agencies verify credentials. Add certifications or explain why you don't have them.
+             Agencies verify credentials. Add certifications OR professional credentials to prove your expertise.
            </div>
          </div>
        </div>
      )}
 
-     {/* Certifications List */}
+     {/* Certifications Section */}
      <div>
-       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Your Certifications</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add all relevant certifications.</p>
-       
-       {certifications.length === 0 && !hasNoCertReason && (
-         <p style={{ fontSize: '12px', color: '#64748B', padding: '12px', background: '#F8FAFC', borderRadius: '8px' }}>
-           No certifications added yet. {specialties.length > 0 && `You claimed ${specialties.length} specialty(ies) - add certs to prove them!`}
-         </p>
-       )}
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Certifications 🏆</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add licenses, certificates, and training credentials.</p>
        
        {certifications.map((cert, index) => (
          <div key={index} style={{ 
@@ -182,8 +200,85 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
        </button>
      </div>
 
-     {/* If no certifications, ask why */}
-     {(certifications.length === 0 || !hasCerts) && (
+     {/* Professional Credentials Section */}
+     <div>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Professional Credentials 📜</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add degrees, diplomas, and other professional qualifications.</p>
+       
+       {credentials.map((cred, index) => (
+         <div key={index} style={{ 
+           padding: '16px', 
+           border: '1px solid #E2E8F0', 
+           borderRadius: '12px', 
+           marginBottom: '12px',
+           background: '#F8FAFC'
+         }}>
+           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+             <span style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E' }}>Credential {index + 1}</span>
+             <button 
+               type="button"
+               onClick={() => removeCredential(index)}
+               style={{ color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}
+             >
+               Remove
+             </button>
+           </div>
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+             <div>
+               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Type *</label>
+               <select 
+                 value={cred.type}
+                 onChange={(e) => updateCredential(index, 'type', e.target.value)}
+                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}
+               >
+                 <option value="">Select...</option>
+                 {CREDENTIAL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+               </select>
+             </div>
+             <div>
+               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Institution</label>
+               <input 
+                 type="text"
+                 value={cred.issuingBody}
+                 onChange={(e) => updateCredential(index, 'issuingBody', e.target.value)}
+                 placeholder="e.g. University of Texas"
+                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}
+               />
+             </div>
+             <div>
+               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Date *</label>
+               <input 
+                 type="date"
+                 value={cred.issueDate}
+                 onChange={(e) => updateCredential(index, 'issueDate', e.target.value)}
+                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}
+               />
+             </div>
+           </div>
+         </div>
+       ))}
+       
+       <button 
+         type="button"
+         onClick={addCredential}
+         style={{
+           padding: '12px 20px',
+           borderRadius: '8px',
+           border: '1px dashed #C9973A',
+           background: '#FDF6EC',
+           color: '#92400E',
+           fontSize: '13px',
+           fontWeight: 600,
+           cursor: 'pointer',
+           width: '100%',
+         }}
+       >
+         + Add Credential
+       </button>
+     </div>
+
+     {/* If no certifications OR credentials, ask why */}
+     {(!hasCerts && !hasCreds) && (
        <div style={{ 
          padding: '16px', 
          borderRadius: '12px', 
@@ -198,13 +293,13 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
                setHasNoCertReason(e.target.checked)
                if (!e.target.checked) {
                  setNoCertReason('')
-                 saveData([])
+                 saveData([], [])
                }
              }}
              style={{ accentColor: '#C9973A', width: '18px', height: '18px' }}
            />
            <span style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>
-             I don't have certifications yet
+             I don't have certifications or credentials yet
            </span>
          </label>
          
