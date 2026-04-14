@@ -31,7 +31,7 @@ interface Cert {
  noExpiry: boolean
 }
 
-export default function Step4Certifications({ initialData }: { initialData?: Cert[] }) {
+export default function Step4Certifications({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [certs, setCerts] = useState<Cert[]>(
  initialData?.length ? initialData :
  [{ id: '1', type: '', issuingBody: '', certNumber: '', issueDate: '', expiryDate: '', noExpiry: false }]

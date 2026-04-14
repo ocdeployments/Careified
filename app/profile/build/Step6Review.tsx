@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getProfileData, submitProfile } from '@/lib/actions/profile'
 
-export default function Step6Review({ onEdit }: { onEdit: (step: number) => void }) {
+export default function Step6Review({ onEdit, onSave }: { onEdit?: (step: number) => void; onSave?: () => void }) {
  const [data, setData] = useState<any>(null)
  const [loading, setLoading] = useState(true)
  const [submitting, setSubmitting] = useState(false)

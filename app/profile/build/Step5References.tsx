@@ -25,7 +25,7 @@ interface Ref {
  consentUnderstands: boolean
 }
 
-export default function Step5References({ initialData }: { initialData?: Ref[] }) {
+export default function Step5References({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [refs, setRefs] = useState<Ref[]>(
  initialData?.length ? initialData :
  [{ id: '1', name: '', relationshipType: '', organisation: '', duration: '', contactMethod: '', consentKnows: false, consentAgreed: false, consentUnderstands: false }]

@@ -95,7 +95,7 @@ const CREDENTIALS = [
  { id: 'other', label: 'Other (specify in certifications)' },
 ]
 
-export default function Step2Services({ initialData }: { initialData?: any }) {
+export default function Step2Services({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [services, setServices] = useState<string[]>(initialData?.services || [])
  const [specialties, setSpecialties] = useState<string[]>(initialData?.specializations || [])
  const [credentials, setCredentials] = useState<string[]>(initialData?.credentials || [])

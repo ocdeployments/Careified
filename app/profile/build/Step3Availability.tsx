@@ -31,7 +31,7 @@ const TIME_OPTIONS = (() => {
  return opts
 })()
 
-export default function Step3Availability({ initialData }: { initialData?: any }) {
+export default function Step3Availability({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [status, setStatus] = useState(initialData?.availabilityStatus || '')
  const [availableFromDate, setAvailableFromDate] = useState(initialData?.availableFromDate || '')
  const [noticePeriod, setNoticePeriod] = useState(initialData?.noticePeriod || '')
