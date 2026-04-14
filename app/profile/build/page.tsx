@@ -13,7 +13,7 @@ const STEPS = [
   { num: 1, title: 'Identity' },
   { num: 2, title: 'Services' },
   { num: 3, title: 'Availability' },
-  { num: 4, title: 'Certifications' },
+  { num: 4, title: 'Qualifications' },
   { num: 5, title: 'References' },
   { num: 6, title: 'Review' },
 ]
