@@ -22,95 +22,133 @@ const NO_CERT_REASONS = [
  'Previously certified, let it expire', 'Employer does not require', 'Other reason',
 ]
 
-interface CertItem { type: string; issuingBody: string; issueDate: string; noExpiry: boolean }
+// Credentials that REQUIRE specific certifications
+const CREDENTIALS = [
+ { id: 'rn', label: 'RN — Registered Nurse', requiredCert: 'Nursing License (RN/LPN)' },
+ { id: 'lpn', label: 'LPN / LVN — Licensed Practical Nurse', requiredCert: 'Nursing License (RN/LPN)' },
+ { id: 'cna', label: 'CNA — Certified Nursing Assistant', requiredCert: 'Certified Nursing Assistant (CNA)' },
+ { id: 'hha', label: 'HHA — Home Health Aide', requiredCert: 'Home Health Aide (HHA)' },
+ { id: 'psw', label: 'PSW — Personal Support Worker', requiredCert: 'PCA/PSW Certification' },
+ { id: 'ot_assistant', label: 'Occupational Therapy Assistant', requiredCert: 'OTA Certification' },
+ { id: 'pt_assistant', label: 'Physiotherapy Assistant', requiredCert: 'PTA Certification' },
+ { id: 'social_worker', label: 'Social Worker', requiredCert: 'Social Work License' },
+ { id: 'nursing_student', label: 'Nursing Student (supervised practice)', requiredCert: '' },
+ { id: 'hospital_support', label: 'Hospital Support Worker', requiredCert: '' },
+ { id: 'no_credential', label: 'No formal credential — experienced carer', requiredCert: '' },
+ { id: 'other', label: 'Other (specify below)', requiredCert: '' },
+]
+
+interface CertItem { type: string; issuingBody: string; issueDate: string }
 
 export default function Step4Certifications({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
+ const [selectedCredential, setSelectedCredential] = useState('')
  const [certifications, setCertifications] = useState<CertItem[]>(initialData?.certifications || [])
- const [credentials, setCredentials] = useState<string[]>([])
  const [hasNoCertReason, setHasNoCertReason] = useState(false)
  const [noCertReason, setNoCertReason] = useState('')
  const [saving, setSaving] = useState(false)
 
- // Read credentials from localStorage (set by Step 2)
- useEffect(() => {
-   const storedCreds = localStorage.getItem('caregiver_credentials')
-   if (storedCreds) {
-     setCredentials(JSON.parse(storedCreds))
-   }
- }, [])
-
- // Map credentials to required certifications
- const getRequiredCerts = () => {
-   const CRED_MAP: Record<string, string> = {
-     'rn': 'Nursing License (RN/LPN)', 'lpn': 'Nursing License (RN/LPN)',
-     'cna': 'Certified Nursing Assistant (CNA)', 'hha': 'Home Health Aide (HHA)',
-     'psw': 'PCA/PSW Certification', 'ot_assistant': 'OTA Certification',
-     'pt_assistant': 'PTA Certification', 'social_worker': 'Social Work License',
-   }
-   return credentials.map(c => CRED_MAP[c]).filter(Boolean)
+ // Get required cert based on selected credential
+ const getRequiredCert = () => {
+   const cred = CREDENTIALS.find(c => c.id === selectedCredential)
+   return cred?.requiredCert || ''
  }
 
- const requiredCerts = getRequiredCerts()
- const hasRequiredCerts = requiredCerts.some(rc => 
-   certifications.some(c => c.type === rc)
- )
+ const requiredCert = getRequiredCert()
+ const hasRequiredCert = requiredCert ? certifications.some(c => c.type === requiredCert) : false
 
- const saveData = async (certData: CertItem[], credData: CertItem[], noCert: string = '') => {
+ const saveData = async (certData: CertData[], noCert: string = '') => {
    setSaving(true)
-   await saveStep4(certData, credData)
+   localStorage.setItem("step4_qualifications", JSON.stringify({ credential: selectedCredential, certifications: certData }));
+    await saveStep4(certData)
    setSaving(false)
  }
 
- const addCertification = () => setCertifications([...certifications, { type: '', issuingBody: '', issueDate: '', noExpiry: false }])
- const updateCertification = (i: number, f: string, v: any) => {
+ const addCertification = () => setCertifications([...certifications, { type: '', issuingBody: '', issueDate: '' }])
+ 
+ const updateCertification = (i: number, f: string, v: string) => {
    const u = [...certifications]; u[i] = { ...u[i], [f]: v }; setCertifications(u)
-   saveData(u.filter(c => c.type && c.issueDate), [])
+   saveData(u.filter(c => c.type && c.issueDate))
  }
+ 
  const removeCertification = (i: number) => {
    const u = certifications.filter((_, idx) => i !== idx); setCertifications(u)
-   saveData(u.filter(c => c.type && c.issueDate), [])
+   saveData(u.filter(c => c.type && c.issueDate))
  }
 
- const addCredential = () => setCredentials([...credentials, { type: '', issuingBody: '', issueDate: '', noExpiry: false }])
- const updateCredential = (i: number, f: string, v: any) => {
-   const u = [...credentials]; u[i] = { ...u[i], [f]: v }; setCredentials(u)
-   saveData(certifications.filter(c => c.type && c.issueDate), u.filter(c => c.type && c.issueDate))
- }
- const removeCredential = (i: number) => {
-   const u = credentials.filter((_, idx) => i !== idx); setCredentials(u)
-   saveData(certifications.filter(c => c.type && c.issueDate), u.filter(c => c.type && c.issueDate))
+ const handleCredentialSelect = (credId: string) => {
+   setSelectedCredential(credId)
+   localStorage.setItem('caregiver_credential', credId)
  }
 
- const handleNoCertReason = (reason: string) => { setNoCertReason(reason); saveData([], [], reason) }
+ const handleNoCertReason = (reason: string) => { 
+   setNoCertReason(reason)
+   saveData([], reason)
+ }
 
  return (
    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-     {/* Required certs warning based on Step 2 selections */}
-     {requiredCerts.length > 0 && !hasRequiredCerts && !hasNoCertReason && (
+     {/* SECTION 1: PRIMARY CREDENTIAL - Comes FIRST */}
+     <div style={{ padding: '20px', background: '#FDF6EC', borderRadius: '16px', border: '1px solid rgba(201, 151, 58, 0.2)' }}>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>1. Your Primary Credential ⭐</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>What best describes your professional role? This determines what certifications you need.</p>
+       
+       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
+         {CREDENTIALS.map((cred) => (
+           <button
+             key={cred.id}
+             type="button"
+             onClick={() => handleCredentialSelect(cred.id)}
+             style={{
+               padding: '14px 16px',
+               borderRadius: '12px',
+               fontSize: '12px',
+               fontWeight: 600,
+               textAlign: 'left',
+               border: selectedCredential === cred.id ? '2px solid #C9973A' : '2px solid #E2E8F0',
+               background: selectedCredential === cred.id ? '#FDF6EC' : 'white',
+               color: selectedCredential === cred.id ? '#92400E' : '#0D1B3E',
+               cursor: 'pointer',
+             }}
+           >
+             {selectedCredential === cred.id && '✓ '} {cred.label}
+           </button>
+         ))}
+       </div>
+       
+       {selectedCredential && (
+         <p style={{ fontSize: '12px', color: '#C9973A', marginTop: '12px' }}>
+           ✓ Selected: {CREDENTIALS.find(c => c.id === selectedCredential)?.label}
+           {requiredCert && <span> — Must add: <strong>{requiredCert}</strong></span>}
+         </p>
+       )}
+     </div>
+
+     {/* Required cert warning */}
+     {requiredCert && !hasRequiredCert && !hasNoCertReason && (
        <div style={{ padding: '16px', borderRadius: '12px', background: '#FEF3C7', border: '1px solid #F59E0B', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
          <div style={{ fontSize: '20px' }}>⚠️</div>
          <div>
            <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400E' }}>
-             You selected credentials in Step 2. Add these required certifications:
+             Required: Add your {requiredCert}
            </div>
            <div style={{ fontSize: '12px', color: '#B45309', marginTop: '4px' }}>
-             {requiredCerts.join(', ')}
+             This certification is required because you selected "{CREDENTIALS.find(c => c.id === selectedCredential)?.label}"
            </div>
          </div>
        </div>
      )}
 
      {/* Success if required certs added */}
-     {requiredCerts.length > 0 && hasRequiredCerts && (
+     {requiredCert && hasRequiredCert && (
        <div style={{ padding: '12px', borderRadius: '12px', background: '#D1FAE5', border: '1px solid #10B981' }}>
-         <span style={{ fontSize: '12px', color: '#065F46' }}>✓ Required certifications added!</span>
+         <span style={{ fontSize: '12px', color: '#065F46' }}>✓ {requiredCert} added!</span>
        </div>
      )}
 
-     {/* Certifications */}
+     {/* SECTION 2: SUPPORTING CERTIFICATIONS */}
      <div>
-       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Certifications 🏆</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add licenses, certificates, and training credentials.</p>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>2. Supporting Certifications 🏆</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add any additional certifications, training, or licenses you hold.</p>
        
        {certifications.map((cert, i) => (
          <div key={i} style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '12px', marginBottom: '12px', background: '#F8FAFC' }}>
@@ -120,7 +158,7 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
            </div>
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
              <div>
-               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Type *</label>
+               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Type</label>
                <select value={cert.type} onChange={(e) => updateCertification(i, 'type', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
                  <option value="">Select...</option>
                  {CERT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -131,7 +169,7 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
                <input type="text" value={cert.issuingBody} onChange={(e) => updateCertification(i, 'issuingBody', e.target.value)} placeholder="e.g. American Red Cross" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }} />
              </div>
              <div>
-               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Issue Date *</label>
+               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Date</label>
                <input type="date" value={cert.issueDate} onChange={(e) => updateCertification(i, 'issueDate', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }} />
              </div>
            </div>
@@ -143,47 +181,21 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
        </button>
      </div>
 
-     {/* Professional Credentials */}
+     {/* SECTION 3: Professional Credentials (Degrees) */}
      <div>
-       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Professional Credentials 📜</h3>
-       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add degrees, diplomas, and other qualifications.</p>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>3. Education / Degrees 📜</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Add any relevant degrees or educational qualifications.</p>
        
-       {credentials.map((cred: any, i: number) => (
-         <div key={i} style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '12px', marginBottom: '12px', background: '#F8FAFC' }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-             <span style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E' }}>Credential {i + 1}</span>
-             <button type="button" onClick={() => removeCredential(i)} style={{ color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
-           </div>
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
-             <div>
-               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Type *</label>
-               <select value={cred.type} onChange={(e) => updateCredential(i, 'type', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
-                 <option value="">Select...</option>
-                 {CREDENTIAL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-               </select>
-             </div>
-             <div>
-               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Institution</label>
-               <input type="text" value={cred.issuingBody} onChange={(e) => updateCredential(i, 'issuingBody', e.target.value)} placeholder="e.g. University of Texas" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }} />
-             </div>
-             <div>
-               <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>Date *</label>
-               <input type="date" value={cred.issueDate} onChange={(e) => updateCredential(i, 'issueDate', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }} />
-             </div>
-           </div>
-         </div>
-       ))}
-       
-       <button type="button" onClick={addCredential} style={{ padding: '12px 20px', borderRadius: '8px', border: '1px dashed #C9973A', background: '#FDF6EC', color: '#92400E', fontSize: '13px', fontWeight: 600, cursor: 'pointer', width: '100%' }}>
-         + Add Credential
+       <button type="button" style={{ padding: '12px 20px', borderRadius: '8px', border: '1px dashed #E2E8F0', background: '#F8FAFC', color: '#64748B', fontSize: '13px', fontWeight: 600, cursor: 'pointer', width: '100%' }}>
+         + Add Education (optional)
        </button>
      </div>
 
      {/* No certs reason */}
-     {(!hasRequiredCerts || certifications.length === 0) && (
+     {(!hasRequiredCert || certifications.length === 0) && (
        <div style={{ padding: '16px', borderRadius: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '12px' }}>
-           <input type="checkbox" checked={hasNoCertReason} onChange={(e) => { setHasNoCertReason(e.target.checked); if (!e.target.checked) { setNoCertReason(''); saveData([], []) }}} style={{ accentColor: '#C9973A', width: '18px', height: '18px' }} />
+           <input type="checkbox" checked={hasNoCertReason} onChange={(e) => { setHasNoCertReason(e.target.checked); if (!e.target.checked) { setNoCertReason(''); saveData([]) }}} style={{ accentColor: '#C9973A', width: '18px', height: '18px' }} />
            <span style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>I don't have certifications yet</span>
          </label>
          

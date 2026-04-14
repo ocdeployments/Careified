@@ -20,7 +20,8 @@ export default function Step5References({ initialData, onSave }: { initialData?:
    
    setTimeout(async () => {
      setSaving(true)
-     await saveStep5(updated.filter(r => r.name && r.relationshipType))
+     localStorage.setItem("step5_references", JSON.stringify(updated.filter(r => r.name && r.relationshipType)));
+    await saveStep5(updated.filter(r => r.name && r.relationshipType))
      setSaving(false)
    }, 1000)
  }
@@ -31,7 +32,8 @@ export default function Step5References({ initialData, onSave }: { initialData?:
    
    setTimeout(async () => {
      setSaving(true)
-     await saveStep5(updated.filter(r => r.name && r.relationshipType))
+     localStorage.setItem("step5_references", JSON.stringify(updated.filter(r => r.name && r.relationshipType)));
+    await saveStep5(updated.filter(r => r.name && r.relationshipType))
      setSaving(false)
    }, 500)
  }

@@ -20,7 +20,6 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
     state: '',
     postalCode: '',
     gender: '',
-    pronouns: '',
     languages: [] as string[],
     ...initialData,
   });
@@ -32,6 +31,7 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
     const timer = setTimeout(() => {
       setIsSaving(true);
       onSave(formData);
+    localStorage.setItem("step1_identity", JSON.stringify(formData));
       setTimeout(() => {
         setIsSaving(false);
         setLastSaved(new Date());
@@ -189,8 +189,6 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
       </div>
 
       <div style={{ marginBottom: '32px' }}>
-        <label style={labelStyle}>Pronouns (optional)</label>
-            <select value={formData.pronouns} onChange={(e) => updateField('pronouns', e.target.value)} style={inputStyle}>
               <option value="">Select...</option>
               {PRONOUNS.map(p => <option key={p} value={p}>{p}</option>)}
             </select>

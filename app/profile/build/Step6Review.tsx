@@ -1,13 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { submitProfile } from '@/lib/actions/profile'
 
 export default function Step6Review({ onEdit }: { onEdit?: (step: number) => void }) {
  const [submitting, setSubmitting] = useState(false)
  const [submitted, setSubmitted] = useState(false)
+ const [errors, setErrors] = useState<string[]>([])
+
+ // Check completion status from localStorage
+ const checkCompletion = () => {
+   const issues: string[] = []
+   
+   // Check Step 1 - Identity
+   const identity = JSON.parse(localStorage.getItem('step1_identity') || '{}')
+   if (!identity.firstName || !identity.lastName || !identity.email || !identity.phone || !identity.city) {
+     issues.push('Step 1: Complete your identity (name, email, phone, location)')
+   }
+   
+   // Check Step 2 - Services
+   const services = JSON.parse(localStorage.getItem('step2_services') || '{}')
+   if (!services.services || services.services.length === 0) {
+     issues.push('Step 2: Select at least one service')
+   }
+   
+   // Check Step 3 - Availability (specialties)
+   const availability = JSON.parse(localStorage.getItem('step3_availability') || '{}')
+   if (!availability.availabilityStatus) {
+     issues.push('Step 3: Set your availability status')
+   }
+   
+   // Check Step 4 - Qualifications
+   const qualifications = JSON.parse(localStorage.getItem('step4_qualifications') || '{}')
+   if (!qualifications.credential && !qualifications.certifications?.length) {
+     issues.push('Step 4: Add your credential or at least one certification')
+   }
+   
+   // Check Step 5 - References
+   const references = JSON.parse(localStorage.getItem('step5_references') || '{}')
+   if (!references.length || references.length < 2) {
+     issues.push('Step 5: Add at least 2 professional references')
+   }
+   
+   setErrors(issues)
+   return issues.length === 0
+ }
 
  const handleSubmit = async () => {
+   if (!checkCompletion()) {
+     return // Errors shown, don't submit
+   }
+   
    setSubmitting(true)
    const result = await submitProfile()
    setSubmitting(false)
@@ -15,6 +58,11 @@ export default function Step6Review({ onEdit }: { onEdit?: (step: number) => voi
      setSubmitted(true)
    }
  }
+
+ // Auto-check on mount
+ useEffect(() => {
+   checkCompletion()
+ }, [])
 
  if (submitted) {
    return (
@@ -32,6 +80,20 @@ export default function Step6Review({ onEdit }: { onEdit?: (step: number) => voi
 
  return (
    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+     {/* Validation Errors */}
+     {errors.length > 0 && (
+       <div style={{ padding: '16px', borderRadius: '12px', background: '#FEF3C7', border: '1px solid #F59E0B' }}>
+         <div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E', marginBottom: '12px' }}>
+           ⚠️ Please complete these sections before submitting:
+         </div>
+         {errors.map((err, i) => (
+           <div key={i} style={{ fontSize: '12px', color: '#B45309', marginBottom: '4px' }}>
+             • {err}
+           </div>
+         ))}
+       </div>
+     )}
+
      <div style={{ padding: '20px', borderRadius: '12px', background: '#FDF6EC', border: '1px solid rgba(201, 151, 58, 0.2)' }}>
        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0D1B3E', marginBottom: '8px' }}>Review Your Profile</h3>
        <p style={{ fontSize: '13px', color: '#64748B' }}>Make sure all sections are complete before submitting.</p>
@@ -40,10 +102,10 @@ export default function Step6Review({ onEdit }: { onEdit?: (step: number) => voi
      {/* Section Review Cards */}
      <div style={{ display: 'grid', gap: '12px' }}>
        {[
-         { num: 1, title: 'Identity', desc: 'Basic info, contact, languages' },
-         { num: 2, title: 'Services', desc: 'Services, specialties, credentials' },
-         { num: 3, title: 'Availability', desc: 'Status, location, placement types' },
-         { num: 4, title: 'Certifications', desc: 'Your certifications & licenses' },
+         { num: 1, title: 'Identity', desc: 'Name, contact, location' },
+         { num: 2, title: 'Services', desc: 'Care services you provide' },
+         { num: 3, title: 'Availability', desc: 'Status, specialties, service area' },
+         { num: 4, title: 'Qualifications', desc: 'Credential & certifications' },
          { num: 5, title: 'References', desc: 'Professional references' },
        ].map((section) => (
          <div key={section.num} style={{ 
@@ -83,25 +145,27 @@ export default function Step6Review({ onEdit }: { onEdit?: (step: number) => voi
      <button
        type="button"
        onClick={handleSubmit}
-       disabled={submitting}
+       disabled={submitting || errors.length > 0}
        style={{
          padding: '16px 24px',
          borderRadius: '12px',
          border: 'none',
-         background: submitting ? '#94A3B8' : 'linear-gradient(135deg, #C9973A, #E8B86D)',
+         background: submitting || errors.length > 0 ? '#94A3B8' : 'linear-gradient(135deg, #C9973A, #E8B86D)',
          color: 'white',
          fontSize: '15px',
          fontWeight: 700,
-         cursor: submitting ? 'not-allowed' : 'pointer',
+         cursor: submitting || errors.length > 0 ? 'not-allowed' : 'pointer',
          marginTop: '8px',
        }}
      >
-       {submitting ? 'Submitting...' : 'Submit Profile'}
+       {submitting ? 'Submitting...' : errors.length > 0 ? 'Complete all steps to submit' : 'Submit Profile'}
      </button>
 
-     <p style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center' }}>
-       By submitting, you confirm all information is accurate.
-     </p>
+     {errors.length > 0 && (
+       <p style={{ fontSize: '11px', color: '#EF4444', textAlign: 'center' }}>
+         You must complete all steps before submitting
+       </p>
+     )}
    </div>
  )
 }
