@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronRight, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { saveStep2 } from '@/lib/actions/profile'
 
 const SERVICE_CATEGORIES = [
@@ -99,99 +99,149 @@ export default function Step2Services({ initialData, onSave }: { initialData?: a
  const [services, setServices] = useState<string[]>(initialData?.services || [])
  const [specialties, setSpecialties] = useState<string[]>(initialData?.specializations || [])
  const [credentials, setCredentials] = useState<string[]>(initialData?.credentials || [])
- const [openCategory, setOpenCategory] = useState<string | null>('personal')
  const [saving, setSaving] = useState(false)
 
  const toggleItem = (list: string[], setList: (val: string[]) => void, item: string) => {
- setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item])
+   setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item])
+   // Save immediately for HTML forms
+   setTimeout(async () => {
+     setSaving(true)
+     await saveStep2({ services: list.includes(item) ? list.filter(i => i !== item) : [...list, item], specializations: specialties, credentials })
+     setSaving(false)
+   }, 100)
  }
 
  useEffect(() => {
- const timer = setTimeout(async () => {
- if (services.length > 0 && credentials.length > 0) {
- setSaving(true)
- await saveStep2({ services, specializations: specialties, credentials })
- setSaving(false)
- }
- }, 1000)
- return () => clearTimeout(timer)
+   const timer = setTimeout(async () => {
+     if (services.length > 0 && credentials.length > 0) {
+       setSaving(true)
+       await saveStep2({ services, specializations: specialties, credentials })
+       setSaving(false)
+     }
+   }, 1000)
+   return () => clearTimeout(timer)
  }, [services, specialties, credentials])
 
  return (
- <div className="space-y-8">
- <div>
- <h3 className="text-[15px] font-black text-[#0D1B3E] mb-1">Services you provide</h3>
- <p className="text-[12.5px] text-[#64748B] mb-4">Select all that apply. Click a category to expand it.</p>
- <div className="flex flex-col gap-2">
- {SERVICE_CATEGORIES.map((cat) => {
- const selectedInCat = cat.services.filter(s => services.includes(s)).length
- const isOpen = openCategory === cat.id
- return (
- <div key={cat.id} className="border border-[#E2E8F0] rounded-xl overflow-hidden">
- <button onClick={() => setOpenCategory(isOpen ? null : cat.id)}
- className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-[#F8FAFC] text-left">
- <div className="flex items-center gap-3">
- <span className="text-[13px] font-bold text-[#0D1B3E]">{cat.label}</span>
- {selectedInCat > 0 && (
- <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FDF6EC] text-[#92400E]">{selectedInCat}</span>
- )}
- </div>
- <ChevronRight className={`w-4 h-4 text-[#94A3B8] transition-transform ${isOpen ? 'rotate-90' : ''}`} />
- </button>
- {isOpen && (
- <div className="px-4 pb-4 pt-2 bg-[#F8FAFC] grid grid-cols-1 sm:grid-cols-2 gap-2">
- {cat.services.map((service) => (
- <label key={service} className={`flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer border text-[12px] ${
- services.includes(service) ? 'border-[#C9973A] bg-[#FDF6EC] text-[#92400E]' : 'border-transparent bg-white'
- }`}>
- <input type="checkbox" checked={services.includes(service)} onChange={() => toggleItem(services, setServices, service)} className="accent-[#C9973A] w-3.5 h-3.5" />
- {service}
- </label>
- ))}
- </div>
- )}
- </div>
- )
- })}
- </div>
- </div>
+   <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+     {/* Services Section - using HTML details/summary for JS-free toggle */}
+     <div>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Services you provide</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Select all that apply. Click a category to expand it.</p>
+       
+       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+         {SERVICE_CATEGORIES.map((cat) => {
+           const selectedCount = cat.services.filter(s => services.includes(s)).length
+           return (
+             <details key={cat.id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden' }}>
+               <summary style={{ 
+                 padding: '12px 16px', 
+                 background: 'white', 
+                 cursor: 'pointer',
+                 display: 'flex', 
+                 justifyContent: 'space-between', 
+                 alignItems: 'center',
+                 listStyle: 'none'
+               }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                   <span style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E' }}>{cat.label}</span>
+                   {selectedCount > 0 && (
+                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#FDF6EC', color: '#92400E' }}>{selectedCount}</span>
+                   )}
+                 </div>
+                 <span style={{ fontSize: '12px', color: '#94A3B8' }}>▼</span>
+               </summary>
+               <div style={{ padding: '12px', background: '#F8FAFC', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                 {cat.services.map((service) => (
+                   <label key={service} style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     gap: '10px', 
+                     padding: '10px', 
+                     borderRadius: '8px', 
+                     cursor: 'pointer',
+                     border: services.includes(service) ? '1px solid #C9973A' : '1px solid transparent',
+                     background: services.includes(service) ? '#FDF6EC' : 'white',
+                   }}>
+                     <input 
+                       type="checkbox" 
+                       checked={services.includes(service)} 
+                       onChange={() => toggleItem(services, setServices, service)}
+                       style={{ accentColor: '#C9973A', width: '14px', height: '14px' }}
+                     />
+                     <span style={{ fontSize: '12px', color: services.includes(service) ? '#92400E' : '#0D1B3E' }}>{service}</span>
+                   </label>
+                 ))}
+               </div>
+             </details>
+           )
+         })}
+       </div>
+     </div>
 
- <div>
- <h3 className="text-[15px] font-black text-[#0D1B3E] mb-1">Clinical specialties</h3>
- <p className="text-[12.5px] text-[#64748B] mb-4">Areas where you have specific training or experience.</p>
- <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
- {SPECIALTIES.map((spec) => (
- <label key={spec} className={`flex items-center gap-2.5 p-3 rounded-xl cursor-pointer border text-[12px] ${
- specialties.includes(spec) ? 'border-[#1E3A8A] bg-[#EFF6FF]' : 'border-[#E2E8F0] bg-white'
- }`}>
- <input type="checkbox" checked={specialties.includes(spec)} onChange={() => toggleItem(specialties, setSpecialties, spec)} className="accent-[#1E3A8A] w-3.5 h-3.5" />
- {spec}
- </label>
- ))}
- </div>
- </div>
+     {/* Specialties */}
+     <div>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Clinical specialties</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Areas where you have specific training or experience.</p>
+       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px' }}>
+         {SPECIALTIES.map((spec) => (
+           <label key={spec} style={{ 
+             display: 'flex', 
+             alignItems: 'center', 
+             gap: '10px', 
+             padding: '12px', 
+             borderRadius: '12px', 
+             cursor: 'pointer',
+             border: specialties.includes(spec) ? '1px solid #1E3A8A' : '1px solid #E2E8F0',
+             background: specialties.includes(spec) ? '#EFF6FF' : 'white',
+           }}>
+             <input 
+               type="checkbox" 
+               checked={specialties.includes(spec)} 
+               onChange={() => toggleItem(specialties, setSpecialties, spec)}
+               style={{ accentColor: '#1E3A8A', width: '14px', height: '14px' }}
+             />
+             <span style={{ fontSize: '12px', color: '#0D1B3E' }}>{spec}</span>
+           </label>
+         ))}
+       </div>
+     </div>
 
- <div>
- <h3 className="text-[15px] font-black text-[#0D1B3E] mb-1">Professional credentials</h3>
- <p className="text-[12.5px] text-[#64748B] mb-4">Select your professional qualification.</p>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
- {CREDENTIALS.map((cred) => (
- <label key={cred.id} className={`flex items-center gap-2.5 p-3 rounded-xl cursor-pointer border text-[12px] ${
- credentials.includes(cred.id) ? 'border-[#C9973A] bg-[#FDF6EC]' : 'border-[#E2E8F0] bg-white'
- }`}>
- <input type="checkbox" checked={credentials.includes(cred.id)} onChange={() => toggleItem(credentials, setCredentials, cred.id)} className="accent-[#C9973A] w-3.5 h-3.5" />
- {cred.label}
- </label>
- ))}
- </div>
- </div>
+     {/* Credentials */}
+     <div>
+       <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', marginBottom: '4px' }}>Professional credentials</h3>
+       <p style={{ fontSize: '12.5px', color: '#64748B', marginBottom: '16px' }}>Select your professional qualification.</p>
+       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+         {CREDENTIALS.map((cred) => (
+           <label key={cred.id} style={{ 
+             display: 'flex', 
+             alignItems: 'center', 
+             gap: '10px', 
+             padding: '12px', 
+             borderRadius: '12px', 
+             cursor: 'pointer',
+             border: credentials.includes(cred.id) ? '1px solid #C9973A' : '1px solid #E2E8F0',
+             background: credentials.includes(cred.id) ? '#FDF6EC' : 'white',
+           }}>
+             <input 
+               type="checkbox" 
+               checked={credentials.includes(cred.id)} 
+               onChange={() => toggleItem(credentials, setCredentials, cred.id)}
+               style={{ accentColor: '#C9973A', width: '14px', height: '14px' }}
+             />
+             <span style={{ fontSize: '12px', color: credentials.includes(cred.id) ? '#92400E' : '#0D1B3E' }}>{cred.label}</span>
+           </label>
+         ))}
+       </div>
+     </div>
 
- <div className="p-4 rounded-xl bg-[#FDF6EC] border border-[#C9973A]/20 flex items-start gap-3">
- <AlertCircle className="w-4 h-4 text-[#C9973A] shrink-0 mt-0.5" />
- <p className="text-[12px] text-[#92400E]">Be honest about your specialties and credentials. Agencies verify claims.</p>
- </div>
+     {/* Notice */}
+     <div style={{ padding: '16px', borderRadius: '12px', background: '#FDF6EC', border: '1px solid rgba(201, 151, 58, 0.2)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+       <AlertCircle style={{ width: '16px', height: '16px', color: '#C9973A', flexShrink: 0, marginTop: '2px' }} />
+       <p style={{ fontSize: '12px', color: '#92400E', margin: 0 }}>Be honest about your specialties and credentials. Agencies verify claims.</p>
+     </div>
 
- {saving && <p className="text-[11px] text-[#94A3B8]">Saving...</p>}
- </div>
+     {saving && <p style={{ fontSize: '11px', color: '#94A3B8' }}>Saving...</p>}
+   </div>
  )
 }
