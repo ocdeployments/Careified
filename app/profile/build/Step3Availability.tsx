@@ -65,7 +65,7 @@ export default function Step3Availability({ initialData, onSave }: { initialData
  const saveData = async (updates: Partial<any>) => {
    setSaving(true)
    localStorage.setItem("step3_availability", JSON.stringify({ availabilityStatus: status, placementTypes, specializations: specialties, serviceCity, serviceZIP, travelRadius }));
-    await saveStep3({ availabilityStatus: status, placementTypes, weeklyAvailability: {}, willingLiveIn, willingOvernight, hasVehicle, travelRadius, serviceCity, serviceState, serviceZIP, additionalLanguages: languages, specializations: specialties, ...updates })
+    await saveStep3({ availabilityStatus: status, serviceCity, serviceState, serviceZIP, willingLiveIn, willingOvernight, hasVehicle, travelRadius, additionalLanguages: languages, specializations: specialties, ...updates })
    setSaving(false)
  }
 

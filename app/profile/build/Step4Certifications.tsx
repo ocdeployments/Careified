@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { saveStep4 } from '@/lib/actions/profile'
 
+interface CertData {
+  type: string
+  issuingBody: string
+  certNumber?: string
+  issueDate: string
+  expiryDate?: string
+  noExpiry: boolean
+}
+
 const CERT_TYPES = [
  'CPR / First Aid', 'Nursing License (RN/LPN)', 'Certified Nursing Assistant (CNA)', 'Home Health Aide (HHA)', 
  'PCA/PSW Certification', 'OTA Certification', 'PTA Certification', 'Social Work License',
@@ -38,7 +47,14 @@ const CREDENTIALS = [
  { id: 'other', label: 'Other (specify below)', requiredCert: '' },
 ]
 
-interface CertItem { type: string; issuingBody: string; issueDate: string }
+interface CertItem {
+  type: string
+  issuingBody: string
+  issueDate: string
+  certNumber?: string
+  expiryDate?: string
+  noExpiry: boolean
+}
 
 export default function Step4Certifications({ initialData, onSave }: { initialData?: any; onSave?: (data: any) => void }) {
  const [selectedCredential, setSelectedCredential] = useState('')
@@ -63,7 +79,7 @@ export default function Step4Certifications({ initialData, onSave }: { initialDa
    setSaving(false)
  }
 
- const addCertification = () => setCertifications([...certifications, { type: '', issuingBody: '', issueDate: '' }])
+ const addCertification = () => setCertifications([...certifications, { type: '', issuingBody: '', issueDate: '', noExpiry: false }])
  
  const updateCertification = (i: number, f: string, v: string) => {
    const u = [...certifications]; u[i] = { ...u[i], [f]: v }; setCertifications(u)

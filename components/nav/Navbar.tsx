@@ -55,35 +55,6 @@ export default function Navbar() {
  </button>
  </div>
  </div>
-
- {mobileOpen && (
- <div className="lg:hidden fixed inset-0 top-[73px] bg-[#0D1B3E] z-40">
- <div className="flex flex-col p-6 gap-2">
- <Link href="/for-agencies" onClick={() => setMobileOpen(false)} className="block text-base font-medium text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all">
- For Agencies
- </Link>
- <Link href="/for-caregivers" onClick={() => setMobileOpen(false)} className="block text-base font-medium text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all">
- For Caregivers
- </Link>
- <Link href="/for-families" onClick={() => setMobileOpen(false)} className="block text-base font-medium text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all">
- For Families
- </Link>
- <Link href="/about" onClick={() => setMobileOpen(false)} className="block text-base font-medium text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all">
- About
- </Link>
- <Link href="/contact" onClick={() => setMobileOpen(false)} className="block text-base font-medium text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all">
- Contact
- </Link>
- <div className="mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
- <Link href="/sign-in" onClick={() => setMobileOpen(false)} className="block text-center text-[13px] font-medium px-4 py-3 rounded-xl border border-white/10 text-white/70 hover:text-white hover:bg-white/5 transition-all">
- Sign in
- </Link>
- <Link href="/sign-up" onClick={() => setMobileOpen(false)} className="block text-center text-[13px] font-bold px-4 py-3 rounded-xl text-[#0D1B3E] hover:opacity-90 transition-all" style={{ background: 'linear-gradient(135deg, #C9973A, #E8B86D)' }}>
- Get started free
- </Link>
- </div>
- </div>
- )}
  </nav>
  );
 }

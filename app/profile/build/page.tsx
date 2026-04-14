@@ -18,8 +18,14 @@ const STEPS = [
   { num: 6, title: 'Review' },
 ]
 
+interface FormData {
+  certifications?: any[]
+  references?: any[]
+  [key: string]: any
+}
+
 function ProfileBuilder() {
-  const [formData, setFormData] = useState({})
+  const [formData, setFormData] = useState<FormData>({})
   const searchParams = useSearchParams()
   const step = searchParams.get('step') || '1'
   const currentStep = parseInt(step)

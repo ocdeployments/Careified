@@ -4,7 +4,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../../node_modules/@prisma/client"
 }
 
 datasource db {
@@ -36,7 +36,6 @@ enum UserRole {
   ADMIN
 }
 
-// Caregiver profiles
 model Caregiver {
   id              String    @id @default(cuid())
   userId          String    @unique
@@ -66,6 +65,12 @@ model Caregiver {
   security        CaregiverSecurity?
   documents       CaregiverDocument[]
   ratings         CaregiverRating[]
+  aggregateScore  Decimal?  @default(0) @db.Decimal(3,2)
+  ratingCount    Int        @default(0)
+
+  // Agency relations
+  relationships  AgencyCaregiverRelationship[]
+  agencyRatings  AgencyRating[]
 
   @@map("caregivers")
 }
@@ -121,11 +126,7 @@ model CaregiverDocument {
   id          String    @id @default(cuid())
   caregiverId String
   type        String
-  fileName    String
-  fileUrl     String
-  fileSize    Int?
-  mimeType    String?
-  isVerified  Boolean   @default(false)
+  url         String
   createdAt   DateTime  @default(now())
 
   caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
@@ -134,22 +135,41 @@ model CaregiverDocument {
 }
 
 model Agency {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  name          String
-  description   String?
-  phone         String?
-  website       String?
-  logoUrl       String?
-  address       String?
-  city          String?
-  state         String?
-  postalCode    String?
-  isVerified    Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  clerkUserId     String?   // Clerk user ID
+  name            String
+  description     String?
+  phone           String?
+  website         String?
+  logoUrl         String?
+  address         String?
+  city            String?
+  state           String?
+  postalCode      String?
+  country         String?   @default("US")
+  isVerified      Boolean   @default(false)
+  status          String?   @default("pending") // pending, approved, rejected
+  
+  // Contact info
+  contactFirstName String?
+  contactLastName  String?
+  contactEmail     String?
+  contactPhone    String?
+  
+  // Business details
+  businessType   String?
+  licenseNumber  String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Agency relations
+  relationships   AgencyCaregiverRelationship[]
+  ratings         AgencyRating[]
+  savedSearches AgencySavedSearch[]
 
   @@map("agencies")
 }
@@ -168,20 +188,20 @@ model CaregiverRating {
 }
 
 model Family {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  firstName       String
-  lastName        String
-  phone           String?
-  address         String?
-  city            String?
-  state           String?
-  postalCode      String?
-  careNeeds       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  firstName   String
+  lastName    String
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  postalCode  String?
+  careNeeds   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("families")
 }
@@ -197,4 +217,119 @@ model AdminAuditLog {
   createdAt   DateTime  @default(now())
 
   @@map("admin_audit_log")
+}
+
+// Agency-Caregiver relationship (private agency data)
+model AgencyCaregiverRelationship {
+  id                String    @id @default(cuid())
+  agencyId          String
+  caregiverId       String
+
+  // Employment details
+  startDate         DateTime  @db.Date
+  endDate           DateTime? @db.Date
+  employmentType    String    // "permanent" | "contract" | "casual"
+  currentlyEmployed  Boolean   @default(true)
+
+  // Private agency data
+  privateNotes      String?
+  payRate           Decimal?  @db.Decimal(10,2)
+  payRateType       String?   // "hourly" | "salary"
+  internalRating   Int?      // 1-5 (private)
+
+  // Quick stats
+  totalShifts       Int       @default(0)
+  noShowCount       Int       @default(0)
+  lastShiftDate     DateTime? @db.Date
+
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  agency            Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  caregiver         Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  shifts            CaregiverShift[]
+  rating            AgencyRating?
+
+  @@unique([agencyId, caregiverId])
+  @@index([agencyId])
+  @@index([caregiverId])
+  @@index([agencyId, currentlyEmployed])
+  @@map("agency_caregiver_relationships")
+}
+
+// Shift logging
+model CaregiverShift {
+  id              String    @id @default(cuid())
+  relationshipId  String
+  shiftDate       DateTime  @db.Date
+  startTime       String    // "09:00"
+  endTime         String    // "17:00"
+  hoursWorked     Decimal   @db.Decimal(5,2)
+
+  status          String    @default("completed") // "completed" | "no_show" | "cancelled"
+  notes           String?
+  payAmount       Decimal?  @db.Decimal(10,2)
+
+  createdAt       DateTime  @default(now())
+
+  relationship    AgencyCaregiverRelationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+
+  @@index([relationshipId])
+  @@index([shiftDate])
+  @@index([relationshipId, shiftDate])
+  @@map("caregiver_shifts")
+}
+
+// Public ratings (visible to all agencies)
+model AgencyRating {
+  id              String    @id @default(cuid())
+  relationshipId  String    @unique
+  agencyId        String
+  caregiverId     String
+
+  // 6 rating categories (1-5)
+  reliability     Int       // Did they show up consistently?
+  punctuality     Int       // Were they on time?
+  warmth          Int        // Were they kind and friendly?
+  dignity         Int        // Did they treat client with dignity?
+  hygiene         Int        // Did they maintain hygiene standards?
+  skillsMatch     Int        // Did skills match what they claimed?
+
+  // Binary signal
+  wouldReengage   Boolean   // Would you hire them again?
+
+  // Optional public comment
+  publicComment   String?   @db.VarChar(500)
+
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  relationship    AgencyCaregiverRelationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+  agency           Agency    @relation(fields: [agencyId], references: [id])
+  caregiver       Caregiver @relation(fields: [caregiverId], references: [id])
+
+  @@index([caregiverId])
+  @@index([agencyId])
+  @@map("agency_ratings")
+}
+
+// Saved searches
+model AgencySavedSearch {
+  id            String    @id @default(cuid())
+  agencyId      String
+  name          String    @db.VarChar(100)
+  filters       Json      // Serialized filter object
+  resultCount   Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  lastUsedAt   DateTime  @default(now())
+
+  agency        Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([agencyId, lastUsedAt])
+  @@map("agency_saved_searches")
 }

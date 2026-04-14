@@ -2,39 +2,35 @@
 
 import { prisma } from '@/lib/db'
 
-// Mock auth for demo - creates user/caregiver if not exists
 async function getOrCreateCaregiver() {
   const mockUserId = 'demo-user-id'
   
-  // Find or create user
-  let user = await prisma.user.findUnique({
-    where: { id: mockUserId }
-  })
+  let user = await prisma.user.findUnique({ where: { id: mockUserId } })
   
   if (!user) {
     user = await prisma.user.create({
       data: {
         id: mockUserId,
         email: 'demo@careified.com',
-        firstName: 'Demo',
-        lastName: 'User',
-        role: 'CAREGIVER',
+        role: 'CAREGIVER'
       }
     })
   }
   
-  // Find or create caregiver
-  let caregiver = await prisma.caregiver.findUnique({
-    where: { userId: mockUserId }
-  })
+  let caregiver = await prisma.caregiver.findFirst({ where: { userId: mockUserId } })
   
   if (!caregiver) {
     caregiver = await prisma.caregiver.create({
       data: {
         userId: mockUserId,
-        firstName: 'Demo',
-        lastName: 'User',
-        isAvailable: false,
+        firstName: '',
+        lastName: '',
+        phone: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        gender: '',
+        status: 'incomplete'
       }
     })
   }
@@ -45,25 +41,52 @@ async function getOrCreateCaregiver() {
 export async function getProfileData() {
   try {
     const caregiver = await getOrCreateCaregiver()
+    const user = await prisma.user.findUnique({ where: { id: caregiver.userId } })
+    const certifications = await prisma.caregiverCertification.findMany({ where: { caregiverId: caregiver.id } })
+    const references = await prisma.caregiverReference.findMany({ where: { caregiverId: caregiver.id } })
     
-    const fullCaregiver = await prisma.caregiver.findUnique({
+    return { user, caregiver, certifications, references }
+  } catch (error) {
+    console.error('Error getting profile data:', error)
+    return null
+  }
+}
+
+export async function saveStep1(data: {
+  firstName: string
+  lastName: string
+  preferredName?: string
+  phone: string
+  email: string
+}) {
+  try {
+    const caregiver = await getOrCreateCaregiver()
+    
+    await prisma.caregiver.update({
       where: { id: caregiver.id },
-      include: {
-        certifications: true,
-        references: true,
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        preferredName: data.preferredName,
+        phone: data.phone,
+        updatedAt: new Date(),
       }
     })
     
-    return fullCaregiver
+    await prisma.user.update({
+      where: { id: caregiver.userId },
+      data: { email: data.email }
+    })
+    
+    return { success: true }
   } catch (error) {
-    console.error('Error getting profile:', error)
-    return null
+    console.error('Error saving step 1:', error)
+    return { error: 'Failed to save' }
   }
 }
 
 export async function saveStep2(data: {
   services: string[]
-  specializations: string[]
   credentials: string[]
 }) {
   try {
@@ -73,7 +96,6 @@ export async function saveStep2(data: {
       where: { id: caregiver.id },
       data: {
         services: data.services,
-        specializations: data.specializations,
         credentials: data.credentials,
         updatedAt: new Date(),
       }
@@ -87,18 +109,22 @@ export async function saveStep2(data: {
 }
 
 export async function saveStep3(data: {
-  availabilityStatus: string
-  availableFromDate?: string
-  noticePeriod?: string
-  placementTypes: string[]
-  weeklyAvailability: Record<string, any>
-  willingLiveIn: boolean
-  willingOvernight: boolean
-  hasVehicle: boolean
-  travelRadius: number
-  city: string
-  postalCode: string
-  additionalLanguages: string[]
+  availabilityStatus?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  address?: string
+  placementTypes?: string[]
+  weeklyAvailability?: Record<string, any>
+  willingLiveIn?: boolean
+  willingOvernight?: boolean
+  hasVehicle?: boolean
+  travelRadius?: number
+  serviceCity?: string
+  serviceState?: string
+  serviceZIP?: string
+  additionalLanguages?: string[]
+  specializations?: string[]
 }) {
   try {
     const caregiver = await getOrCreateCaregiver()
@@ -106,18 +132,10 @@ export async function saveStep3(data: {
     await prisma.caregiver.update({
       where: { id: caregiver.id },
       data: {
-        availabilityStatus: data.availabilityStatus,
-        availableFromDate: data.availableFromDate ? new Date(data.availableFromDate) : null,
-        noticePeriod: data.noticePeriod,
-        placementTypes: data.placementTypes,
-        weeklyAvailability: data.weeklyAvailability,
-        willingLiveIn: data.willingLiveIn,
-        willingOvernight: data.willingOvernight,
-        hasVehicle: data.hasVehicle,
-        travelRadius: data.travelRadius,
-        city: data.city,
-        postalCode: data.postalCode,
-        additionalLanguages: data.additionalLanguages,
+        availabilityStatus: data.availabilityStatus || 'available_now',
+        city: data.city || data.serviceCity,
+        state: data.state || data.serviceState,
+        postalCode: data.postalCode || data.serviceZIP,
         updatedAt: new Date(),
       }
     })
@@ -148,11 +166,12 @@ export async function saveStep4(certifications: Array<{
       await prisma.caregiverCertification.createMany({
         data: certifications.map(cert => ({
           caregiverId: caregiver.id,
-          type: cert.type,
-          issuingBody: cert.issuingBody,
+          certification: cert.type,
+          issuingOrg: cert.issuingBody,
           certNumber: cert.certNumber,
           issueDate: new Date(cert.issueDate),
-          expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+          expiryDate: cert.noExpiry ? null : (cert.expiryDate ? new Date(cert.expiryDate) : null),
+          status: cert.noExpiry ? 'active' : (cert.expiryDate && new Date(cert.expiryDate) > new Date() ? 'active' : 'expired'),
         }))
       })
     }
@@ -169,12 +188,11 @@ export async function saveStep5(references: Array<{
   relationshipType: string
   organisation?: string
   duration: string
-  contactMethod: string
+  contactMethod?: string
   email?: string
   phone?: string
-  consentKnows: boolean
-  consentAgreed: boolean
-  consentUnderstands: boolean
+  consentGiven?: boolean
+  consentDate?: string
 }>) {
   try {
     const caregiver = await getOrCreateCaregiver()
@@ -212,16 +230,8 @@ export async function submitProfile() {
     await prisma.caregiver.update({
       where: { id: caregiver.id },
       data: {
-        isAvailable: true,
+        status: 'pending',
         updatedAt: new Date(),
-      }
-    })
-    
-    await prisma.adminAuditLog.create({
-      data: {
-        action: 'profile_submitted',
-        entityType: 'caregiver',
-        entityId: caregiver.id,
       }
     })
     

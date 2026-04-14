@@ -188,12 +188,6 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
         </div>
       </div>
 
-      <div style={{ marginBottom: '32px' }}>
-              <option value="">Select...</option>
-              {PRONOUNS.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
-      </div>
-
       <div style={{ marginBottom: '24px' }}>
         <label style={labelStyle}>Languages Spoken</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
