@@ -61,6 +61,15 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
   };
 
   const LANGUAGES = ['English', 'Spanish', 'French', 'Mandarin', 'Cantonese', 'Tagalog', 'Hindi', 'Arabic', 'Portuguese', 'Vietnamese', 'Other'];
+  const PRONOUNS = ['she/her', 'he/him', 'they/them', 'she/they', 'he/they', 'other'];
+
+  // Save city to localStorage for Step 3 auto-fill
+  useEffect(() => {
+    if (formData.city && formData.state) {
+      localStorage.setItem('home_city', formData.city);
+      localStorage.setItem('home_state', formData.state);
+    }
+  }, [formData.city, formData.state]);
 
   const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' };
   const inputStyle = { width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', backgroundColor: 'white', fontSize: '13px', color: '#0D1B3E', outline: 'none' };
@@ -181,7 +190,10 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
 
       <div style={{ marginBottom: '32px' }}>
         <label style={labelStyle}>Pronouns (optional)</label>
-        <input type="text" value={formData.pronouns} onChange={(e) => updateField('pronouns', e.target.value)} placeholder="she/her, he/him, they/them" style={inputStyle} />
+            <select value={formData.pronouns} onChange={(e) => updateField('pronouns', e.target.value)} style={inputStyle}>
+              <option value="">Select...</option>
+              {PRONOUNS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
       </div>
 
       <div style={{ marginBottom: '24px' }}>

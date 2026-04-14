@@ -48,6 +48,13 @@ export default function Step3Availability({ initialData, onSave }: { initialData
  const [willingOvernight, setWillingOvernight] = useState(initialData?.willingOvernight || false)
  const [hasVehicle, setHasVehicle] = useState(initialData?.hasVehicle || false)
  const [serviceCity, setServiceCity] = useState(initialData?.serviceCity || '')
+ // Auto-fill from Step 1
+ useEffect(() => {
+   const homeCity = localStorage.getItem('home_city')
+   const homeState = localStorage.getItem('home_state')
+   if (homeCity && !serviceCity) setServiceCity(homeCity)
+   if (homeState && !serviceState) setServiceState(homeState)
+ }, [])
  const [serviceState, setServiceState] = useState(initialData?.serviceState || '')
  const [serviceZIP, setServiceZIP] = useState(initialData?.serviceZIP || '')
  const [travelRadius, setTravelRadius] = useState(initialData?.travelRadius || 15)
