@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://careified_user:Careified2024@187.124.227.63:5432/careified'
+  connectionString: process.env.DATABASE_URL || 'postgresql://careified_user:nFvV7KEqXSX9unj8X7BPdGlIZokqWqi6@187.124.227.63:5432/careified'
 });
 
 // Demo agency ID

@@ -1,7 +1,3 @@
-// Careified Database Schema
-// Generated: April 13, 2026
-// Note: Connection URL is in prisma.config.ts (Prisma 7 requirement)
-
 generator client {
   provider = "prisma-client"
   output   = "../../node_modules/@prisma/client"
@@ -11,325 +7,180 @@ datasource db {
   provider = "postgresql"
 }
 
-// User accounts (base table for all user types)
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String?
-  role          UserRole  @default(CAREGIVER)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Relations
-  caregiver     Caregiver?
-  agency        Agency?
-  family        Family?
+  id            String      @id @default(cuid()) @db.VarChar(255)
+  email         String      @unique @db.VarChar(255)
+  password_hash String?     @db.VarChar(255)
+  role          String?     @default("CAREGIVER") @db.VarChar(50)
+  is_active     Boolean?    @default(true)
+  created_at    DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?   @default(now()) @db.Timestamp(6)
+  caregivers    Caregiver[]
 
   @@map("users")
 }
 
-enum UserRole {
-  CAREGIVER
-  AGENCY
-  FAMILY
-  ADMIN
-}
-
 model Caregiver {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  firstName       String
-  middleName      String?
-  lastName        String
-  preferredName   String?
-  phone           String
-  city            String
-  state           String
-  postalCode      String
-  gender          String
-  pronouns        String?
-  bio             String?
-  yearsExperience Int       @default(0)
-  hourlyRate      Float?
-  isAvailable     Boolean   @default(true)
-  profilePhotoUrl String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relations
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  languages       String[]
-  certifications  CaregiverCertification[]
-  references      CaregiverReference[]
-  security        CaregiverSecurity?
-  documents       CaregiverDocument[]
-  ratings         CaregiverRating[]
-  aggregateScore  Decimal?  @default(0) @db.Decimal(3,2)
-  ratingCount    Int        @default(0)
-
-  // Agency relations
-  relationships  AgencyCaregiverRelationship[]
-  agencyRatings  AgencyRating[]
+  id                             String                        @id @default(cuid()) @db.VarChar(255)
+  user_id                        String?                       @db.VarChar(255)
+  first_name                     String?                       @db.VarChar(255)
+  last_name                      String?                       @db.VarChar(255)
+  preferred_name                 String?                       @db.VarChar(255)
+  phone                          String?                       @db.VarChar(50)
+  email                          String?                       @db.VarChar(255)
+  gender                         String?                       @db.VarChar(20)
+  date_of_birth                  DateTime?                     @db.Date
+  city                           String?                       @db.VarChar(100)
+  state                          String?                       @db.VarChar(50)
+  postal_code                    String?                       @db.VarChar(20)
+  address                        String?
+  status                         String?                       @default("incomplete") @db.VarChar(50)
+  availability_status            String?                       @default("available_now") @db.VarChar(50)
+  services                       String[]
+  specializations                String[]
+  credentials                    String[]
+  placement_types                String[]
+  willing_live_in                Boolean?                      @default(false)
+  willing_overnight              Boolean?                      @default(false)
+  has_vehicle                    Boolean?                      @default(false)
+  travel_radius                  Int?                          @default(15)
+  hourly_rate                    Decimal?                      @db.Decimal(10, 2)
+  bio                            String?
+  photo_url                      String?
+  years_experience               Int?
+  rating_count                   Int?                          @default(0)
+  aggregate_score                Decimal?                      @default(0) @db.Decimal(3, 2)
+  created_at                     DateTime?                     @default(now()) @db.Timestamp(6)
+  updated_at                     DateTime?                     @default(now()) @db.Timestamp(6)
+  agency_caregiver_relationships AgencyCaregiverRelationship[]
+  agency_ratings                 AgencyRating[]
+  caregiver_certifications       CaregiverCertification[]
+  caregiver_references           CaregiverReference[]
+  caregiver_shifts               CaregiverShift[]
+  users                          User?                         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("caregivers")
 }
 
 model CaregiverCertification {
-  id            String    @id @default(cuid())
-  caregiverId   String
-  certification String
-  issuingOrg    String
-  issueDate     DateTime
-  expiryDate    DateTime?
-  documentUrl   String?
-  createdAt     DateTime  @default(now())
-
-  caregiver     Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  id            String     @id @default(cuid()) @db.VarChar(255)
+  caregiver_id  String?    @db.VarChar(255)
+  certification String?    @db.VarChar(255)
+  issuing_org   String?    @db.VarChar(255)
+  cert_number   String?    @db.VarChar(100)
+  issue_date    DateTime?  @db.Date
+  expiry_date   DateTime?  @db.Date
+  status        String?    @default("active") @db.VarChar(50)
+  created_at    DateTime?  @default(now()) @db.Timestamp(6)
+  caregivers    Caregiver? @relation(fields: [caregiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("caregiver_certifications")
 }
 
 model CaregiverReference {
-  id            String    @id @default(cuid())
-  caregiverId   String
-  name          String
-  relationship  String
-  phone         String
-  email         String?
-  notes         String?
-  createdAt     DateTime  @default(now())
-
-  caregiver     Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  id             String     @id @default(cuid()) @db.VarChar(255)
+  caregiver_id   String?    @db.VarChar(255)
+  name           String?    @db.VarChar(255)
+  relationship   String?    @db.VarChar(100)
+  organisation   String?    @db.VarChar(255)
+  duration       String?    @db.VarChar(50)
+  contact_method String?    @db.VarChar(50)
+  email          String?    @db.VarChar(255)
+  phone          String?    @db.VarChar(50)
+  created_at     DateTime?  @default(now()) @db.Timestamp(6)
+  caregivers     Caregiver? @relation(fields: [caregiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("caregiver_references")
 }
 
-model CaregiverSecurity {
-  id                String    @id @default(cuid())
-  caregiverId       String    @unique
-  backgroundCheck   String?
-  backgroundCheckDate DateTime?
-  backgroundCheckUrl String?
-  socialSecurity    String?
-  driversLicense    String?
-  driversLicenseState String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  caregiver         Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
-
-  @@map("caregiver_security")
-}
-
-model CaregiverDocument {
-  id          String    @id @default(cuid())
-  caregiverId String
-  type        String
-  url         String
-  createdAt   DateTime  @default(now())
-
-  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
-
-  @@map("caregiver_documents")
-}
-
 model Agency {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  clerkUserId     String?   // Clerk user ID
-  name            String
-  description     String?
-  phone           String?
-  website         String?
-  logoUrl         String?
-  address         String?
-  city            String?
-  state           String?
-  postalCode      String?
-  country         String?   @default("US")
-  isVerified      Boolean   @default(false)
-  status          String?   @default("pending") // pending, approved, rejected
-  
-  // Contact info
-  contactFirstName String?
-  contactLastName  String?
-  contactEmail     String?
-  contactPhone    String?
-  
-  // Business details
-  businessType   String?
-  licenseNumber  String?
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Agency relations
-  relationships   AgencyCaregiverRelationship[]
-  ratings         AgencyRating[]
-  savedSearches AgencySavedSearch[]
+  id                             String                        @id @default(cuid()) @db.VarChar(255)
+  name                           String                        @db.VarChar(255)
+  business_type                  String?                       @db.VarChar(100)
+  license_number                 String?                       @db.VarChar(100)
+  contact_first_name             String?                       @db.VarChar(100)
+  contact_last_name              String?                       @db.VarChar(100)
+  contact_email                  String?                       @db.VarChar(255)
+  contact_phone                  String?                       @db.VarChar(50)
+  street                         String?                       @db.VarChar(255)
+  city                           String?                       @db.VarChar(100)
+  state                          String?                       @db.VarChar(50)
+  postal_code                    String?                       @db.VarChar(20)
+  status                         String?                       @default("pending") @db.VarChar(50)
+  rating_count                   Int?                          @default(0)
+  aggregate_score                Decimal?                      @default(0) @db.Decimal(3, 2)
+  created_at                     DateTime?                     @default(now()) @db.Timestamp(6)
+  updated_at                     DateTime?                     @default(now()) @db.Timestamp(6)
+  agency_caregiver_relationships AgencyCaregiverRelationship[]
+  agency_ratings                 AgencyRating[]
+  agency_saved_searches          AgencySavedSearch[]
+  caregiver_shifts               CaregiverShift[]
 
   @@map("agencies")
 }
 
-model CaregiverRating {
-  id          String    @id @default(cuid())
-  caregiverId String
-  rating      Int
-  review      String?
-  reviewerName String?
-  createdAt   DateTime  @default(now())
-
-  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
-
-  @@map("caregiver_ratings")
-}
-
-model Family {
-  id          String    @id @default(cuid())
-  userId      String    @unique
-  firstName   String
-  lastName    String
-  phone       String?
-  address     String?
-  city        String?
-  state       String?
-  postalCode  String?
-  careNeeds   String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("families")
-}
-
-model AdminAuditLog {
-  id          String    @id @default(cuid())
-  action      String
-  entityType  String?
-  entityId    String?
-  userId      String?
-  details     String?
-  ipAddress   String?
-  createdAt   DateTime  @default(now())
-
-  @@map("admin_audit_log")
-}
-
-// Agency-Caregiver relationship (private agency data)
 model AgencyCaregiverRelationship {
-  id                String    @id @default(cuid())
-  agencyId          String
-  caregiverId       String
+  id                String           @id @default(cuid()) @db.VarChar(255)
+  agency_id         String?          @db.VarChar(255)
+  caregiver_id      String?          @db.VarChar(255)
+  relationship_type String?          @db.VarChar(50)
+  status            String?          @default("active") @db.VarChar(50)
+  notes             String?
+  created_at        DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?        @default(now()) @db.Timestamp(6)
+  agencies          Agency?          @relation(fields: [agency_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  caregivers        Caregiver?       @relation(fields: [caregiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  caregiver_shifts  CaregiverShift[]
 
-  // Employment details
-  startDate         DateTime  @db.Date
-  endDate           DateTime? @db.Date
-  employmentType    String    // "permanent" | "contract" | "casual"
-  currentlyEmployed  Boolean   @default(true)
-
-  // Private agency data
-  privateNotes      String?
-  payRate           Decimal?  @db.Decimal(10,2)
-  payRateType       String?   // "hourly" | "salary"
-  internalRating   Int?      // 1-5 (private)
-
-  // Quick stats
-  totalShifts       Int       @default(0)
-  noShowCount       Int       @default(0)
-  lastShiftDate     DateTime? @db.Date
-
-  // Metadata
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relations
-  agency            Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  caregiver         Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
-  shifts            CaregiverShift[]
-  rating            AgencyRating?
-
-  @@unique([agencyId, caregiverId])
-  @@index([agencyId])
-  @@index([caregiverId])
-  @@index([agencyId, currentlyEmployed])
+  @@unique([agency_id, caregiver_id])
   @@map("agency_caregiver_relationships")
 }
 
-// Shift logging
 model CaregiverShift {
-  id              String    @id @default(cuid())
-  relationshipId  String
-  shiftDate       DateTime  @db.Date
-  startTime       String    // "09:00"
-  endTime         String    // "17:00"
-  hoursWorked     Decimal   @db.Decimal(5,2)
+  id                             String                       @id @default(cuid()) @db.VarChar(255)
+  relationship_id                String?                      @db.VarChar(255)
+  caregiver_id                   String?                      @db.VarChar(255)
+  agency_id                      String?                      @db.VarChar(255)
+  date                           DateTime?                    @db.Date
+  start_time                     DateTime?                    @db.Time(6)
+  end_time                       DateTime?                    @db.Time(6)
+  hours                          Decimal?                     @db.Decimal(5, 2)
+  status                         String?                      @default("scheduled") @db.VarChar(50)
+  notes                          String?
+  created_at                     DateTime?                    @default(now()) @db.Timestamp(6)
+  agencies                       Agency?                      @relation(fields: [agency_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  caregivers                     Caregiver?                   @relation(fields: [caregiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agency_caregiver_relationships AgencyCaregiverRelationship? @relation(fields: [relationship_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  status          String    @default("completed") // "completed" | "no_show" | "cancelled"
-  notes           String?
-  payAmount       Decimal?  @db.Decimal(10,2)
-
-  createdAt       DateTime  @default(now())
-
-  relationship    AgencyCaregiverRelationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
-
-  @@index([relationshipId])
-  @@index([shiftDate])
-  @@index([relationshipId, shiftDate])
   @@map("caregiver_shifts")
 }
 
-// Public ratings (visible to all agencies)
 model AgencyRating {
-  id              String    @id @default(cuid())
-  relationshipId  String    @unique
-  agencyId        String
-  caregiverId     String
+  id             String     @id @default(cuid()) @db.VarChar(255)
+  agency_id      String?    @db.VarChar(255)
+  caregiver_id   String?    @db.VarChar(255)
+  reliability    Int?
+  punctuality    Int?
+  warmth         Int?
+  dignity        Int?
+  hygiene        Int?
+  skills_match   Int?
+  would_reengage Boolean?
+  public_comment String?
+  created_at     DateTime?  @default(now()) @db.Timestamp(6)
+  agencies       Agency?    @relation(fields: [agency_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  caregivers     Caregiver? @relation(fields: [caregiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  // 6 rating categories (1-5)
-  reliability     Int       // Did they show up consistently?
-  punctuality     Int       // Were they on time?
-  warmth          Int        // Were they kind and friendly?
-  dignity         Int        // Did they treat client with dignity?
-  hygiene         Int        // Did they maintain hygiene standards?
-  skillsMatch     Int        // Did skills match what they claimed?
-
-  // Binary signal
-  wouldReengage   Boolean   // Would you hire them again?
-
-  // Optional public comment
-  publicComment   String?   @db.VarChar(500)
-
-  // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  relationship    AgencyCaregiverRelationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
-  agency           Agency    @relation(fields: [agencyId], references: [id])
-  caregiver       Caregiver @relation(fields: [caregiverId], references: [id])
-
-  @@index([caregiverId])
-  @@index([agencyId])
   @@map("agency_ratings")
 }
 
-// Saved searches
 model AgencySavedSearch {
-  id            String    @id @default(cuid())
-  agencyId      String
-  name          String    @db.VarChar(100)
-  filters       Json      // Serialized filter object
-  resultCount   Int       @default(0)
+  id         String    @id @default(cuid()) @db.VarChar(255)
+  agency_id  String?   @db.VarChar(255)
+  name       String?   @db.VarChar(255)
+  filters    Json?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  agencies   Agency?   @relation(fields: [agency_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  createdAt     DateTime  @default(now())
-  lastUsedAt   DateTime  @default(now())
-
-  agency        Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-
-  @@index([agencyId])
-  @@index([agencyId, lastUsedAt])
   @@map("agency_saved_searches")
 }

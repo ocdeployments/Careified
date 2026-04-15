@@ -110,3 +110,5 @@ export const prisma = {
     },
   },
 };
+
+export { pool };

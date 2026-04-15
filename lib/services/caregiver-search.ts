@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { SearchFilters, CaregiverSearchResult, SearchResponse } from '@/lib/types/search';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://careified_user:Careified2024@187.124.227.63:5432/careified'
+  connectionString: process.env.DATABASE_URL || 'postgresql://careified_user:nFvV7KEqXSX9unj8X7BPdGlIZokqWqi6@187.124.227.63:5432/careified'
 });
 
 export class CaregiverSearchService {
