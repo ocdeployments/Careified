@@ -2,7 +2,7 @@
 
 import { CaregiverSearchResult } from '@/lib/types/search';
 import { CaregiverCard } from './CaregiverCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 
 interface SearchResultsProps {
  results: CaregiverSearchResult[];
@@ -12,69 +12,68 @@ interface SearchResultsProps {
  onPageChange: (page: number) => void;
 }
 
-export function SearchResults({ 
- results, 
- loading, 
- page, 
- totalPages, 
- onPageChange 
+export function SearchResults({
+ results, loading, page, totalPages, onPageChange
 }: SearchResultsProps) {
- 
+
  if (loading) {
-  return (
-   <div className="flex items-center justify-center py-20">
-    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-   </div>
-  );
- }
- 
- if (results.length === 0) {
-  return (
-   <div className="text-center py-20">
-    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-     <span className="text-3xl">🔍</span>
-    </div>
-    <h3 className="text-lg font-bold text-slate-900 mb-2">
-     No caregivers match your filters
-    </h3>
-    <p className="text-sm text-slate-600 mb-6">
-     Try expanding your search criteria
-    </p>
-   </div>
-  );
- }
- 
  return (
-  <div>
-   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-    {results.map(caregiver => (
-     <CaregiverCard key={caregiver.id} caregiver={caregiver} />
-    ))}
-   </div>
- 
-   {totalPages > 1 && (
-    <div className="flex items-center justify-center gap-2">
-     <button
-      onClick={() => onPageChange(page - 1)}
-      disabled={page === 1}
-      className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-     >
-      ← Previous
-     </button>
- 
-     <span className="text-sm text-slate-600">
-      Page {page} of {totalPages}
-     </span>
- 
-     <button
-      onClick={() => onPageChange(page + 1)}
-      disabled={page === totalPages}
-      className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-     >
-      Next →
-     </button>
-    </div>
-   )}
-  </div>
+ <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+ <div style={{ textAlign: 'center' }}>
+ <Loader2 size={32} color="#C9973A" style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
+ <p style={{ fontSize: '13px', color: '#94A3B8' }}>Finding caregivers...</p>
+ </div>
+ </div>
+ );
+ }
+
+ if (results.length === 0) {
+ return (
+ <div style={{ textAlign: 'center', padding: '80px 0' }}>
+ <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+ <Search size={28} color="#94A3B8" />
+ </div>
+ <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 8px' }}>
+ No caregivers match your filters
+ </h3>
+ <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+ Try expanding your search criteria
+ </p>
+ </div>
+ );
+ }
+
+ return (
+ <div>
+ {/* Cards grid */}
+ <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+ {results.map(caregiver => (
+ <CaregiverCard key={caregiver.id} caregiver={caregiver} />
+ ))}
+ </div>
+
+ {/* Pagination */}
+ {totalPages > 1 && (
+ <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+ <button
+ onClick={() => onPageChange(page - 1)}
+ disabled={page === 1}
+ style={{ padding: '8px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '13px', fontWeight: 600, color: '#64748B', backgroundColor: 'white', cursor: page === 1 ? 'not-allowed' : 'pointer', opacity: page === 1 ? 0.5 : 1 }}
+ >
+ ← Previous
+ </button>
+ <span style={{ fontSize: '13px', color: '#64748B', padding: '0 8px' }}>
+ Page {page} of {totalPages}
+ </span>
+ <button
+ onClick={() => onPageChange(page + 1)}
+ disabled={page === totalPages}
+ style={{ padding: '8px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '13px', fontWeight: 600, color: '#64748B', backgroundColor: 'white', cursor: page === totalPages ? 'not-allowed' : 'pointer', opacity: page === totalPages ? 0.5 : 1 }}
+ >
+ Next →
+ </button>
+ </div>
+ )}
+ </div>
  );
 }
