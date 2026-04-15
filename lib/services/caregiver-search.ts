@@ -5,7 +5,10 @@
 import { Pool } from 'pg';
 import { SearchFilters, CaregiverSearchResult, SearchResponse } from '@/lib/types/search';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 export class CaregiverSearchService {
 
