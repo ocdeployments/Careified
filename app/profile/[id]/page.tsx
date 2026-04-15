@@ -13,8 +13,8 @@ async function getCaregiver(id: string) {
  try {
  const result = await pool.query(`
  SELECT c.*,
- (SELECT COUNT(*) FROM caregiver_certifications cc WHERE cc."caregiverId" = c.id) as cert_count,
- (SELECT COUNT(*) FROM caregiver_references cr WHERE cr."caregiverId" = c.id) as ref_count
+ (SELECT COUNT(*) FROM caregiver_certifications cc WHERE cc.caregiver_id = c.id) as cert_count,
+ (SELECT COUNT(*) FROM caregiver_references cr WHERE cr.caregiver_id = c.id) as ref_count
  FROM caregivers c WHERE c.id = $1 AND c.status = 'approved'
  `, [id])
  return result.rows[0] || null
@@ -23,7 +23,7 @@ async function getCaregiver(id: string) {
 
 async function getCertifications(caregiverId: string) {
  try {
- const result = await pool.query(`SELECT * FROM caregiver_certifications WHERE "caregiverId" = $1 ORDER BY issue_date DESC`, [caregiverId])
+ const result = await pool.query(`SELECT * FROM caregiver_certifications WHERE caregiver_id = $1 ORDER BY issue_date DESC`, [caregiverId])
  return result.rows
  } catch { return [] }
 }
