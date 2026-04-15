@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { CaregiverSearchResult } from '@/lib/types/search';
 import { Star, MapPin, Briefcase, Shield, Zap, Home, Globe } from 'lucide-react';
 
@@ -21,6 +22,7 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  : 'bg-slate-100 text-slate-600 border-slate-200';
 
  return (
+ <Link href={`/profile/${caregiver.id}`} className="block">
  <div className="bg-white rounded-2xl border border-slate-100 p-5 hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer">
 
  {/* Header */}
@@ -134,5 +136,6 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  )}
  </div>
  </div>
+ </Link>
  );
 }
