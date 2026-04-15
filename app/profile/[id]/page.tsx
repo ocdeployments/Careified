@@ -43,9 +43,10 @@ export default async function CaregiverProfilePage({ params }: { params: { id: s
  const tierLabel = caregiver.profile_completion_pct >= 80 ? 'Professional' : caregiver.profile_completion_pct >= 60 ? 'Verified' : caregiver.profile_completion_pct >= 40 ? 'Basic' : 'Incomplete'
 
  return (
- <div style={{ backgroundColor: '#F7F4F0', minHeight: '100vh' }}>
- <div style={{ backgroundColor: '#0D1B3E', padding: '12px 24px' }}>
- <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+ <div className="min-h-screen" style={{ backgroundColor: '#F7F4F0' }}>
+  {/* Top bar */}
+  <div className="bg-[#0D1B3E] px-6 py-3">
+   <div className="max-w-6xl mx-auto flex items-center gap-2">
  <a href="/agency/search" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>Search</a>
  <ChevronRight size={14} color="rgba(255,255,255,0.3)" />
  <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>{displayName}</span>
