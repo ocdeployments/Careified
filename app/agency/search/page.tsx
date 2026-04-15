@@ -48,17 +48,18 @@ export default function CaregiverSearchPage() {
  };
  
  return (
-  <div className="min-h-screen bg-slate-50 py-8 px-4">
+ <div className="min-h-screen bg-slate-50">
+  {/* Hero Section */}
+  <div className="bg-gradient-to-r from-[#0D1B3E] to-[#1E3A8A] py-12 px-4">
    <div className="max-w-7xl mx-auto">
- 
-    <div className="mb-6">
-     <h1 className="text-2xl font-bold text-slate-900 mb-2">
-      Find Caregivers
-     </h1>
-     <p className="text-slate-600">
-      Search verified caregiver profiles by specialty, location, and availability
-     </p>
-    </div>
+    <h1 className="text-3xl font-bold text-white mb-2">Find Caregivers</h1>
+    <p className="text-blue-200">
+     Search verified caregiver profiles by specialty, location, and availability
+    </p>
+   </div>
+  </div>
+  
+  <div className="max-w-7xl mx-auto py-8 px-4">
  
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
      <div className="lg:col-span-1">
