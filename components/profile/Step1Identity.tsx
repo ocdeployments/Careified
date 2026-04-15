@@ -1,4 +1,5 @@
 'use client';
+import { saveStep1 } from '@/lib/actions/profile';
 
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Upload, CheckCircle } from 'lucide-react';
@@ -28,17 +29,32 @@ export default function Step1Identity({ initialData = {}, onSave }: Step1Identit
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       setIsSaving(true);
-      onSave(formData);
-    localStorage.setItem("step1_identity", JSON.stringify(formData));
-      setTimeout(() => {
-        setIsSaving(false);
+      try {
+        await saveStep1({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          preferredName: formData.preferredName || undefined,
+          phone: formData.phone,
+          email: formData.email,
+          gender: formData.gender || undefined,
+          city: formData.city || undefined,
+          state: formData.state || undefined,
+          postalCode: formData.postalCode || undefined,
+          languages: formData.languages,
+        });
+        onSave(formData);
+        localStorage.setItem('step1_identity', JSON.stringify(formData));
         setLastSaved(new Date());
-      }, 500);
+      } catch (error) {
+        console.error('Step1 save error:', error);
+      } finally {
+        setIsSaving(false);
+      }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [formData, onSave]);
+  }, [formData]);
 
   const updateField = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
