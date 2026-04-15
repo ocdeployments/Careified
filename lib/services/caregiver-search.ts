@@ -39,10 +39,10 @@ export class CaregiverSearchService {
  conditions.push(`c.placement_types && ARRAY[${ph}]`);
  params.push(...filters.placementTypes);
  }
- if (filters.daysAvailable?.length > 0) {
- const ph = filters.daysAvailable.map(() => `$${p++}`).join(', ');
+ if (((filters.daysAvailable) || []).length > 0) {
+ const ph = ((filters.daysAvailable) || []).map(() => `$${p++}`).join(', ');
  conditions.push(`c.days_available && ARRAY[${ph}]`);
- params.push(...filters.daysAvailable);
+ params.push(...((filters.daysAvailable) || []));
  }
  if (filters.minHoursPerWeek) {
  conditions.push(`c.min_hours_per_week >= $${p++}`);
@@ -66,10 +66,10 @@ export class CaregiverSearchService {
  conditions.push(`c.credentials && ARRAY[${ph}]`);
  params.push(...filters.credentials);
  }
- if (filters.languages?.length > 0) {
- const ph = filters.languages.map(() => `$${p++}`).join(', ');
+ if (((filters.languages) || []).length > 0) {
+ const ph = ((filters.languages) || []).map(() => `$${p++}`).join(', ');
  conditions.push(`c.languages && ARRAY[${ph}]`);
- params.push(...filters.languages);
+ params.push(...((filters.languages) || []));
  }
  if (filters.minExperience) {
  conditions.push(`c.years_experience >= $${p++}`);
@@ -98,10 +98,10 @@ export class CaregiverSearchService {
  conditions.push(`(c.employment_type = $${p++} OR c.employment_type = 'either')`);
  params.push(filters.employmentType);
  }
- if (filters.liftExperience?.length > 0) {
- const ph = filters.liftExperience.map(() => `$${p++}`).join(', ');
+ if (((filters.liftExperience) || []).length > 0) {
+ const ph = ((filters.liftExperience) || []).map(() => `$${p++}`).join(', ');
  conditions.push(`c.lift_experience && ARRAY[${ph}]`);
- params.push(...filters.liftExperience);
+ params.push(...((filters.liftExperience) || []));
  }
  if (filters.technologyComfort) {
  conditions.push(`(

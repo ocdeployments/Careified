@@ -184,7 +184,7 @@ export function FilterPanel({ filters, onChange, resultCount }: FilterPanelProps
  </div>
  </Section>
 
- <Section title="Placement type" expanded={true} nested>
+ <Section title="Placement type" expanded={true} onToggle={() => {}} nested>
  <div className="space-y-2">
  {PLACEMENT_TYPE_OPTIONS.map(opt => (
  <label key={opt} className="flex items-center gap-2 cursor-pointer">
@@ -469,7 +469,7 @@ export function FilterPanel({ filters, onChange, resultCount }: FilterPanelProps
  <Section title="Experience" expanded={expanded.experience}
  onToggle={() => toggle('experience')}>
  <div className="grid grid-cols-2 gap-2">
- { {[
+ {[
  { label: 'Min years', key: 'minExperience' as const },
  { label: 'Max years', key: 'maxExperience' as const },
  ].map(({ label, key }) => (
