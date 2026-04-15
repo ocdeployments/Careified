@@ -62,11 +62,33 @@ export default function Step3Availability({ initialData, onSave }: { initialData
  const [saving, setSaving] = useState(false)
  const [lookingUp, setLookingUp] = useState(false)
 
- const saveData = async (updates: Partial<any>) => {
+ const saveData = async (updates: Partial<any> = {}) => {
    setSaving(true)
-   localStorage.setItem("step3_availability", JSON.stringify({ availabilityStatus: status, placementTypes, specializations: specialties, serviceCity, serviceZIP, travelRadius }));
-    await saveStep3({ availabilityStatus: status, serviceCity, serviceState, serviceZIP, willingLiveIn, willingOvernight, hasVehicle, travelRadius, additionalLanguages: languages, specializations: specialties, ...updates })
-   setSaving(false)
+   try {
+     const payload = {
+       availabilityStatus: status,
+       city: serviceCity,
+       state: serviceState,
+       postalCode: serviceZIP,
+       serviceCity,
+       serviceState,
+       serviceZIP,
+       placementTypes,
+       specializations: specialties,
+       willingLiveIn,
+       willingOvernight,
+       hasVehicle,
+       travelRadius,
+       languages,
+       ...updates,
+     }
+     localStorage.setItem('step3_availability', JSON.stringify(payload))
+     await saveStep3(payload)
+   } catch (error) {
+     console.error('Step3 save error:', error)
+   } finally {
+     setSaving(false)
+   }
  }
 
  const handleZipChange = async (zip: string) => {
