@@ -37,6 +37,10 @@ export const prisma = {
     },
   },
   caregiver: {
+    findUnique: async ({ where }: { where: { id: string } }) => {
+      const result = await pool.query('SELECT * FROM caregivers WHERE id = $1', [where.id]);
+      return result.rows[0];
+    },
     findFirst: async ({ where }: { where: { userId?: string } }) => {
       const result = await pool.query('SELECT * FROM caregivers WHERE user_id = $1 LIMIT 1', [where.userId]);
       return result.rows[0];
@@ -80,6 +84,10 @@ export const prisma = {
       const result = await pool.query('SELECT * FROM caregiver_certifications WHERE caregiver_id = $1', [where.caregiverId]);
       return result.rows;
     },
+    count: async ({ where }: { where: { caregiverId: string } }) => {
+      const result = await pool.query('SELECT COUNT(*) as count FROM caregiver_certifications WHERE caregiver_id = $1', [where.caregiverId]);
+      return parseInt(result.rows[0]?.count || '0', 10);
+    },
     deleteMany: async ({ where }: { where: { caregiverId: string } }) => {
       await pool.query('DELETE FROM caregiver_certifications WHERE caregiver_id = $1', [where.caregiverId]);
     },
@@ -96,6 +104,10 @@ export const prisma = {
     findMany: async ({ where }: { where: { caregiverId: string } }) => {
       const result = await pool.query('SELECT * FROM caregiver_references WHERE caregiver_id = $1', [where.caregiverId]);
       return result.rows;
+    },
+    count: async ({ where }: { where: { caregiverId: string } }) => {
+      const result = await pool.query('SELECT COUNT(*) as count FROM caregiver_references WHERE caregiver_id = $1', [where.caregiverId]);
+      return parseInt(result.rows[0]?.count || '0', 10);
     },
     deleteMany: async ({ where }: { where: { caregiverId: string } }) => {
       await pool.query('DELETE FROM caregiver_references WHERE caregiver_id = $1', [where.caregiverId]);

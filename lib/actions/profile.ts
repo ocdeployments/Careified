@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
+import { calculateProfileCompletion } from '@/lib/utils/profile-completion'
 
 async function getOrCreateCaregiver() {
  const mockUserId = 'demo-user-id'
@@ -34,6 +35,54 @@ async function getOrCreateCaregiver() {
  }
 
  return caregiver
+}
+
+async function updateCompletionScore(caregiverId: string) {
+ try {
+   const caregiver = await prisma.caregiver.findUnique({
+     where: { id: caregiverId }
+   })
+   if (!caregiver) return
+
+   const certCount = await prisma.caregiverCertification.count({
+     where: { caregiverId }
+   })
+   const refCount = await prisma.caregiverReference.count({
+     where: { caregiverId }
+   })
+
+   const profile = caregiver.personality_profile as any
+   const strengthsCount = profile?.strengths?.length || 0
+
+   const result = calculateProfileCompletion({
+     firstName: caregiver.first_name,
+     lastName: caregiver.last_name,
+     photoUrl: caregiver.photo_url,
+     city: caregiver.city,
+     gender: caregiver.gender,
+     services: caregiver.services || [],
+     credentials: caregiver.credentials || [],
+     availabilityStatus: caregiver.availability_status,
+     placementTypes: caregiver.placement_types || [],
+     certificationCount: certCount,
+     referenceCount: refCount,
+     languages: caregiver.languages || [],
+     hasVehicle: caregiver.has_vehicle,
+     willingToTransport: caregiver.willing_to_transport,
+     travelRadius: caregiver.travel_radius,
+     petTolerance: caregiver.pet_tolerance,
+     smokerHousehold: caregiver.smoker_household,
+     employmentType: caregiver.employment_type,
+     strengthsCount,
+   })
+
+   await prisma.caregiver.update({
+     where: { id: caregiverId },
+     data: { profile_completion_pct: result.score }
+   })
+ } catch (error) {
+   console.error('updateCompletionScore error:', error)
+ }
 }
 
 export async function getProfileData() {
@@ -88,6 +137,8 @@ export async function saveStep1(data: {
  data: { email: data.email }
  })
 
+ await updateCompletionScore(caregiver.id)
+
  return { success: true }
  } catch (error) {
  console.error('saveStep1 error:', error)
@@ -112,6 +163,8 @@ export async function saveStep2(data: {
  }
  })
 
+ await updateCompletionScore(caregiver.id)
+
  return { success: true }
  } catch (error) {
  console.error('saveStep2 error:', error)
@@ -127,7 +180,7 @@ export async function saveStep3(data: {
  placementTypes?: string[]
  daysAvailable?: string[]
  shiftTimes?: Record<string, any>
-  serviceCity?: string
+ serviceCity?: string
  serviceState?: string
  serviceZIP?: string
  additionalLanguages?: string[]
@@ -184,6 +237,8 @@ export async function saveStep3(data: {
  }
  })
 
+ await updateCompletionScore(caregiver.id)
+
  return { success: true }
  } catch (error) {
  console.error('saveStep3 error:', error)
@@ -226,6 +281,8 @@ export async function saveStep4(certifications: Array<{
  })
  }
 
+ await updateCompletionScore(caregiver.id)
+
  return { success: true }
  } catch (error) {
  console.error('saveStep4 error:', error)
@@ -264,6 +321,8 @@ export async function saveStep5(references: Array<{
  }))
  })
  }
+
+ await updateCompletionScore(caregiver.id)
 
  return { success: true }
  } catch (error) {
