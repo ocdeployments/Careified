@@ -3,6 +3,57 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { UserButton, useAuth } from '@clerk/nextjs';
+
+function AuthButton() {
+  const { isLoaded, userId } = useAuth();
+  
+  if (!isLoaded) {
+    return null; // Or a loading spinner
+  }
+  
+  if (userId) {
+    return (
+      <UserButton 
+        appearance={{
+          elements: {
+            userButtonAvatarBox: { width: '32px', height: '32px' },
+            userButtonTrigger: { padding: '4px' },
+          },
+        }}
+      />
+    );
+  }
+  
+  return (
+    <>
+      <Link href="/sign-in" style={{ 
+        fontSize: '12px', 
+        fontWeight: 500, 
+        padding: '8px 16px',
+        borderRadius: '8px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        color: 'rgba(255,255,255,0.7)',
+        textDecoration: 'none',
+        transition: 'all 0.2s'
+      }}>
+        Sign in
+      </Link>
+      <Link href="/sign-up" style={{ 
+        fontSize: '12px', 
+        fontWeight: 700, 
+        padding: '8px 16px',
+        borderRadius: '8px',
+        background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+        color: '#0D1B3E',
+        textDecoration: 'none',
+        transition: 'all 0.2s'
+      }}>
+        Get started free
+      </Link>
+    </>
+  );
+}
 
 export default function Navbar() {
  const [mobileOpen, setMobileOpen] = useState(false);
@@ -104,30 +155,7 @@ export default function Navbar() {
 
  {/* Sign In / Sign Up Buttons */}
  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
- <Link href="/sign-in" style={{ 
-   fontSize: '12px', 
-   fontWeight: 500, 
-   padding: '8px 16px',
-   borderRadius: '8px',
-   border: '1px solid rgba(255,255,255,0.1)',
-   color: 'rgba(255,255,255,0.7)',
-   textDecoration: 'none',
-   transition: 'all 0.2s'
- }}>
-   Sign in
- </Link>
- <Link href="/sign-up" style={{ 
-   fontSize: '12px', 
-   fontWeight: 700, 
-   padding: '8px 16px',
-   borderRadius: '8px',
-   background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-   color: '#0D1B3E',
-   textDecoration: 'none',
-   transition: 'all 0.2s'
- }}>
-   Get started free
- </Link>
+   <AuthButton />
  </div>
  </div>
  </nav>
