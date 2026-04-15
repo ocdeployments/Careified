@@ -1,12 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ============================================
  Careified Design System v1.0
  ============================================ */
 
-:root {
+@theme {
  --navy: #0D1B3E;
  --navy-dark: #080F1E;
  --royal: #1E3A8A;
