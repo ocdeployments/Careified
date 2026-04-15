@@ -1,3 +1,4 @@
+import { SignIn } from '@clerk/nextjs'
 import Link from 'next/link'
 
 export default function SignInPage() {
@@ -28,23 +29,37 @@ export default function SignInPage() {
           padding: '40px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
         }}>
-          <div style={{ 
-            padding: '24px',
-            background: '#FDF6EC',
-            borderRadius: '12px',
-            textAlign: 'center',
-            marginBottom: '24px'
-          }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔐</div>
-            <p style={{ fontSize: '14px', color: '#92400E', fontWeight: 500 }}>
-              Sign in coming soon!
-            </p>
-            <p style={{ fontSize: '13px', color: '#B45309', marginTop: '8px' }}>
-              We're building a secure authentication system.
-            </p>
-          </div>
+          <SignIn
+            appearance={{
+              elements: {
+                rootBox: { width: '100%', margin: 0 },
+                card: { boxShadow: 'none', padding: 0, margin: 0 },
+                header: { display: 'none' },
+                socialButtonsBlockButton: {
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                },
+                formButtonPrimary: {
+                  borderRadius: '12px',
+                  background: '#0D1B3E',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  padding: '14px',
+                },
+                formFieldInput: {
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  padding: '14px',
+                  fontSize: '14px',
+                },
+                footer: { display: 'none' },
+              },
+            }}
+          />
           
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
             <Link 
               href="/agency/signup"
               style={{ 
