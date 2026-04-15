@@ -1,3 +1,35 @@
-// Clerk disabled for development - enable when ready
-export function middleware() {}
-export const config = { matcher: [] };
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/about',
+  '/contact',
+  '/terms',
+  '/privacy',
+  '/for-caregivers',
+  '/for-agencies',
+  '/for-families',
+  '/profile/[id]',
+  '/api/health',
+])
+
+export default clerkMiddleware((auth, request) => {
+  // If the route is public, allow access
+  if (isPublicRoute(request)) {
+    return
+  }
+  
+  // Protect all other routes
+  auth.protect()
+})
+
+export const config = {
+  matcher: [
+    // Skip Next.js internals and static files
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
+}
