@@ -10,7 +10,25 @@ export default function SignInPage() {
       justifyContent: 'center',
       padding: '40px 20px',
     }}>
-      <SignIn />
+      <SignIn
+        signUpUrl="/sign-up"
+        fallbackRedirectUrl="/api/auth/role-redirect"
+        appearance={{
+          variables: {
+            colorPrimary: '#C9973A',
+            colorBackground: '#FFFFFF',
+            colorText: '#0D1B3E',
+            borderRadius: '12px',
+          },
+          elements: {
+            formButtonPrimary: {
+              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+              color: '#0D1B3E',
+              fontWeight: 700,
+            },
+          },
+        }}
+      />
     </div>
   )
 }
