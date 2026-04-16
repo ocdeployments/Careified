@@ -9,12 +9,16 @@ const pool = new Pool({
 })
 
 async function getCaregiver(id: string) {
-  // Try ID first, then caregiver_code, then verify_slug
-  const { rows } = await pool.query(
-    'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 OR caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
-    [id]
-  )
-  return rows[0] || null
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 OR caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
+      [id]
+    )
+    return rows[0] || null
+  } catch (e) {
+    console.error('getCaregiver error:', e)
+    return null
+  }
 }
 
 export default async function IDCardPage({
