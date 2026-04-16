@@ -18,6 +18,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/health',
   '/agency/pending-approval',
   '/api/onboarding/set-role(.*)',
+  '/api/auth/role-redirect(.*)',
 ])
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
