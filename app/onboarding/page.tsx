@@ -31,7 +31,8 @@ export default function OnboardingPage() {
           router.push('/profile/build')
         }
       } else {
-        alert('Failed to set role. Please try again.')
+        const data = await res.json()
+        alert('Failed: ' + (data.detail || data.error))
       }
     } catch (error) {
       console.error('Error setting role:', error)
