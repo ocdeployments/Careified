@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CaregiverSearchResult } from '@/lib/types/search';
 import { Star, MapPin, Briefcase, Shield, Zap, Home, Globe, Car } from 'lucide-react';
+import ShortlistButton from './ShortlistButton';
 
 interface CaregiverCardProps {
  caregiver: CaregiverSearchResult;
@@ -161,9 +162,12 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  </span>
  )}
  </div>
+ <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
  <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', backgroundColor: caregiver.profileCompletionPct >= 80 ? '#EFF6FF' : caregiver.profileCompletionPct >= 60 ? '#F0FDF4' : '#F8FAFC', color: caregiver.profileCompletionPct >= 80 ? '#1E3A8A' : caregiver.profileCompletionPct >= 60 ? '#16A34A' : '#94A3B8' }}>
  {caregiver.profileCompletionPct >= 80 ? 'Professional' : caregiver.profileCompletionPct >= 60 ? 'Verified' : caregiver.profileCompletionPct >= 40 ? 'Basic' : 'Incomplete'}
  </span>
+ <ShortlistButton caregiverId={caregiver.id} size="sm" />
+ </div>
  </div>
  </div>
  </Link>
