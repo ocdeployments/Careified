@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
+import { Building2, Heart } from 'lucide-react'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -102,7 +103,7 @@ export default function OnboardingPage() {
               justifyContent: 'center',
               fontSize: '32px',
             }}>
-              🏥
+              <Building2 style={{ width: '32px', height: '32px', color: '#FFFFFF' }} />
             </div>
             <div>
               <div style={{ fontSize: '20px', fontWeight: 700, color: '#0D1B3E', marginBottom: '4px' }}>
@@ -142,7 +143,7 @@ export default function OnboardingPage() {
               justifyContent: 'center',
               fontSize: '32px',
             }}>
-              👩‍⚕️
+              <Heart style={{ width: '32px', height: '32px', color: '#FFFFFF' }} />
             </div>
             <div>
               <div style={{ fontSize: '20px', fontWeight: 700, color: '#0D1B3E', marginBottom: '4px' }}>
