@@ -10,9 +10,19 @@ const pool = new Pool({
 
 async function getCaregiver(id: string) {
   try {
+    // Try numeric ID first
+    const numId = parseInt(id, 10)
+    if (!isNaN(numId)) {
+      const { rows } = await pool.query(
+        'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 LIMIT 1',
+        [numId]
+      )
+      if (rows[0]) return rows[0]
+    }
+    // Try caregiver_code
     const { rows } = await pool.query(
-      'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 OR caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
-      [id]
+      'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
+      [id.toUpperCase()]
     )
     return rows[0] || null
   } catch (e) {
