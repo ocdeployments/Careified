@@ -1,409 +1,100 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
 export default function Home() {
-  return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #F7F4F0 0%, #FFFFFF 100%)' }}>
-      {/* Hero Section */}
-      <section style={{ padding: '120px 20px 80px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ 
-            display: 'inline-block', 
-            padding: '8px 16px', 
-            background: '#FDF6EC', 
-            borderRadius: '100px', 
-            marginBottom: '24px',
-            border: '1px solid #E8B86D'
-          }}>
-            <span style={{ fontSize: '14px', color: '#92400E', fontWeight: 500 }}>
-              🏥 Healthcare Hiring, Simplified
-            </span>
-          </div>
-          
-          <h1 style={{ 
-            fontSize: 'clamp(40px, 6vw, 64px)', 
-            fontWeight: 900, 
-            color: '#0D1B3E', 
-            lineHeight: 1.1,
-            marginBottom: '24px'
-          }}>
-            Connecting Healthcare<br />
-            <span style={{ background: 'linear-gradient(135deg, #C9973A, #E8B86D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Professionals
-            </span>{' '}
-            With Agencies
-          </h1>
-          
-          <p style={{ 
-            fontSize: '20px', 
-            color: '#64748B', 
-            maxWidth: '600px', 
-            margin: '0 auto 48px',
-            lineHeight: 1.6
-          }}>
-            Careified is the trusted platform connecting qualified caregivers 
-            with agencies. Find your match today.
-          </p>
-          
-          {/* Who Are You? Choice */}
-          <div style={{ 
-            display: 'flex', 
-            gap: '24px', 
-            justifyContent: 'center', 
-            flexWrap: 'wrap',
-            marginBottom: '48px'
-          }}>
-            <div style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '40px',
-              width: '300px',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              border: '2px solid transparent',
-              transition: 'all 0.3s'
-            }}>
-              <div style={{ 
-                width: '72px', height: '72px', 
-                margin: '0 auto 20px',
-                borderRadius: '18px', 
-                background: 'linear-gradient(135deg, #0D1B3E, #1a2f5c)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <span style={{ fontSize: '36px' }}>🏥</span>
-              </div>
-              <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0D1B3E', marginBottom: '12px' }}>
-                I am an Agency
-              </h2>
-              <p style={{ fontSize: '15px', color: '#64748B', marginBottom: '24px', lineHeight: 1.5 }}>
-                Hire verified caregivers, post shifts, and manage your team.
-              </p>
-              <Link 
-                href="/sign-up?role=agency"
-                style={{ 
-                  display: 'block',
-                  padding: '14px 28px', 
-                  background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                  color: '#0D1B3E', 
-                  borderRadius: '12px', 
-                  textDecoration: 'none', 
-                  fontWeight: 700,
-                  fontSize: '15px'
-                }}
-              >
-                Start Hiring →
-              </Link>
-            </div>
-            
-            <div style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '40px',
-              width: '300px',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              border: '2px solid transparent',
-              transition: 'all 0.3s'
-            }}>
-              <div style={{ 
-                width: '72px', height: '72px', 
-                margin: '0 auto 20px',
-                borderRadius: '18px', 
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <span style={{ fontSize: '36px' }}>👩‍⚕️</span>
-              </div>
-              <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0D1B3E', marginBottom: '12px' }}>
-                I am a Caregiver
-              </h2>
-              <p style={{ fontSize: '15px', color: '#64748B', marginBottom: '24px', lineHeight: 1.5 }}>
-                Create your profile, get discovered, and find better opportunities.
-              </p>
-              <Link 
-                href="/sign-up?role=caregiver"
-                style={{ 
-                  display: 'block',
-                  padding: '14px 28px', 
-                  background: '#0D1B3E',
-                  color: 'white', 
-                  borderRadius: '12px', 
-                  textDecoration: 'none', 
-                  fontWeight: 700,
-                  fontSize: '15px'
-                }}
-              >
-                Build Profile →
-              </Link>
-            </div>
-          </div>
-          
-          <p style={{ fontSize: '14px', color: '#64748B' }}>
-            Looking for care for a family member? <Link href="/for-families" style={{ color: '#C9973A', fontWeight: 600 }}>Learn more</Link>
-          </p>
-        </div>
-      </section>
+ const fontSerif = "'DM Serif Display', serif";
+ const fontSans = "'DM Sans', sans-serif";
 
-      {/* Stats Section */}
-      <section style={{ padding: '60px 20px', background: '#0D1B3E' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', textAlign: 'center' }}>
-          {[
-            { number: '2,500+', label: 'Verified Caregivers' },
-            { number: '500+', label: 'Partner Agencies' },
-            { number: '98%', label: 'Satisfaction Rate' },
-            { number: '24hr', label: 'Average Match Time' },
-          ].map((stat, i) => (
-            <div key={i}>
-              <div style={{ fontSize: '48px', fontWeight: 800, color: '#C9973A', marginBottom: '8px' }}>
-                {stat.number}
-              </div>
-              <div style={{ fontSize: '16px', color: 'rgba(255,255,255,0.7)' }}>
-                {stat.number === '98%' ? 'Satisfaction Rate' : stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+ return (
+ <>
+ <style>{`
+ @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+ `}</style>
 
-      {/* How It Works */}
-      <section style={{ padding: '80px 20px' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '36px', fontWeight: 800, color: '#0D1B3E', marginBottom: '16px' }}>
-            How Careified Works
-          </h2>
-          <p style={{ fontSize: '18px', color: '#64748B', maxWidth: '600px', margin: '0 auto 48px' }}>
-            A simple, transparent process for everyone
-          </p>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ 
-              display: 'flex', alignItems: 'center', gap: '24px',
-              padding: '24px 32px',
-              background: 'white',
-              borderRadius: '16px',
-              border: '1px solid #E2E8F0',
-              textAlign: 'left',
-              maxWidth: '600px',
-              margin: '0 auto'
-            }}>
-              <div style={{ 
-                width: '48px', height: '48px', 
-                borderRadius: '12px', 
-                background: '#FDF6EC',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '20px', fontWeight: 800, color: '#C9973A',
-                flexShrink: 0
-              }}>
-                1
-              </div>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D1B3E', marginBottom: '4px' }}>
-                  Create Your Profile
-                </h3>
-                <p style={{ fontSize: '14px', color: '#64748B' }}>
-                  Agencies register or caregivers build their professional profile.
-                </p>
-              </div>
-            </div>
-            
-            <div style={{ 
-              display: 'flex', alignItems: 'center', gap: '24px',
-              padding: '24px 32px',
-              background: 'white',
-              borderRadius: '16px',
-              border: '1px solid #E2E8F0',
-              textAlign: 'left',
-              maxWidth: '600px',
-              margin: '0 auto'
-            }}>
-              <div style={{ 
-                width: '48px', height: '48px', 
-                borderRadius: '12px', 
-                background: '#FDF6EC',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '20px', fontWeight: 800, color: '#C9973A',
-                flexShrink: 0
-              }}>
-                2
-              </div>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D1B3E', marginBottom: '4px' }}>
-                  Get Verified
-                </h3>
-                <p style={{ fontSize: '14px', color: '#64748B' }}>
-                  Credentials, certifications, and references are verified.
-                </p>
-              </div>
-            </div>
-            
-            <div style={{ 
-              display: 'flex', alignItems: 'center', gap: '24px',
-              padding: '24px 32px',
-              background: 'white',
-              borderRadius: '16px',
-              border: '1px solid #E2E8F0',
-              textAlign: 'left',
-              maxWidth: '600px',
-              margin: '0 auto'
-            }}>
-              <div style={{ 
-                width: '48px', height: '48px', 
-                borderRadius: '12px', 
-                background: '#FDF6EC',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '20px', fontWeight: 800, color: '#C9973A',
-                flexShrink: 0
-              }}>
-                3
-              </div>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D1B3E', marginBottom: '4px' }}>
-                  Connect & Grow
-                </h3>
-                <p style={{ fontSize: '14px', color: '#64748B' }}>
-                  Find perfect matches and build lasting professional relationships.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+ <div style={{ fontFamily: fontSans, background: '#F7F4F0', paddingTop: '60px' }}>
 
-      {/* For Everyone Section */}
-      <section style={{ padding: '80px 20px', background: 'white' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: 800, color: '#0D1B3E', marginBottom: '16px' }}>
-              Built for Everyone in Healthcare
-            </h2>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-            {[
-              {
-                icon: '🏥',
-                title: 'For Agencies',
-                desc: 'Access thousands of verified caregivers. Post shifts, track performance, and build your dream team.',
-                href: '/for-agencies',
-                cta: 'Learn More'
-              },
-              {
-                icon: '👩‍⚕️',
-                title: 'For Caregivers',
-                desc: 'Create your free profile, showcase your skills, and connect with agencies looking for talent like you.',
-                href: '/for-caregivers',
-                cta: 'Build Profile'
-              },
-              {
-                icon: '👨‍👩‍👧',
-                title: 'For Families',
-                desc: 'Find trusted, verified caregivers to provide the best care for your loved ones at home.',
-                href: '/for-families',
-                cta: 'Learn More'
-              },
-            ].map((item, i) => (
-              <div key={i} style={{ 
-                padding: '32px', 
-                background: '#F7F4F0',
-                borderRadius: '20px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '48px', marginBottom: '20px' }}>{item.icon}</div>
-                <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#0D1B3E', marginBottom: '12px' }}>
-                  {item.title}
-                </h3>
-                <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.6, marginBottom: '24px' }}>
-                  {item.desc}
-                </p>
-                <Link 
-                  href={item.href}
-                  style={{ 
-                    display: 'inline-block',
-                    padding: '12px 24px', 
-                    background: '#0D1B3E',
-                    color: 'white',
-                    borderRadius: '10px',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    fontSize: '14px'
-                  }}
-                >
-                  {item.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+ {/* HERO */}
+ <section style={{ background: '#0D1B3E', padding: '80px 24px 72px', position: 'relative', overflow: 'hidden' }}>
+ <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(201,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,151,58,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
 
-      {/* CTA Section */}
-      <section style={{ 
-        padding: '80px 20px', 
-        background: 'linear-gradient(135deg, #0D1B3E 0%, #1a2f5c 100%)',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '36px', fontWeight: 800, color: 'white', marginBottom: '16px' }}>
-            Ready to Get Started?
-          </h2>
-          <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', marginBottom: '32px' }}>
-            Join thousands of healthcare professionals and agencies on Careified.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link 
-              href="/sign-up?role=agency"
-              style={{ 
-                padding: '16px 32px', 
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                color: '#0D1B3E', 
-                borderRadius: '12px', 
-                textDecoration: 'none', 
-                fontWeight: 700,
-                fontSize: '16px'
-              }}
-            >
-              Agency Sign Up
-            </Link>
-            <Link 
-              href="/sign-up?role=caregiver"
-              style={{ 
-                padding: '16px 32px', 
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white', 
-                borderRadius: '12px', 
-                textDecoration: 'none', 
-                fontWeight: 600,
-                fontSize: '16px',
-                border: '2px solid rgba(255,255,255,0.2)'
-              }}
-            >
-              Caregiver Sign Up
-            </Link>
-          </div>
-        </div>
-      </section>
+ <div style={{ maxWidth: '960px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+ <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.2)', borderRadius: '100px', padding: '5px 14px', marginBottom: '28px' }}>
+ <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9973A' }} />
+ <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C9973A', fontFamily: fontSans }}>Caregiving&apos;s trust layer</span>
+ </div>
 
-      {/* Footer */}
-      <footer style={{ padding: '40px 20px', background: '#0D1B3E', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ 
-              width: '32px', height: '32px', 
-              borderRadius: '8px', 
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <span style={{ fontWeight: 800, color: '#0D1B3E' }}>C</span>
-            </div>
-            <span style={{ color: 'white', fontWeight: 700 }}>Careified</span>
-          </div>
-          <div style={{ display: 'flex', gap: '24px' }}>
-            <Link href="/for-agencies" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>For Agencies</Link>
-            <Link href="/for-caregivers" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>For Caregivers</Link>
-            <Link href="/for-families" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>For Families</Link>
-            <Link href="/contact" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Contact</Link>
-            <Link href="/privacy" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Privacy</Link>
-            <Link href="/terms" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Terms</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
-  )
+ <h1 style={{ fontFamily: fontSerif, fontSize: '58px', lineHeight: 1.0, letterSpacing: '-0.02em', color: 'white', marginBottom: '6px' }}>Verified reputations.</h1>
+ <h1 style={{ fontFamily: fontSerif, fontSize: '58px', lineHeight: 1.0, letterSpacing: '-0.02em', color: '#C9973A', fontStyle: 'italic', marginBottom: '24px' }}>Built on real work.</h1>
+
+ <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, maxWidth: '480px', marginBottom: '48px', fontWeight: 300 }}>
+ The platform where caregivers earn credibility and agencies hire with confidence.
+ </p>
+
+ <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', maxWidth: '700px' }}>
+ <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+ <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #1E3A8A, #2563EB)' }} />
+ <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', marginBottom: '4px' }}>For Agencies</div>
+ <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5, marginBottom: '14px' }}>Search verified profiles.</div>
+ <Link href="/sign-up?role=agency" style={{ fontSize: '11px', fontWeight: 700, color: '#60A5FA', textDecoration: 'none' }}>Start hiring →</Link>
+ </div>
+
+ <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+ <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #C9973A, #E8B86D)' }} />
+ <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', marginBottom: '4px' }}>For Caregivers</div>
+ <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5, marginBottom: '14px' }}>Free. Always. Build once.</div>
+ <Link href="/sign-up?role=caregiver" style={{ fontSize: '11px', fontWeight: 700, color: '#C9973A', textDecoration: 'none' }}>Build free profile →</Link>
+ </div>
+
+ <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+ <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #B45309, #C97706)' }} />
+ <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', marginBottom: '4px' }}>For Families</div>
+ <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5, marginBottom: '14px' }}>Know who is caring.</div>
+ <Link href="/for-families" style={{ fontSize: '11px', fontWeight: 700, color: '#F59E0B', textDecoration: 'none' }}>Learn more →</Link>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ {/* STATS */}
+ <section style={{ background: '#080F1E', padding: '20px 24px' }}>
+ <div style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+ {[{n:'75%',l:'Annual turnover',s:'2025'},{n:'4 in 5',l:'Leave 100 days',s:'2024'},{n:'9.7M',l:'Jobs by 2034',s:'PHI'},{n:'15+',l:'Live in TX',s:'Now'}].map((s,i)=>(<div key={i} style={{padding:'12px'}}><div style={{fontFamily:fontSerif,fontSize:'22px',color:'white'}}>{s.n}</div><div style={{fontSize:'11px',color:'rgba(255,255,255,0.3)',marginTop:'4px'}}>{s.l}</div></div>))}
+ </div>
+ </section>
+
+ {/* HOW IT WORKS */}
+ <section style={{ padding: '80px 24px', background: '#F7F4F0' }}>
+ <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+ <h2 style={{ fontFamily: fontSerif, fontSize: '38px', color: '#0D1B3E', marginBottom: '40px' }}>A reputation system<br/>caregiving has never had</h2>
+ <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+ {[{t:'Build your profile',d:'7 steps. Your complete record.'},{t:'Get placed',d:'Agencies search by score.'},{t:'Earn your score',d:'Badges no one can take away.'}].map((s,i)=>(<div key={i} style={{background:'white',borderRadius:'16px',padding:'28px'}}><div style={{fontFamily:fontSerif,fontSize:'44px',color:'#C9973A18'}}>0{i+1}</div><div style={{fontSize:'15px',fontWeight:600,color:'#0D1B3E',marginBottom:'8px'}}>{s.t}</div><div style={{fontSize:'13px',color:'#64748B'}}>{s.d}</div></div>))}
+ </div>
+ </div>
+ </section>
+
+ {/* CTA */}
+ <section style={{ padding: '80px 24px', textAlign: 'center', background: 'linear-gradient(135deg, #0D1B3E 0%, #1E3A8A 100%)' }}>
+ <h2 style={{ fontFamily: fontSerif, fontSize: '44px', color: 'white', marginBottom: '12px' }}>The information problem<br/>in caregiving ends here</h2>
+ <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginBottom: '36px' }}>75% annual turnover. Every hire starts blind. Not anymore.</p>
+ <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+ <Link href="/sign-up?role=agency" style={{ fontSize: '13px', fontWeight: 700, padding: '13px 28px', borderRadius: '10px', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: '#0D1B3E', textDecoration: 'none' }}>I&apos;m an agency</Link>
+ <Link href="/sign-up?role=caregiver" style={{ fontSize: '13px', fontWeight: 500, padding: '13px 28px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>I&apos;m a caregiver — it&apos;s free</Link>
+ </div>
+ </section>
+
+ {/* FOOTER */}
+ <footer style={{ background: '#080F1E', padding: '48px 24px 32px' }}>
+ <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+ <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+ <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+ <span style={{ fontWeight: 800, color: '#0D1B3E', fontSize: '12px' }}>C</span>
+ </div>
+ <span style={{ fontSize: '13px', fontWeight: 600, color: 'white' }}>Careified</span>
+ </div>
+ <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', maxWidth: '200px' }}>Verified reputations for the caregiving profession. Texas-first.</p>
+ </div>
+ </footer>
+
+ </div>
+ </>
+ );
 }
