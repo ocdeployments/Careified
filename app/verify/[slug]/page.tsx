@@ -8,17 +8,16 @@ const pool = new Pool({
 })
 
 async function getCaregiverBySlug(slug: string) {
-  const { rows } = await pool.query(`
-    SELECT 
-      first_name, last_name, job_title,
-      photo_url, city, state, country,
-      aggregate_score, caregiver_code,
-      verify_slug, status, specializations,
-      years_experience, credentials
-    FROM caregivers 
-    WHERE verify_slug = $1
-  `, [slug.toUpperCase()])
-  return rows[0] || null
+  try {
+    const { rows } = await pool.query(
+      'SELECT first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE verify_slug = $1',
+      [slug.toUpperCase()]
+    )
+    return rows[0] || null
+  } catch (e) {
+    console.error('getCaregiverBySlug error:', e)
+    return null
+  }
 }
 
 export default async function VerifyPage({ 
