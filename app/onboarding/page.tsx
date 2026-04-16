@@ -67,7 +67,7 @@ export default function OnboardingPage() {
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{ fontSize: '32px', fontWeight: 800, color: '#0D1B3E', marginBottom: '12px' }}>
-            Welcome to Careified! 👋
+            Welcome to Careified!
           </h1>
           <p style={{ fontSize: '18px', color: '#64748B' }}>
             How will you be using our platform?
