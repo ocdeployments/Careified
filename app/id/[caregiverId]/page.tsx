@@ -1,6 +1,11 @@
-import { sql } from '@vercel/postgres'
+import { Pool } from 'pg'
 import { ShieldCheck, MapPin, Star } from 'lucide-react'
 import QRCodeDisplay from '@/components/id/QRCodeDisplay'
+
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -9,16 +14,18 @@ async function getCaregiver(id: string) {
     // Try numeric ID first
     const numId = parseInt(id, 10)
     if (!isNaN(numId)) {
-      const { rows } = await sql`
-        SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = ${numId}
-      `
+      const { rows } = await pool.query(
+        'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 LIMIT 1',
+        [numId]
+      )
       if (rows.length > 0) return rows[0]
     }
     // Try caregiver_code or verify_slug
     const upperId = id.toUpperCase()
-    const { rows } = await sql`
-      SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE caregiver_code = ${upperId} OR verify_slug = ${upperId}
-    `
+    const { rows } = await pool.query(
+      'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
+      [upperId]
+    )
     return rows[0] || null
   } catch (e) {
     console.error('getCaregiver error:', e)
