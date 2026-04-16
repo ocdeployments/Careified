@@ -20,14 +20,26 @@ async function getCaregiverBySlug(slug: string) {
   }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function VerifyPage({ 
   params 
 }: { 
   params: Promise<{ slug: string }> 
 }) {
-  const { slug } = await params
-  const caregiver = await getCaregiverBySlug(slug)
-  if (!caregiver) notFound()
+  let caregiver = null
+  try {
+    const { slug } = await params
+    caregiver = await getCaregiverBySlug(slug)
+  } catch (e) {
+    console.error('VerifyPage error:', e)
+  }
+  
+  if (!caregiver) return (
+    <div style={{ minHeight: '100vh', background: '#0D1B3E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', padding: '20px' }}>
+      <p>Caregiver not found</p>
+    </div>
+  )
 
   const isActive = caregiver.status === 'approved'
   const initial = caregiver.last_name?.[0] || ''
