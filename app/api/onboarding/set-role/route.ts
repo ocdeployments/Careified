@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
 
         if (existing.rows.length === 0) {
           await pool.query(
-            `INSERT INTO agencies (id, clerk_user_id, status, created_at, updated_at)
-             VALUES (gen_random_uuid()::text, $1, 'pending', NOW(), NOW())`,
+            `INSERT INTO agencies (id, clerk_user_id, name, status, created_at, updated_at)
+             VALUES (gen_random_uuid()::text, $1, 'New Agency', 'pending', NOW(), NOW())`,
             [userId]
           )
         }
