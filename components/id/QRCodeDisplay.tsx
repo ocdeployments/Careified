@@ -1,0 +1,31 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import QRCode from 'qrcode'
+
+interface QRCodeDisplayProps {
+  value: string
+  size?: number
+}
+
+export default function QRCodeDisplay({ 
+  value, 
+  size = 120 
+}: QRCodeDisplayProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, value, {
+        width: size,
+        margin: 0,
+        color: {
+          dark: '#0D1B3E',
+          light: '#FFFFFF',
+        },
+      })
+    }
+  }, [value, size])
+
+  return <canvas ref={canvasRef} style={{ display: 'block' }} />
+}
