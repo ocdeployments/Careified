@@ -110,7 +110,7 @@ export default function OnboardingPage() {
                 I'm an Agency
               </div>
               <div style={{ fontSize: '14px', color: '#64748B' }}>
-                Hiring healthcare professionals for your facility
+                Search and hire verified caregivers for your clients
               </div>
             </div>
           </button>
@@ -150,7 +150,7 @@ export default function OnboardingPage() {
                 I'm a Caregiver
               </div>
               <div style={{ fontSize: '14px', color: '#64748B' }}>
-                Looking for healthcare job opportunities
+                Build your verified profile and connect with agencies
               </div>
             </div>
           </button>
