@@ -9,15 +9,11 @@ const pool = new Pool({
 })
 
 async function getCaregiver(id: string) {
-  const { rows } = await pool.query(`
-    SELECT 
-      id, first_name, last_name, job_title,
-      photo_url, city, state, country,
-      aggregate_score, caregiver_code,
-      verify_slug, status, credentials,
-      years_experience, specializations
-    FROM caregivers WHERE id = $1
-  `, [id])
+  // Try ID first, then caregiver_code, then verify_slug
+  const { rows } = await pool.query(
+    'SELECT id, first_name, last_name, job_title, photo_url, city, state, aggregate_score, caregiver_code, verify_slug, status, years_experience FROM caregivers WHERE id = $1 OR caregiver_code = $1 OR verify_slug = $1 LIMIT 1',
+    [id]
+  )
   return rows[0] || null
 }
 
