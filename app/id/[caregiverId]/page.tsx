@@ -24,9 +24,10 @@ async function getCaregiver(id: string) {
 export default async function IDCardPage({
   params
 }: {
-  params: { caregiverId: string }
+  params: Promise<{ caregiverId: string }>
 }) {
-  const c = await getCaregiver(params.caregiverId)
+  const { caregiverId } = await params
+  const c = await getCaregiver(caregiverId)
   if (!c) notFound()
 
   const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://careified.vercel.app'}/verify/${c.verify_slug}`
