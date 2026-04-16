@@ -26,7 +26,7 @@ export default function OnboardingPage() {
       if (res.ok) {
         // Redirect based on role
         if (role === 'agency') {
-          router.push('/agency/search')
+          router.push('/agency/pending-approval')
         } else {
           router.push('/profile/build')
         }
