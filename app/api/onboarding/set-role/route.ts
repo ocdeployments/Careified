@@ -1,35 +1,49 @@
-import { NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { Pool } from 'pg'
 
-export async function POST(request: Request) {
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+})
+
+export async function POST(req: NextRequest) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { role } = await req.json()
+  if (!role || !['agency', 'caregiver'].includes(role)) {
+    return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+  }
+
   try {
-    const { userId } = await auth()
-    const user = await currentUser()
-    
-    if (!userId || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { role } = await request.json()
-    
-    if (!role || !['agency', 'caregiver'].includes(role)) {
-      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
-    }
-
-    // Update user's publicMetadata via Clerk API
-    // Using the Clerk backend API to update metadata
-    const { clerkClient } = await import('@clerk/nextjs/server')
-    const clerk = await clerkClient()
-    
-    await clerk.users.updateUser(userId, {
-      publicMetadata: {
-        role,
-      },
+    // Set role in Clerk metadata
+    const client = await clerkClient()
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: { role }
     })
+
+    // If agency — create pending agency record in DB
+    if (role === 'agency') {
+      const existing = await pool.query(
+        'SELECT id FROM agencies WHERE clerk_user_id = $1',
+        [userId]
+      )
+
+      if (existing.rows.length === 0) {
+        await pool.query(
+          `INSERT INTO agencies (id, clerk_user_id, status, created_at, updated_at)
+           VALUES (gen_random_uuid()::text, $1, 'pending', NOW(), NOW())`,
+          [userId]
+        )
+      }
+    }
 
     return NextResponse.json({ success: true, role })
   } catch (error) {
-    console.error('Error setting role:', error)
+    console.error('set-role error:', error)
     return NextResponse.json({ error: 'Failed to set role' }, { status: 500 })
   }
 }
