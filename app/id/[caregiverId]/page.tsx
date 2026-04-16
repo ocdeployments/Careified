@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation'
 import { ShieldCheck, MapPin } from 'lucide-react'
 import QRCodeDisplay from '@/components/id/QRCodeDisplay'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+})
 
 async function getCaregiver(id: string) {
   const { rows } = await pool.query(`

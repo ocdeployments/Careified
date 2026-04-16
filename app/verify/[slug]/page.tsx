@@ -2,7 +2,10 @@ import { Pool } from 'pg'
 import { notFound } from 'next/navigation'
 import { ShieldCheck, MapPin } from 'lucide-react'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+})
 
 async function getCaregiverBySlug(slug: string) {
   const { rows } = await pool.query(`
