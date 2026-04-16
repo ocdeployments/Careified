@@ -77,7 +77,7 @@ export default function Home() {
                 Hire verified caregivers, post shifts, and manage your team.
               </p>
               <Link 
-                href="/agency/signup"
+                href="/sign-up?role=agency"
                 style={{ 
                   display: 'block',
                   padding: '14px 28px', 
@@ -118,7 +118,7 @@ export default function Home() {
                 Create your profile, get discovered, and find better opportunities.
               </p>
               <Link 
-                href="/profile/build"
+                href="/sign-up?role=caregiver"
                 style={{ 
                   display: 'block',
                   padding: '14px 28px', 
@@ -348,7 +348,7 @@ export default function Home() {
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link 
-              href="/agency/signup"
+              href="/sign-up?role=agency"
               style={{ 
                 padding: '16px 32px', 
                 background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
@@ -362,7 +362,7 @@ export default function Home() {
               Agency Sign Up
             </Link>
             <Link 
-              href="/profile/build"
+              href="/sign-up?role=caregiver"
               style={{ 
                 padding: '16px 32px', 
                 background: 'rgba(255,255,255,0.1)',
