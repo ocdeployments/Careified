@@ -23,9 +23,10 @@ async function getCaregiverBySlug(slug: string) {
 export default async function VerifyPage({ 
   params 
 }: { 
-  params: { slug: string } 
+  params: Promise<{ slug: string }> 
 }) {
-  const caregiver = await getCaregiverBySlug(params.slug)
+  const { slug } = await params
+  const caregiver = await getCaregiverBySlug(slug)
   if (!caregiver) notFound()
 
   const isActive = caregiver.status === 'approved'
