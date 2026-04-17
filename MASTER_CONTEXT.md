@@ -215,13 +215,14 @@ scripts/seed-demo.js             ✅ Run — 15 caregivers
 | Session 8B | ✅ | Admin approval flow |
 | Session 8C | ✅ | Role-locked signup (URL param) |
 | Session 8D | ✅ | Profile builder UX redesign (sidebar, animations) |
+| Session 9 | ✅ | Split view live preview + ID card reveal |
 
 ---
 
 ## Next Sessions
 
-1. **Session 9** — Personality Step 7 (7 forced-choice scenario questions)
-2. **Session 10** — Rating System (agency ratings, trust scores)
+1. **Session 10** — Rating System (agency ratings, trust scores)
+2. **Session 11** — Family Portal Phase 1
 
 ---
 
