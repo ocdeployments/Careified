@@ -86,13 +86,15 @@ export interface ProfileFormData {
  // Step 6 — Compliance
  backgroundConsent?: boolean
  backgroundConsentDate?: string
- vulnerableSectorCheck?: string
- drivingRecordCheck?: string
+ vulnerableSectorCheck?: boolean
+ drivingRecordCheck?: boolean
  criminalDeclaration?: boolean
  criminalDeclarationDetail?: string
  bondedInsured?: boolean
  tbClearanceDate?: string
  declarationAccurate?: boolean
+ declarationDate?: string
+ immunisationRecords?: Record<string, boolean>
 
  // Step 7 — Personality
  personalityProfile?: Record<string, any>
