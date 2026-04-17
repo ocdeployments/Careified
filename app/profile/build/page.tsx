@@ -104,7 +104,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
 
  const renderStep = () => {
  switch (currentStep) {
- case 1: return <Step1Identity onSave={handleSave} />
+ case 1: return <Step1Identity />
  case 2: return <Step2Services initialData={formData} onSave={handleSave} />
  case 3: return <Step3Availability initialData={formData} onSave={handleSave} />
  case 4: return <Step4Certifications initialData={formData.certifications || []} onSave={handleSave} />
@@ -113,7 +113,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  onEdit={(s: number) => router.push(`?step=${s}`)}
  onSubmitSuccess={() => setShowReveal(true)}
  />
- default: return <Step1Identity onSave={handleSave} />
+ default: return <Step1Identity />
  }
  }
 

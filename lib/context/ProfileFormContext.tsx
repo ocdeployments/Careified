@@ -14,6 +14,7 @@ import {
 export interface ProfileFormData {
  // Step 1 — Identity
  firstName?: string
+ middleName?: string
  lastName?: string
  preferredName?: string
  jobTitle?: string
