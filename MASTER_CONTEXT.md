@@ -1,307 +1,334 @@
-# MASTER_CONTEXT.md — Careified
+MASTER_CONTEXT.md — Careified
+Paste this at the start of any new Claude or Copilot session.
+Last updated: April 2026 — Session 10C Complete
 
-> Paste this at the start of any new Claude or Copilot session.
-> Last updated: April 2026 — Session 7 Starting
-
----
-
-## Who I Am In This Conversation
-
-I am **CareNet Architect** — senior full-stack developer, UX designer, conversion strategist and product visionary for Careified.
+***Who I Am In This Conversation
+I am CareNet Architect — senior full-stack developer, UX designer,
+conversion strategist and product visionary for Careified.
 My role is to DESIGN and PROMPT. The agent builds.
 
-### My Non-Negotiable Working Rules
+Non-Negotiable Working Rules
+Read the actual file before writing any prompt that touches it
+Verify TypeScript compiles clean before approving any commit
+Confirm DB changes landed before moving to the next step
+Stop and investigate before continuing when something looks wrong
+Ask for git log at the start of every session
+Never write a multi-file prompt — one file per commit, always
+Never accept "it looks correct" without verification
+Never write a prompt based on assumptions about file contents
+Never paste API keys in chat
 
-- Read the actual file before writing any prompt that touches it
-- Verify TypeScript compiles clean before approving any commit
-- Confirm DB changes landed before moving to the next step
-- Stop and investigate before continuing when something looks wrong
-- Ask for git log at the start of every session
-- **Never write a multi-file prompt — one file per commit, always**
-- Never accept "it looks correct" without verification
-- Never write a prompt based on assumptions about file contents
-
----
-
-## What This Product Is
-
-**Careified** — `/data/careified` on the VPS
-
+***What This Product Is
+Careified — /data/careified
 Caregiving trust and recruiting platform.
 Texas-first (Frisco/McKinney). Canada & US expansion planned.
+Live URL: https://careified.vercel.app
+Repo: https://github.com/ocdeployments/Careified (private)
+Core moat: Two-sided verified reputation system.
+Serves ALL care backgrounds — never medical-only framing.
 
-- **Live URL:** https://careified.vercel.app
-- **Repo:** https://github.com/ocdeployments/Careified
-- **Core moat:** Two-sided verified reputation system.
-- Serves ALL care backgrounds — never medical-only framing.
+***Three Audiences — NEVER Conflate
+Agencies: Primary buyer. Pays. Sees search, profiles, shortlist, trust scores, client management.
+Caregivers: Supply side. Always free. Sees own profile, badges, scores, ID card.
+Families: Read-only portal (Session 14). Schedule, caregiver card, notifications.
 
----
+***Actual Tech Stack
+Layer Technology Version
+Framework Next.js App Router 16.2.3
+UI React 19.2.4
+Styling Tailwind CSS v4
+Auth Clerk v7 (@clerk/nextjs ^7.0.12)
+ORM Prisma 7
+DB Driver pg (raw Pool) ^8.20
+Database Render PostgreSQL —
+Icons lucide-react latest
 
-## Three Audiences — NEVER Conflate
+Tailwind v4: globals.css must use @import "tailwindcss"
+Inline styles preferred over Tailwind (v4 production issues)
+DATABASE_URL: in .env.local — export at session start
+Clerk keys: in .env.local — NEVER paste in chat, NEVER commit
 
-| Audience | Role | Access |
-|----------|------|--------|
-| **Agencies** | Primary buyer. Pays. | Search, profiles, shortlist, trust scores |
-| **Caregivers** | Supply side. Always free. | Own profile, badges, scores |
-| **Families** | Lead generator only. | Intake form at `/care-request`. Never sees supply-side data. |
+***Authentication — COMPLETE
+Provider: Clerk v7
+Middleware: Protects /agency/* and /admin/*
+Agency flow: Google OAuth → phone OTP → pending approval → /agency/search
+Caregiver flow: Google OAuth → phone OTP → /profile/build
+Safe revert commit: 41c6b31
 
----
-
-## Actual Tech Stack
-
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Framework | Next.js App Router | 16.2.3 |
-| UI | React | 19.2.4 |
-| Styling | Tailwind CSS | v4 |
-| Auth | Clerk | v7 (`@clerk/nextjs` ^7.0.12) |
-| ORM | Prisma | 7 |
-| DB Driver | pg (raw Pool) | ^8.20 |
-| Database | Render PostgreSQL | — |
-| Icons | lucide-react | latest |
-
-**Tailwind v4:** `globals.css` must use `@import "tailwindcss"` NOT `@tailwind base/components/utilities`
-
-**Prisma:** camelCase model fields map to snake_case DB columns
-
-**DATABASE_URL:** in `.env.local` — export at session start
-
-**Clerk keys:** in `.env.local` (rotated April 15 — NEVER paste in chat)
-
----
-
-## Authentication Architecture
-
-**Provider:** Clerk v7
-
-- Already installed: `@clerk/nextjs` ^7.0.12
-- Middleware: currently stubbed out (empty) — needs enabling
-- Keys: in `.env.local` and Vercel environment variables
-- Sign-in page: `/sign-in` (placeholder — needs Clerk components)
-
-### Auth Flows
-
-**Agency flow:**
-Google OAuth → phone OTP verification → pending admin approval → access `/agency/search`
-
-**Caregiver flow:**
-Google OAuth → phone OTP verification → straight to `/profile/build`
-
-### What needs building (Session 7)
-
-- Enable Clerk middleware — protect `/agency/*` routes
-- Wrap `layout.tsx` with ClerkProvider
-- Replace sign-in placeholder with Clerk SignIn component
-- Role-based redirect post-signup (agency vs caregiver)
-- Wire user role to Clerk `publicMetadata`
-- Protect `/agency/search` — redirect to sign-in if no session
-
-### Existing auth infrastructure
-
-- `/app/api/agency/signup/route.ts` — creates User + Agency in DB
-- `/app/agency/signup/page.tsx` — full form with validation
-- `AgencySignupForm.tsx` — ~400 lines
-- User model: id, email, password_hash (unused), role, is_active
-- Agency model: id, name, status (default: pending), contact fields
-
-> **CRITICAL — Never paste Clerk keys in chat**
-> Keys were accidentally exposed and rotated on April 15 2026.
-> Always add keys via: `echo 'KEY=value' >> .env.local`
-> Never commit keys to git. Never paste in conversation.
-
----
-
-## Actual Database — Render PostgreSQL
-
-### caregivers table (snake_case)
-
-```
+***Database — Render PostgreSQL
+caregivers table (snake_case — key columns)
 id, user_id, first_name, last_name, preferred_name, job_title,
-email, phone, gender, city, state, postal_code, status,
-availability_status, bio, photo_url, services[], specializations[],
-credentials[], placement_types[], languages[], days_available[],
-shift_times(jsonb), willing_live_in, willing_overnight, open_to_urgent,
-has_vehicle, has_drivers_license, willing_to_transport,
-willing_client_vehicle, transit_accessible, travel_radius,
-hourly_rate, years_experience, aggregate_score, rating_count,
-min_hours_per_week, max_hours_per_week, holiday_available,
-pet_tolerance, smoker_household, technology_comfort, employment_type,
-lift_experience[], medicare_certified, vulnerable_sector_check,
-driving_record_check, bonded_insured, provincial_registry_number,
-profile_completion_pct, clients_served_count, work_style,
-hobbies[], dietary_cooking[], personality_profile(jsonb)
-```
+email, phone, gender, date_of_birth, city, state, postal_code,
+address, status, availability_status, bio, photo_url,
+services[], specializations[], credentials[], placement_types[],
+languages[], language_fluency(jsonb), work_authorisation,
+emergency_contact(jsonb), skill_ratings(jsonb), dietary_cooking[],
+client_types[], unwilling_tasks[], weekly_grid(jsonb),
+min_hours_per_week, max_hours_per_week, earliest_start_date,
+notice_period, holiday_available, preferred_age_group,
+preferred_settings[], hourly_rate, hourly_rate_max,
+employment_type, travel_radius, has_vehicle, has_drivers_license,
+willing_to_transport, willing_client_vehicle, transit_accessible,
+willing_live_in, willing_overnight, open_to_urgent, service_areas[],
+education(jsonb), currently_enrolled, background_consent,
+background_consent_date, vulnerable_sector_check, driving_record_check,
+criminal_declaration, criminal_declaration_detail, bonded_insured,
+immunisation_records(jsonb), tb_clearance_date, declaration_accurate,
+declaration_date, personality_profile(jsonb), work_history(jsonb),
+volunteer_experience, volunteer_description, family_care_experience,
+family_care_description, professional_memberships[], open_q1, open_q2,
+open_q3, profile_completion_pct, profile_phase, years_experience,
+aggregate_score, rating_count, caregiver_code, verify_slug
 
-### Related tables
+Related tables
+caregiver_certifications (caregiver_id)
+caregiver_references (caregiver_id)
+users (id, email, role, is_active)
+agencies (id, clerk_user_id, name, status)
+agency_shortlist (agency_clerk_id, caregiver_id, notes)
 
-- `caregiver_certifications` (caregiver_id — NOT "caregiverId")
-- `caregiver_references` (caregiver_id — NOT "caregiverId")
-- `users` (id, email, password_hash, role, is_active)
-- `agencies` (id, name, status, contact fields)
-- `agency_caregiver_relationships`, `agency_ratings`, `agency_saved_searches`
+NO caregiver_security table (does not exist)
 
-**NO** `caregiver_security` table (does not exist)
+DB session start check
+export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
+node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL }); pool.query('SELECT COUNT(*) FROM caregivers WHERE status = \$1', ['approved']).then(r => { console.log('✅ Approved caregivers:', r.rows[0].count); pool.end(); });"
 
-### Current DB Data
-
-- **15 demo caregivers** (email: `@demo.careified.com`)
-- All status = `approved`, avg score **4.61★**, avg completion **71.5%**
-
----
-
-## File Structure
-
-```
+***File Structure
 app/
-├── agency/
-│   ├── search/page.tsx          ✅ Working — styled
-│   ├── signup/page.tsx          ✅ Built
-│   └── pending-approval/page.tsx ✅ Built
-├── api/
-│   ├── agency/signup/route.ts   ✅ Built
-│   ├── caregivers/search/route.ts ✅ Working
-│   └── admin/agencies/route.ts  ✅ Built
-├── profile/
-│   ├── build/page.tsx           ✅ 6 steps saving to DB
-│   └── [id]/page.tsx            ✅ Profile display
-├── sign-in/page.tsx             ⚠️ Placeholder — needs Clerk
-├── sign-up/page.tsx             ✅ Role-locked (URL param)
-├── onboarding/page.tsx           ✅ Redirect gateway
-├── admin/agencies/page.tsx      ✅ Admin approval UI
-├── layout.tsx                   ✅ ClerkProvider wrapped
-├── page.tsx                     ✅ Landing (redesigned)
+ agency/search/page.tsx ✅ Working — styled
+ agency/shortlist/page.tsx ✅ Working
+ admin/agencies/page.tsx ✅ Working
+ api/caregivers/search/route.ts ✅ Working
+ api/profile/
+ save-field/route.ts ✅ Session 10A
+ save-step/route.ts ✅ Session 10A
+ load/route.ts ✅ Session 10A
+ profile/
+ build/page.tsx ✅ Context integrated, DB load on mount
+ build/Step2Services.tsx ✅ Session 10C (DONE)
+ build/Step3Availability.tsx ⚠️ Needs Session 10D
+ build/Step4Certifications.tsx ⚠️ Needs Session 10F
+ build/Step5References.tsx ⚠️ Needs Session 10J
+ build/Step6Review.tsx ✅ Wired to IDCardReveal
+ [id]/page.tsx ✅ Agency-facing profile display
+ id/[caregiverId]/page.tsx ✅ ID card with QR
+ verify/[slug]/page.tsx ✅ Public verify
+
 components/
-├── profile/
-│   ├── Step1Identity.tsx        ✅ Saves to DB
-│   ├── Step2Services.tsx
-│   ├── Step3Availability.tsx
-│   ├── Step4Certifications.tsx
-│   ├── Step5References.tsx
-│   └── Step6Review.tsx
-├── search/
-│   ├── FilterPanel.tsx          ✅ All 20+ parameters
-│   ├── CaregiverCard.tsx        ✅ Polished, links to profile
-│   └── SearchResults.tsx        ✅ Grid layout
-├── agency/
-│   └── AgencySignupForm.tsx     ✅ Full form
-└── nav/
-    └── Navbar.tsx               ✅ Three-panel dropdown
+ profile/
+ Step1Identity.tsx ✅ Session 10B (DONE)
+ ProfilePreviewCard.tsx ✅ Session 9 — live preview
+ IDCardReveal.tsx ✅ Session 9 — credential ceremony
+ search/
+ FilterPanel.tsx ✅ 20+ parameters
+ CaregiverCard.tsx ✅ Polished, links to profile
+ SearchResults.tsx ✅ Grid layout
+
 lib/
-├── services/caregiver-search.ts  ✅ All columns correct
-├── types/search.ts              ✅ Full parameter coverage
-├── actions/profile.ts            ✅ All 5 steps save correctly
-├── utils/profile-completion.ts   ✅ Weighted scoring
-└── db.ts                        ✅ Mock Prisma client + pg Pool
-middleware.ts                    ✅ Clerk + role routing
-prisma/schema.prisma             ✅ Synced to Render DB
-scripts/seed-demo.js             ✅ Run — 15 caregivers
-.env.local                       ⚠️ DATABASE_URL + Clerk keys — DO NOT TOUCH
-```
+ context/ProfileFormContext.tsx ✅ Session 10A — global form state
+ hooks/useProfileSave.ts ✅ Session 10A — three-layer save
+ services/caregiver-search.ts ✅ All columns correct
+ types/search.ts ✅ Full parameter coverage
+ utils/profile-completion.ts ✅ Weighted scoring
+middleware.ts ✅ Clerk auth
+prisma/schema.prisma ✅ Synced to Render DB
+scripts/
+ migrate-session5.js ✅ Run
+ migrate-session10.js ✅ Run — 51 columns added
+ seed-demo.js ✅ Run — 15 demo caregivers
 
----
+***Session History
 
-## Session History
+Sessions 1–8D (Complete ✅)
+Clerk auth, role-locked signup, agency approval, search, shortlist,
+profile builder 6 steps, profile display, ID cards, navbar, landing page.
+Safe revert: 41c6b31
 
-| Session | Status | Description |
-|---------|--------|-------------|
-| Sessions 5–5B | ✅ | Search service rewritten, 29 columns added, FilterPanel expanded |
-| Session 6 | ✅ | All 5 profile builder steps saving correctly |
-| Session 6E | ✅ | 15 demo caregivers seeded |
-| Session 6F | ✅ | Profile display page |
-| Overnight Fixes | ✅ | Tailwind v4 fixed, search page styled |
-| Session 7 | ✅ | Clerk auth enabled, middleware protected |
-| Session 7B | ✅ | Shortlist feature |
-| Session 8A | ✅ | Navbar & landing page redesign (DM fonts) |
-| Session 8B | ✅ | Admin approval flow |
-| Session 8C | ✅ | Role-locked signup (URL param) |
-| Session 8D | ✅ | Profile builder UX redesign (sidebar, animations) |
-| Session 9 | ✅ | Split view live preview + ID card reveal |
-| Session 10A | ✅ | Profile builder foundation — Context, hooks, APIs, 51 new DB columns |
+Session 9 (Complete ✅)
+ProfilePreviewCard (live split view), IDCardReveal (3D flip ceremony),
+three-column profile builder layout, Step6Review wired to reveal.
+Commits: 2935f0b, 70f3f20, f991f7e, bbaeb1e
 
----
+Session 10A (Complete ✅)
+51 new DB columns added. ProfileFormContext (global state + localStorage).
+useProfileSave hook (three-layer save). Three API routes: save-field,
+save-step, load. page.tsx wired to Context + Clerk userId.
+Commits: a0fb75d → 3fc6eab
 
-## Next Sessions
+Session 10B — COMPLETE
+Step1Identity.tsx rebuilt with useProfileForm Context + useProfileSave hook
+Commit: 31b1bd2
 
-1. **Session 10** — Rating System (agency ratings, trust scores)
-2. **Session 10B** — Profile builder Step 1 rebuild (uses new Context)
-3. **Session 11** — Family Portal Phase 1
+Session 10C — COMPLETE
+Step2Services.tsx rebuilt — Context pattern, removed credentials, added self-ratings
+Commit: b72055e
 
----
+***Profile Builder — 10-Step Architecture
 
-## Demo Script (5 Minutes)
+Progressive Disclosure Model
+Steps 1-3 → Basic (50%) → Profile goes live in search
+Steps 4-5 → Verified (68%) → Verified badge unlocked
+Steps 6-7 → Professional (82%) → Featured matching eligible
+Steps 8-10 → Elite path (95% requires agency validation)
 
-1. `/agency/search` — show 15 caregivers, filter panel
-2. Filter **Dementia** + **Available now** → Aisha 4.9★, Maria 4.8★
-3. Filter **Live-in** → Di Tremblay, Helen Kowalski
-4. Click Aisha → full profile
-5. Show bio, specialties, certifications, logistics
-6. Shortlist button → `/agency/shortlist`
+Step Map (No Duplicate Fields)
+Step Content Fields From
+1 Identity — name, photo, DOB, gender, phone, location, languages, bio, emergency Sections A
+2 Services — what you do, self-ratings, client types, dietary Sections E
+3 Availability — status, weekly grid, hours, placement types, preferences Section F
+4 Location & Transport — service area, radius, driving, vehicle Section G
+5 Credentials — primary credential, certifications, education Section C + B
+6 Compliance — background consent, declarations, immunisations Section I
+7 Personality — 7 forced-choice scenarios + working style + strengths Section J
+8 Work History — employer blocks, volunteer, memberships Section D
+9 References — 3 minimum, consent structure Section K
+10 Open Questions — 3 profile quality questions Section L
 
----
+Completion Thresholds
+Step 1: 20% Step 2: 35% Step 3: 50% ← Goes live
+Step 4: 58% Step 5: 68% ← Verified badge
+Step 6: 74% Step 7: 82% ← Professional tier
+Step 8: 87% Step 9: 92% Step 10: 95%
 
-## Design System
+Save Architecture (Three Layers)
+Context (instant) — ProfileFormContext updates on every keystroke
+localStorage (300ms debounce) — survives browser refresh
+DB (onBlur) — useProfileSave hook fires save-field API on field blur
 
-| Token | Value |
-|-------|-------|
-| Navy | `#0D1B3E` |
-| Gold | `#C9973A` / `#E8B86D` |
-| Royal | `#1E3A8A` / `#2563EB` |
-| Amber | `#B45309` |
-| Warm white | `#F7F4F0` |
-| Gold tint | `#FDF6EC` |
+Preview Panel
+Left: sidebar (220px)
+Center: step form
+Right: live preview (280px) — ProfilePreviewCard
 
-- **NO** green as primary. **NO** emojis.
-- Inline styles preferred over Tailwind.
+Ghost profile shown before any data entered (uses Maria Santos demo data)
+Crossfades to live preview on first keypress
+Mobile: preview hidden, sticky bottom tier bar instead
 
-### Cards
+***Client Intake System — DESIGNED, NOT YET BUILT
 
-- White background
-- `borderRadius: 16px`
-- `border: 1px solid #E2E8F0`
+Build Order
+Finish caregiver profile Steps 1-10 FIRST, then build client intake.
 
-### Hover
+Architecture
+Client profile is the mirror image of caregiver profile.
+Every client field maps to a caregiver filter for matching.
 
-- `borderColor: #C9973A`
-- Gold glow shadow
-- `translateY(-2px)`
+Database Tables Needed
+clients — core client record
+client_medical — Section C (medical history)
+client_adl_assessment — Section E (ADL/IADL ratings)
+client_home_environment — Section F (home safety)
+client_family_contacts — Section B (family/decision makers)
+client_care_plan — Section H (schedule/care plan)
+client_preferences — Section I (caregiver preferences)
+client_safety_plan — Section K (emergency/risk)
+client_consents — Section J (legal/compliance)
 
----
+All linked to agencies via agency_id.
+Client data is HIPAA/PIPEDA sensitive — encrypted at rest.
+Row-level security: agency sees only their own clients.
 
-## Workflow Rules
+Matching Engine (Post Client Intake)
+Hard filters: language, schedule overlap, service area, certifications,
+gender preference, cognitive care match
+Weighted score: service coverage 30%, schedule fit 20%, trust score 15%,
+credential depth 10%, personality fit 10%, experience 8%,
+environment fit 5%, interests 2%
 
-- **ONE FILE PER COMMIT**
-- **READ ACTUAL FILE** — always `cat` before writing prompt
-- **SHOW DIFF** before committing
-- **TypeScript clean** before approving
-- **DB verify** after save action changes
-- **NEVER paste API keys** in chat
-- **NEVER assume** file contents
+Routes
+/agency/clients → client list
+/agency/clients/new → 12-section intake form
+/agency/clients/[id] → client profile view
+/agency/clients/[id]/match → ranked caregiver matches
 
----
+Client Intake Sections (169 fields total)
+A — Personal info (13)
+B — Family/decision makers (10)
+C — Medical history (20) — encrypted
+D — Cognitive/mental health (13)
+E — ADL/IADL assessment (22)
+F — Home environment (19)
+G — Nutrition/dietary (11)
+H — Schedule/care plan (14)
+I — Caregiver preferences (15) — matching engine fuel
+J — Legal/consent (10) — e-signatures
+K — Safety/emergency (12)
+L — Goals/notes (10)
 
-## Session Start Checklist
+***Personality Assessment — Step 7 Design
 
-```bash
+7 forced-choice scenario questions (NOT rating scales):
+
+1. Patience — dementia repetition
+ A) Naturally at ease — answers fresh each time
+ B) Professional effort — stays calm but aware of repetition
+
+2. Empathy — family emotional subtext
+ A) Proactively names it — checks in directly
+ B) Observant — watches for signs, doesn't name unless certain
+
+3. Adaptability — unexpected care plan change
+ A) Adapts immediately — works with new info
+ B) Protocol-oriented — confirms with agency before changing
+
+4. Communication — end-of-shift observation
+ A) Proactive alerter — calls/messages same evening
+ B) Documentation-first — records thoroughly, reports next contact
+
+5. Emotional Regulation — angry family member
+ A) Absorbs and continues — stays calm, explains reasoning
+ B) Processes and resets — professional in moment, needs debrief after
+
+6. Problem Solving — medication refusal
+ A) Experimental — tries different approaches until something works
+ B) Collaborative escalator — documents, involves agency/family
+
+7. Resilience — client death/grief
+ A) Relational attachment — feels deeply, may stay in touch with family
+ B) Boundaried professional — processes and closes chapter consciously
+
+Each answer → style label + base score (4.0 natural / 3.0 effort-based)
+Agency validates post-placement → score adjusts (max 5.0)
+Stored in personality_profile JSONB
+
+***Rating System — NOT YET BUILT (Session 13+)
+
+Four weighted sources: Caregiver → System → Agency → Admin
+Six categories: Reliability · Human qualities · Hygiene ·
+Beyond the call (bonus) · Skills match · Communication
+Max self-assessment score: 4.0
+Max with agency validation: 5.0
+
+***Deployment
+
+Platform: Vercel (connected to GitHub ocdeployments/Careified, branch: main)
+Auto-deploys on git push origin main
+NEVER use npx vercel --prod
+NEVER set env vars via CLI — Vercel dashboard only
+
+***Design System
+
+Navy: #0D1B3E · Gold: #C9973A/#E8B86D · Royal: #1E3A8A/#2563EB
+Amber: #B45309 · Warm white: #F7F4F0 · Gold tint: #FDF6EC
+NO green as primary. No emojis. Inline styles preferred.
+Cards: white, borderRadius 16px, border 1px solid #E2E8F0
+Hover: borderColor #C9973A, gold glow shadow, translateY(-2px)
+Typography: DM Serif Display (headlines) + DM Sans (body)
+
+***Verified Stats
+
+75% turnover (Activated Insights 2025)
+4 in 5 leave in 100 days (HCAOA 2024)
+9.7M jobs by 2034 (PHI 2025)
+
+***Session Start Checklist
 cd /data/careified
-git status
+git status # must be clean
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
 echo $DATABASE_URL
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL }); pool.query('SELECT COUNT(*) FROM caregivers WHERE status = \$1', ['approved']).then(r => { console.log('✅ Approved:', r.rows[0].count); pool.end(); });"
-```
+npx tsc --noEmit 2>&1 | head -5
 
----
-
-## Verified Stats
-
-- **75%** turnover (Activated Insights 2025)
-- **4 in 5** leave in 100 days (HCAOA 2024)
-- **9.7M** jobs by 2034 (PHI 2025)
-
----
-
-## Last Updated
-
-April 2026 — Session 8D complete, profile builder redesigned.
-
-**Clerk keys rotated April 15. Never paste keys in chat.**
+***Last updated: April 2026 — Session 10C Complete
+Next: Session 10D — Step3Availability rebuild

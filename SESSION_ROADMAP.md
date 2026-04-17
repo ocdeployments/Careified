@@ -1,255 +1,231 @@
-# SESSION_ROADMAP.md — Careified
-
-> Last updated: April 16 2026 — Session 8D Complete + Family Portal spec added
-
----
-
-## Completed Sessions
-
-| Session | What was built | Key commits |
-|---------|----------------|-------------|
-| 1–6F | Search, profile builder, DB seeding, profile display | — |
-| 7 | Clerk v7 auth — full integration | 9aa73c2 |
-| 7B | Shortlist — agency_shortlist table, API, UI | — |
-| 8B | Admin approval flow — /admin/agencies | — |
-| 8C | Role-locked signup — role param in sign-up URL | 9488380, ba4b49f, edc2fe0 |
-| 8D | Sign-in role-redirect — /api/auth/role-redirect | 00909d3, 45749bc, 4cf0609, acdca6a |
-| 9B | Caregiver ID system — CRF codes, QR, Apple Wallet scaffold | — |
-
----
-
-## Current State
-
-### What works
-
-- ✅ Full auth flow: signup → role assignment → approval gating → search
-- ✅ 15 approved demo caregivers in DB
-- ✅ 9 agencies in DB (seeded have clerk_user_id=null)
-- ✅ Agency search at `/agency/search` — 20+ filters, approval-gated
-- ✅ Caregiver profile display at `/profile/[id]`
-- ✅ Profile builder 6 steps — all saving to DB
-- ✅ Shortlist at `/agency/shortlist`
-- ✅ Admin approval at `/admin/agencies`
-- ✅ Caregiver ID cards at `/id/[caregiverId]`, verify at `/verify/[slug]`
-- ✅ TypeScript clean, working tree clean
-
-### What is broken/missing
-
-- ❌ All page copy is placeholder/wrong framing
-- ❌ No design system applied consistently
-- ❌ Navbar needs three-panel hover nav (agency/caregiver/family)
-- ❌ Landing page needs full design pass (Session 8A)
-- ❌ No personality assessment (Step 7 — Session 9A)
-- ❌ No rating system (Session 10)
-- ❌ No family portal (Sessions 11–13)
-
----
-
-## Session 8A — Landing Page Design Pass (NEXT)
-
-### Goals
-
-- DM Serif Display + DM Sans typography
-- Three-panel hover nav (agency / caregiver / family)
-- Mobile-first — hamburger drawer on small screens
-- Hero with subtle grid texture
-- Animated stats strip on scroll
-- Role cards for three audiences
-- Inline styles only (no Tailwind classes that break in prod)
-- Profile builder step transitions (slide in/out)
-- ID card reveal moment at profile completion
-
-### Rules
-
-- One file per commit
-- No new packages
-- `tsc --noEmit` before every commit
-
----
-
-## Session 9A — Personality Step 7
-
-7 forced-choice scenario questions:
-
-1. **Patience** — dementia repetition
-2. **Empathy** — family emotional subtext
-3. **Adaptability** — unexpected care plan change
-4. **Communication** — end-of-shift observation
-5. **Emotional Regulation** — angry family member
-6. **Problem Solving** — medication refusal
-7. **Resilience** — client death/grief
-
-Each answer → style label + base score (4.0 natural / 3.0 effort-based)
-
-- Saves to `personality_profile` JSONB
-- Personality & Fit tab on `/profile/[id]`
-
----
-
-## Session 10 — Rating System
-
-- **10A:** Agency rating form — 6 categories, engagement dates required
-- **10B:** Trust score engine — weighted recalc, recency decay
-- **10C:** Honesty scoring — agency vs self-assessment, badge awards
-
----
-
-## Session 11 — Family Portal Phase 1
-
-### What
-
-- Schedule view + caregiver profile card + notification prefs
-- Access: Agency enables per client → unique invite link → PWA, no app download
-- Auth: Email + password, family role
-- Visual: Amber tone, calm, warm, low data density
-
-### New DB tables needed
-
-- `clients` — id, agency_id, name, care_plan_summary
-- `client_family_access` — id, client_id, email, token, enabled_by_agency
-- `shifts` — id, client_id, caregiver_id, scheduled_start, scheduled_end, status
-
-### Routes
-
-- `/family/[token]` — login gate
-- `/family/[token]/schedule` — calendar
-- `/family/[token]/caregiver` — profile card
-- `/family/[token]/notifications` — prefs
-
-### Feature 1 — Schedule View
-
-- Monthly/weekly calendar of upcoming visits
-- Each visit: date, time, caregiver name + photo, care type
-- Status: Upcoming / In Progress / Completed / Missed (icon-based, no emojis)
-- Shift changes → notification + reason
-- Recurring vs one-off distinguished
-
-### Feature 4 — Caregiver Profile Card
-
-- Photo + first name (last name per agency policy)
-- Short bio, verified cert badges, years experience
-- Aggregate trust score, "Assigned since" date
-- Caregiver change → family notified with new card
-
-### Feature 8 — Notifications Phase 1 (email only)
-
-- Shift completed
-- Visit changed/cancelled
-- Care plan updated
-
----
-
-## Session 12 — Family Portal Phase 2
-
-Requires: Caregiver PWA with check-in/out button
-
-### Feature 2 — Live Shift Tracker
-
-- Start Shift tap → "Maria arrived at 9:04 AM" to family
-- End Shift tap → "Maria completed shift at 12:32 PM"
-- Late alert: no check-in within 15 min → "Running Late" to family + agency
-- Timestamp only — no GPS
-
-### Feature 3 — Care Notes Feed
-
-- Post-shift structured note (target: under 3 min, voice-to-text supported):
-  - Tasks checklist (done / not done + reason)
-  - Mood indicator — 5 states, icon-based (no emojis)
-  - Meals (yes / partial / refused)
-  - Medications (confirmed / declined)
-  - Observations free text (50 words max)
-- Concerns flagged → visible to family AND agency
-- Chronological feed, scrollable, searchable.
-
-### Feature 5 — Wellness Summary Dashboard
-
-- Shift attendance rate ("23 of 24 visits completed")
-- 30-day mood trend chart
-- Task completion % per week
-- Nutrition log per visit
-- Caregiver consistency % — key trust metric for families
-
-### Feature 8 additions — Push + SMS
-
-- Caregiver checked in: Push / Email / SMS
-- Shift completed + notes ready: Push / Email
-- Caregiver running late: Push + SMS (always on)
-- Concern flagged: Push + SMS (always on)
-
----
-
-## Session 13 — Family Portal Phase 3
-
-### Feature 6 — Message Agency (Never Caregiver)
-
-- In-portal thread → agency inbox only
-- Quick templates: "Scheduling question" / "Discuss care plan" / "Concern about visit"
-- Agency responds from dashboard, all comms logged
-- No family↔caregiver path — intentional
-
-### Feature 7 — Billing & Invoices
-
-- Invoices per billing period
-- Shift-by-shift breakdown (date, caregiver, hours, rate, total)
-- Payment status (paid / outstanding)
-- Download as PDF
-- Split billing: multiple family members assigned % share
-- View only — not a payment processor
-
-### Feature 8 additions
-
-- New invoice: Email
-- New agency message: Push / Email
-
----
-
-## Open Questions — Resolve Before Session 11
-
-1. **"CareShepherds"** — separate brand or internal name? Must clarify before family portal UI
-2. **Agency branding** — portal shows agency logo/colors. White-label theming adds complexity. Decision needed
-3. **Mood indicators** — spec uses emojis. Must use lucide-react icons or custom SVG per design rules
-4. **Billing** — confirm agencies want visibility in Careified vs keeping in existing billing system
-
----
-
-## Before First Real Agency Demo
-
-- [ ] Clerk production instance upgrade
-- [ ] Dedicated copy session — every page
-- [ ] Apple Developer account ($99/yr)
-- [ ] Phone OTP via Clerk
-- [ ] UX debt: agency signup form error handling
-- [ ] Clarify "CareShepherds" naming
-
----
-
-## Post-MVP
-
-- Training platform (250–550 materials)
-- Retention tools (day 15/30/60/90 check-ins)
-- AI matching (personality-to-client compatibility)
-- Google Wallet JWT
-- Bedside device: single-purpose tablet locked to family portal, no login, agency provides as premium tier
-
----
-
-## Demo Script (5 Minutes)
-
-**SETUP:** careified.vercel.app — sign in as agency
-
-1. **SEARCH (30s)** — `/agency/search`, filter panel
-2. **FILTER (60s)** — Dementia + Available now → Aisha 4.9, Maria 4.8
-   - Live-in → Di Tremblay, Helen Kowalski
-3. **PROFILE (90s)** — Click Aisha, show full profile, trust score, tier badge
-4. **SHORTLIST (30s)** — Shortlist → `/agency/shortlist`, add note
-5. **CAREGIVER (30s)** — `/profile/build`, `/id/[caregiverId]`, QR scan
-
-**CLOSE:** "75% annual turnover. Every hire starts blind. Careified fixes the information problem."
-
----
-
-## Last updated
-
-April 16 2026 — Session 8D Complete
-Family portal full spec incorporated (CareShepherds doc)
-Next: Session 8A — landing page design pass
+SESSION_ROADMAP.md — Careified
+Last updated: April 2026 — Session 10C Complete
+
+***Completed Sessions
+Session What was built Key commits
+1–8D Auth, search, shortlist, profile builder, ID cards, navbar, landing 41c6b31
+9 ProfilePreviewCard, IDCardReveal, three-column layout bbaeb1e
+10A 51 DB columns, ProfileFormContext, useProfileSave, 3 API routes 3fc6eab
+
+***Current State
+Working:
+Full Clerk auth flow (agency + caregiver)
+Agency search — 20+ filters, 15 demo caregivers
+Agency shortlist, admin approval
+Profile builder shell — Context integrated, DB load on mount
+Profile display /profile/[id]
+ID cards /id/[caregiverId], verify /verify/[slug]
+ProfilePreviewCard (live split view)
+IDCardReveal (credential ceremony)
+
+Session 10B — Step1Identity rebuild ✅ DONE
+Session 10C — Step2Services rebuild ✅ DONE (b72055e)
+
+Not yet built:
+Steps 3-10 of profile builder (Sessions 10D-10M)
+Client intake system (after caregiver profile complete)
+Matching engine
+Rating system
+Family portal
+Personality display tab on profile
+
+***Immediate Next — Caregiver Profile Rebuild
+
+Session 10B — Step1Identity rebuild ✅ COMPLETE
+File: components/profile/Step1Identity.tsx
+useProfileForm Context (no local useState)
+useProfileSave hook (onBlur saves to DB)
+ZIP auto-populate via zippopotam.us
+Working photo upload with preview
+DOB + age verification (18+)
+Job title, bio, language fluency, work authorisation
+Emergency contact (collapsible)
+Required field validation (red border on blur)
+
+Session 10C — Step2Services rebuild ✅ COMPLETE (b72055e)
+File: app/profile/build/Step2Services.tsx
+Remove credential selection (belongs in Step 5)
+Remove grocery shopping from Nutrition (belongs in Household only)
+Added total years experience
+Added self-rating per specialty (learning/competent/experienced/specialist)
+Added client types most experienced with
+Added care tasks unwilling to perform (honesty field)
+Added dietary accommodations
+Wire to useProfileSave — onBlur saves each selection
+
+Session 10D — Step3Availability rebuild
+File: app/profile/build/Step3Availability.tsx
+Remove location fields (already in Step 1)
+Remove language fields (already in Step 1)
+Add weekly availability grid (Mon-Sun × Morning/Afternoon/Evening/Overnight)
+Add min/max hours per week
+Add earliest start date + notice period
+Add preferred client age group
+Add preferred care settings
+Add hourly rate range (min + max)
+Add employment type preference
+Wire to useProfileSave
+
+Session 10E — Step4Location rebuild (NEW STEP)
+New file: app/profile/build/Step4Location.tsx
+Service area derived from Step 1 location (pre-filled, editable)
+Travel radius with visual map showing coverage area
+Driver's licence (yes/no + class)
+Personal vehicle, willing to drive client
+Willing to use client's vehicle
+Transit accessible
+
+Session 10F — Step5Credentials rebuild
+File: app/profile/build/Step4Certifications.tsx → rename Step5Credentials
+Primary credential with mutual exclusivity logic
+ (No formal credential deselects all others)
+Per credential: licence number, issuing body, issue date, expiry, upload
+"I don't have this document" path → Self-declared not Verified
+Supporting certifications (repeatable, up to 10)
+Expiry alerts (amber 90 days, red if expired)
+Education section (level, institution, field, year)
+Currently enrolled toggle
+
+Session 10G — Step6Compliance rebuild
+File: app/profile/build/Step5References.tsx → repurpose as Step6Compliance
+Background check consent + e-signature
+Vulnerable sector screen consent (Canada)
+Driving record check consent (conditional on has_vehicle)
+Criminal offence declaration
+TB clearance date + upload
+Immunisation records upload
+Bonded/insured status
+Declaration of accuracy (final checkbox)
+
+Session 10H — Step7Personality (new)
+New file: app/profile/build/Step7Personality.tsx
+7 forced-choice scenario questions (see MASTER_CONTEXT for full spec)
+Working style selectors (autonomy/pace/social energy/conflict)
+Top 5 strengths from 12 options
+Work environment preferences
+Ideal client match (excels with / client personalities / avoid)
+Growth areas (up to 3)
+Care philosophy (2 optional free text)
+Saves to personality_profile JSONB
+
+Session 10I — Step8WorkHistory (new)
+New file: app/profile/build/Step8WorkHistory.tsx
+Repeatable employer blocks (up to 5)
+Per employer: org, title, type, dates, client types, duties, reason leaving, supervisor
+Volunteer caregiving experience
+Family care experience
+Professional memberships
+Time estimate shown upfront: "~15 minutes. Save and continue later."
+
+Session 10J — Step9References rebuild
+File: app/profile/build/Step5References.tsx → rebuild as Step9References
+3 references minimum
+12 relationship types
+Conditional email/phone fields
+Phone auto-format (XXX) XXX-XXXX
+3-part consent block per reference
+Client reference special handling (admin review, first name + last initial only)
+"Add later" option with "References pending" status
+
+Session 10K — Step10OpenQuestions (new)
+New file: app/profile/build/Step10OpenQuestions.tsx
+3 questions shown one at a time
+"Describe a challenging caregiving moment" (200 chars)
+"How do you ensure client safety daily?" (200 chars)
+"Anything else agencies should know?" (300 chars, optional)
+All optional but clearly incentivised
+
+Session 10L — GhostProfile + Preview polish
+New file: components/profile/GhostProfile.tsx
+Maria Santos example profile shown before any data entered
+Crossfades to live preview on first keypress
+"What agencies see" checklist below preview
+Locked score bar (placeholder until agency placement)
+Mobile sticky bottom tier bar
+
+Session 10M — page.tsx full update
+Wire all 10 steps
+Validation on Next button (required fields must be filled)
+Step-specific milestone banners
+Goes-live celebration at Step 3
+
+***After Caregiver Profile Complete
+
+Session 11 — Client Intake System
+Database migration:
+Create 9 new tables (clients, client_medical, client_adl_assessment,
+client_home_environment, client_family_contacts, client_care_plan,
+client_preferences, client_safety_plan, client_consents)
+Routes:
+/agency/clients — client list
+/agency/clients/new — 12-section intake form
+/agency/clients/[id] — client profile
+/agency/clients/[id]/match — matched caregivers
+
+Intake form sections:
+A — Personal info · B — Family/decision makers · C — Medical history (encrypted)
+D — Cognitive/mental health · E — ADL/IADL assessment · F — Home environment
+G — Nutrition/dietary · H — Schedule/care plan · I — Caregiver preferences
+J — Legal/consent (e-signatures) · K — Safety/emergency · L — Goals/notes
+Total: ~169 fields across 12 sections
+
+Security:
+HIPAA/PIPEDA compliant
+Medical fields encrypted at rest
+Row-level security (agency sees only their clients)
+Audit log on all access
+
+Session 12 — Matching Engine
+Match function: takes client_id → returns ranked caregiver_id list with score 0-100
+Hard filters (eliminates):
+Language mismatch
+Schedule overlap <40%
+Outside radius
+Missing required certifications
+Gender preference mismatch
+Cognitive care needed + no relevant cert
+
+Weighted score (ranks remaining):
+Service coverage: 30%
+Schedule fit: 20%
+Trust score: 15%
+Credential depth: 10%
+Personality fit: 10%
+Experience level: 8%
+Environment fit: 5%
+Interests alignment: 2%
+
+Display: /agency/clients/[id]/match shows ranked list with match breakdown
+
+Session 13 — Rating System
+Agency rating form (post-placement)
+Trust score calculation engine
+Honesty scoring against self-assessment
+Badge awards
+
+Session 14 — Family Portal Phase 1
+/family/[token] — unique invite per client
+Schedule view, caregiver profile card, notification prefs
+PWA, no app download, agency-branded
+
+***Before First Real Agency Demo
+Clerk production instance upgrade
+Apple Developer account ($99/yr) for Wallet passes
+Phone OTP via Clerk
+Dedicated copy session (all pages still placeholder)
+UX debt: agency signup form error handling
+SSL certificate for Render DB (currently ssl: rejectUnauthorized: false)
+
+***Demo Script (5 Minutes)
+1. Agency logs in → /agency/search
+2. Filter: Dementia + Available now → Aisha 4.9★, Maria 4.8★
+3. Filter: Live-in → Di Tremblay, Helen Kowalski
+4. Click Aisha → full profile (bio, specialties, certifications, logistics)
+5. Show shortlist button → /agency/shortlist
+6. Show: /profile/build → three-column split view, live preview
+7. Show: ID card reveal after submit
+8. (Post Session 11): /agency/clients/new → intake form
+9. (Post Session 12): /agency/clients/[id]/match → ranked matches
+
+***Last updated: April 2026 — Session 10C Complete
+Priority: Step3 rebuild (10D) → Step4-10
