@@ -103,6 +103,7 @@ function ProfileBuilder() {
  case 5: return <Step5References initialData={formData.references || []} onSave={handleSave} />
  case 6: return <Step6Review
  onEdit={(s: number) => router.push(`?step=${s}`)}
+ onSubmitSuccess={() => setShowReveal(true)}
  />
  default: return <Step1Identity onSave={handleSave} />
  }

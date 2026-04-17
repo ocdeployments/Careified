@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react'
 import { submitProfile } from '@/lib/actions/profile'
 
-export default function Step6Review({ onEdit }: { onEdit?: (step: number) => void }) {
+export default function Step6Review({
+ onEdit,
+ onSubmitSuccess,
+}: {
+ onEdit?: (step: number) => void
+ onSubmitSuccess?: () => void
+}) {
  const [submitting, setSubmitting] = useState(false)
  const [submitted, setSubmitted] = useState(false)
  const [errors, setErrors] = useState<string[]>([])
@@ -56,6 +62,7 @@ export default function Step6Review({ onEdit }: { onEdit?: (step: number) => voi
    setSubmitting(false)
    if (result.success) {
      setSubmitted(true)
+     onSubmitSuccess?.()
    }
  }
 
