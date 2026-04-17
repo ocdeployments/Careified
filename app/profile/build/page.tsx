@@ -9,6 +9,8 @@ import Step4Certifications from './Step4Certifications'
 import Step5References from './Step5References'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
+import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
+import IDCardReveal from '@/components/profile/IDCardReveal'
 
 const FONT_SERIF = "'DM Serif Display', serif"
 const FONT_SANS = "'DM Sans', sans-serif"
@@ -59,6 +61,7 @@ function ProfileBuilder() {
  const [savedVisible, setSavedVisible] = useState(false)
  const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward')
  const [animating, setAnimating] = useState(false)
+ const [showReveal, setShowReveal] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
  const step = searchParams.get('step') || '1'
@@ -98,7 +101,9 @@ function ProfileBuilder() {
  case 3: return <Step3Availability initialData={formData} onSave={handleSave} />
  case 4: return <Step4Certifications initialData={formData.certifications || []} onSave={handleSave} />
  case 5: return <Step5References initialData={formData.references || []} onSave={handleSave} />
- case 6: return <Step6Review onEdit={(s: number) => router.push(`?step=${s}`)} />
+ case 6: return <Step6Review
+ onEdit={(s: number) => router.push(`?step=${s}`)}
+ />
  default: return <Step1Identity onSave={handleSave} />
  }
  }
@@ -124,6 +129,7 @@ function ProfileBuilder() {
  .pb-layout { grid-template-columns: 1fr !important; }
  .pb-sidebar { display: none !important; }
  .pb-mobile-steps { display: flex !important; }
+ .pb-preview { display: none !important; }
  }
  `}</style>
 
@@ -191,7 +197,7 @@ function ProfileBuilder() {
  <div className="pb-layout" style={{
  maxWidth: '1000px', margin: '0 auto',
  display: 'grid',
- gridTemplateColumns: '220px 1fr',
+ gridTemplateColumns: '220px 1fr 280px',
  gap: '0', minHeight: 'calc(100vh - 108px)',
  }}>
 
@@ -446,8 +452,34 @@ function ProfileBuilder() {
  )}
  </div>
  </div>
+
+ {/* Live preview panel */}
+ <div className="pb-preview" style={{ padding: '24px 16px 24px 0' }}>
+ <ProfilePreviewCard data={formData as any} step={currentStep} />
  </div>
  </div>
+ </div>
+
+ {/* ID Card Reveal */}
+ {showReveal && (
+ <IDCardReveal
+ caregiverData={{
+ firstName: formData.firstName,
+ lastName: formData.lastName,
+ preferredName: formData.preferredName,
+ jobTitle: formData.jobTitle,
+ city: formData.city,
+ state: formData.state,
+ credentials: formData.credentials,
+ caregiverCode: formData.caregiverCode,
+ }}
+ onViewProfile={() => {
+ setShowReveal(false)
+ router.push('/profile/view')
+ }}
+ onDismiss={() => setShowReveal(false)}
+ />
+ )}
  </>
  )
 }
