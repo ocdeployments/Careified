@@ -216,13 +216,15 @@ scripts/seed-demo.js             ✅ Run — 15 caregivers
 | Session 8C | ✅ | Role-locked signup (URL param) |
 | Session 8D | ✅ | Profile builder UX redesign (sidebar, animations) |
 | Session 9 | ✅ | Split view live preview + ID card reveal |
+| Session 10A | ✅ | Profile builder foundation — Context, hooks, APIs, 51 new DB columns |
 
 ---
 
 ## Next Sessions
 
 1. **Session 10** — Rating System (agency ratings, trust scores)
-2. **Session 11** — Family Portal Phase 1
+2. **Session 10B** — Profile builder Step 1 rebuild (uses new Context)
+3. **Session 11** — Family Portal Phase 1
 
 ---
 
