@@ -22,17 +22,22 @@ const STEPS = [
  { num: 1, title: 'Identity', desc: 'Name, photo, bio' },
  { num: 2, title: 'Services', desc: 'What you offer' },
  { num: 3, title: 'Availability', desc: 'When & where' },
- { num: 4, title: 'Qualifications', desc: 'Your credentials' },
- { num: 5, title: 'References', desc: 'Who vouches for you' },
- { num: 6, title: 'Review', desc: 'Submit your profile' },
+ { num: 4, title: 'Location', desc: 'Service area, transport' },
+ { num: 5, title: 'Credentials', desc: 'Licences, certifications' },
+ { num: 6, title: 'Compliance', desc: 'Consents, declarations' },
+ { num: 7, title: 'Personality', desc: 'Work style, strengths' },
+ { num: 8, title: 'Work History', desc: 'Experience, employers' },
+ { num: 9, title: 'References', desc: 'Who vouches for you' },
+ { num: 10, title: 'Open Q\'s', desc: 'Final profile questions' },
 ]
 
-const PROGRESS = [14, 28, 42, 58, 72, 86]
-const TIERS = ['Incomplete', 'Incomplete', 'Basic', 'Verified', 'Professional', 'Professional']
+const PROGRESS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+const TIERS = ['Incomplete', 'Incomplete', 'Basic', 'Location', 'Verified', 'Compliance', 'Professional', 'Work History', 'References', 'Open Q\'s']
 
 const MILESTONES: Record<number, { text: string; sub: string }> = {
- 3: { text: 'Halfway there', sub: 'Complete 3 more steps to go live.' },
- 5: { text: 'Almost live', sub: 'One more step before your profile is submitted.' },
+ 3: { text: 'Profile goes live after step 3', sub: 'Agencies can find you once you complete Availability.' },
+ 5: { text: 'Verified badge after step 5', sub: 'Complete through Compliance for verification.' },
+ 7: { text: 'Professional tier after step 7', sub: 'Complete through Work History for Professional status.' },
 }
 
 interface FormData {
@@ -95,7 +100,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const navigate = (dir: 'forward' | 'back') => {
  setAnimDir(dir)
  const next = dir === 'forward' ? currentStep + 1 : currentStep - 1
- if (next >= 1 && next <= 6) router.push(`?step=${next}`)
+ if (next >= 1 && next <= 10) router.push(`?step=${next}`)
  }
 
  const goToStep = (num: number) => {
@@ -105,6 +110,13 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  }
 
  const renderStep = () => {
+// Temporary placeholder for unbuilt steps
+const StepPlaceholder = ({ title }: { title: string }) => (
+ <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>
+ {title} - coming soon
+ </div>
+)
+
  switch (currentStep) {
  case 1: return <Step1Identity />
  case 2: return <Step2Services />
@@ -112,11 +124,10 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  case 4: return <Step4Location />
  case 5: return <Step5Credentials />
  case 6: return <Step6Compliance />
- case 7: return <Step5References initialData={formData.references || []} onSave={handleSave} />
- case 8: return <Step6Review
- onEdit={(s: number) => router.push(`?step=${s}`)}
- onSubmitSuccess={() => setShowReveal(true)}
- />
+ case 7: return <StepPlaceholder title="Personality" />
+ case 8: return <StepPlaceholder title="Work History" />
+ case 9: return <StepPlaceholder title="References" />
+ case 10: return <StepPlaceholder title="Open Questions" />
  default: return <Step1Identity />
  }
  }
@@ -317,7 +328,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
 
  {/* Submit button */}
  <button
- disabled={currentStep < 6}
+ disabled={currentStep < 10}
  style={{
  width: '100%', padding: '10px',
  borderRadius: '8px', border: 'none',
@@ -356,9 +367,13 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  {currentStep === 1 && "Let's start with you."}
  {currentStep === 2 && "What do you offer?"}
  {currentStep === 3 && "When can you work?"}
- {currentStep === 4 && "Your credentials."}
- {currentStep === 5 && "Who vouches for you?"}
- {currentStep === 6 && "Ready to submit."}
+ {currentStep === 4 && "Where will you work?"}
+ {currentStep === 5 && "Your credentials."}
+ {currentStep === 6 && "Compliance and consent."}
+ {currentStep === 7 && "Your work style."}
+ {currentStep === 8 && "Your experience."}
+ {currentStep === 9 && "Who vouches for you?"}
+ {currentStep === 10 && "Final questions."}
  </div>
  </div>
 
@@ -430,7 +445,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  <div />
  )}
 
- {currentStep < 6 ? (
+ {currentStep < 10 ? (
  <button
  className="nav-btn-next"
  onClick={() => navigate('forward')}
