@@ -2,6 +2,7 @@
 
 import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { ProfileFormProvider, useProfileForm } from '@/lib/context/ProfileFormContext'
 import Step1Identity from '@/components/profile/Step1Identity'
 import Step2Services from './Step2Services'
 import Step3Availability from './Step3Availability'
@@ -56,8 +57,8 @@ function SavedIndicator({ show }: { show: boolean }) {
  )
 }
 
-function ProfileBuilder() {
- const [formData, setFormData] = useState<FormData>({})
+function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
+ const [formData, setFormData] = useState<FormData>(contextFormData || {})
  const [savedVisible, setSavedVisible] = useState(false)
  const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward')
  const [animating, setAnimating] = useState(false)
@@ -70,14 +71,21 @@ function ProfileBuilder() {
  const tier = TIERS[currentStep - 1]
  const milestone = MILESTONES[currentStep]
 
+ // Use context formData if passed, otherwise local state
+ const data = contextFormData || formData
+
  useEffect(() => {
  setAnimating(true)
  const t = setTimeout(() => setAnimating(false), 280)
  return () => clearTimeout(t)
  }, [currentStep])
 
- const handleSave = (data: any) => {
- setFormData(prev => ({ ...prev, ...data }))
+ const handleSave = (saveData: any) => {
+ if (contextFormData) {
+ // Context handles saving - just show indicator
+ } else {
+ setFormData(prev => ({ ...prev, ...saveData }))
+ }
  setSavedVisible(true)
  setTimeout(() => setSavedVisible(false), 2000)
  }
@@ -487,6 +495,7 @@ function ProfileBuilder() {
 
 export default function ProfileBuildPage() {
  return (
+ <ProfileFormProvider>
  <Suspense fallback={
  <div style={{
  padding: '50px', textAlign: 'center',
@@ -496,7 +505,41 @@ export default function ProfileBuildPage() {
  Loading...
  </div>
  }>
- <ProfileBuilder />
+ <ProfileBuilderWrapper />
  </Suspense>
+ </ProfileFormProvider>
  )
+}
+
+function ProfileBuilderWrapper() {
+ const { formData, updateFields, isLoaded } = useProfileForm()
+
+ // Load from DB on mount
+ useEffect(() => {
+ if (!isLoaded) return
+ fetch('/api/profile/load')
+ .then(r => r.json())
+ .then(({ exists, data }) => {
+ if (exists && data) {
+ updateFields(data)
+ }
+ })
+ .catch(err => console.error('Profile load error:', err))
+ }, [isLoaded])
+
+ if (!isLoaded) {
+ return (
+ <div style={{
+ minHeight: '100vh', display: 'flex',
+ alignItems: 'center', justifyContent: 'center',
+ background: '#F7F4F0',
+ }}>
+ <div style={{ fontSize: '13px', color: '#94A3B8' }}>
+ Loading your profile...
+ </div>
+ </div>
+ )
+ }
+
+ return <ProfileBuilder formData={formData} />
 }
