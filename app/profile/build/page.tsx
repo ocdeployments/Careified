@@ -7,7 +7,7 @@ import Step1Identity from '@/components/profile/Step1Identity'
 import Step2Services from './Step2Services'
 import Step3Availability from './Step3Availability'
 import Step4Location from './Step4Location'
-import Step4Certifications from './Step4Certifications'
+import Step5Credentials from './Step5Credentials'
 import Step5References from './Step5References'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
@@ -109,8 +109,9 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  case 2: return <Step2Services />
  case 3: return <Step3Availability />
  case 4: return <Step4Location />
- case 5: return <Step5References initialData={formData.references || []} onSave={handleSave} />
- case 6: return <Step6Review
+ case 5: return <Step5Credentials />
+ case 6: return <Step5References initialData={formData.references || []} onSave={handleSave} />
+ case 7: return <Step6Review
  onEdit={(s: number) => router.push(`?step=${s}`)}
  onSubmitSuccess={() => setShowReveal(true)}
  />
