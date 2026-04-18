@@ -219,13 +219,14 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  {/* Main layout */}
  <div style={{
  minHeight: '100vh', background: '#F7F4F0',
- paddingTop: '108px', fontFamily: FONT_SANS,
+ paddingTop: '108px', paddingBottom: '160px', fontFamily: FONT_SANS,
  }}>
  <div className="pb-layout" style={{
- maxWidth: '1000px', margin: '0 auto',
+ maxWidth: '1280px', margin: '0 auto',
  display: 'grid',
- gridTemplateColumns: '220px 1fr 280px',
- gap: '0', minHeight: 'calc(100vh - 108px)',
+ gridTemplateColumns: '240px 560px 340px',
+ gap: '40px', minHeight: 'calc(100vh - 108px)',
+ padding: '120px 40px 160px',
  }}>
 
  {/* Sidebar */}
