@@ -130,14 +130,14 @@ async function handleSearch(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      caregivers: result.rows,
-      count: result.rows.length
+      results: result.rows,
+      totalCount: result.rows.length
     })
 
   } catch (error) {
     console.error('Search error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to search caregivers', caregivers: [], count: 0 },
+      { success: false, error: 'Failed to search caregivers', results: [], count: 0 },
       { status: 500 }
     )
   }
