@@ -9,21 +9,22 @@ const pool = new Pool({
     : { rejectUnauthorized: false }
 })
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const body = await request.json()
+    const f = body.filters || {}
     
-    // Get filter parameters
-    const city = searchParams.get('city')
-    const state = searchParams.get('state')
-    const specializations = searchParams.get('specializations')
-    const availabilityStatus = searchParams.get('availabilityStatus')
-    const minScore = searchParams.get('minScore')
-    const credentials = searchParams.get('credentials')
-    const placementTypes = searchParams.get('placementTypes')
-    const languages = searchParams.get('languages')
-    const minExperience = searchParams.get('minExperience')
-    const searchQuery = searchParams.get('q')
+    // Get filter parameters from body
+    const city = f.city
+    const state = f.state
+    const specializations = f.specializations
+    const availabilityStatus = f.availabilityStatus
+    const minScore = f.minScore
+    const credentials = f.credentials
+    const placementTypes = f.placementTypes
+    const languages = f.languages
+    const minExperience = f.minExperience
+    const searchQuery = f.q || f.searchQuery
 
     // Build WHERE clause
     let whereConditions = ["status = 'approved'"] // Only show approved caregivers
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (specializations) {
-      const specArray = specializations.split(',').map(s => s.trim())
+      const specArray = specializations.split(',').map((s: string) => s.trim())
       whereConditions.push(`specializations && $${paramCount}::text[]`)
       queryParams.push(specArray)
       paramCount++
@@ -62,21 +63,21 @@ export async function GET(request: NextRequest) {
     }
 
     if (credentials) {
-      const credArray = credentials.split(',').map(c => c.trim())
+      const credArray = credentials.split(',').map((c: string) => c.trim())
       whereConditions.push(`credentials && $${paramCount}::text[]`)
       queryParams.push(credArray)
       paramCount++
     }
 
     if (placementTypes) {
-      const typeArray = placementTypes.split(',').map(t => t.trim())
+      const typeArray = placementTypes.split(',').map((t: string) => t.trim())
       whereConditions.push(`placement_types && $${paramCount}::text[]`)
       queryParams.push(typeArray)
       paramCount++
     }
 
     if (languages) {
-      const langArray = languages.split(',').map(l => l.trim())
+      const langArray = languages.split(',').map((l: string) => l.trim())
       whereConditions.push(`languages && $${paramCount}::text[]`)
       queryParams.push(langArray)
       paramCount++
