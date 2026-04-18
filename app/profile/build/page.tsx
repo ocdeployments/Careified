@@ -2,6 +2,7 @@
 
 import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileFormProvider, useProfileForm } from '@/lib/context/ProfileFormContext'
 import Step1Identity from '@/components/profile/Step1Identity'
 import Step2Services from './Step2Services'
@@ -121,16 +122,16 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 )
 
  switch (currentStep) {
- case 1: return <Step1Identity />
- case 2: return <Step2Services />
- case 3: return <Step3Availability />
- case 4: return <Step4Location />
- case 5: return <Step5Credentials />
- case 6: return <Step6Compliance />
- case 7: return <Step7Personality />
- case 8: return <Step8WorkHistory />
- case 9: return <Step9References />
- case 10: return <Step10OpenQuestions />
+ case 1: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step1Identity /></motion.div></AnimatePresence>
+ case 2: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step2Services /></motion.div></AnimatePresence>
+ case 3: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step3Availability /></motion.div></AnimatePresence>
+ case 4: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step4Location /></motion.div></AnimatePresence>
+ case 5: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step5Credentials /></motion.div></AnimatePresence>
+ case 6: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step6Compliance /></motion.div></AnimatePresence>
+ case 7: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step7Personality /></motion.div></AnimatePresence>
+ case 8: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step8WorkHistory /></motion.div></AnimatePresence>
+ case 9: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step9References /></motion.div></AnimatePresence>
+ case 10: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step10OpenQuestions /></motion.div></AnimatePresence>
  default: return <Step1Identity />
  }
  }
