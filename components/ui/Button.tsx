@@ -14,7 +14,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
-const V = {
+const V: Record<Variant, { base: React.CSSProperties; hover: React.CSSProperties; down: React.CSSProperties }> = {
   primary: {
     base: { background: 'linear-gradient(135deg,#C9973A,#E8B86D)', color: '#0D1B3E', border: 'none' },
     hover: { filter: 'brightness(1.06)', transform: 'translateY(-1px)', boxShadow: '0 4px 16px rgba(201,151,58,0.30)' },
@@ -35,9 +35,9 @@ const V = {
     hover: { background: 'rgba(220,38,38,0.10)', borderColor: 'rgba(220,38,38,0.4)', transform: 'translateY(-1px)' },
     down: { transform: 'translateY(0)' },
   },
-} as const
+}
 
-const S = {
+const S: Record<Size, { height: string; padding: string; fontSize: string; gap: string; icon: string }> = {
   sm: { height: '32px', padding: '0 12px', fontSize: '12px', gap: '5px', icon: '14px' },
   md: { height: '40px', padding: '0 18px', fontSize: '13px', gap: '6px', icon: '15px' },
   lg: { height: '48px', padding: '0 24px', fontSize: '14px', gap: '7px', icon: '16px' },
@@ -45,9 +45,8 @@ const S = {
 
 function Spinner({ size }: { size: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none"
-    style={{ animation: 'spin 0.7s linear infinite', flexShrink: 0 }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" style={{ animation: 'btn-spin 0.7s linear infinite', flexShrink: 0 }}>
+      <style>{`@keyframes btn-spin{to{transform:rotate(360deg)}}`}</style>
       <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25"/>
       <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -65,20 +64,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   const isDisabled = disabled || loading
 
   const computedStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: s.gap,
-    height: s.height,
-    padding: s.padding,
-    fontSize: s.fontSize,
-    fontFamily: "'DM Sans', sans-serif",
-    fontWeight: 600,
-    lineHeight: 1,
-    borderRadius: '10px',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    gap: s.gap, height: s.height, padding: s.padding,
+    fontSize: s.fontSize, fontFamily: "'DM Sans',sans-serif",
+    fontWeight: 600, lineHeight: 1, borderRadius: '10px',
     cursor: isDisabled ? 'not-allowed' : 'pointer',
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
+    whiteSpace: 'nowrap', userSelect: 'none',
     transition: 'all 150ms ease',
     width: fullWidth ? '100%' : undefined,
     opacity: isDisabled ? 0.45 : 1,
