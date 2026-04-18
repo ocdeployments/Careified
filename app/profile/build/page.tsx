@@ -9,8 +9,10 @@ import Step3Availability from './Step3Availability'
 import Step4Location from './Step4Location'
 import Step5Credentials from './Step5Credentials'
 import Step9References from './Step9References'
+import Step10OpenQuestions from './Step10OpenQuestions'
 import Step6Compliance from './Step6Compliance'
 import Step7Personality from './Step7Personality'
+import Step8WorkHistory from './Step8WorkHistory'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
@@ -126,9 +128,9 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  case 5: return <Step5Credentials />
  case 6: return <Step6Compliance />
  case 7: return <Step7Personality />
- case 8: return <StepPlaceholder title="Work History" />
- case 9: return <StepPlaceholder title="References" />
- case 10: return <StepPlaceholder title="Open Questions" />
+ case 8: return <Step8WorkHistory />
+ case 9: return <Step9References />
+ case 10: return <Step10OpenQuestions />
  default: return <Step1Identity />
  }
  }
