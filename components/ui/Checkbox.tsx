@@ -1,66 +1,60 @@
-'use client';
+'use client'
+import { InputHTMLAttributes, ReactNode } from 'react'
 
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { Check } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-interface CheckboxProps {
-  label: string;
-  checked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-  disabled?: boolean;
+interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+ label?: ReactNode
+ description?: string
+ error?: string
 }
 
-export default function Checkbox({
-  label,
-  checked,
-  onCheckedChange,
-  disabled,
-}: CheckboxProps) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-      <CheckboxPrimitive.Root
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-        style={{
-          width: '20px',
-          height: '20px',
-          borderRadius: '6px',
-          border: checked ? '2px solid #C9973A' : '2px solid #E2E8F0',
-          background: checked ? '#C9973A' : '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s',
-          flexShrink: 0,
-          marginTop: '2px',
-        }}
-      >
-        <CheckboxPrimitive.Indicator asChild>
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-          >
-            <Check size={12} color="#FFFFFF" strokeWidth={3} />
-          </motion.div>
-        </CheckboxPrimitive.Indicator>
-      </CheckboxPrimitive.Root>
-
-      <label
-        style={{
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          color: disabled ? '#94A3B8' : '#0D1B3E',
-          fontSize: '13px',
-          fontFamily: "'DM Sans', sans-serif",
-          lineHeight: 1.5,
-        }}
-        onClick={() => !disabled && onCheckedChange?.(!checked)}
-      >
-        {label}
-      </label>
-    </div>
-  );
+export function Checkbox({ label, description, error, id, style, ...props }: CheckboxProps) {
+ const inputId = id || `cb-${Math.random().toString(36).slice(2)}`
+ return (
+ <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', ...style as any }}>
+ <div style={{ position: 'relative', flexShrink: 0, marginTop: '1px' }}>
+ <input
+ type="checkbox"
+ id={inputId}
+ style={{ position: 'absolute', opacity: 0, width: '18px', height: '18px', margin: 0, cursor: 'pointer', zIndex: 1 }}
+ {...props}
+ />
+ <div style={{
+ width: '18px', height: '18px', borderRadius: '5px',
+ border: `1.5px solid ${props.checked ? '#C9973A' : '#CBD5E1'}`,
+ background: props.checked ? 'linear-gradient(135deg,#C9973A,#E8B86D)' : '#FFFFFF',
+ display: 'flex', alignItems: 'center', justifyContent: 'center',
+ transition: 'all 150ms ease',
+ boxShadow: props.checked ? '0 2px 6px rgba(201,151,58,0.25)' : 'none',
+ pointerEvents: 'none',
+ }}>
+ {props.checked && (
+ <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+ <path d="M1 4L3.5 6.5L9 1" stroke="#0D1B3E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+ </svg>
+ )}
+ </div>
+ </div>
+ {(label || description) && (
+ <label htmlFor={inputId} style={{ cursor: 'pointer', flex: 1 }}>
+ {label && (
+ <div style={{ fontSize: '13px', fontWeight: 500, color: '#0D1B3E', fontFamily: "'DM Sans',sans-serif", lineHeight: 1.4 }}>
+ {label}
+ </div>
+ )}
+ {description && (
+ <div style={{ fontSize: '12px', color: '#64748B', fontFamily: "'DM Sans',sans-serif", marginTop: '2px', lineHeight: 1.4 }}>
+ {description}
+ </div>
+ )}
+ {error && (
+ <div style={{ fontSize: '12px', color: '#DC2626', fontFamily: "'DM Sans',sans-serif", marginTop: '3px' }}>
+ {error}
+ </div>
+ )}
+ </label>
+ )}
+ </div>
+ )
 }
+
+export default Checkbox
