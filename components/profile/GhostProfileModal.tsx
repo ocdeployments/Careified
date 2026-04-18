@@ -81,7 +81,7 @@ export default function GhostProfileModal({ onDismiss }: Props) {
         </div>
 
         {/* CTA */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <button
             onClick={onDismiss}
             style={{
@@ -105,30 +105,21 @@ export default function GhostProfileModal({ onDismiss }: Props) {
           </p>
         </div>
 
-        {/* Profile Preview Link */}
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '12px', color: '#94A3B8', margin: '0 0 8px' }}>
-            ⬇️ This is what agencies will see
+        {/* Static Preview Sample */}
+        <div style={{ border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px', backgroundColor: '#F8FAFC' }}>
+          <p style={{ fontSize: '12px', color: '#94A3B8', margin: '0 0 12px', textAlign: 'center' }}>
+            ⬇️ Example: What agencies see
           </p>
-          <a
-            href="/profile/demo-preview"
-            target="_blank"
-            style={{
-              display: 'inline-block',
-              padding: '12px 24px',
-              backgroundColor: '#F0F9FF',
-              color: '#0369A1',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 500,
-              textDecoration: 'none'
-            }}
-          >
-            View Demo Profile →
-          </a>
-          <p style={{ fontSize: '11px', color: '#CBD5E1', margin: '8px 0 0' }}>
-            Scroll to explore a complete profile
-          </p>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 900, color: '#0D1B3E', flexShrink: 0 }}>
+              MS
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E' }}>Maria Santos</div>
+              <div style={{ fontSize: '12px', color: '#64748B' }}>Certified Personal Support Worker</div>
+              <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>📍 McKinney, TX • 📅 8 years • 🟢 Available now</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
