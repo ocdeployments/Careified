@@ -28,10 +28,10 @@ async function getCertifications(caregiverId: string) {
  } catch { return [] }
 }
 
-export default async function CaregiverProfilePage({ params }: { params: { id: string } }) {
- const caregiver = await getCaregiver(params.id)
+export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
+ const caregiver = await getCaregiver((await params).id)
  if (!caregiver) notFound()
- const certifications = await getCertifications(params.id)
+ const certifications = await getCertifications((await params).id)
 
  const displayName = caregiver.preferred_name ? `${caregiver.preferred_name} ${caregiver.last_name}` : `${caregiver.first_name} ${caregiver.last_name}`
  const initials = `${caregiver.first_name?.[0] || ''}${caregiver.last_name?.[0] || ''}`.toUpperCase()
