@@ -41,7 +41,7 @@ function FieldLabel({ label, required, hint }: { label: string; required?: boole
       <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', fontFamily: FONT_SANS }}>
         {label} {required && <span style={{ color: '#EF4444', marginLeft: '3px' }}>*</span>}
       </label>
-      {hint && <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', fontFamily: FONT_SANS }}>{hint}</p>}
+      <p style={{ fontSize: '11px', color: hint ? '#94A3B8' : 'transparent', minHeight: '18px', marginTop: '2px', fontFamily: FONT_SANS }}>{hint || '‎'}</p>
     </div>
   )
 }
@@ -135,6 +135,12 @@ export default function Step1Identity() {
     border: '1.5px solid ' + (touched[field] && errors[field] ? '#EF4444' : touched[field] ? '#22C55E' : '#E2E8F0'),
     backgroundColor: 'white', fontSize: '13px', color: '#0D1B3E', outline: 'none', fontFamily: FONT_SANS, boxSizing: 'border-box' as const,
   })
+
+  const HelperText = ({ children }: { children?: string }) => (
+    <p style={{ fontSize: '12px', color: children ? '#64748B' : 'transparent', minHeight: '18px', marginBottom: '8px' }}>
+      {children || '‎'}
+    </p>
+  )
 
   const bioWordCount = (formData.bio || '').trim().split(/\s+/).filter(Boolean).length
 
