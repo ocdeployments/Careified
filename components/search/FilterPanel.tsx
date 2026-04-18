@@ -24,6 +24,7 @@ interface FilterPanelProps {
  filters: SearchFilters;
  onChange: (filters: SearchFilters) => void;
  resultCount: number;
+  onClear?: () => void;
 }
 
 const EMPTY_FILTERS: SearchFilters = {
@@ -39,7 +40,7 @@ const EMPTY_FILTERS: SearchFilters = {
  limit: 20,
 };
 
-export function FilterPanel({ filters, onChange, resultCount }: FilterPanelProps) {
+export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterPanelProps) {
 
  const [expanded, setExpanded] = useState({
  location: true,
@@ -103,7 +104,7 @@ export function FilterPanel({ filters, onChange, resultCount }: FilterPanelProps
  </h3>
  {activeCount > 0 && (
  <button
- onClick={() => onChange(EMPTY_FILTERS)}
+ onClick={() => { onChange(EMPTY_FILTERS); onClear?.(); }}
  className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
  >
  <X className="w-3 h-3" />
