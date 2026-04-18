@@ -90,13 +90,12 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  useEffect(() => {
  // Check if user has seen the motivation modal
  const seen = localStorage.getItem('hasSeenProfileMotivation')
- const isIncomplete = !data.profile_completion_pct || data.profile_completion_pct < 100
  
- // Show if: (1) never seen before AND (2) profile incomplete
- if (!seen && isIncomplete) {
+ // Show if never seen before (for testing - remove isIncomplete check)
+ if (!seen) {
  setShowModal(true)
  }
- }, [data])
+ }, [])
 
  const handleDismissModal = () => {
  localStorage.setItem('hasSeenProfileMotivation', 'true')
