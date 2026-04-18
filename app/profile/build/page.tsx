@@ -76,6 +76,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const [animating, setAnimating] = useState(false)
  const [showReveal, setShowReveal] = useState(false)
  const [showModal, setShowModal] = useState(false)
+ const [canShow, setCanShow] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
  const step = searchParams.get('step') || '1'
@@ -88,10 +89,13 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const data = contextFormData || formData
 
  useEffect(() => {
+ // Wait for client hydration before checking localStorage
+ setCanShow(true)
+ 
  // Check if user has seen the motivation modal
  const seen = localStorage.getItem('hasSeenProfileMotivation')
  
- // Show if never seen before (for testing - remove isIncomplete check)
+ // Show if never seen before
  if (!seen) {
  setShowModal(true)
  }
@@ -155,7 +159,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 
  return (
  <>
- {showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
+ {canShow && showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
  <style>{`
  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
  @keyframes slideInForward {
