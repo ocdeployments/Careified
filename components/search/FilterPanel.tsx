@@ -68,9 +68,9 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
  };
 
  const activeCount =
- filters.specialties.length +
- filters.credentials.length +
- filters.placementTypes.length +
+ (filters.specialties || []).length +
+ (filters.credentials || []).length +
+ (filters.placementTypes || []).length +
  (filters.languages?.length || 0) +
  (filters.daysAvailable?.length || 0) +
  (filters.shiftTypes?.length || 0) +

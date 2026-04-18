@@ -123,7 +123,7 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  </div>
 
  {/* Specialties */}
- {caregiver.specialties.length > 0 && (
+ {(caregiver.specialties || []).length > 0 && (
  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
  {caregiver.specialties.slice(0, 3).map((s, i) => (
  <span key={i} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', backgroundColor: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0' }}>
@@ -134,7 +134,7 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  )}
 
  {/* Languages */}
- {caregiver.languages.length > 0 && (
+ {(caregiver.languages || []).length > 0 && (
  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '12px' }}>
  <Globe size={12} color="#94A3B8" />
  <span style={{ fontSize: '11px', color: '#64748B' }}>
