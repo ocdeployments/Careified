@@ -27,9 +27,9 @@ async function handleSearch(request: NextRequest) {
     // Get filter parameters
     const city = f.city
     const state = f.state
-    const specializations = f.specializations
+    const specializations = f.specialties
     const availabilityStatus = f.availabilityStatus
-    const minScore = f.minScore
+    const minScore = f.minTrustScore
     const credentials = f.credentials
     const placementTypes = f.placementTypes
     const languages = f.languages
