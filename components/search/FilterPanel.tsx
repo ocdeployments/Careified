@@ -191,7 +191,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
  <label key={opt} className="flex items-center gap-2 cursor-pointer">
  <input
  type="checkbox"
- checked={filters.placementTypes.includes(opt)}
+ checked={(filters.placementTypes || []).includes(opt)}
  onChange={() => toggleArr('placementTypes', opt)}
  className="w-4 h-4 rounded border-slate-300 text-blue-600"
  />
@@ -282,7 +282,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
  <label key={s} className="flex items-center gap-2 cursor-pointer">
  <input
  type="checkbox"
- checked={filters.specialties.includes(s)}
+ checked={(filters.specialties || []).includes(s)}
  onChange={() => toggleArr('specialties', s)}
  className="w-4 h-4 rounded border-slate-300 text-blue-600"
  />
@@ -299,7 +299,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
  <label key={c} className="flex items-center gap-2 cursor-pointer">
  <input
  type="checkbox"
- checked={filters.credentials.includes(c)}
+ checked={(filters.credentials || []).includes(c)}
  onChange={() => toggleArr('credentials', c)}
  className="w-4 h-4 rounded border-slate-300 text-blue-600"
  />
