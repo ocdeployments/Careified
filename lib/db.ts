@@ -1,8 +1,16 @@
 import { Pool } from 'pg';
 
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://careified_user:nFvV7KEqXSX9unj8X7BPdGlIZokqWqi6@dpg-d7fd1jflk1mc73dbjdn0-a.oregon-postgres.render.com/careified',
-  ssl: { rejectUnauthorized: false },
+  connectionString,
+  ssl: process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: true }
+    : { rejectUnauthorized: false }
 });
 
 export const prisma = {
