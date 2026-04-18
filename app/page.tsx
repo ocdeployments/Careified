@@ -12,6 +12,11 @@ export default function Home() {
 
  <div style={{ fontFamily: fontSans, background: '#F7F4F0', paddingTop: '60px' }}>
 
+ {/* Header with sign-in */}
+ <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+ <Link href="/sign-in" style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>Sign in</Link>
+ </div>
+
  {/* HERO */}
  <section style={{ background: '#0D1B3E', padding: '80px 24px 72px', position: 'relative', overflow: 'hidden' }}>
  <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(201,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,151,58,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
