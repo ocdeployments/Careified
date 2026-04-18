@@ -1,12 +1,18 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Upload, Camera, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 
 const FONT_SANS = "'DM Sans', sans-serif"
 const FONT_SERIF = "'DM Serif Display', serif"
+
+const fadeInUp = {
+ hidden: { opacity: 0, y: 24 },
+ visible: { opacity: 1, y: 0 }
+};
 
 const LANGUAGES = ['English', 'Spanish', 'French', 'Mandarin', 'Cantonese', 'Tagalog', 'Hindi', 'Punjabi', 'Arabic', 'Portuguese', 'Vietnamese', 'Polish', 'Sign Language', 'Other']
 const FLUENCY_LEVELS = ['Basic', 'Conversational', 'Fluent', 'Native']
@@ -67,6 +73,10 @@ export default function Step1Identity() {
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(formData.photoUrl || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Animation refs for scroll-triggered fade-in
+  const languagesRef = useRef(null)
+  const languagesInView = useInView(languagesRef, { once: true, margin: '-100px' })
 
   const handleChange = useCallback((field: string, value: any) => { saveField(field as any, value) }, [saveField])
   const handleBlur = useCallback((field: string, value: any, required?: boolean) => {
@@ -244,7 +254,7 @@ export default function Step1Identity() {
         </div>
       </div>
 
-      <div style={{ marginBottom: '36px' }}>
+      <motion.div ref={languagesRef} initial="hidden" animate={languagesInView ? "visible" : "hidden"} variants={fadeInUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} style={{ marginBottom: '36px' }}>
         <SectionHeader icon={null} title="Languages spoken" subtitle="Select all that apply. Then set your fluency level." />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
           {LANGUAGES.map(lang => {
@@ -275,7 +285,7 @@ export default function Step1Identity() {
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
       <div style={{ marginBottom: '36px' }}>
         <FieldLabel label="Professional bio" hint="150–300 words recommended." />
