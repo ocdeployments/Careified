@@ -5,6 +5,7 @@
 'use client'
 
 import { MapPin, Star, Briefcase, Globe, Shield, Zap, Home, Car } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const FONT_SERIF = "'DM Serif Display', serif"
 const FONT_SANS = "'DM Sans', sans-serif"
@@ -89,7 +90,10 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
       </div>
 
       {/* Card */}
-      <div style={{
+      <motion.div
+whileHover={{ scale: 1.02, boxShadow: '0 12px 32px rgba(13, 27, 62, 0.12)' }}
+transition={{ duration: 0.2, ease: 'easeOut' }}
+style={{
         background: 'white',
         borderRadius: '16px',
         border: '1px solid #E2E8F0',
@@ -315,7 +319,7 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
               : 'Strong profile — agencies can find and shortlist you.'}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* What agencies see note */}
       <p style={{
