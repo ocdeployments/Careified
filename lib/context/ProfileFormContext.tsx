@@ -105,14 +105,17 @@ export interface ProfileFormData {
  organisation?: string
  title?: string
  employmentType?: string
- startDate?: string
- endDate?: string
+ startMonth?: string
+ startYear?: string
+ endMonth?: string
+ endYear?: string
  current?: boolean
  clientTypes?: string[]
- duties?: string[]
+ duties?: string
  reasonLeaving?: string
  supervisorName?: string
  supervisorContact?: string
+ canContact?: boolean
  }>
  volunteerExperience?: boolean
  volunteerDescription?: string
