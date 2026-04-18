@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
+import { generateWorkingStyle } from '@/lib/profile-templates'
 import { ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react'
 
 const FONT_SANS = "'Inter', sans-serif"
@@ -150,6 +151,27 @@ export default function Step7Personality() {
 
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [answered, setAnswered] = useState<Set<number>>(new Set())
+  const [workingStyleText, setWorkingStyleText] = useState('')
+
+  const handleGenerateWorkingStyle = () => {
+    const personality = getPersonality()
+    const generated = generateWorkingStyle({
+      scenarios: {
+        patience: (personality.soft_skills as Record<string, unknown>)?.patience as 'A' | 'B' | undefined,
+        empathy: (personality.soft_skills as Record<string, unknown>)?.empathy as 'A' | 'B' | undefined,
+        adaptability: (personality.soft_skills as Record<string, unknown>)?.adaptability as 'A' | 'B' | undefined,
+        communication: (personality.soft_skills as Record<string, unknown>)?.communication as 'A' | 'B' | undefined,
+        emotional_regulation: (personality.soft_skills as Record<string, unknown>)?.emotional_regulation as 'A' | 'B' | undefined,
+        problem_solving: (personality.soft_skills as Record<string, unknown>)?.problem_solving as 'A' | 'B' | undefined,
+        resilience: (personality.soft_skills as Record<string, unknown>)?.resilience as 'A' | 'B' | undefined
+      },
+      specializations: formData.specializations || [],
+      yearsExperience: formData.yearsExperience || 0,
+      jobTitle: formData.jobTitle
+    })
+    setWorkingStyleText(generated)
+    savePersonality({ working_style_summary: generated })
+  }
 
   const getPersonality = () => (formData.personalityProfile || {}) as Record<string, unknown>
   const savePersonality = (updates: Record<string, unknown>) => {
@@ -352,6 +374,54 @@ export default function Step7Personality() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* TEMPLATE GENERATION: Working Style Summary */}
+      <div style={{ marginTop: '40px', padding: '24px', backgroundColor: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Working Style Summary</h3>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px' }}>Describe your approach to care in ~100 words. Click generate to auto-fill from your profile.</p>
+        
+        {!workingStyleText ? (
+          <button
+            onClick={handleGenerateWorkingStyle}
+            style={{
+              backgroundColor: '#F0F9FF',
+              color: '#0369A1',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              border: '1px solid #BAE6FD',
+              fontSize: '15px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginBottom: '12px',
+              fontFamily: FONT_SANS
+            }}
+          >
+            ✨ Generate from my profile
+          </button>
+        ) : null}
+        
+        <textarea
+          value={workingStyleText}
+          onChange={(e) => {
+            setWorkingStyleText(e.target.value)
+            savePersonality({ working_style_summary: e.target.value })
+          }}
+          placeholder="Click 'Generate' or write your own..."
+          style={{
+            width: '100%',
+            minHeight: '150px',
+            padding: '12px',
+            fontSize: '16px',
+            borderRadius: '8px',
+            border: '1px solid #E2E8F0',
+            fontFamily: FONT_SANS,
+            resize: 'vertical'
+          }}
+        />
+        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
+          {workingStyleText.split(/\s+/).filter(Boolean).length} / 100 words
+        </div>
       </div>
 
       {/* SECTION 3: STRENGTHS */}
