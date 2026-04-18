@@ -96,6 +96,8 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         opacity: isEmpty ? 0.5 : 1,
+        padding: '40px',
+        boxShadow: '0 8px 24px rgba(13, 27, 62, 0.06)',
       }}>
 
         {/* Gold accent bar */}
@@ -124,9 +126,10 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
                   <h3 style={{
-                    fontSize: '14px', fontWeight: 800,
+                    fontSize: '32px', fontWeight: 900,
                     margin: '0 0 2px', fontFamily: FONT_SERIF,
-                    minHeight: '18px',
+                    letterSpacing: '-0.025em', lineHeight: 1.1,
+                    minHeight: '36px',
                     background: isEmpty ? '#F1F5F9' : 'transparent',
                     borderRadius: isEmpty ? '4px' : '0',
                     color: isEmpty ? 'transparent' : '#0D1B3E',
