@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
  <body style={{ margin: 0 }}>
  <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
  <Navbar />
- <main style={{ paddingTop: '73px' }}>
+ <main style={{ paddingTop: '64px' }}>
  {children}
  </main>
  </ClerkProvider>
