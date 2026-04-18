@@ -332,7 +332,10 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  </div>
 
  {/* Submit button */}
- <button
+ <motion.button
+whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.98 }}
+transition={{ duration: 0.15 }}
  disabled={currentStep < 10}
  style={{
  width: '100%', padding: '10px',
@@ -349,7 +352,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  }}
  >
  Submit for review →
- </button>
+ </motion.button>
  </div>
 
  {/* Content area */}
@@ -431,7 +434,10 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  borderTop: '1px solid #F1F5F9',
  }}>
  {currentStep > 1 ? (
- <button
+ <motion.button
+whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.98 }}
+transition={{ duration: 0.15 }}
  className="nav-btn-back"
  onClick={() => navigate('back')}
  style={{
@@ -445,13 +451,16 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  >
  <ChevronLeft size={16} />
  Back
- </button>
+ </motion.button>
  ) : (
  <div />
  )}
 
  {currentStep < 10 ? (
- <button
+ <motion.button
+whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.98 }}
+transition={{ duration: 0.15 }}
  className="nav-btn-next"
  onClick={() => navigate('forward')}
  style={{
@@ -466,9 +475,12 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  >
  Continue
  <ChevronRight size={16} />
- </button>
+ </motion.button>
  ) : (
- <button
+ <motion.button
+whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.98 }}
+transition={{ duration: 0.15 }}
  className="nav-btn-next"
  style={{
  display: 'flex', alignItems: 'center', gap: '6px',
@@ -481,7 +493,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  }}
  >
  Submit for review →
- </button>
+ </motion.button>
  )}
  </div>
  </div>
