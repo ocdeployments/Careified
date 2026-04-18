@@ -86,3 +86,100 @@ html {
  -webkit-tap-highlight-color: transparent;
  }
 }
+
+/* Typography Scale — Rippling Premium Standard */
+.text-display-xl {
+ font-family: 'DM Serif Display', serif;
+ font-size: 96px;
+ font-weight: 900;
+ line-height: 1.0;
+ letter-spacing: -0.05em;
+}
+
+.text-display-lg {
+ font-family: 'DM Serif Display', serif;
+ font-size: 72px;
+ font-weight: 900;
+ line-height: 1.0;
+ letter-spacing: -0.04em;
+}
+
+.text-display-md {
+ font-family: 'DM Serif Display', serif;
+ font-size: 56px;
+ font-weight: 900;
+ line-height: 1.05;
+ letter-spacing: -0.03em;
+}
+
+.text-heading-xl {
+ font-family: 'DM Serif Display', serif;
+ font-size: 40px;
+ font-weight: 900;
+ line-height: 1.1;
+ letter-spacing: -0.03em;
+}
+
+.text-heading-lg {
+ font-family: 'DM Serif Display', serif;
+ font-size: 32px;
+ font-weight: 900;
+ line-height: 1.1;
+ letter-spacing: -0.025em;
+}
+
+.text-heading-md {
+ font-family: 'DM Serif Display', serif;
+ font-size: 28px;
+ font-weight: 900;
+ line-height: 1.15;
+ letter-spacing: -0.02em;
+}
+
+.text-eyebrow {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 11px;
+ font-weight: 800;
+ line-height: 1.2;
+ letter-spacing: 0.12em;
+ text-transform: uppercase;
+ color: #C9973A;
+}
+
+.text-body-lg {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 400;
+ line-height: 1.6;
+ color: #64748B;
+}
+
+.text-body {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ font-weight: 400;
+ line-height: 1.65;
+ color: #64748B;
+}
+
+.text-body-sm {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 12px;
+ font-weight: 400;
+ line-height: 1.5;
+ color: #94A3B8;
+}
+
+/* Spacing Scale — 8px base */
+.spacing-xs { padding: 8px; }
+.spacing-sm { padding: 16px; }
+.spacing-md { padding: 24px; }
+.spacing-lg { padding: 40px; }
+.spacing-xl { padding: 64px; }
+.spacing-2xl { padding: 120px; }
+
+.gap-xs { gap: 8px; }
+.gap-sm { gap: 16px; }
+.gap-md { gap: 24px; }
+.gap-lg { gap: 40px; }
+.gap-xl { gap: 64px; }
