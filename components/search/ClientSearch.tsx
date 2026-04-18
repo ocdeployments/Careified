@@ -23,7 +23,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
         body: JSON.stringify(f),
       })
       const data = await response.json()
-      setSearchResponse(data)
+      setSearchResponse({ results: data.results || data.caregivers || [], totalCount: data.totalCount || data.count || 0, page: 1, totalPages: 1, filters })
     } catch (error) {
       console.error('Search failed:', error)
     } finally {
