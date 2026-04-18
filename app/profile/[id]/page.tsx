@@ -2,6 +2,7 @@
 
 import { notFound } from 'next/navigation'
 import { Pool } from 'pg'
+import * as Accordion from '@radix-ui/react-accordion'
 import {
  MapPin, Briefcase, Star, Shield, Zap, Home,
  Globe, Car, Clock, CheckCircle, Award, Heart, Users, ChevronRight
@@ -28,10 +29,18 @@ async function getCertifications(caregiverId: string) {
  } catch { return [] }
 }
 
+async function getReferences(caregiverId: string) {
+ try {
+ const result = await pool.query(`SELECT * FROM caregiver_references WHERE caregiver_id = $1`, [caregiverId])
+ return result.rows
+ } catch { return [] }
+}
+
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
  const caregiver = await getCaregiver((await params).id)
  if (!caregiver) notFound()
  const certifications = await getCertifications((await params).id)
+ const references = await getReferences((await params).id)
 
  const displayName = caregiver.preferred_name ? `${caregiver.preferred_name} ${caregiver.last_name}` : `${caregiver.first_name} ${caregiver.last_name}`
  const initials = `${caregiver.first_name?.[0] || ''}${caregiver.last_name?.[0] || ''}`.toUpperCase()
@@ -88,6 +97,79 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  {caregiver.bio && <Section title="About"><p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, margin: 0 }}>{caregiver.bio}</p></Section>}
  {(caregiver.specializations || []).length > 0 && <Section title="Specialties"><div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{(caregiver.specializations || []).map((s: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1E3A8A' }}>{s}</span>)}</div></Section>}
  {(caregiver.services || []).length > 0 && <Section title="Services"><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>{(caregiver.services || []).map((s: string, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569' }}><CheckCircle size={14} color="#16A34A" />{s}</div>)}</div></Section>}
+ 
+ {/* Work History Accordion */}
+ {(caregiver.work_history && caregiver.work_history.length > 0) && (
+ <Accordion.Root type="multiple" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+ <Accordion.Item value="work-history" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}>
+ <Accordion.Trigger style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', fontSize: '18px', fontWeight: 600, color: '#0D1B3E', cursor: 'pointer', border: 'none', background: 'none' }}>
+ Work History <ChevronRight size={20} />
+ </Accordion.Trigger>
+ <Accordion.Content style={{ paddingTop: '16px' }}>
+ <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+ {caregiver.work_history.map((job: any, i: number) => (
+ <div key={i} style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
+ <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>{job.job_title || 'Caregiver'}</div>
+ <div style={{ fontSize: '14px', color: '#64748B' }}>{job.employer} - {job.start_date ? new Date(job.start_date).toLocaleDateString() : ''} {job.is_current ? '- Present' : job.end_date ? '- ' + new Date(job.end_date).toLocaleDateString() : ''}</div>
+ {job.description && <p style={{ fontSize: '14px', color: '#475569', marginTop: '8px' }}>{job.description}</p>}
+ </div>
+ ))}
+ </div>
+ </Accordion.Content>
+ </Accordion.Item>
+ 
+ {/* References Accordion */}
+ {references.length > 0 && (
+ <Accordion.Item value="references" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}>
+ <Accordion.Trigger style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', fontSize: '18px', fontWeight: 600, color: '#0D1B3E', cursor: 'pointer', border: 'none', background: 'none' }}>
+ References ({references.length}) <ChevronRight size={20} />
+ </Accordion.Trigger>
+ <Accordion.Content style={{ paddingTop: '16px' }}>
+ <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+ {references.map((ref: any, i: number) => (
+ <div key={i} style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
+ <div style={{ fontSize: '16px', fontWeight: 600 }}>{ref.reference_name}</div>
+ <div style={{ fontSize: '14px', color: '#64748B' }}>{ref.relationship} - Known for {ref.years_known} years</div>
+ <div style={{ fontSize: '14px', color: '#64748B', marginTop: '8px' }}>Contact available upon request</div>
+ </div>
+ ))}
+ </div>
+ </Accordion.Content>
+ </Accordion.Item>
+ )}
+ 
+ {/* Background & Compliance Accordion */}
+ <Accordion.Item value="compliance" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}>
+ <Accordion.Trigger style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', fontSize: '18px', fontWeight: 600, color: '#0D1B3E', cursor: 'pointer', border: 'none', background: 'none' }}>
+ Background and Compliance <ChevronRight size={20} />
+ </Accordion.Trigger>
+ <Accordion.Content style={{ paddingTop: '16px' }}>
+ <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+ {caregiver.vulnerable_sector_check && (
+ <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
+ <span style={{ fontSize: '14px' }}>Vulnerable Sector Check</span>
+ <span style={{ fontSize: '14px', color: '#10B981', fontWeight: 600 }}>✓ Complete</span>
+ </div>)}
+ {caregiver.driving_record_check && (
+ <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
+ <span style={{ fontSize: '14px' }}>Driving Record Check</span>
+ <span style={{ fontSize: '14px', color: '#10B981', fontWeight: 600 }}>✓ Complete</span>
+ </div>)}
+ {caregiver.bonded_insured !== undefined && (
+ <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
+ <span style={{ fontSize: '14px' }}>Bonded and Insured</span>
+ <span style={{ fontSize: '14px', color: '#10B981', fontWeight: 600 }}>{caregiver.bonded_insured ? '✓ Yes' : '-'}</span>
+ </div>)}
+ {caregiver.tb_clearance_date && (
+ <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+ <span style={{ fontSize: '14px' }}>TB Clearance</span>
+ <span style={{ fontSize: '14px', color: '#64748B' }}>{new Date(caregiver.tb_clearance_date).toLocaleDateString()}</span>
+ </div>)}
+ </div>
+ </Accordion.Content>
+ </Accordion.Item>
+ </Accordion.Root>
+ )}
  {certifications.length > 0 && <Section title="Certifications"><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{certifications.map((cert: any, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#F8FAFC', borderRadius: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Shield size={16} color="#1E3A8A" /><div><p style={{ fontSize: '13px', fontWeight: 700, margin: 0 }}>{cert.certification}</p>{cert.issuing_org && <p style={{ fontSize: '11px', color: '#64748B', margin: '2px 0 0' }}>{cert.issuing_org}</p>}</div></div><span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', backgroundColor: cert.status === 'active' ? '#F0FDF4' : '#FEF2F2', color: cert.status === 'active' ? '#16A34A' : '#DC2626' }}>{cert.status === 'active' ? 'Active' : 'Expired'}</span></div>)}</div></Section>}
  </div>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
