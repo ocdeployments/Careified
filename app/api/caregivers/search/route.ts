@@ -9,12 +9,22 @@ const pool = new Pool({
     : { rejectUnauthorized: false }
 })
 
-export async function POST(request: NextRequest) {
+async function handleSearch(request: NextRequest) {
   try {
-    const body = await request.json()
-    const f = body.filters || {}
+    let f: Record<string, any> = {}
     
-    // Get filter parameters from body
+    // Support both GET (query params) and POST (body)
+    if (request.method === 'POST') {
+      const body = await request.json()
+      f = body.filters || body
+    } else {
+      const { searchParams } = new URL(request.url)
+      searchParams.forEach((value, key) => {
+        if (value) f[key] = value
+      })
+    }
+    
+    // Get filter parameters
     const city = f.city
     const state = f.state
     const specializations = f.specializations
@@ -27,7 +37,7 @@ export async function POST(request: NextRequest) {
     const searchQuery = f.q || f.searchQuery
 
     // Build WHERE clause
-    let whereConditions = ["status = 'approved'"] // Only show approved caregivers
+    let whereConditions = ["status = 'approved'"]
     const queryParams: any[] = []
     let paramCount = 1
 
@@ -103,27 +113,13 @@ export async function POST(request: NextRequest) {
       ? `WHERE ${whereConditions.join(' AND ')}`
       : ''
 
-    // Query caregivers
     const query = `
       SELECT 
-        id,
-        first_name,
-        last_name,
-        job_title,
-        photo_url,
-        city,
-        state,
-        bio,
-        specializations,
-        credentials,
-        placement_types,
-        languages,
-        availability_status,
-        years_experience,
-        aggregate_score,
-        rating_count,
-        hourly_rate,
-        hourly_rate_max
+        id, first_name, last_name, job_title, photo_url,
+        city, state, bio, specializations, credentials,
+        placement_types, languages, availability_status,
+        years_experience, aggregate_score, rating_count,
+        hourly_rate, hourly_rate_max
       FROM caregivers
       ${whereClause}
       ORDER BY aggregate_score DESC, created_at DESC
@@ -141,13 +137,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Search error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to search caregivers',
-        caregivers: [],
-        count: 0
-      },
+      { success: false, error: 'Failed to search caregivers', caregivers: [], count: 0 },
       { status: 500 }
     )
   }
+}
+
+export async function GET(request: NextRequest) {
+  return handleSearch(request)
+}
+
+export async function POST(request: NextRequest) {
+  return handleSearch(request)
 }
