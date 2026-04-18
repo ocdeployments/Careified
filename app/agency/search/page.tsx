@@ -41,7 +41,7 @@ export default async function CaregiverSearchPage() {
   }
 
   // Pending or rejected — redirect to pending page
-  if (rows[0].status !== 'approved') {
+  if (rows[0].status !== 'approved' && rows[0].status !== 'active') {
     redirect('/agency/pending-approval')
   }
 
