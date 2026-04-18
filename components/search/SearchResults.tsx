@@ -27,7 +27,7 @@ export function SearchResults({
  );
  }
 
- if (results.length === 0) {
+ if (!results || results.length === 0) {
  return (
  <div style={{ textAlign: 'center', padding: '80px 0' }}>
  <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
