@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import "tailwindcss";
 
 /* ============================================================
  Careified Design System v2.0
@@ -31,18 +31,23 @@
  --c-border: #E2E8F0;
  --c-border-light: rgba(13,27,62,0.06);
  --c-border-gold: rgba(201,151,58,0.25);
+
  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
  --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px;
  --sp-12:48px; --sp-16:64px; --sp-20:80px;
+
  --r-sm:6px; --r-md:10px; --r-lg:16px; --r-xl:24px; --r-full:9999px;
+
  --shadow-xs: 0 1px 2px rgba(13,27,62,0.04);
  --shadow-sm: 0 2px 8px rgba(13,27,62,0.06),0 1px 2px rgba(13,27,62,0.04);
  --shadow-md: 0 4px 16px rgba(13,27,62,0.08),0 2px 4px rgba(13,27,62,0.04);
  --shadow-lg: 0 8px 32px rgba(13,27,62,0.10),0 4px 8px rgba(13,27,62,0.06);
  --shadow-xl: 0 16px 48px rgba(13,27,62,0.14),0 8px 16px rgba(13,27,62,0.08);
  --shadow-gold: 0 4px 20px rgba(201,151,58,0.20);
+
  --font-serif: 'DM Serif Display', Georgia, serif;
  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
  --t-fast: 100ms ease;
  --t-base: 150ms ease;
  --t-slow: 250ms ease;
@@ -290,11 +295,10 @@ body {
 /* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
  input, textarea, select { font-size: 16px !important; }
- button, a { min-height: 44px; }
  * { -webkit-tap-highlight-color: transparent; }
 }
 
-/* ── Agency layout containers ───────────────────────────── */
+/* ── Legacy container classes (kept for compatibility) ───── */
 .agency-container { padding: 1.5rem 2rem; max-width: 80rem; margin: 0 auto; }
 @media (max-width: 768px) { .agency-container { padding: 0.75rem 1rem; } }
 .caregiver-container { padding: 0.75rem 1rem; }
