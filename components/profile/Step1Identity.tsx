@@ -51,9 +51,9 @@ function FieldError({ message }: { message: string }) {
 
 function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: FONT_SERIF }}>{icon} {title}</h3>
-      {subtitle && <p style={{ fontSize: '12px', color: '#64748B', margin: 0, fontFamily: FONT_SANS }}>{subtitle}</p>}
+    <div style={{ marginBottom: '24px' }}>
+      <h3 style={{ fontSize: '28px', fontWeight: 900, color: '#0D1B3E', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: FONT_SERIF, letterSpacing: '-0.02em' }}>{icon} {title}</h3>
+      {subtitle && <p style={{ fontSize: '15px', color: '#64748B', margin: 0, fontFamily: FONT_SANS, lineHeight: 1.6 }}>{subtitle}</p>}
     </div>
   )
 }
