@@ -18,6 +18,7 @@ import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
 import IDCardReveal from '@/components/profile/IDCardReveal'
+import GhostProfileModal from '@/components/profile/GhostProfileModal'
 
 const FONT_SERIF = "'Inter', sans-serif"
 const FONT_SANS = "'Inter', sans-serif"
@@ -74,6 +75,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward')
  const [animating, setAnimating] = useState(false)
  const [showReveal, setShowReveal] = useState(false)
+ const [showModal, setShowModal] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
  const step = searchParams.get('step') || '1'
@@ -84,6 +86,19 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
 
  // Use context formData if passed, otherwise local state
  const data = contextFormData || formData
+
+ useEffect(() => {
+ // Check if user has seen the motivation modal
+ const seen = localStorage.getItem('hasSeenProfileMotivation')
+ if (!seen) {
+ setShowModal(true)
+ }
+ }, [])
+
+ const handleDismissModal = () => {
+ localStorage.setItem('hasSeenProfileMotivation', 'true')
+ setShowModal(false)
+ }
 
  useEffect(() => {
  setAnimating(true)
@@ -138,6 +153,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 
  return (
  <>
+ {showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
  <style>{`
  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
  @keyframes slideInForward {
