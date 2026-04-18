@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { UserButton, useAuth } from '@clerk/nextjs';
 
@@ -100,6 +100,20 @@ type PanelKey = keyof typeof panels;
 export default function Navbar() {
  const [mobileOpen, setMobileOpen] = useState(false);
  const [activePanel, setActivePanel] = useState< PanelKey | null>(null);
+ const [mounted, setMounted] = useState(false);
+
+ useEffect(() => {
+ setMounted(true);
+ }, []);
+
+ // Prevent hydration mismatch
+ if (!mounted) {
+ return (
+ <nav style={{ height: '64px', background: '#0D1B3E' }}>
+ {/* Static placeholder while loading */}
+ </nav>
+ );
+ }
 
  const handleMouseEnter = (key: PanelKey) => setActivePanel(key);
  const handleMouseLeave = () => setActivePanel(null);
