@@ -37,17 +37,17 @@ export function Checkbox({ label, description, error, id, style, ...props }: Che
  {(label || description) && (
  <label htmlFor={inputId} style={{ cursor: 'pointer', flex: 1 }}>
  {label && (
- <div style={{ fontSize: '13px', fontWeight: 500, color: '#0D1B3E', fontFamily: "'DM Sans',sans-serif", lineHeight: 1.4 }}>
+ <div style={{ fontSize: '13px', fontWeight: 500, color: '#0D1B3E', fontFamily: "'Inter', sans-serif", lineHeight: 1.4 }}>
  {label}
  </div>
  )}
  {description && (
- <div style={{ fontSize: '12px', color: '#64748B', fontFamily: "'DM Sans',sans-serif", marginTop: '2px', lineHeight: 1.4 }}>
+ <div style={{ fontSize: '12px', color: '#64748B', fontFamily: "'Inter', sans-serif", marginTop: '2px', lineHeight: 1.4 }}>
  {description}
  </div>
  )}
  {error && (
- <div style={{ fontSize: '12px', color: '#DC2626', fontFamily: "'DM Sans',sans-serif", marginTop: '3px' }}>
+ <div style={{ fontSize: '12px', color: '#DC2626', fontFamily: "'Inter', sans-serif", marginTop: '3px' }}>
  {error}
  </div>
  )}

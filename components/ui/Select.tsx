@@ -31,7 +31,7 @@ export default function Select({
             fontSize: '12px',
             fontWeight: 600,
             color: '#64748B',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           {label}
@@ -53,7 +53,7 @@ export default function Select({
             justifyContent: 'space-between',
             cursor: 'pointer',
             transition: 'border 0.2s, box-shadow 0.2s',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           <SelectPrimitive.Value placeholder={placeholder} />
@@ -90,7 +90,7 @@ export default function Select({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     transition: 'background 0.15s',
-                    fontFamily: "'DM Sans', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                   }}
                 >
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
@@ -112,7 +112,7 @@ export default function Select({
             marginTop: '4px',
             fontSize: '12px',
             color: '#DC2626',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           {error}

@@ -7,8 +7,8 @@
 import { MapPin, Star, Briefcase, Globe, Shield, Zap, Home, Car } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-const FONT_SERIF = "'DM Serif Display', serif"
-const FONT_SANS = "'DM Sans', sans-serif"
+const FONT_SERIF = "'Inter', sans-serif"
+const FONT_SANS = "'Inter', sans-serif"
 
 interface PreviewData {
   firstName?: string

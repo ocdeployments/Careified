@@ -60,11 +60,11 @@ export function CardHeader({ children, style, ...props }: HTMLAttributes<HTMLDiv
 }
 
 export function CardTitle({ children, style, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: '15px', fontWeight: 600, color: '#0D1B3E', letterSpacing: '-0.01em', ...style }} {...props}>{children}</h3>
+  return <h3 style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: '15px', fontWeight: 600, color: '#0D1B3E', letterSpacing: '-0.01em', ...style }} {...props}>{children}</h3>
 }
 
 export function CardDescription({ children, style, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p style={{ margin: '4px 0 0', fontFamily: "'DM Sans', sans-serif", fontSize: '13px', color: '#64748B', lineHeight: 1.5, ...style }} {...props}>{children}</p>
+  return <p style={{ margin: '4px 0 0', fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#64748B', lineHeight: 1.5, ...style }} {...props}>{children}</p>
 }
 
 export default Card

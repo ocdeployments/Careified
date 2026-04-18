@@ -23,7 +23,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               fontSize: '12px',
               fontWeight: 600,
               color: '#64748B',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             {label}
@@ -43,7 +43,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               color: '#0D1B3E',
               outline: 'none',
               transition: 'border 0.2s, box-shadow 0.2s',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               boxShadow: error
                 ? '0 0 0 3px rgba(220, 38, 38, 0.1)'
                 : 'none',
@@ -98,7 +98,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               marginTop: '4px',
               fontSize: '12px',
               color: '#DC2626',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             {error}

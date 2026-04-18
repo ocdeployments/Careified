@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { UserButton, useAuth } from '@clerk/nextjs';
 
-const FONT_SERIF = "'DM Serif Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
+const FONT_SERIF = "'Inter', sans-serif";
+const FONT_SANS = "'Inter', sans-serif";
 
 function AuthButton() {
  const { isLoaded, userId } = useAuth();

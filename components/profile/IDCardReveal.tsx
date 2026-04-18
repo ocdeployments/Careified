@@ -7,8 +7,8 @@
 import { useState, useEffect } from 'react'
 import { Shield, MapPin, Star, ExternalLink, Share2 } from 'lucide-react'
 
-const FONT_SERIF = "'DM Serif Display', serif"
-const FONT_SANS = "'DM Sans', sans-serif"
+const FONT_SERIF = "'Inter', sans-serif"
+const FONT_SANS = "'Inter', sans-serif"
 
 interface IDCardRevealProps {
   caregiverData: {

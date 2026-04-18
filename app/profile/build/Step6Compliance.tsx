@@ -5,8 +5,8 @@ import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { ShieldCheck, AlertCircle, Upload, CheckCircle } from 'lucide-react'
 
-const FONT_SANS = "'DM Sans', sans-serif"
-const FONT_SERIF = "'DM Serif Display', serif"
+const FONT_SANS = "'Inter', sans-serif"
+const FONT_SERIF = "'Inter', sans-serif"
 
 const inputStyle: React.CSSProperties = {
   padding: '12px 16px',

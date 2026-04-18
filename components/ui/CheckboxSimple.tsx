@@ -46,7 +46,7 @@ export function Checkbox({ label, description, error, checked, disabled, style, 
         <span>
           {label && <span style={{
             display: 'block',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: '13px',
             fontWeight: checked ? 500 : 400,
             color: checked ? '#0D1B3E' : '#475569',
@@ -55,7 +55,7 @@ export function Checkbox({ label, description, error, checked, disabled, style, 
           }}>{label}</span>}
           {description && <span style={{
             display: 'block',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: '12px',
             color: '#94A3B8',
             lineHeight: 1.4,

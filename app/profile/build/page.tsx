@@ -19,8 +19,8 @@ import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 
-const FONT_SERIF = "'DM Serif Display', serif"
-const FONT_SANS = "'DM Sans', sans-serif"
+const FONT_SERIF = "'Inter', sans-serif"
+const FONT_SANS = "'Inter', sans-serif"
 
 const STEPS = [
  { num: 1, title: 'Identity', desc: 'Name, photo, bio' },
@@ -535,7 +535,7 @@ export default function ProfileBuildPage() {
  <Suspense fallback={
  <div style={{
  padding: '50px', textAlign: 'center',
- fontFamily: "'DM Sans', sans-serif",
+ fontFamily: "'Inter', sans-serif",
  color: '#64748B', fontSize: '13px',
  }}>
  Loading...

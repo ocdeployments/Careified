@@ -35,7 +35,7 @@ export function AgencyShell({ children, title, subtitle }: { children: ReactNode
       }}>
         {/* Header */}
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: col ? 'center' : 'space-between' }}>
-          {!col && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94A3B8' }}>Agency</span>}
+          {!col && <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94A3B8' }}>Agency</span>}
           <button onClick={() => setCol(!col)} style={{
             display: 'flex',
             alignItems: 'center',
@@ -71,7 +71,7 @@ export function AgencyShell({ children, title, subtitle }: { children: ReactNode
                 background: active ? 'rgba(201,151,58,0.08)' : 'transparent',
                 borderLeft: active ? '2px solid #C9973A' : '2px solid transparent',
                 color: active ? '#92400E' : '#64748B',
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '13px',
                 fontWeight: active ? 600 : 400,
                 transition: 'all 150ms ease',
@@ -88,7 +88,7 @@ export function AgencyShell({ children, title, subtitle }: { children: ReactNode
 
         {/* Footer */}
         <div style={{ padding: '12px 8px', borderTop: '1px solid #F1F5F9' }}>
-          {!col && <span style={{ display: 'block', padding: '8px 12px', fontFamily: "'DM Sans', sans-serif", fontSize: '11px', color: '#94A3B8' }}>Careified Agency</span>}
+          {!col && <span style={{ display: 'block', padding: '8px 12px', fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#94A3B8' }}>Careified Agency</span>}
         </div>
       </aside>
 
@@ -96,8 +96,8 @@ export function AgencyShell({ children, title, subtitle }: { children: ReactNode
       <main style={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
         {(title || subtitle) && (
           <div style={{ padding: '28px 32px 0', marginBottom: '24px' }}>
-            {title && <h1 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: '28px', fontWeight: 400, color: '#0D1B3E', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{title}</h1>}
-            {subtitle && <p style={{ margin: '6px 0 0', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#64748B', lineHeight: 1.5 }}>{subtitle}</p>}
+            {title && <h1 style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: '28px', fontWeight: 400, color: '#0D1B3E', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{title}</h1>}
+            {subtitle && <p style={{ margin: '6px 0 0', fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#64748B', lineHeight: 1.5 }}>{subtitle}</p>}
           </div>
         )}
         <div style={{ padding: '0 32px 48px' }}>{children}</div>

@@ -66,7 +66,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   const computedStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     gap: s.gap, height: s.height, padding: s.padding,
-    fontSize: s.fontSize, fontFamily: "'DM Sans',sans-serif",
+    fontSize: s.fontSize, fontFamily: "'Inter', sans-serif",
     fontWeight: 600, lineHeight: 1, borderRadius: '10px',
     cursor: isDisabled ? 'not-allowed' : 'pointer',
     whiteSpace: 'nowrap', userSelect: 'none',

@@ -41,7 +41,7 @@ export default function Tooltip({ content, children }: TooltipProps) {
               lineHeight: 1.5,
               boxShadow: '0 4px 12px rgba(13, 27, 62, 0.2)',
               zIndex: 100,
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             {content}

@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export default function Home() {
- const fontSerif = "'DM Serif Display', serif";
- const fontSans = "'DM Sans', sans-serif";
+ const fontSerif = "'Inter', sans-serif";
+ const fontSans = "'Inter', sans-serif";
 
  return (
  <>
