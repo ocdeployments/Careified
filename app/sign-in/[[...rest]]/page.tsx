@@ -1,15 +1,6 @@
-'use client'
-import { SignUp } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { SignIn } from '@clerk/nextjs'
 
-function SignUpContent() {
-  const searchParams = useSearchParams()
-  const role = searchParams.get('role') || 'caregiver'
-  const redirectUrl = role === 'agency' 
-    ? `/api/onboarding/set-role?role=agency&redirect=/agency/pending-approval`
-    : `/api/onboarding/set-role?role=caregiver&redirect=/profile/build`
-
+export default function SignInPage() {
   return (
     <div style={{
       minHeight: '100vh',
@@ -19,8 +10,9 @@ function SignUpContent() {
       justifyContent: 'center',
       padding: '40px 20px',
     }}>
-      <SignUp
-        forceRedirectUrl={redirectUrl}
+      <SignIn
+        signUpUrl="/sign-up"
+        fallbackRedirectUrl="/api/auth/role-redirect"
         appearance={{
           variables: {
             colorPrimary: '#C9973A',
@@ -38,13 +30,5 @@ function SignUpContent() {
         }}
       />
     </div>
-  )
-}
-
-export default function SignUpPage() {
-  return (
-    <Suspense>
-      <SignUpContent />
-    </Suspense>
   )
 }
