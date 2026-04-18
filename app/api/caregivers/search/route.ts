@@ -53,8 +53,8 @@ async function handleSearch(request: NextRequest) {
       paramCount++
     }
 
-    if (specializations) {
-      const specArray = specializations.split(',').map((s: string) => s.trim())
+    if (specializations && Array.isArray(specializations) && specializations.length > 0) {
+      const specArray = specializations as string[]
       whereConditions.push(`specializations && $${paramCount}::text[]`)
       queryParams.push(specArray)
       paramCount++
@@ -72,22 +72,22 @@ async function handleSearch(request: NextRequest) {
       paramCount++
     }
 
-    if (credentials) {
-      const credArray = credentials.split(',').map((c: string) => c.trim())
+    if (credentials && Array.isArray(credentials) && credentials.length > 0) {
+      const credArray = credentials as string[]
       whereConditions.push(`credentials && $${paramCount}::text[]`)
       queryParams.push(credArray)
       paramCount++
     }
 
-    if (placementTypes) {
-      const typeArray = placementTypes.split(',').map((t: string) => t.trim())
+    if (placementTypes && Array.isArray(placementTypes) && placementTypes.length > 0) {
+      const typeArray = placementTypes as string[]
       whereConditions.push(`placement_types && $${paramCount}::text[]`)
       queryParams.push(typeArray)
       paramCount++
     }
 
-    if (languages) {
-      const langArray = languages.split(',').map((l: string) => l.trim())
+    if (languages && Array.isArray(languages) && languages.length > 0) {
+      const langArray = languages as string[]
       whereConditions.push(`languages && $${paramCount}::text[]`)
       queryParams.push(langArray)
       paramCount++
