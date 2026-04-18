@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Upload, Camera, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
+import { generateBio } from '@/lib/profile-templates'
 
 const FONT_SANS = "'Inter', sans-serif"
 const FONT_SERIF = "'Inter', sans-serif"
@@ -105,6 +106,16 @@ export default function Step1Identity() {
       finally { setZipLooking(false) }
     }
   }, [saveField])
+
+  const handleGenerateBio = useCallback(() => {
+    const generated = generateBio({
+      jobTitle: formData.jobTitle,
+      specializations: formData.specializations || [],
+      yearsExperience: formData.yearsExperience || 0,
+      certifications: []
+    })
+    handleChange('bio', generated)
+  }, [formData.jobTitle, formData.specializations, formData.yearsExperience, handleChange])
 
   const handlePhotoClick = () => { fileInputRef.current?.click() }
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,6 +306,25 @@ export default function Step1Identity() {
 
       <div style={{ marginBottom: '36px' }}>
         <FieldLabel label="Professional bio" hint="150–300 words recommended." />
+        {!formData.bio && (
+          <button
+            onClick={handleGenerateBio}
+            style={{
+              backgroundColor: '#F0F9FF',
+              color: '#0369A1',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              border: '1px solid #BAE6FD',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginBottom: '10px',
+              fontFamily: FONT_SANS
+            }}
+          >
+            ✨ Generate professional bio
+          </button>
+        )}
         <textarea value={formData.bio || ''} placeholder="Tell agencies who you are..." rows={5} onChange={e => handleChange('bio', e.target.value)} onBlur={e => handleBlur('bio', e.target.value)} style={{ ...inputStyle('bio'), resize: 'vertical', lineHeight: 1.6, padding: '14px 16px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
           <span style={{ fontSize: '11px', color: bioWordCount < 50 ? '#94A3B8' : bioWordCount <= 300 ? '#16A34A' : '#EF4444', fontFamily: FONT_SANS }}>
