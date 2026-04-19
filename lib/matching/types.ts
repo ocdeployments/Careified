@@ -1,4 +1,6 @@
 // lib/matching/types.ts
+import type { AttributeTier } from '@/lib/attributes'
+export type { AttributeTier }
 
 /**
  * Confidence in a dimension score.
@@ -16,8 +18,12 @@ export type Confidence = 'high' | 'medium' | 'low' | 'none'
 export type DimensionScore = {
   score: number | null
   confidence: Confidence
+  /** Numeric confidence multiplier (0-1) applied to score in overall calculation. */
+  confidence_multiplier: number
   source: string // Human-readable explanation of source
   weight_applied: number // Actual weight used after renormalization (0-1)
+  /** Which caregiver attributes fed this score (field_names from caregiver_attributes). */
+  attributes_used: string[]
 }
 
 /**
@@ -31,7 +37,10 @@ export type MatchScope = 'full_client_match' | 'partial_filter_match'
  * Result of a match computation between a caregiver and a need (client_needs or filter spec).
  */
 export type MatchResult = {
-  /** Overall weighted score, or null if no dimensions scorable. */
+  /** Overall weighted alignment score, or null if no dimensions scorable. */
+  alignment_score: number | null
+
+  /** @deprecated Use alignment_score */
   overall_score: number | null
 
   /** What this match was computed against. */
@@ -48,13 +57,19 @@ export type MatchResult = {
     environment_fit: DimensionScore
   }
 
-  /** Human-readable reasons this is a strong match. */
+  /** Criteria the caregiver's disclosures align with. */
+  criteria_aligned: string[]
+
+  /** @deprecated Use criteria_aligned */
   strong_fits: string[]
 
-  /** Human-readable concerns or mismatches. */
+  /** Criteria the caregiver's disclosures do NOT align with. */
+  criteria_not_aligned: string[]
+
+  /** @deprecated Use criteria_not_aligned */
   gaps: string[]
 
-  /** Dimensions where no data was available — explicit, not hidden. */
+  /** Dimensions where data was unavailable. */
   unknowns: string[]
 
   /** Whether the caregiver passed all hard filter gates. */
@@ -63,9 +78,24 @@ export type MatchResult = {
   /** If gates_passed is false, which gates failed. */
   gates_failed: string[]
 
+  /** Informational disclaimer required with every response. */
+  disclaimer: string
+
+  /** Weighted average confidence across scored dimensions (0-1). */
+  overall_confidence: number | null
+
   /** ISO timestamp when this was computed. */
   computed_at: string
 }
+
+/**
+ * Informational disclaimer required with every match response.
+ */
+export const ALIGNMENT_DISCLAIMER =
+  "This alignment score reflects how the caregiver's self-disclosures and " +
+  'any attributed third-party information match your stated criteria. It is ' +
+  'not a recommendation. Careified does not vouch for any caregiver. ' +
+  'Employment decisions are solely the agency\'s responsibility.'
 
 /**
  * Input for the matching function.
