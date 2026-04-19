@@ -8,7 +8,7 @@ function SignUpContent() {
   const role = searchParams.get('role') || 'caregiver'
   const redirectUrl = role === 'agency'
     ? `/api/onboarding/set-role?role=agency&redirect=/agency/pending-approval`
-    : `/api/onboarding/set-role?role=caregiver&redirect=/profile/build`
+    : `/api/onboarding/set-role?role=caregiver&redirect=/profile/start`
 
   return (
     <div style={{
