@@ -76,7 +76,6 @@ model Caregiver {
   job_title                      String?                       @db.VarChar(100)
   clients_served_count           Int?                          @default(0)
   profile_completion_pct         Decimal?                      @default(0) @db.Decimal(5, 2)
-  work_style                     String?                       @db.VarChar(50)
   hobbies                        String[]                      @default([])
   dietary_cooking                String[]                      @default([])
   personality_profile            Json?                         @default("{}")
