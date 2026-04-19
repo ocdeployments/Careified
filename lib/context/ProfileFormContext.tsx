@@ -98,6 +98,15 @@ export interface ProfileFormData {
 
  // Step 7 — Personality
  personalityProfile?: Record<string, any>
+ environment_comfort?: Record<string, 'yes' | 'no' | 'prefer_not'>
+
+ // Step 10 — Motivation
+ motivation?: Record<string, string>
+ client_preferences?: {
+   personality_types?: string[]
+   age_ranges?: string[]
+   care_style?: string
+ }
 
  // Step 8 — Work history
  workHistory?: Array<{

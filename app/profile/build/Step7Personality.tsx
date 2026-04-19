@@ -105,6 +105,18 @@ const WORKING_STYLE_LABELS: Record<string, string> = {
   conflict_style: 'Conflict approach',
 }
 
+const ENV_FACTORS = [
+  { key: 'dogs', label: 'Homes with dogs' },
+  { key: 'cats', label: 'Homes with cats' },
+  { key: 'other_pets', label: 'Homes with other pets (birds, reptiles, etc.)' },
+  { key: 'smoking_indoor', label: 'Smoking indoors' },
+  { key: 'smoking_outdoor', label: 'Smoking outdoors only' },
+  { key: 'clutter', label: 'Cluttered living spaces' },
+  { key: 'large_family', label: 'Very large or active families' },
+  { key: 'hoarding', label: 'Homes with hoarding tendencies' },
+  { key: 'substance_use', label: 'Households with substance use present' },
+]
+
 const STRENGTH_OPTIONS = [
   'Patience', 'Warmth', 'Reliability', 'Empathy',
   'Attention to detail', 'Physical stamina', 'Emotional resilience',
@@ -146,12 +158,16 @@ const GROWTH_AREA_OPTIONS = [
 ]
 
 export default function Step7Personality() {
-  const { formData } = useProfileForm()
+  const { formData, updateField } = useProfileForm()
   const { saveField } = useProfileSave()
 
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [answered, setAnswered] = useState<Set<number>>(new Set())
   const [workingStyleText, setWorkingStyleText] = useState('')
+
+  // Environment comfort state
+  const envComfort = formData.environment_comfort || {}
+  const envComplete = ENV_FACTORS.every(f => envComfort[f.key] === 'yes' || envComfort[f.key] === 'no' || envComfort[f.key] === 'prefer_not')
 
   const handleGenerateWorkingStyle = () => {
     const personality = getPersonality()
@@ -338,7 +354,7 @@ export default function Step7Personality() {
         </div>
 
         {/* Completion banner */}
-        {answered.size === 7 && (
+        {answered.size === 7 && envComplete && (
           <div style={{ 
             background: '#F0FDF4', 
             border: '1px solid #86EFAC',
@@ -351,10 +367,54 @@ export default function Step7Personality() {
           }}>
             <CheckCircle size={18} color="#16A34A" />
             <span style={{ fontSize: '13px', color: '#15803D', fontWeight: 600 }}>
-              All 7 scenarios answered — your style profile is saved
+              All 7 scenarios + environment answered — your style profile is saved
             </span>
           </div>
         )}
+      </div>
+
+      {/* SECTION 1B: ENVIRONMENT COMFORT */}
+      <div style={{ marginTop: '40px', padding: '24px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Environment comfort</h3>
+        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 20px' }}>Be honest — agencies match based on this. There are no wrong answers.</p>
+        
+        {ENV_FACTORS.map(factor => (
+          <div key={factor.key} style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>{factor.label}</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {(['yes', 'no', 'prefer_not'] as const).map(val => {
+                const selected = envComfort[factor.key] === val
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...envComfort, [factor.key]: val }
+                      updateField('environment_comfort', updated)
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: selected ? 700 : 400,
+                      cursor: 'pointer',
+                      border: selected ? '2px solid #C9973A' : '1px solid #1E3A8A',
+                      background: selected ? '#C9973A' : 'white',
+                      color: selected ? '#0D1B3E' : '#1E3A8A',
+                      fontFamily: FONT_SANS,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {val === 'yes' ? 'Yes' : val === 'no' ? 'No' : 'Prefer not to say'}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+        <div style={{ fontSize: '12px', fontWeight: 600, marginTop: '16px', color: envComplete ? '#16A34A' : '#C9973A' }}>
+          {envComplete ? '✓ All environment factors answered' : `${Object.keys(envComfort).filter(k => envComfort[k]).length} / 9 answered`}
+        </div>
       </div>
 
       {/* SECTION 2: WORKING STYLE */}
