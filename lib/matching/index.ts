@@ -12,3 +12,9 @@ export {
   scoreEnvironmentFit,
 } from './dimensions'
 export { computeMatchScore } from './score'
+export {
+  persistMatchScore,
+  getCachedMatchScore,
+  loadCaregiverForMatching,
+  loadAllApprovedCaregivers,
+} from './persistence'
