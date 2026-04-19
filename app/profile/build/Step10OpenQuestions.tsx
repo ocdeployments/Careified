@@ -3,10 +3,34 @@
 import { useState, useEffect } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
-import { MessageSquare, Sparkles, Users } from 'lucide-react'
+import { Heart, Star, Users } from 'lucide-react'
 
 const FONT_SANS = "'Inter', sans-serif"
 const FONT_SERIF = "'Inter', sans-serif"
+
+const MOTIVATION_QUESTIONS = [
+  {
+    key: 'why_caregiving',
+    label: 'Why did you become a caregiver?',
+    helper: 'What drew you to this work — your values matter to agencies.',
+    maxLength: 300,
+    required: true,
+  },
+  {
+    key: 'proudest_placement',
+    label: "Tell us about a placement you're most proud of.",
+    helper: '2–3 sentences — what happened, what you did. Optional but heavily encouraged.',
+    maxLength: 500,
+    required: false,
+  },
+  {
+    key: 'ideal_client',
+    label: 'What kind of client do you feel you were made to care for?',
+    helper: 'Describe your ideal match in your own words. Optional but heavily encouraged.',
+    maxLength: 300,
+    required: false,
+  },
+]
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -23,24 +47,28 @@ const inputStyle: React.CSSProperties = {
 }
 
 export default function Step10OpenQuestions() {
-  const { formData } = useProfileForm()
-  const { saveField } = useProfileSave()
+  const { formData, updateField } = useProfileForm()
+  
+  // Load existing motivation data from context
+  const motivation = formData.motivation || {}
 
-  const [q1, setQ1] = useState(formData.openQ1 || '')
-  const [q2, setQ2] = useState(formData.openQ2 || '')
-  const [q3, setQ3] = useState(formData.openQ3 || '')
-  const [canContinue, setCanContinue] = useState(false)
+  const [q1, setQ1] = useState(motivation.why_caregiving || '')
+  const [q2, setQ2] = useState(motivation.proudest_placement || '')
+  const [q3, setQ3] = useState(motivation.ideal_client || '')
 
-  useEffect(() => {
-    setCanContinue(
-      q1.trim().length >= 50 &&
-      q2.trim().length >= 50 &&
-      q3.trim().length >= 50
-    )
-  }, [q1, q2, q3])
+  const q1Complete = q1.trim().length > 0
+  const canContinue = q1Complete
 
-  const handleBlur = (field: 'openQ1' | 'openQ2' | 'openQ3', value: string) => {
-    saveField(field, value.trim())
+  const handleChange = (key: string, value: string) => {
+    if (key === 'why_caregiving') setQ1(value)
+    if (key === 'proudest_placement') setQ2(value)
+    if (key === 'ideal_client') setQ3(value)
+    
+    // Save to context (useProfileSave handles DB via onBlur)
+    updateField('motivation', {
+      ...motivation,
+      [key]: value
+    })
   }
 
   return (
@@ -48,83 +76,83 @@ export default function Step10OpenQuestions() {
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: 'inline-block', padding: '6px 12px', borderRadius: 20, background: 'rgba(201,151,58,0.1)', marginBottom: 12 }}>
-          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: '#C9973A' }}>FINAL STEP - TELL YOUR STORY</span>
+          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: '#C9973A' }}>YOUR STORY</span>
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', marginBottom: 8, lineHeight: 1.1 }}>
-          In Your Own Words
+          What Drives You
         </h2>
         <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>
-          These open-ended questions let agencies see your personality, communication style, and what drives you as a caregiver. Be honest and specific - this is where you stand out.
+          Agencies use this to match you with clients who'll genuinely benefit from who you are.
         </p>
       </div>
 
-      {/* Question 1 */}
+      {/* Question 1 - Required */}
       <div style={{ marginBottom: 24, padding: 24, borderRadius: 16, background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
         <div style={{ display: 'flex', alignItems: 'start', gap: 12, marginBottom: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <MessageSquare size={16} color="#0D1B3E" />
+            <Heart size={16} color="#0D1B3E" />
           </div>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0D1B3E', marginBottom: 4 }}>
-              Tell us about a time you made a real difference in someone's life as a caregiver.
+              {MOTIVATION_QUESTIONS[0].label} <span style={{ color: '#DC2626' }}>*</span>
             </h3>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>What happened, and why does it matter to you?</p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>{MOTIVATION_QUESTIONS[0].helper}</p>
           </div>
         </div>
         <textarea
           value={q1}
-          onChange={(e) => setQ1(e.target.value)}
-          onBlur={(e) => handleBlur('openQ1', e.target.value)}
-          maxLength={500}
-          rows={5}
-          placeholder="Example: I cared for Mrs. Chen for 18 months. She had advanced dementia and often didn't recognize her own family. But she always remembered me as 'the kind one.' On her final week, she held my hand and smiled. Her daughter told me I gave her mother dignity when she needed it most. That's why I do this work..."
+          onChange={(e) => handleChange('why_caregiving', e.target.value)}
+          maxLength={MOTIVATION_QUESTIONS[0].maxLength}
+          rows={4}
+          placeholder="I became a caregiver because..."
           style={{
             ...inputStyle,
-            border: q1.length >= 50 ? '1px solid #C9973A' : '1px solid #E2E8F0',
+            border: q1.length > 0 ? '1px solid #C9973A' : '1px solid #E2E8F0',
           }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-          <span style={{ fontSize: 11, color: q1.length < 50 ? '#DC2626' : '#16A34A' }}>
-            {q1.length < 50 ? `Need ${50 - q1.length} more characters (minimum 50)` : 'Looking good'}
+          <span style={{ fontSize: 11, color: q1Complete ? '#16A34A' : '#DC2626' }}>
+            {q1Complete ? '✓ Required question answered' : 'Required'}
           </span>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>{q1.length}/500</span>
+          <span style={{ fontSize: 11, color: q1.length > MOTIVATION_QUESTIONS[0].maxLength - 20 ? '#DC2626' : '#94A3B8' }}>{q1.length}/{MOTIVATION_QUESTIONS[0].maxLength}</span>
         </div>
       </div>
 
-      {/* Question 2 */}
+      {/* Question 2 - Optional but encouraged */}
       <div style={{ marginBottom: 24, padding: 24, borderRadius: 16, background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
         <div style={{ display: 'flex', alignItems: 'start', gap: 12, marginBottom: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #1E3A8A, #2563EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Sparkles size={16} color="#FFFFFF" />
+            <Star size={16} color="#FFFFFF" />
           </div>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0D1B3E', marginBottom: 4 }}>
-              What's the most challenging situation you've faced in caregiving, and how did you handle it?
+              {MOTIVATION_QUESTIONS[1].label}
             </h3>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>Agencies want to see problem-solving and resilience.</p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>{MOTIVATION_QUESTIONS[1].helper}</p>
           </div>
         </div>
         <textarea
           value={q2}
-          onChange={(e) => setQ2(e.target.value)}
-          onBlur={(e) => handleBlur('openQ2', e.target.value)}
-          maxLength={500}
-          rows={5}
-          placeholder="Example: I worked with a client who refused all medication. Family was frustrated. I tried music during med time, then his favorite snack after. Nothing worked. Finally I asked why. He said pills reminded him of the hospital where his wife died. Once I understood, I got the doctor to switch to liquid form in juice. He took it every day after that..."
+          onChange={(e) => handleChange('proudest_placement', e.target.value)}
+          maxLength={MOTIVATION_QUESTIONS[1].maxLength}
+          rows={4}
+          placeholder="One placement that stands out..."
           style={{
             ...inputStyle,
-            border: q2.length >= 50 ? '1px solid #C9973A' : '1px solid #E2E8F0',
+            border: q2.length > 0 ? '1px solid #1E3A8A' : '1px solid #E2E8F0',
           }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-          <span style={{ fontSize: 11, color: q2.length < 50 ? '#DC2626' : '#16A34A' }}>
-            {q2.length < 50 ? `Need ${50 - q2.length} more characters (minimum 50)` : 'Looking good'}
-          </span>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>{q2.length}/500</span>
+          {!q2 && (
+            <span style={{ fontSize: 11, color: '#C9973A' }}>
+              Optional — but caregivers who answer get noticed more often
+            </span>
+          )}
+          <span style={{ fontSize: 11, color: q2.length > MOTIVATION_QUESTIONS[1].maxLength - 20 ? '#DC2626' : '#94A3B8' }}>{q2.length}/{MOTIVATION_QUESTIONS[1].maxLength}</span>
         </div>
       </div>
 
-      {/* Question 3 */}
+      {/* Question 3 - Optional but encouraged */}
       <div style={{ marginBottom: 24, padding: 24, borderRadius: 16, background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
         <div style={{ display: 'flex', alignItems: 'start', gap: 12, marginBottom: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #B45309, #C97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -132,37 +160,38 @@ export default function Step10OpenQuestions() {
           </div>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0D1B3E', marginBottom: 4 }}>
-              If a family asked why they should choose you as their caregiver, what would you want them to know?
+              {MOTIVATION_QUESTIONS[2].label}
             </h3>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>This is your elevator pitch. What makes you different?</p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>{MOTIVATION_QUESTIONS[2].helper}</p>
           </div>
         </div>
         <textarea
           value={q3}
-          onChange={(e) => setQ3(e.target.value)}
-          onBlur={(e) => handleBlur('openQ3', e.target.value)}
-          maxLength={500}
-          rows={5}
-          placeholder="Example: I don't just follow a care plan - I get to know the person. I learn their stories, their habits, what makes them smile. I've worked with dementia clients for 8 years and I still remember every single one. Your loved one won't be a task list to me. They'll be a person I care about..."
+          onChange={(e) => handleChange('ideal_client', e.target.value)}
+          maxLength={MOTIVATION_QUESTIONS[2].maxLength}
+          rows={4}
+          placeholder="I feel most connected with clients who..."
           style={{
             ...inputStyle,
-            border: q3.length >= 50 ? '1px solid #C9973A' : '1px solid #E2E8F0',
+            border: q3.length > 0 ? '1px solid #B45309' : '1px solid #E2E8F0',
           }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-          <span style={{ fontSize: 11, color: q3.length < 50 ? '#DC2626' : '#16A34A' }}>
-            {q3.length < 50 ? `Need ${50 - q3.length} more characters (minimum 50)` : 'Looking good'}
-          </span>
-          <span style={{ fontSize: 11, color: '#94A3B8' }}>{q3.length}/500</span>
+          {!q3 && (
+            <span style={{ fontSize: 11, color: '#C9973A' }}>
+              Optional — but helps agencies find your best fit
+            </span>
+          )}
+          <span style={{ fontSize: 11, color: q3.length > MOTIVATION_QUESTIONS[2].maxLength - 20 ? '#DC2626' : '#94A3B8' }}>{q3.length}/{MOTIVATION_QUESTIONS[2].maxLength}</span>
         </div>
       </div>
 
       {/* Completion note */}
       {canContinue && (
         <div style={{ padding: 16, borderRadius: 12, background: '#FDF6EC', border: '1px solid rgba(201,151,58,0.2)', display: 'flex', alignItems: 'start', gap: 12 }}>
-          <Sparkles size={16} color="#C9973A" style={{ flexShrink: 0, marginTop: 2 }} />
+          <Star size={16} color="#C9973A" style={{ flexShrink: 0, marginTop: 2 }} />
           <p style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6 }}>
-            <strong>Your profile is ready to submit.</strong> Click Continue to review everything one last time, then submit for agency review. Once approved, you'll appear in search results.
+            <strong>Your story is ready.</strong> Click Continue to review everything one last time, then submit for agency review.
           </p>
         </div>
       )}
