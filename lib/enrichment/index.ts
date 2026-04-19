@@ -1,6 +1,6 @@
 // lib/enrichment/index.ts
 import { Pool } from 'pg'
-import { generateBestFitProfile } from './bestFitProfile'
+import { generateDisclosedPreferences } from './bestFitProfile'
 import { extractMatchingTags, computeProfileStrength } from './tagsAndScore'
 import type {
   CaregiverForEnrichment,
@@ -8,7 +8,7 @@ import type {
 } from './types'
 
 export * from './types'
-export { generateBestFitProfile } from './bestFitProfile'
+export { generateDisclosedPreferences } from './bestFitProfile'
 export { extractMatchingTags, computeProfileStrength } from './tagsAndScore'
 
 /**
@@ -19,7 +19,7 @@ export function enrichCaregiver(
   cg: CaregiverForEnrichment
 ): EnrichmentResult {
   return {
-    best_fit_profile: generateBestFitProfile(cg),
+    disclosed_preferences: generateDisclosedPreferences(cg),
     matching_tags: extractMatchingTags(cg),
     profile_strength_score: computeProfileStrength(cg),
   }
@@ -51,6 +51,7 @@ export async function enrichAndPersist(
   const cg = rows[0] as CaregiverForEnrichment
   const result = enrichCaregiver(cg)
 
+  // Store as best_fit_profile for backward compatibility during transition
   await pool.query(
     `UPDATE caregivers
     SET
@@ -59,15 +60,11 @@ export async function enrichAndPersist(
       updated_at = now()
     WHERE id = $3`,
     [
-      JSON.stringify(result.best_fit_profile),
+      JSON.stringify(result.disclosed_preferences),
       result.profile_strength_score,
       caregiverId,
     ]
   )
-
-  // Note: matching_tags is not persisted as a column (yet).
-  // It's computed on-demand from the profile and used by the matching engine (Session 12A).
-  // If we want to persist for filtering performance, we'd add a tags[] column in a future migration.
 
   return result
 }

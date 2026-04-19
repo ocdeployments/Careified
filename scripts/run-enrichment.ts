@@ -19,7 +19,7 @@ async function main() {
   for (const { id, first_name, last_name } of rows) {
     const result = await enrichAndPersist(pool, id)
     console.log(
-      `✅ ${first_name} ${last_name}: strength=${result.profile_strength_score}, tags=${result.matching_tags.length}, fits=${result.best_fit_profile.strong_fits.length}`
+      `✅ ${first_name} ${last_name}: strength=${result.profile_strength_score}, tags=${result.matching_tags.length}, fits=${result.disclosed_preferences.caregiver_indicates_best_for.length}`
     )
   }
 

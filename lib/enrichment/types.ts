@@ -35,13 +35,16 @@ export type Motivation = {
   ideal_client?: string
 }
 
-export type BestFitProfile = {
-  strong_fits: string[]
-  weak_fits: string[]
+export type CaregiverDisclosedPreferences = {
+  caregiver_indicates_best_for: string[]
+  caregiver_indicates_less_suited_for: string[]
   recommended_placement_length: 'short_term' | 'long_term' | 'either'
   recommended_intensity: 'light' | 'moderate' | 'complex' | 'any'
   generated_at: string
 }
+
+/** @deprecated Use CaregiverDisclosedPreferences */
+export type BestFitProfile = CaregiverDisclosedPreferences
 
 export type MatchingTag =
   | 'personal_connection'
@@ -78,7 +81,7 @@ export type CaregiverForEnrichment = {
 }
 
 export type EnrichmentResult = {
-  best_fit_profile: BestFitProfile
+  disclosed_preferences: CaregiverDisclosedPreferences
   matching_tags: MatchingTag[]
   profile_strength_score: number
 }
