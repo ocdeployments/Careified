@@ -1,7 +1,8 @@
-// app/api/agency/clients/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
+import { decryptPHI, decryptPHIJson } from '@/lib/encryption/phi'
+import { logAudit } from '@/lib/audit/log'
 
 async function getAgencyId(clerkUserId: string): Promise<string | null> {
   const { rows } = await pool.query(
@@ -12,7 +13,7 @@ async function getAgencyId(clerkUserId: string): Promise<string | null> {
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
@@ -32,11 +33,57 @@ export async function GET(
     return NextResponse.json({ error: 'not_found' }, { status: 404 })
   }
 
-  return NextResponse.json({ client: rows[0] })
+  const r = rows[0]
+
+  const client = {
+    id: r.id,
+    client_first_name: decryptPHI(r.client_first_name_encrypted),
+    client_age: r.client_age,
+    primary_condition: decryptPHI(r.primary_condition_encrypted),
+    secondary_conditions: decryptPHIJson<string[]>(r.secondary_conditions_encrypted) ?? [],
+    mobility_level: decryptPHI(r.mobility_level_encrypted),
+    medications_complex: (() => {
+      const v = decryptPHI(r.medications_complex_encrypted)
+      return v === 'true' ? true : v === 'false' ? false : null
+    })(),
+    services_needed: r.services_needed,
+    care_intensity: r.care_intensity,
+    placement_type: r.placement_type,
+    hours_per_week: r.hours_per_week,
+    start_date: r.start_date,
+    duration_expected: r.duration_expected,
+    city: r.city,
+    state: r.state,
+    postal_code: r.postal_code,
+    pets_present: r.pets_present,
+    smoking_household: r.smoking_household,
+    home_condition: r.home_condition,
+    family_dynamics: r.family_dynamics,
+    language_required: r.language_required,
+    gender_preference: r.gender_preference,
+    cultural_preference: r.cultural_preference,
+    personality_desired: r.personality_desired,
+    hourly_rate_max: r.hourly_rate_max,
+    status: r.status,
+    matched_caregiver_id: r.matched_caregiver_id,
+    created_at: r.created_at,
+  }
+
+  logAudit(pool, {
+    actorType: 'agency',
+    actorId: userId,
+    action: 'client_needs_view',
+    resourceType: 'client_needs',
+    resourceId: id,
+    ipAddress: req.headers.get('x-forwarded-for') || undefined,
+    userAgent: req.headers.get('user-agent') || undefined,
+  })
+
+  return NextResponse.json({ client })
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
@@ -55,6 +102,16 @@ export async function DELETE(
   if (result.rowCount === 0) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 })
   }
+
+  logAudit(pool, {
+    actorType: 'agency',
+    actorId: userId,
+    action: 'client_needs_deleted',
+    resourceType: 'client_needs',
+    resourceId: id,
+    ipAddress: req.headers.get('x-forwarded-for') || undefined,
+    userAgent: req.headers.get('user-agent') || undefined,
+  })
 
   return NextResponse.json({ success: true })
 }
