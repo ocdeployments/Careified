@@ -14,16 +14,57 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
   const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const [excludedCount, setExcludedCount] = useState(0)
+
   const executeSearch = useCallback(async (f: SearchFilters) => {
     setLoading(true)
     try {
-      const response = await fetch('/api/caregivers/search', {
+      // Build MatchNeed from filters
+      const need = {
+        city: f.city,
+        state: f.state,
+        primary_condition: f.specialties?.[0] || undefined,
+        placement_type: f.placementTypes?.[0] || undefined,
+        language_required: f.languages?.[0] || undefined,
+        care_intensity: undefined,
+      }
+
+      const response = await fetch('/api/match/rank', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(f),
+        body: JSON.stringify({ need }),
       })
       const data = await response.json()
-      setSearchResponse({ results: data.results || data.caregivers || [], totalCount: data.totalCount || data.count || 0, page: 1, totalPages: 1, filters })
+      
+      // Map rank API results to CaregiverSearchResult shape
+      const mappedResults = (data.results || []).map((r: any) => ({
+        id: r.caregiver_id,
+        firstName: r.first_name,
+        lastName: r.last_name,
+        credentials: [],
+        specialties: r.specializations || [],
+        languages: r.languages || [],
+        yearsExperience: r.years_experience || 0,
+        clientsServedCount: 0,
+        score: r.match?.overall_score || 0,
+        hasReferences: false,
+        hasBackgroundCheck: false,
+        city: r.city,
+        state: r.state,
+        availabilityStatus: 'available_now',
+        availabilityLabel: 'Available',
+        placementTypes: [],
+        willingLiveIn: false,
+        hasVehicle: false,
+        openToUrgent: false,
+        employmentType: 'full-time',
+        certificationCount: 0,
+        profileCompletionPct: 0,
+        hourlyRate: r.hourly_rate,
+      }))
+      
+      setSearchResponse({ results: mappedResults, totalCount: data.matched_count || 0, page: 1, totalPages: 1, filters })
+      setExcludedCount(data.excluded_count || 0)
     } catch (error) {
       console.error('Search failed:', error)
     } finally {
@@ -54,7 +95,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
           </h1>
           <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
             {searchResponse
-              ? `${searchResponse.totalCount} verified caregiver${searchResponse.totalCount !== 1 ? 's' : ''} match your search`
+              ? `${searchResponse.totalCount} verified caregiver${searchResponse.totalCount !== 1 ? 's' : ''} match your search${excludedCount > 0 ? ` (${excludedCount} excluded)` : ''}`
               : 'Search verified caregiver profiles'}
           </p>
         </div>
@@ -76,6 +117,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
                 {loading ? 'Searching...' : `${searchResponse?.totalCount || 0} caregivers found`}
+                {excludedCount > 0 && <span style={{ marginLeft: '8px', color: '#94A3B8' }}>({excludedCount} excluded by filters)</span>}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <label style={{ fontSize: '12px', color: '#64748B' }}>Sort by</label>
