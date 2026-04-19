@@ -168,6 +168,25 @@ export async function POST(req: NextRequest) {
   )
  }
 
+ // Run enrichment asynchronously (non-blocking)
+ // This updates best_fit_profile and profile_strength_score
+ // We don't await — the save response goes back immediately
+ const caregiverIdResult = await pool.query(
+  'SELECT id FROM caregivers WHERE user_id = $1 LIMIT 1',
+  [userId]
+ )
+ if (caregiverIdResult.rows.length > 0) {
+  const caregiverId = caregiverIdResult.rows[0].id
+  // Import and call enrichment - fire and forget
+  import('@/lib/enrichment').then(({ enrichAndPersist }) => {
+   enrichAndPersist(pool, caregiverId).catch(err => {
+    console.error('Enrichment failed (non-fatal):', err)
+   })
+  }).catch(() => {
+   // Enrichment import failed - non-fatal
+  })
+ }
+
  return NextResponse.json({
   success: true,
   completionPct,
