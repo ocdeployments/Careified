@@ -18,3 +18,6 @@ export {
   loadCaregiverForMatching,
   loadAllApprovedCaregivers,
 } from './persistence'
+export { loadCaregiverForMatchingV2, loadAllApprovedCaregiversV2 } from './caregiver-loader'
+export type { CaregiverWithProvenance } from './caregiver-loader'
+export { ALIGNMENT_DISCLAIMER } from './types'

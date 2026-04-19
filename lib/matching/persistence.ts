@@ -1,7 +1,8 @@
 // lib/matching/persistence.ts
 import { Pool } from 'pg'
-import type { MatchResult, CaregiverForMatching, MatchNeed } from './types'
+import type { MatchResult, MatchNeed } from './types'
 import { computeMatchScore } from './score'
+import { loadCaregiverForMatchingV2, loadAllApprovedCaregiversV2, type CaregiverWithProvenance } from './caregiver-loader'
 
 export async function persistMatchScore(
   pool: Pool,
@@ -9,6 +10,10 @@ export async function persistMatchScore(
   clientNeedsId: string,
   result: MatchResult
 ): Promise<void> {
+  const overall = result.alignment_score ?? result.overall_score
+  const strongs = result.criteria_aligned ?? result.strong_fits ?? []
+  const gapsList = result.criteria_not_aligned ?? result.gaps ?? []
+
   await pool.query(
     `INSERT INTO match_scores (
       caregiver_id, client_needs_id,
@@ -20,7 +25,7 @@ export async function persistMatchScore(
     [
       caregiverId,
       clientNeedsId,
-      result.overall_score,
+      overall,
       result.dimensions.clinical_fit.score,
       result.dimensions.reliability.score,
       result.dimensions.logistics_match.score,
@@ -28,8 +33,8 @@ export async function persistMatchScore(
       result.dimensions.cultural_language_fit.score,
       result.dimensions.retention_signal.score,
       result.dimensions.environment_fit.score,
-      result.strong_fits,
-      result.gaps,
+      strongs,
+      gapsList,
     ]
   )
 }
@@ -52,38 +57,16 @@ export async function getCachedMatchScore(
   return null // For now, cache lookup returns null — forces recompute. Will refine if perf needs.
 }
 
+// V2 loaders that use the attribute-aware loader
 export async function loadCaregiverForMatching(
   pool: Pool,
   caregiverId: string
-): Promise<CaregiverForMatching | null> {
-  const { rows } = await pool.query(
-    `SELECT id, first_name, last_name,
-      specializations, credentials, placement_types, languages,
-      years_experience, hourly_rate, hourly_rate_max, gender,
-      city, state, postal_code, travel_radius,
-      has_vehicle, willing_live_in, willing_overnight,
-      availability_status,
-      client_preferences, environment_comfort, motivation,
-      reliability_metrics
-    FROM caregivers WHERE id = $1 AND status = 'approved'`,
-    [caregiverId]
-  )
-  return (rows[0] as CaregiverForMatching) ?? null
+): Promise<CaregiverWithProvenance | null> {
+  return loadCaregiverForMatchingV2(pool, caregiverId)
 }
 
 export async function loadAllApprovedCaregivers(
   pool: Pool
-): Promise<CaregiverForMatching[]> {
-  const { rows } = await pool.query(
-    `SELECT id, first_name, last_name,
-      specializations, credentials, placement_types, languages,
-      years_experience, hourly_rate, hourly_rate_max, gender,
-      city, state, postal_code, travel_radius,
-      has_vehicle, willing_live_in, willing_overnight,
-      availability_status,
-      client_preferences, environment_comfort, motivation,
-      reliability_metrics
-    FROM caregivers WHERE status = 'approved'`
-  )
-  return rows as CaregiverForMatching[]
+): Promise<CaregiverWithProvenance[]> {
+  return loadAllApprovedCaregiversV2(pool)
 }

@@ -6,6 +6,7 @@ import {
   computeMatchScore,
   loadAllApprovedCaregivers,
   persistMatchScore,
+  ALIGNMENT_DISCLAIMER,
 } from '@/lib/matching'
 import type { MatchNeed } from '@/lib/matching'
 
@@ -37,8 +38,8 @@ export async function POST(req: NextRequest) {
   const ranked = caregivers
     .map(cg => ({ caregiver: cg, result: computeMatchScore(cg, need) }))
     .filter(r => r.result.gates_passed)
-    .filter(r => (r.result.overall_score ?? 0) >= minScore)
-    .sort((a, b) => (b.result.overall_score ?? 0) - (a.result.overall_score ?? 0))
+    .filter(r => (r.result.alignment_score ?? 0) >= minScore)
+    .sort((a, b) => (b.result.alignment_score ?? 0) - (a.result.alignment_score ?? 0))
     .slice(0, limit)
 
   // Persist results if we have a client_needs_id (not a filter spec)
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     scope: ranked[0]?.result.scope ?? 'partial_filter_match',
+    disclaimer: ranked[0]?.result.disclaimer ?? ALIGNMENT_DISCLAIMER,
     total_caregivers: caregivers.length,
     matched_count: ranked.length,
     excluded_count: excludedCount,
@@ -70,7 +72,10 @@ export async function POST(req: NextRequest) {
       languages: r.caregiver.languages,
       years_experience: r.caregiver.years_experience,
       hourly_rate: r.caregiver.hourly_rate,
-      match: r.result,
+      alignment_score: r.result.alignment_score,
+      overall_confidence: r.result.overall_confidence,
+      alignment: r.result,
+      match: r.result, // deprecated alias for UI backcompat
     })),
   })
 }
