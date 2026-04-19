@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const FONT_SANS = "'DM Sans', sans-serif"
@@ -46,6 +46,28 @@ export default function NewClientPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Consent state
+  const [consentsLoaded, setConsentsLoaded] = useState(false)
+  const [showConsentModal, setShowConsentModal] = useState(false)
+  const [acknowledgedPlatform, setAcknowledgedPlatform] = useState(false)
+  const [acknowledgedEmployer, setAcknowledgedEmployer] = useState(false)
+  const [savingConsent, setSavingConsent] = useState(false)
+
+  // Check consent status on mount
+  useEffect(() => {
+    fetch('/api/agency/consent-status')
+      .then(r => r.json())
+      .then(d => {
+        const hasPlatform = d.has_agency_platform_role
+        const hasEmployer = d.has_agency_employer_responsibility
+        if (!hasPlatform || !hasEmployer) {
+          setShowConsentModal(true)
+        }
+        setConsentsLoaded(true)
+      })
+      .catch(() => setConsentsLoaded(true))
+  }, [])
+
   const [form, setForm] = useState({
     client_first_name: '',
     client_age: '',
@@ -70,6 +92,7 @@ export default function NewClientPage() {
     gender_preference: '',
     personality_desired: [] as string[],
     hourly_rate_max: '',
+    client_data_authorization: false,
   })
 
   function setField<K extends keyof typeof form>(key: K, value: typeof form[K]) {
@@ -105,6 +128,12 @@ export default function NewClientPage() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
+        // Handle consent required (412)
+        if (res.status === 412 && err.error === 'consent_required') {
+          setShowConsentModal(true)
+          setSubmitting(false)
+          return
+        }
         throw new Error(err.error || 'Failed to create client')
       }
       const data = await res.json()
@@ -115,10 +144,36 @@ export default function NewClientPage() {
     }
   }
 
-  const canSubmit = form.client_first_name && form.primary_condition && form.city && form.state
+  const canSubmit = form.client_first_name && form.primary_condition && form.city && form.state && (form.client_data_authorization ?? false)
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px', fontFamily: FONT_SANS }}>
+      {/* Consent Modal */}
+      {showConsentModal && consentsLoaded && (
+        <ConsentModal
+          onAccept={async () => {
+            setSavingConsent(true)
+            try {
+              const res = await fetch('/api/agency/consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  consents: ['agency_platform_role', 'agency_employer_responsibility'],
+                }),
+              })
+              if (res.ok) setShowConsentModal(false)
+            } finally {
+              setSavingConsent(false)
+            }
+          }}
+          acknowledgedPlatform={acknowledgedPlatform}
+          setAcknowledgedPlatform={setAcknowledgedPlatform}
+          acknowledgedEmployer={acknowledgedEmployer}
+          setAcknowledgedEmployer={setAcknowledgedEmployer}
+          saving={savingConsent}
+        />
+      )}
+
       <h1 style={{ fontFamily: FONT_SERIF, fontSize: 32, color: '#0D1B3E', margin: '0 0 8px 0' }}>
         New Client
       </h1>
@@ -307,6 +362,35 @@ export default function NewClientPage() {
         </div>
       </div>
 
+      {/* Client Authorization */}
+      <div style={{
+        background: '#FEF3C7',
+        border: '1px solid #F59E0B',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 24,
+      }}>
+        <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={form.client_data_authorization ?? false}
+            onChange={e => setField('client_data_authorization' as any, e.target.checked as any)}
+            style={{ marginTop: 3 }}
+          />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E', marginBottom: 4 }}>
+              Client authorization confirmation <span style={{ color: '#DC2626' }}>*</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#78350F', lineHeight: 1.5 }}>
+              I confirm I have obtained informed authorization from the client (or their
+              legally authorized representative) to input their care requirements,
+              including health-related information, into Careified for the purpose of
+              finding a caregiver.
+            </div>
+          </div>
+        </label>
+      </div>
+
       {error && (
         <div style={{ background: '#FEE2E2', color: '#991B1B', padding: 16, borderRadius: 12, marginBottom: 16 }}>
           {error}
@@ -372,5 +456,92 @@ function Pill({ label, active, onClick }: { label: string; active: boolean; onCl
     >
       {label}
     </button>
+  )
+}
+
+function ConsentModal({
+  onAccept,
+  acknowledgedPlatform,
+  setAcknowledgedPlatform,
+  acknowledgedEmployer,
+  setAcknowledgedEmployer,
+  saving,
+}: {
+  onAccept: () => void
+  acknowledgedPlatform: boolean
+  setAcknowledgedPlatform: (v: boolean) => void
+  acknowledgedEmployer: boolean
+  setAcknowledgedEmployer: (v: boolean) => void
+  saving: boolean
+}) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(13,27,62,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+      padding: 24, fontFamily: "'DM Sans', sans-serif",
+    }}>
+      <div style={{
+        background: 'white', borderRadius: 16, maxWidth: 640, width: '100%',
+        maxHeight: '90vh', overflow: 'auto', padding: 40,
+      }}>
+        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 26, color: '#0D1B3E', margin: '0 0 8px 0' }}>
+          Before you add a client
+        </h2>
+        <p style={{ color: '#64748B', marginBottom: 24, fontSize: 14 }}>
+          Please acknowledge how Careified works. These are one-time acknowledgments.
+        </p>
+
+        <div style={{ background: '#F7F4F0', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
+            <input
+              type="checkbox"
+              checked={acknowledgedPlatform}
+              onChange={e => setAcknowledgedPlatform(e.target.checked)}
+              style={{ marginTop: 3 }}
+            />
+            <div style={{ fontSize: 13, color: '#0D1B3E', lineHeight: 1.6 }}>
+              <strong>Platform, not recommender.</strong> I acknowledge that Careified
+              organizes and displays information provided by caregivers and third parties.
+              Careified does NOT recommend, vouch for, endorse, or employ any caregiver.
+              All hiring decisions are solely my responsibility. Match scores and rankings
+              are UI conveniences, not recommendations.
+            </div>
+          </label>
+        </div>
+
+        <div style={{ background: '#F7F4F0', borderRadius: 12, padding: 20, marginBottom: 24 }}>
+          <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
+            <input
+              type="checkbox"
+              checked={acknowledgedEmployer}
+              onChange={e => setAcknowledgedEmployer(e.target.checked)}
+              style={{ marginTop: 3 }}
+            />
+            <div style={{ fontSize: 13, color: '#0D1B3E', lineHeight: 1.6 }}>
+              <strong>Employer responsibility.</strong> If I engage any caregiver through
+              Careified, I (or my agency) am the employer or engaging party and am solely
+              responsible for background checks, qualification verification, employment
+              law compliance, supervision, insurance, and healthcare regulation compliance.
+              Careified bears no employer or agency relationship with any caregiver.
+            </div>
+          </label>
+        </div>
+
+        <button
+          onClick={onAccept}
+          disabled={!acknowledgedPlatform || !acknowledgedEmployer || saving}
+          style={{
+            width: '100%', padding: '14px 24px', borderRadius: 10, border: 'none',
+            background: acknowledgedPlatform && acknowledgedEmployer && !saving
+              ? 'linear-gradient(135deg, #C9973A, #E8B86D)' : '#E2E8F0',
+            color: '#0D1B3E', fontSize: 14, fontWeight: 700,
+            cursor: acknowledgedPlatform && acknowledgedEmployer && !saving ? 'pointer' : 'not-allowed',
+            fontFamily: "'DM Sans', sans-serif",
+          }}
+        >
+          {saving ? 'Saving…' : 'I acknowledge and continue'}
+        </button>
+      </div>
+    </div>
   )
 }
