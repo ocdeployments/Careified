@@ -1,12 +1,38 @@
 // scripts/test-matching.ts
 import { computeMatchScore } from '../lib/matching'
-import type { CaregiverForMatching, MatchNeed } from '../lib/matching'
+import type { MatchNeed } from '../lib/matching'
+import type { CaregiverWithProvenance } from '../lib/matching'
 
-// ─────────────────────────────────────────────────────────
-// Test fixtures
-// ─────────────────────────────────────────────────────────
+// Helper to build provenance for test caregivers.
+// Defaults all fields to Tier 4 (self-reported) unless overrides provided.
+function mkProvenance(
+  overrides: Partial<Record<string, { source: string; tier: 1|2|3|4 }>> = {}
+): CaregiverWithProvenance['_provenance'] {
+  const fields = [
+    'specializations', 'credentials', 'placement_types', 'languages',
+    'years_experience', 'hourly_rate', 'gender',
+    'city', 'state', 'travel_radius',
+    'has_vehicle', 'willing_live_in', 'willing_overnight',
+    'availability_status',
+    'client_preferences', 'environment_comfort', 'motivation',
+    'reliability_metrics',
+  ]
+  const prov: CaregiverWithProvenance['_provenance'] = {}
+  const tierConf = { 1: 1.0, 2: 0.75, 3: 0.55, 4: 0.35 }
+  for (const f of fields) {
+    const o = overrides[f]
+    const tier = o?.tier ?? 4
+    prov[f] = {
+      source: o?.source ?? 'test_fixture',
+      tier,
+      confidence: tierConf[tier],
+    }
+  }
+  return prov
+}
 
-const mariaSantos: CaregiverForMatching = {
+// Base caregiver data
+const baseCaregiver = {
   id: 'maria-test',
   first_name: 'Maria',
   last_name: 'Santos',
@@ -44,8 +70,15 @@ const mariaSantos: CaregiverForMatching = {
   reliability_metrics: null, // No placement data yet
 }
 
-const newbieCaregiver: CaregiverForMatching = {
-  ...mariaSantos,
+const mariaSantos: CaregiverWithProvenance = {
+  ...baseCaregiver,
+  client_preferences: baseCaregiver.client_preferences as CaregiverWithProvenance['client_preferences'],
+  environment_comfort: baseCaregiver.environment_comfort as CaregiverWithProvenance['environment_comfort'],
+  _provenance: mkProvenance(),
+}
+
+const newbieCaregiver: CaregiverWithProvenance = {
+  ...baseCaregiver,
   id: 'newbie-test',
   first_name: 'New',
   last_name: 'Caregiver',
@@ -54,6 +87,9 @@ const newbieCaregiver: CaregiverForMatching = {
   years_experience: 1,
   motivation: null,
   reliability_metrics: null,
+  client_preferences: baseCaregiver.client_preferences as CaregiverWithProvenance['client_preferences'],
+  environment_comfort: baseCaregiver.environment_comfort as CaregiverWithProvenance['environment_comfort'],
+  _provenance: mkProvenance(),
 }
 
 // ─────────────────────────────────────────────────────────
@@ -62,7 +98,7 @@ const newbieCaregiver: CaregiverForMatching = {
 
 type Test = {
   name: string
-  caregiver: CaregiverForMatching
+  caregiver: CaregiverWithProvenance
   need: MatchNeed
   expect: (r: ReturnType<typeof computeMatchScore>) => string[] // returns array of failure messages
 }
@@ -84,10 +120,13 @@ const tests: Test[] = [
     expect: (r) => {
       const fails: string[] = []
       if (r.gates_passed !== true) fails.push(`gates should pass, got failed: ${r.gates_failed.join(',')}`)
-      if (r.overall_score == null) fails.push('overall_score should be non-null')
-      else if (r.overall_score < 75) fails.push(`overall_score should be >=75, got ${r.overall_score}`)
+      if (r.alignment_score == null) fails.push('alignment_score should be non-null')
+      else if (r.alignment_score < 75) fails.push(`alignment_score should be >=75, got ${r.alignment_score}`)
       if (!r.unknowns.includes('reliability')) fails.push('reliability should be unknown (no placement data)')
-      if (r.strong_fits.length < 3) fails.push(`expected >=3 strong_fits, got ${r.strong_fits.length}`)
+      if (r.criteria_aligned.length < 3) fails.push(`expected >=3 criteria_aligned, got ${r.criteria_aligned.length}`)
+      if (!r.disclaimer || !r.disclaimer.includes('not a recommendation')) {
+        fails.push('disclaimer should be present')
+      }
       return fails
     },
   },
@@ -104,7 +143,7 @@ const tests: Test[] = [
     expect: (r) => {
       const fails: string[] = []
       if (r.gates_passed !== false) fails.push('gates should fail')
-      if (r.overall_score !== null) fails.push(`overall_score should be null (excluded), got ${r.overall_score}`)
+      if (r.alignment_score !== null) fails.push(`alignment_score should be null (excluded), got ${r.alignment_score}`)
       if (!r.gates_failed.some(g => g.includes('language_required'))) fails.push('should mention language gate')
       return fails
     },
@@ -125,6 +164,8 @@ const tests: Test[] = [
         fails.push(`reliability.score should be null, got ${r.dimensions.reliability.score}`)
       if (r.dimensions.reliability.confidence !== 'none')
         fails.push(`reliability.confidence should be 'none', got '${r.dimensions.reliability.confidence}'`)
+      if (r.dimensions.reliability.confidence_multiplier !== 0)
+        fails.push(`reliability.confidence_multiplier should be 0, got ${r.dimensions.reliability.confidence_multiplier}`)
       if (!r.unknowns.includes('reliability'))
         fails.push('reliability should appear in unknowns array')
       if (r.dimensions.reliability.weight_applied !== 0)
@@ -186,8 +227,8 @@ const tests: Test[] = [
       const lang = r.dimensions.cultural_language_fit
       if (lang.score === null) fails.push('cultural_language should have a score')
       else if (lang.score < 60) fails.push(`multilingual should score well, got ${lang.score}`)
-      if (!r.strong_fits.some(s => /Spanish|Multilingual/i.test(s)))
-        fails.push('should mention Spanish or multilingual in strong_fits')
+      if (!r.criteria_aligned.some(s => /Spanish|Multilingual/i.test(s)))
+        fails.push('should mention Spanish or multilingual in criteria_aligned')
       return fails
     },
   },
@@ -237,6 +278,76 @@ const tests: Test[] = [
       return fails
     },
   },
+
+  // ── Test 9: confidence propagates — Tier 1 data outscores Tier 4 at equal raw scores ──
+  {
+    name: 'confidence — verified data outscores self-reported at equal inputs',
+    caregiver: {
+      ...mariaSantos,
+      _provenance: mkProvenance({
+        specializations: { source: 'state_board_api', tier: 1 },
+        credentials: { source: 'nursys', tier: 1 },
+        years_experience: { source: 'payroll_records', tier: 1 },
+        languages: { source: 'document_on_file', tier: 2 },
+        city: { source: 'address_verification', tier: 1 },
+        travel_radius: { source: 'address_verification', tier: 1 },
+        has_vehicle: { source: 'self_reported', tier: 4 },
+        willing_live_in: { source: 'self_reported', tier: 4 },
+        availability_status: { source: 'self_reported', tier: 4 },
+        placement_types: { source: 'self_reported', tier: 4 },
+        client_preferences: { source: 'self_reported', tier: 4 },
+        motivation: { source: 'self_reported', tier: 4 },
+      }),
+    },
+    need: {
+      city: 'Frisco',
+      state: 'TX',
+      primary_condition: 'Alzheimer\'s',
+      language_required: 'Spanish',
+      care_intensity: 'moderate',
+    },
+    expect: (r) => {
+      const fails: string[] = []
+      if (r.alignment_score == null) fails.push('alignment_score should exist')
+      if (r.overall_confidence == null) fails.push('overall_confidence should exist')
+      else if (r.overall_confidence < 0.5) {
+        fails.push(`verified data should give higher overall_confidence, got ${r.overall_confidence}`)
+      }
+      // Clinical fit should have attributes_used populated
+      if (r.dimensions.clinical_fit.attributes_used.length === 0) {
+        fails.push('clinical_fit should list attributes_used')
+      }
+      // With Tier 1 specializations/credentials/years, clinical should have higher confidence
+      if (r.dimensions.clinical_fit.confidence_multiplier < 0.8) {
+        fails.push(`Tier 1 clinical should give >0.8 confidence_multiplier, got ${r.dimensions.clinical_fit.confidence_multiplier}`)
+      }
+      return fails
+    },
+  },
+
+  // ── Test 10: all self-reported confidence stays low ──
+  {
+    name: 'confidence — all Tier 4 keeps overall_confidence low',
+    caregiver: mariaSantos, // default provenance = all Tier 4
+    need: {
+      city: 'Frisco',
+      state: 'TX',
+      primary_condition: 'Alzheimer\'s',
+      language_required: 'Spanish',
+      care_intensity: 'moderate',
+    },
+    expect: (r) => {
+      const fails: string[] = []
+      if (r.overall_confidence == null) fails.push('overall_confidence should exist')
+      else if (r.overall_confidence > 0.45) {
+        fails.push(`all self-reported should cap confidence <=0.45, got ${r.overall_confidence}`)
+      }
+      if (!r.disclaimer || !r.disclaimer.includes('not a recommendation')) {
+        fails.push('disclaimer should be present and state not a recommendation')
+      }
+      return fails
+    },
+  },
 ]
 
 // ─────────────────────────────────────────────────────────
@@ -253,7 +364,7 @@ for (const test of tests) {
   if (errors.length === 0) {
     passed++
     console.log(`✅ ${test.name}`)
-    console.log(`   score: ${result.overall_score}, unknowns: [${result.unknowns.join(',')}]`)
+    console.log(`   score: ${result.alignment_score}, unknowns: [${result.unknowns.join(',')}]`)
   } else {
     failed++
     failures.push({ name: test.name, errors })
@@ -263,8 +374,25 @@ for (const test of tests) {
   }
 }
 
+// Cross-test check: verified > self-reported at equal inputs
 console.log(`\n${'─'.repeat(50)}`)
-console.log(`Passed: ${passed}/${tests.length}`)
+const t9 = tests.find(t => t.name.includes('verified data outscores'))
+const t10 = tests.find(t => t.name.includes('all Tier 4 keeps'))
+if (t9 && t10) {
+  const r9 = computeMatchScore(t9.caregiver, t9.need)
+  const r10 = computeMatchScore(t10.caregiver, t10.need)
+  console.log(`Verified confidence: ${r9.overall_confidence}`)
+  console.log(`Self-reported confidence: ${r10.overall_confidence}`)
+  if ((r9.overall_confidence ?? 0) > (r10.overall_confidence ?? 0)) {
+    console.log('✅ Confidence hierarchy preserved: verified > self-reported')
+  } else {
+    console.log('❌ Confidence hierarchy BROKEN')
+    failed++
+    failures.push({ name: 'Confidence hierarchy', errors: ['verified confidence must be > self-reported'] })
+  }
+}
+
+console.log(`\nPassed: ${passed}/${tests.length}`)
 console.log(`Failed: ${failed}/${tests.length}`)
 
 if (failed > 0) {

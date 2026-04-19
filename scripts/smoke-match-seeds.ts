@@ -1,7 +1,7 @@
 // scripts/smoke-match-seeds.ts
 import { Pool } from 'pg'
-import { computeMatchScore } from '../lib/matching'
-import type { CaregiverForMatching, MatchNeed } from '../lib/matching'
+import { computeMatchScore, loadAllApprovedCaregivers } from '../lib/matching'
+import type { MatchNeed } from '../lib/matching'
 import * as dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 
@@ -11,22 +11,10 @@ const pool = new Pool({
 })
 
 async function main() {
-  const { rows } = await pool.query(`
-    SELECT
-      id, first_name, last_name,
-      specializations, credentials, placement_types, languages,
-      years_experience, hourly_rate, hourly_rate_max, gender,
-      city, state, postal_code, travel_radius,
-      has_vehicle, willing_live_in, willing_overnight,
-      availability_status,
-      client_preferences, environment_comfort, motivation,
-      reliability_metrics
-    FROM caregivers
-    WHERE status = 'approved'
-    ORDER BY aggregate_score DESC
-  `)
+  // Use the attribute-aware V2 loader
+  const caregivers = await loadAllApprovedCaregivers(pool)
 
-  console.log(`Running matching against ${rows.length} seed caregivers\n`)
+  console.log(`Running matching against ${caregivers.length} seed caregivers\n`)
 
   // Three test scenarios against real data:
   const scenarios: Array<{ name: string; need: MatchNeed }> = [
@@ -63,26 +51,26 @@ async function main() {
 
   for (const s of scenarios) {
     console.log(`\n━━━ Scenario: ${s.name} ━━━`)
-    const results = rows.map(cg => {
-      const caregiver = cg as unknown as CaregiverForMatching
-      const r = computeMatchScore(caregiver, s.need)
-      return { caregiver, result: r }
+    const results = caregivers.map(cg => {
+      const r = computeMatchScore(cg, s.need)
+      return { caregiver: cg, result: r }
     })
 
     // Split: excluded vs scored
     const excluded = results.filter(r => !r.result.gates_passed)
     const scored = results.filter(r => r.result.gates_passed)
 
-    scored.sort((a, b) => (b.result.overall_score ?? 0) - (a.result.overall_score ?? 0))
+    scored.sort((a, b) => (b.result.alignment_score ?? 0) - (a.result.alignment_score ?? 0))
 
     console.log(`\n  Scored: ${scored.length} | Excluded: ${excluded.length}`)
-    console.log(`  ${'Score'.padStart(5)} ${'Name'.padEnd(25)} Strong fits  Unknowns`)
-    console.log(`  ${'─'.repeat(70)}`)
+    console.log(`  ${'Score'.padStart(5)} ${'Conf'.padStart(5)} ${'Name'.padEnd(25)} Criteria  Unknowns`)
+    console.log(`  ${'─'.repeat(80)}`)
     for (const r of scored) {
       console.log(
-        `  ${String(r.result.overall_score ?? '—').padStart(5)} ` +
+        `  ${String(r.result.alignment_score ?? '—').padStart(5)} ` +
+        `${String(r.result.overall_confidence ?? '—').padStart(5)} ` +
         `${(r.caregiver.first_name + ' ' + r.caregiver.last_name).padEnd(25)} ` +
-        `${String(r.result.strong_fits.length).padStart(12)} ` +
+        `${String(r.result.criteria_aligned.length).padStart(8)} ` +
         `[${r.result.unknowns.join(',')}]`
       )
     }
@@ -95,7 +83,7 @@ async function main() {
 
     // Verify distribution is discriminating
     if (scored.length > 0) {
-      const scores = scored.map(r => r.result.overall_score!).filter(s => s != null)
+      const scores = scored.map(r => r.result.alignment_score!).filter(s => s != null)
       const max = Math.max(...scores)
       const min = Math.min(...scores)
       const range = max - min
