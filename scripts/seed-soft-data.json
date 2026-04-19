@@ -1,0 +1,92 @@
+{
+  "12b7a1e0-b4ea-42d1-b217-56d15d64fb25": {
+    "name_for_reference": "Patricia O'Brien - Palliative Care Specialist",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["seniors", "elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "prefer_not", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "prefer_not", "substance_use": "no"},
+    "motivation": {"why_caregiving": "I lost my mother to cancer and the hospice nurse showed me what this work can mean.", "proudest_placement": "A gentleman with ALS asked me to be there when he passed. It was peaceful.", "ideal_client": "Families navigating end-of-life transitions."}
+  },
+  "2cdde808-34fc-43f5-8cc9-ce747f85ae1a": {
+    "name_for_reference": "Aisha Mohammed - Dementia Care Specialist",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "My grandmother had Alzheimer's and I wanted to give other families those moments too.", "proudest_placement": "A former surgeon who lost speech. We played chess every afternoon.", "ideal_client": "Elderly clients in early-to-mid dementia."}
+  },
+  "14149b38-ba51-47d6-8e3a-2a539ee9beb8": {
+    "name_for_reference": "Priya Nair - RN Home Care",
+    "client_preferences": {"personality_types": ["Formerly professional"], "age_ranges": ["adults", "seniors"], "care_style": "hands_on"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "no", "smoking_indoor": "no", "smoking_outdoor": "no", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "ICU showed me the most meaningful moments happen in quiet times.", "proudest_placement": "Post-stroke patient who said my name for the first time after six months.", "ideal_client": "Clients with complex medical needs."}
+  },
+  "3abdeeb1-839b-4b02-8744-0ca7ea39b8f0": {
+    "name_for_reference": "Maria Santos - PSW",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["seniors", "elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "prefer_not", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "I cared for my grandmother through her Alzheimer's and found my calling.", "proudest_placement": "Stayed 3 years with Mrs. Chen.", "ideal_client": "Elderly clients who need patience and consistency."}
+  },
+  "68f4e01a-01f0-4251-9459-0e4cd9ea5156": {
+    "name_for_reference": "Helen Kowalski - Complex Care PSW",
+    "client_preferences": {"personality_types": ["Strong-willed or stubborn"], "age_ranges": ["adults", "seniors"], "care_style": "hands_on"},
+    "environment_comfort": {"dogs": "yes", "cats": "no", "other_pets": "no", "smoking_indoor": "no", "smoking_outdoor": "no", "clutter": "prefer_not", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "My husband had a stroke. I turned my personal loss into a career.", "proudest_placement": "A 400-pound client other aides refused.", "ideal_client": "Clients with complex physical needs."}
+  },
+  "64a4d48f-b3c1-4b56-8eab-d8eaf3f19b50": {
+    "name_for_reference": "Diane Tremblay - Live-in Specialist",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["seniors", "elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "prefer_not", "substance_use": "no"},
+    "motivation": {"why_caregiving": "After my kids left home, I wanted purpose. Live-in care gave me a home and family.", "proudest_placement": "Lived with a couple for two years. We became like family.", "ideal_client": "Couples where one needs dementia care."}
+  },
+  "5052a1a3-23c4-46ef-98af-9e144ef48ec8": {
+    "name_for_reference": "Sandra Beaumont - Home Health Aide",
+    "client_preferences": {"personality_types": ["Chatty and social"], "age_ranges": ["seniors", "elderly"], "care_style": "companionship"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "no", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "I wanted work where I could talk to people, not just do tasks.", "proudest_placement": "A lonely diabetic client. Crossword puzzles helped her recover.", "ideal_client": "Seniors who need help but mostly need company."}
+  },
+  "bc7ea84d-8cb5-48c5-a4ba-28a63ffce5b8": {
+    "name_for_reference": "Robert Delacroix - LPN Home Care",
+    "client_preferences": {"personality_types": ["Formerly professional"], "age_ranges": ["adults", "seniors"], "care_style": "hands_on"},
+    "environment_comfort": {"dogs": "yes", "cats": "no", "other_pets": "no", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "Hospital LPN felt like a task machine. Home care lets me build relationships.", "proudest_placement": "Post-stroke patient. He's still home a year later.", "ideal_client": "Post-hospital patients needing clinical monitoring."}
+  },
+  "f38a3dbc-a7b9-48cd-a38d-efbc06133a53": {
+    "name_for_reference": "James Okafor - CNA",
+    "client_preferences": {"personality_types": ["Chatty and social"], "age_ranges": ["adults", "seniors"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "prefer_not", "substance_use": "prefer_not"},
+    "motivation": {"why_caregiving": "My cousin has cerebral palsy. The work is about helping people do for themselves.", "proudest_placement": "A bariatric client who gave up on going outside.", "ideal_client": "Clients working on recovery who want independence."}
+  },
+  "3fa6bb0b-92f6-41e7-a70f-d349919a8700": {
+    "name_for_reference": "Kevin Nguyen - Paediatric PSW",
+    "client_preferences": {"personality_types": ["Creative or artistic"], "age_ranges": ["children"], "care_style": "companionship"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "My brother has autism. Kids with special needs just want to be kids.", "proudest_placement": "A nonverbal child with brain injury. Art brought her out of her shell.", "ideal_client": "Children with special needs."}
+  },
+  "a73d4247-b2b2-498e-8f90-b619040371ee": {
+    "name_for_reference": "David Kim - PSW with OT Background",
+    "client_preferences": {"personality_types": ["Formerly professional"], "age_ranges": ["adults", "seniors"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "no", "other_pets": "no", "smoking_indoor": "no", "smoking_outdoor": "no", "clutter": "no", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "OT assistant background. Home care lets me help people actually live better.", "proudest_placement": "Parkinson's client. Falls dropped 80% with home modifications.", "ideal_client": "Clients with mobility challenges who want to stay safe."}
+  },
+  "3b179e64-e4a8-4816-8d1c-ff618cae5a80": {
+    "name_for_reference": "Grace Mensah - Companion Caregiver",
+    "client_preferences": {"personality_types": ["Chatty and social"], "age_ranges": ["seniors", "elderly"], "care_style": "companionship"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "prefer_not", "substance_use": "no"},
+    "motivation": {"why_caregiving": "Everyone deserves company, not just care.", "proudest_placement": "A client whose family lived far away. I became her connection to the world.", "ideal_client": "Seniors who need help getting out and staying social."}
+  },
+  "d8d75966-f4a7-4f58-80e3-2eb8e3f63c94": {
+    "name_for_reference": "Chen Wei - PSW",
+    "client_preferences": {"personality_types": ["Quiet and reflective"], "age_ranges": ["seniors", "elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "prefer_not", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "My father had dementia. I know what families go through.", "proudest_placement": "A client with diabetes. Her A1C dropped with consistent meal planning.", "ideal_client": "Elderly clients who need consistent, reliable care."}
+  },
+  "5c510859-66ab-43db-8be9-ceb082c23f78": {
+    "name_for_reference": "Marcus Thompson - Home Health Aide",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["adults", "seniors"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "no", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "I enjoy helping people recover and get back on their feet.", "proudest_placement": "Post-hospital recovery client. She regained full mobility.", "ideal_client": "Clients recovering from hospital stays."}
+  },
+  "f4d6615b-06f0-4c02-83d2-a606d499c0d2": {
+    "name_for_reference": "Fatima Al-Hassan - Nursing Student",
+    "client_preferences": {"personality_types": ["Gentle and easy-going"], "age_ranges": ["seniors", "elderly"], "care_style": "balanced"},
+    "environment_comfort": {"dogs": "yes", "cats": "yes", "other_pets": "yes", "smoking_indoor": "no", "smoking_outdoor": "yes", "clutter": "yes", "large_family": "yes", "hoarding": "no", "substance_use": "no"},
+    "motivation": {"why_caregiving": "I'm studying nursing and want practical experience in home care.", "ideal_client": "Anyone who needs a caring, eager learner."}
+  }
+}
