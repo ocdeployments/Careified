@@ -1,14 +1,14 @@
 // lib/matching/score.ts
 import type {
-  CaregiverForMatching,
   MatchNeed,
   MatchResult,
   MatchScope,
   DimensionScore,
   DimensionKey,
 } from './types'
-import { BASE_WEIGHTS } from './types'
+import { BASE_WEIGHTS, ALIGNMENT_DISCLAIMER } from './types'
 import { runGates } from './gates'
+import type { CaregiverWithProvenance } from './caregiver-loader'
 import {
   scoreClinicalFit,
   scoreReliability,
@@ -68,41 +68,41 @@ function renormalizeWeights(
 }
 
 /**
- * Derive strong_fits and gaps from dimension sources.
+ * Derive criteria_aligned and gaps from dimension sources.
  * These are human-readable explanations for the UI.
  */
 function deriveExplanations(
   dimensions: Record<DimensionKey, DimensionScore>
-): { strong_fits: string[]; gaps: string[] } {
-  const strong_fits: string[] = []
+): { criteria_aligned: string[]; gaps: string[] } {
+  const criteria_aligned: string[] = []
   const gaps: string[] = []
 
   const cf = dimensions.clinical_fit
   if (cf.score != null) {
-    if (cf.score >= 70) strong_fits.push(humanizeClinical(cf.source, 'strong'))
+    if (cf.score >= 70) criteria_aligned.push(humanizeClinical(cf.source, 'strong'))
     else if (cf.score < 40) gaps.push(humanizeClinical(cf.source, 'gap'))
   }
 
   const rl = dimensions.reliability
   if (rl.score != null && rl.score >= 80) {
-    strong_fits.push(humanizeReliability(rl.source, 'strong'))
+    criteria_aligned.push(humanizeReliability(rl.source, 'strong'))
   } else if (rl.score != null && rl.score < 50) {
     gaps.push(humanizeReliability(rl.source, 'gap'))
   }
 
   const log = dimensions.logistics_match
   if (log.score != null) {
-    if (log.source.includes('same_city')) strong_fits.push('In your service area')
-    if (log.source.includes('available_now')) strong_fits.push('Available immediately')
-    if (log.source.includes('live_in_capable')) strong_fits.push('Live-in capable')
+    if (log.source.includes('same_city')) criteria_aligned.push('In your service area')
+    if (log.source.includes('available_now')) criteria_aligned.push('Available immediately')
+    if (log.source.includes('live_in_capable')) criteria_aligned.push('Live-in capable')
     if (log.score < 40) gaps.push('Travel or availability constraints')
   }
 
   const lang = dimensions.cultural_language_fit
   if (lang.score != null && lang.score >= 70) {
     const match = /language:([^|]+)/.exec(lang.source)
-    if (match) strong_fits.push(`Speaks ${match[1]}`)
-    else if (lang.source.includes('multilingual')) strong_fits.push('Multilingual')
+    if (match) criteria_aligned.push(`Speaks ${match[1]}`)
+    else if (lang.source.includes('multilingual')) criteria_aligned.push('Multilingual')
   }
 
   const env = dimensions.environment_fit
@@ -113,11 +113,11 @@ function deriveExplanations(
 
   const pers = dimensions.personality_compatibility
   if (pers.score != null && pers.score >= 70) {
-    strong_fits.push('Personality fit with stated client preferences')
+    criteria_aligned.push('Personality fit with stated client preferences')
   }
 
   return {
-    strong_fits: Array.from(new Set(strong_fits)).slice(0, 8),
+    criteria_aligned: Array.from(new Set(criteria_aligned)).slice(0, 8),
     gaps: Array.from(new Set(gaps)).slice(0, 6),
   }
 }
@@ -159,7 +159,7 @@ function humanizeEnvConflict(c: string): string {
  * Returns MatchResult — never throws on missing data, only on malformed input.
  */
 export function computeMatchScore(
-  caregiver: CaregiverForMatching,
+  caregiver: CaregiverWithProvenance,
   need: MatchNeed
 ): MatchResult {
   const scope = inferScope(need)
@@ -168,14 +168,19 @@ export function computeMatchScore(
   // If gates fail, return excluded result (no score).
   if (!gates.passed) {
     return {
+      alignment_score: null,
       overall_score: null,
       scope,
       dimensions: buildEmptyDimensions('gates_failed'),
+      criteria_aligned: [],
       strong_fits: [],
-      gaps: gates.failed.map(f => f.replace(/[_:]/g, ' ')),
+      criteria_not_aligned: gates.failed.map(f => f.replace(/[_:]/g, ' ')),
+      gaps: [],
       unknowns: [],
       gates_passed: false,
       gates_failed: gates.failed,
+      disclaimer: ALIGNMENT_DISCLAIMER,
+      overall_confidence: null,
       computed_at: new Date().toISOString(),
     }
   }
@@ -194,17 +199,36 @@ export function computeMatchScore(
   // Renormalize weights across non-null dimensions
   const dimensions = renormalizeWeights(rawDimensions)
 
-  // Compute overall score from renormalized weighted average
+  // Compute overall score from renormalized weighted average,
+  // multiplied by per-dimension confidence.
   const active = (Object.entries(dimensions) as [DimensionKey, DimensionScore][])
     .filter(([, d]) => d.score !== null)
 
-  let overall_score: number | null = null
+  let alignment_score: number | null = null
+  let overall_confidence: number | null = null
+
   if (active.length > 0) {
-    const weighted = active.reduce(
-      (sum, [, d]) => sum + (d.score as number) * d.weight_applied,
-      0
-    )
-    overall_score = Math.round(weighted)
+    // Weighted score × confidence sum, normalized by effective weight sum
+    let weightedScoreSum = 0
+    let effectiveWeightSum = 0
+    let confidenceWeightedSum = 0
+    let weightSum = 0
+
+    for (const [, d] of active) {
+      const effectiveWeight = d.weight_applied * d.confidence_multiplier
+      weightedScoreSum += (d.score as number) * effectiveWeight
+      effectiveWeightSum += effectiveWeight
+      confidenceWeightedSum += d.confidence_multiplier * d.weight_applied
+      weightSum += d.weight_applied
+    }
+
+    if (effectiveWeightSum > 0) {
+      alignment_score = Math.round(weightedScoreSum / effectiveWeightSum)
+    }
+
+    if (weightSum > 0) {
+      overall_confidence = Math.round((confidenceWeightedSum / weightSum) * 100) / 100
+    }
   }
 
   // Collect unknowns
@@ -212,17 +236,22 @@ export function computeMatchScore(
     .filter(([, d]) => d.score === null)
     .map(([k]) => k)
 
-  const { strong_fits, gaps } = deriveExplanations(dimensions)
+  const { criteria_aligned, gaps } = deriveExplanations(dimensions)
 
   return {
-    overall_score,
+    alignment_score,
+    overall_score: alignment_score, // deprecated alias
     scope,
     dimensions,
-    strong_fits,
-    gaps,
+    criteria_aligned,
+    strong_fits: criteria_aligned, // deprecated alias
+    criteria_not_aligned: gaps,
+    gaps, // deprecated alias
     unknowns,
     gates_passed: true,
     gates_failed: [],
+    disclaimer: ALIGNMENT_DISCLAIMER,
+    overall_confidence,
     computed_at: new Date().toISOString(),
   }
 }
@@ -231,8 +260,10 @@ function buildEmptyDimensions(reason: string): Record<DimensionKey, DimensionSco
   const empty: DimensionScore = {
     score: null,
     confidence: 'none',
+    confidence_multiplier: 0,
     source: reason,
     weight_applied: 0,
+    attributes_used: [],
   }
   return {
     clinical_fit: empty,
