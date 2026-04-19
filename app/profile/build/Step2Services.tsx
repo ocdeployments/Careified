@@ -108,6 +108,32 @@ const DIETARY_OPTIONS = [
  'Pureed / soft foods', 'Culturally specific meals',
 ]
 
+// Client preferences for matching
+const PERSONALITY_TYPES = [
+ 'Quiet and reflective',
+ 'Chatty and social',
+ 'Strong-willed or stubborn',
+ 'Gentle and easy-going',
+ 'Anxious or fearful',
+ 'Formerly professional (doctors, executives, etc.)',
+ 'Creative or artistic',
+ 'Religious or spiritual',
+]
+
+const AGE_RANGES = [
+ { key: 'children', label: 'Children (under 18)' },
+ { key: 'young_adults', label: 'Young adults (18–40)' },
+ { key: 'adults', label: 'Adults (40–65)' },
+ { key: 'seniors', label: 'Seniors (65–80)' },
+ { key: 'elderly', label: 'Elderly (80+)' },
+]
+
+const CARE_STYLES = [
+ { key: 'hands_on', label: 'Hands-on medical/physical care' },
+ { key: 'companionship', label: 'Companionship-focused support' },
+ { key: 'balanced', label: 'Balance of both' },
+]
+
 const YEARS_OPTIONS = [
  { value: 0, label: 'Less than 1 year' },
  { value: 1, label: '1–2 years' },
@@ -126,7 +152,7 @@ const UNWILLING_TASKS = [
 ]
 
 export default function Step2Services() {
- const { formData } = useProfileForm()
+ const { formData, updateField } = useProfileForm()
  const { saveField } = useProfileSave()
 
  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
@@ -140,6 +166,37 @@ export default function Step2Services() {
  const unwillingTasks = formData.unwillingTasks || []
  const dietaryCooking = formData.dietaryCooking || []
  const yearsExperience = formData.yearsExperience
+ const clientPrefs = formData.client_preferences || {
+   personality_types: [],
+   age_ranges: [],
+   care_style: null,
+ }
+
+ // Validation for client preferences
+ const prefsValid =
+   (clientPrefs.personality_types?.length ?? 0) >= 2 &&
+   (clientPrefs.age_ranges?.length ?? 0) >= 1 &&
+   !!clientPrefs.care_style
+
+ const togglePersonalityType = useCallback((type: string) => {
+   const current = clientPrefs.personality_types || []
+   const updated = current.includes(type)
+     ? current.filter(t => t !== type)
+     : current.length < 8 ? [...current, type] : current
+   updateField('client_preferences', { ...clientPrefs, personality_types: updated })
+ }, [clientPrefs, updateField])
+
+ const toggleAgeRange = useCallback((key: string) => {
+   const current = clientPrefs.age_ranges || []
+   const updated = current.includes(key)
+     ? current.filter(k => k !== key)
+     : [...current, key]
+   updateField('client_preferences', { ...clientPrefs, age_ranges: updated })
+ }, [clientPrefs, updateField])
+
+ const setCareStyle = useCallback((key: string) => {
+   updateField('client_preferences', { ...clientPrefs, care_style: key })
+ }, [clientPrefs, updateField])
 
  const toggleCategory = useCallback((id: string) => {
  setOpenCategories(prev => ({ ...prev, [id]: !prev[id] }))
@@ -334,6 +391,118 @@ export default function Step2Services() {
  </button>
  ))}
  </div>
+ </div>
+
+ {/* CLIENT PREFERENCES SECTION */}
+ <div style={{ marginTop: '32px', padding: '24px', borderRadius: '16px', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
+   <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>Who you work best with</h3>
+   <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 20px' }}>This helps us match you with clients where you'll genuinely thrive.</p>
+   
+   {/* Personality types */}
+   <div style={{ marginBottom: '20px' }}>
+     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
+       What describes you? <span style={{ fontWeight: 400, color: '#94A3B8', marginLeft: '6px' }}>(select at least 2)</span>
+     </div>
+     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+       {PERSONALITY_TYPES.map(type => {
+         const selected = (clientPrefs.personality_types || []).includes(type)
+         return (
+           <button
+             key={type}
+             type="button"
+             onClick={() => togglePersonalityType(type)}
+             style={{
+               padding: '8px 14px',
+               borderRadius: '10px',
+               fontSize: '12px',
+               fontWeight: selected ? 700 : 400,
+               cursor: 'pointer',
+               border: selected ? '2px solid #C9973A' : '1px solid #E2E8F0',
+               background: selected ? '#FDF6EC' : 'white',
+               color: selected ? '#92400E' : '#64748B',
+               fontFamily: FONT_SANS,
+             }}
+           >
+             {type}
+           </button>
+         )
+       })}
+     </div>
+     {(clientPrefs.personality_types?.length ?? 0) < 2 && (
+       <div style={{ fontSize: '11px', color: '#DC2626', marginTop: '6px' }}>Select at least 2</div>
+     )}
+   </div>
+   
+   {/* Age ranges */}
+   <div style={{ marginBottom: '20px' }}>
+     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
+       Age groups you prefer working with <span style={{ fontWeight: 400, color: '#94A3B8', marginLeft: '6px' }}>(select at least 1)</span>
+     </div>
+     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+       {AGE_RANGES.map(age => {
+         const selected = (clientPrefs.age_ranges || []).includes(age.key)
+         return (
+           <button
+             key={age.key}
+             type="button"
+             onClick={() => toggleAgeRange(age.key)}
+             style={{
+               padding: '8px 14px',
+               borderRadius: '10px',
+               fontSize: '12px',
+               fontWeight: selected ? 700 : 400,
+               cursor: 'pointer',
+               border: selected ? '2px solid #1E3A8A' : '1px solid #E2E8F0',
+               background: selected ? '#EFF6FF' : 'white',
+               color: selected ? '#1E3A8A' : '#64748B',
+               fontFamily: FONT_SANS,
+             }}
+           >
+             {age.label}
+           </button>
+         )
+       })}
+     </div>
+     {(clientPrefs.age_ranges?.length ?? 0) < 1 && (
+       <div style={{ fontSize: '11px', color: '#DC2626', marginTop: '6px' }}>Select at least 1</div>
+     )}
+   </div>
+   
+   {/* Care style */}
+   <div style={{ marginBottom: '16px' }}>
+     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
+       Your care style <span style={{ color: '#DC2626' }}>*</span>
+     </div>
+     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+       {CARE_STYLES.map(style => {
+         const selected = clientPrefs.care_style === style.key
+         return (
+           <button
+             key={style.key}
+             type="button"
+             onClick={() => setCareStyle(style.key)}
+             style={{
+               padding: '10px 16px',
+               borderRadius: '20px',
+               fontSize: '12px',
+               fontWeight: selected ? 700 : 400,
+               cursor: 'pointer',
+               border: selected ? '2px solid #C9973A' : '1px solid #1E3A8A',
+               background: selected ? '#C9973A' : 'white',
+               color: selected ? '#0D1B3E' : '#1E3A8A',
+               fontFamily: FONT_SANS,
+             }}
+           >
+             {style.label}
+           </button>
+         )
+       })}
+     </div>
+   </div>
+   
+   <div style={{ fontSize: '11px', fontWeight: 600, color: prefsValid ? '#16A34A' : '#C9973A' }}>
+     {prefsValid ? '✓ Client preferences complete' : 'Complete all 3 sections above to continue'}
+   </div>
  </div>
 
  <div>
