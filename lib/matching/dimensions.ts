@@ -1,12 +1,12 @@
 // lib/matching/dimensions.ts
 import type {
-  CaregiverForMatching,
   MatchNeed,
   DimensionScore,
-  MatchScope,
   DimensionKey,
 } from './types'
 import { BASE_WEIGHTS } from './types'
+import type { CaregiverWithProvenance } from './caregiver-loader'
+import { lowestConfidenceFor } from './caregiver-loader'
 
 // ─────────────────────────────────────────────────────────
 // Helper: build a DimensionScore
@@ -16,22 +16,27 @@ function unknown(dim: DimensionKey, source: string): DimensionScore {
   return {
     score: null,
     confidence: 'none',
+    confidence_multiplier: 0,
     source,
     weight_applied: 0, // renormalized later
+    attributes_used: [],
   }
 }
 
 function scored(
   dim: DimensionKey,
   score: number,
-  confidence: 'high' | 'medium' | 'low',
-  source: string
+  confidenceLabel: 'high' | 'medium' | 'low',
+  source: string,
+  provenance: { confidence: number; attributes_used: string[] }
 ): DimensionScore {
   return {
     score: Math.max(0, Math.min(100, Math.round(score))),
-    confidence,
+    confidence: confidenceLabel,
+    confidence_multiplier: provenance.confidence,
     source,
     weight_applied: BASE_WEIGHTS[dim], // renormalized later
+    attributes_used: provenance.attributes_used,
   }
 }
 
@@ -40,9 +45,11 @@ function scored(
 // ─────────────────────────────────────────────────────────
 
 export function scoreClinicalFit(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['specializations', 'credentials', 'years_experience'])
+
   if (!need.primary_condition) {
     return unknown('clinical_fit', 'no_primary_condition_specified')
   }
@@ -105,18 +112,20 @@ export function scoreClinicalFit(
       'clinical_fit',
       20,
       'medium',
-      `no_direct_specialty_match_for_${need.primary_condition}`
+      `no_direct_specialty_match_for_${need.primary_condition}`,
+      prov
     )
   }
 
-  const confidence: 'high' | 'medium' = hasDirectMatch && years >= 5 ? 'high' : 'medium'
+  const confidenceLabel: 'high' | 'medium' = hasDirectMatch && years >= 5 ? 'high' : 'medium'
   return scored(
     'clinical_fit',
     score,
-    confidence,
+    confidenceLabel,
     hasDirectMatch
       ? `direct_specialty_match:${need.primary_condition}`
-      : `related_specialty_match:${need.primary_condition}`
+      : `related_specialty_match:${need.primary_condition}`,
+    prov
   )
 }
 
@@ -125,9 +134,10 @@ export function scoreClinicalFit(
 // ─────────────────────────────────────────────────────────
 
 export function scoreReliability(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   _need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['reliability_metrics'])
   const metrics = cg.reliability_metrics
 
   // HONEST HANDLING: if no placement data, this dimension is UNKNOWN.
@@ -155,16 +165,17 @@ export function scoreReliability(
   score += wouldRehire * 25
 
   // Confidence calibration by data quantity
-  let confidence: 'high' | 'medium' | 'low'
-  if (placements >= 10) confidence = 'high'
-  else if (placements >= 3) confidence = 'medium'
-  else confidence = 'low'
+  let confidenceLabel: 'high' | 'medium' | 'low'
+  if (placements >= 10) confidenceLabel = 'high'
+  else if (placements >= 3) confidenceLabel = 'medium'
+  else confidenceLabel = 'low'
 
   return scored(
     'reliability',
     score,
-    confidence,
-    `verified_from_${placements}_placement_${placements === 1 ? 'outcome' : 'outcomes'}`
+    confidenceLabel,
+    `verified_from_${placements}_placement_${placements === 1 ? 'outcome' : 'outcomes'}`,
+    prov
   )
 }
 
@@ -173,9 +184,15 @@ export function scoreReliability(
 // ─────────────────────────────────────────────────────────
 
 export function scoreLogisticsMatch(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, [
+    'city', 'travel_radius', 'has_vehicle',
+    'willing_live_in', 'willing_overnight',
+    'availability_status', 'placement_types',
+  ])
+
   // If we have no location in the need, we can't score this
   if (!need.city && !need.state) {
     return unknown('logistics_match', 'no_location_specified')
@@ -236,12 +253,13 @@ export function scoreLogisticsMatch(
     sources.push('available_from_future_date')
   }
 
-  const confidence: 'high' | 'medium' = (need.city && cg.city) ? 'high' : 'medium'
+  const confidenceLabel: 'high' | 'medium' = (need.city && cg.city) ? 'high' : 'medium'
   return scored(
     'logistics_match',
     score,
-    confidence,
-    sources.join('|') || 'minimal_logistics_signal'
+    confidenceLabel,
+    sources.join('|') || 'minimal_logistics_signal',
+    prov
   )
 }
 
@@ -250,10 +268,12 @@ export function scoreLogisticsMatch(
 // ─────────────────────────────────────────────────────────
 
 export function scorePersonalityCompatibility(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed,
-  scope: MatchScope
+  scope: 'full_client_match' | 'partial_filter_match' = 'partial_filter_match'
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['client_preferences'])
+
   // HONEST HANDLING: without client personality data, we cannot score compatibility.
   // Caregiver self-data alone tells us nothing about FIT — only about THEM.
   if (!need.personality_desired || need.personality_desired.length === 0) {
@@ -291,7 +311,8 @@ export function scorePersonalityCompatibility(
     'personality_compatibility',
     score,
     'medium', // self-reported preferences on both sides
-    `overlap:${overlaps.length}/${clientTypes.length}_types`
+    `overlap:${overlaps.length}/${clientTypes.length}_types`,
+    prov
   )
 }
 
@@ -300,9 +321,11 @@ export function scorePersonalityCompatibility(
 // ─────────────────────────────────────────────────────────
 
 export function scoreCulturalLanguageFit(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['languages'])
+
   let score = 0
   let sources: string[] = []
 
@@ -342,7 +365,8 @@ export function scoreCulturalLanguageFit(
     'cultural_language_fit',
     score,
     'high',
-    sources.join('|')
+    sources.join('|'),
+    prov
   )
 }
 
@@ -351,9 +375,10 @@ export function scoreCulturalLanguageFit(
 // ─────────────────────────────────────────────────────────
 
 export function scoreRetentionSignal(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['reliability_metrics', 'motivation'])
   const metrics = cg.reliability_metrics
 
   // If we have placement data, use verified tenure
@@ -367,12 +392,13 @@ export function scoreRetentionSignal(
     else if (avgDays >= 30) score = 40
     else score = 20
 
-    const confidence: 'high' | 'medium' = metrics.total_placements >= 3 ? 'high' : 'medium'
+    const confidenceLabel: 'high' | 'medium' = metrics.total_placements >= 3 ? 'high' : 'medium'
     return scored(
       'retention_signal',
       score,
-      confidence,
-      `verified_avg_tenure_${avgDays}_days`
+      confidenceLabel,
+      `verified_avg_tenure_${avgDays}_days`,
+      prov
     )
   }
 
@@ -393,7 +419,8 @@ export function scoreRetentionSignal(
       'retention_signal',
       60, // stated preference only — capped
       'low',
-      'stated_long_term_preference_no_placement_history'
+      'stated_long_term_preference_no_placement_history',
+      prov
     )
   }
 
@@ -406,9 +433,10 @@ export function scoreRetentionSignal(
 // ─────────────────────────────────────────────────────────
 
 export function scoreEnvironmentFit(
-  cg: CaregiverForMatching,
+  cg: CaregiverWithProvenance,
   need: MatchNeed
 ): DimensionScore {
+  const prov = lowestConfidenceFor(cg, ['environment_comfort'])
   const env = cg.environment_comfort
   if (!env || Object.keys(env).length === 0) {
     return unknown('environment_fit', 'caregiver_environment_comfort_not_provided')
@@ -473,6 +501,7 @@ export function scoreEnvironmentFit(
     'environment_fit',
     score,
     'medium',
-    conflicts.length === 0 ? 'no_conflicts' : conflicts.join('|')
+    conflicts.length === 0 ? 'no_conflicts' : conflicts.join('|'),
+    prov
   )
 }
