@@ -49,7 +49,7 @@ export default function ProfileStart() {
         </div>
 
         {/* CTA */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <button
             onClick={() => router.push('/profile/build')}
             style={{
@@ -72,46 +72,27 @@ export default function ProfileStart() {
           </p>
         </div>
 
-        {/* Preview Section */}
-        <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-          <p style={{ fontSize: '12px', color: '#94A3B8', margin: '0 0 20px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            ⬇️ This is what agencies will see
+        {/* Scrollable Iframe Preview */}
+        <div style={{ marginBottom: '32px' }}>
+          <p style={{ fontSize: '14px', color: '#64748B', margin: '0 0 16px', textAlign: 'center', fontWeight: 500 }}>
+            ⬇️ Scroll to see your complete professional profile
           </p>
-          
-          {/* Profile Header */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid #E2E8F0' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 900, color: '#0D1B3E', flexShrink: 0 }}>
-              MS
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '20px', fontWeight: 700, color: '#0D1B3E' }}>Maria Santos</div>
-              <div style={{ fontSize: '14px', color: '#64748B' }}>Certified Personal Support Worker</div>
-              <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '4px' }}>📍 McKinney, TX • 📅 8 years • 🟢 Available now</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#C9973A' }}>⭐ 4.8</div>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>22 reviews</div>
-            </div>
-          </div>
-
-          {/* About */}
-          <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</h4>
-            <p style={{ fontSize: '14px', color: '#475569', margin: 0, lineHeight: 1.6 }}>
-              Compassionate caregiver with 8+ years specializing in dementia care and post-surgical recovery. I believe every client deserves dignity, patience, and personalized attention.
-            </p>
-          </div>
-
-          {/* Specialties */}
-          <div>
-            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Specialties</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {['Dementia / Alzheimer\'s', 'Post-surgical recovery', 'Mobility assistance'].map((s, i) => (
-                <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1E3A8A' }}>
-                  {s}
-                </span>
-              ))}
-            </div>
+          <div style={{ 
+            borderRadius: '16px', 
+            overflow: 'hidden', 
+            border: '1px solid #E2E8F0',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
+          }}>
+            <iframe
+              src="/profile/demo-preview"
+              style={{
+                width: '100%',
+                height: '800px',
+                border: 'none',
+                backgroundColor: '#F7F4F0'
+              }}
+              title="Profile Preview"
+            />
           </div>
         </div>
 
