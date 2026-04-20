@@ -14,13 +14,13 @@ function AuthButton() {
       <div className="flex items-center gap-3">
         <Link
           href="/profile/strength"
-          className="text-xs text-white/60 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
         >
           Profile strength
         </Link>
         <Link
           href="/settings/data-rights"
-          className="text-xs text-white/60 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
         >
           Data rights
         </Link>
@@ -39,13 +39,13 @@ function AuthButton() {
     <>
       <Link
         href="/sign-in"
-        className="text-xs font-medium px-3.5 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+        className="text-xs font-medium px-3.5 py-1.5 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
       >
         Sign in
       </Link>
       <Link
         href="/sign-up"
-        className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-gradient-to-br from-gold to-gold-warm text-navy hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+        className="text-xs font-semibold px-4 py-2 rounded-lg bg-[#C9973A] text-white hover:bg-[#b8862e] transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
       >
         Get started
       </Link>
@@ -60,9 +60,9 @@ const panels = {
     title: 'For Agencies',
     desc: 'Find, vet, and place caregivers faster with AI-powered matching.',
     links: [
-      { href: '/agency/search', label: 'Search caregivers', desc: 'Browse verified profiles' },
-      { href: '/agency/shortlist', label: 'Shortlist', desc: 'Save and compare candidates' },
-      { href: '/for-agencies', label: 'How it works', desc: 'See the full agency workflow' },
+      { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
+      { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
+      { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
     ],
     cta: { href: '/agency/signup', label: 'Start as an agency' },
   },
@@ -71,9 +71,9 @@ const panels = {
     title: 'For Caregivers',
     desc: 'Build a verified profile and get matched with agencies that fit you.',
     links: [
-      { href: '/profile/build', label: 'Build your profile', desc: 'Free — takes 10 minutes' },
-      { href: '/opportunities', label: 'Browse opportunities', desc: 'See open placements' },
-      { href: '/for-caregivers', label: 'How it works', desc: 'See the caregiver journey' },
+      { href: '/profile/build',    label: 'Build your profile',    desc: 'Free — takes 10 minutes'      },
+      { href: '/opportunities',    label: 'Browse opportunities',  desc: 'See open placements'          },
+      { href: '/for-caregivers',   label: 'How it works',          desc: 'See the caregiver journey'    },
     ],
     cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
   },
@@ -83,7 +83,7 @@ const panels = {
     desc: 'Find trusted, verified caregivers for your loved ones.',
     links: [
       { href: '/for-families', label: 'How it works', desc: 'See how families use Careified' },
-      { href: '/about', label: 'About us', desc: 'Our mission and team' },
+      { href: '/about',        label: 'About us',     desc: 'Our mission and team'           },
     ],
     cta: { href: '/sign-up?role=family', label: 'Find a caregiver' },
   },
@@ -129,10 +129,8 @@ export default function Navbar() {
     <nav
       ref={navRef}
       className={[
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-200',
-        scrolled
-          ? 'bg-navy/95 backdrop-blur-md shadow-lg shadow-navy/20'
-          : 'bg-navy',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-200 bg-[#0D1B3E]',
+        scrolled ? 'shadow-lg shadow-black/20' : '',
       ].join(' ')}
       aria-label="Main navigation"
     >
@@ -141,7 +139,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="font-serif text-xl font-normal text-white tracking-tight focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+          className="font-serif text-xl font-bold text-white tracking-tight focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
           Careified
@@ -156,11 +154,11 @@ export default function Navbar() {
               aria-expanded={activePanel === key}
               aria-haspopup="true"
               className={[
-                'flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors',
-                'focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none',
+                'flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                'focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none',
                 activePanel === key
                   ? 'text-white bg-white/10'
-                  : 'text-white/70 hover:text-white hover:bg-white/5',
+                  : 'text-white/80 hover:text-white hover:bg-white/10',
               ].join(' ')}
             >
               <span className="capitalize">{key}</span>
@@ -172,7 +170,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/about"
-            className="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
           >
             About
           </Link>
@@ -186,7 +184,7 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
@@ -194,22 +192,22 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* ── Desktop dropdown panel ── */}
+      {/* ── Desktop dropdown panel (light bg) ── */}
       {activePanel && (
-        <div className="hidden md:block absolute top-full left-0 right-0 bg-navy border-t border-white/10 shadow-2xl">
+        <div className="hidden md:block absolute top-full left-0 right-0 bg-white border-t border-slate-200 shadow-2xl">
           <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-3 gap-8">
             {/* Panel info */}
             <div>
-              <h2 className="text-white font-serif text-xl font-normal mb-2">
+              <h2 className="text-[#0D1B3E] font-serif text-xl font-bold mb-2">
                 {panels[activePanel].title}
               </h2>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-slate-500 text-sm leading-relaxed">
                 {panels[activePanel].desc}
               </p>
               <Link
                 href={panels[activePanel].cta.href}
                 onClick={() => setActivePanel(null)}
-                className="inline-block mt-4 px-4 py-2 rounded-lg bg-gradient-to-br from-gold to-gold-warm text-navy text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                className="inline-block mt-4 px-4 py-2 rounded-lg bg-[#C9973A] text-white text-sm font-semibold hover:bg-[#b8862e] transition-colors focus-visible:ring-2 focus-visible:ring-[#0D1B3E] focus-visible:outline-none"
               >
                 {panels[activePanel].cta.label}
               </Link>
@@ -221,12 +219,12 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setActivePanel(null)}
-                  className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                  className="group p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
                 >
-                  <div className="text-sm font-semibold text-white group-hover:text-gold transition-colors">
+                  <div className="text-sm font-semibold text-[#0D1B3E] group-hover:text-[#C9973A] transition-colors">
                     {link.label}
                   </div>
-                  <div className="text-xs text-white/50 mt-0.5">{link.desc}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{link.desc}</div>
                 </Link>
               ))}
             </div>
@@ -236,14 +234,14 @@ export default function Navbar() {
 
       {/* ── Mobile menu ── */}
       {mobileOpen && (
-        <div className="md:hidden bg-navy border-t border-white/10 px-4 py-4 space-y-1">
+        <div className="md:hidden bg-[#0D1B3E] border-t border-white/10 px-4 py-4 space-y-1">
           {(Object.keys(panels) as PanelKey[]).map(key => (
             <div key={key}>
               <button
                 onClick={() => togglePanel(key)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
               >
-                <span className="capitalize font-medium">{key}</span>
+                <span className="capitalize">{key}</span>
                 <ChevronDown
                   size={14}
                   className={`transition-transform duration-200 ${activePanel === key ? 'rotate-180' : ''}`}
@@ -256,7 +254,7 @@ export default function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                      className="block px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                      className="block px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
                     >
                       {link.label}
                     </Link>
@@ -264,7 +262,7 @@ export default function Navbar() {
                   <Link
                     href={panels[key].cta.href}
                     onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                    className="block px-3 py-2 rounded-lg text-sm font-semibold text-gold hover:text-gold-warm transition-colors"
+                    className="block px-3 py-2 rounded-lg text-sm font-semibold text-[#C9973A] hover:text-[#E8B86D] transition-colors"
                   >
                     {panels[key].cta.label} →
                   </Link>
@@ -275,7 +273,7 @@ export default function Navbar() {
           <Link
             href="/about"
             onClick={() => setMobileOpen(false)}
-            className="block px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+            className="block px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
           >
             About
           </Link>
