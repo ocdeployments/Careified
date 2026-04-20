@@ -7,6 +7,8 @@ import {
  MapPin, Briefcase, Star, Shield, Zap, Home,
  Globe, Car, Clock, CheckCircle, Award, Heart, Users, ChevronRight
 } from 'lucide-react'
+import { TierBadge } from '@/components/matching/AlignmentBadge'
+import { tierFromMultiplier } from '@/lib/matching/dimension-meta'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -36,11 +38,24 @@ async function getReferences(caregiverId: string) {
  } catch { return [] }
 }
 
+async function getAttributes(caregiverId: string) {
+ try {
+ const result = await pool.query(
+   `SELECT field_name, source, tier FROM caregiver_attributes WHERE caregiver_id = $1 AND status = 'active'`,
+   [caregiverId]
+ )
+ return Object.fromEntries(
+   result.rows.map((a: any) => [a.field_name, { tier: a.tier, source: a.source }])
+ )
+ } catch { return {} }
+}
+
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
  const caregiver = await getCaregiver((await params).id)
  if (!caregiver) notFound()
  const certifications = await getCertifications((await params).id)
  const references = await getReferences((await params).id)
+ const attributes = await getAttributes((await params).id)
 
  const displayName = caregiver.preferred_name ? `${caregiver.preferred_name} ${caregiver.last_name}` : `${caregiver.first_name} ${caregiver.last_name}`
  const initials = `${caregiver.first_name?.[0] || ''}${caregiver.last_name?.[0] || ''}`.toUpperCase()
@@ -75,7 +90,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  {caregiver.job_title && <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 12px' }}>{caregiver.job_title}</p>}
  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><MapPin size={14} /> {caregiver.city}, {caregiver.state}</span>
- <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Briefcase size={14} /> {caregiver.years_experience} yrs</span>
+ <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Briefcase size={14} /> {caregiver.years_experience} yrs</span>{attributes.years_experience && <span style={{ marginLeft: 4 }}><TierBadge tier={tierFromMultiplier(attributes.years_experience.tier)} /></span>}
  {caregiver.clients_served_count > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Users size={14} /> {caregiver.clients_served_count} clients</span>}
  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: availabilityColor, fontWeight: 600 }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: availabilityColor }} />{availabilityLabel}</span>
  </div>
@@ -95,7 +110,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
  {caregiver.bio && <Section title="About"><p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, margin: 0 }}>{caregiver.bio}</p></Section>}
- {(caregiver.specializations || []).length > 0 && <Section title="Specialties"><div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{(caregiver.specializations || []).map((s: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1E3A8A' }}>{s}</span>)}</div></Section>}
+ {(caregiver.specializations || []).length > 0 && <Section title="Specialties">{attributes.specializations && <TierBadge tier={tierFromMultiplier(attributes.specializations.tier)} />}<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{(caregiver.specializations || []).map((s: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1E3A8A' }}>{s}</span>)}</div></Section>}
  {(caregiver.services || []).length > 0 && <Section title="Services"><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>{(caregiver.services || []).map((s: string, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569' }}><CheckCircle size={14} color="#16A34A" />{s}</div>)}</div></Section>}
  
  {/* Work History Accordion */}
@@ -170,7 +185,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  </Accordion.Item>
  </Accordion.Root>
  )}
- {certifications.length > 0 && <Section title="Certifications"><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{certifications.map((cert: any, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#F8FAFC', borderRadius: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Shield size={16} color="#1E3A8A" /><div><p style={{ fontSize: '13px', fontWeight: 700, margin: 0 }}>{cert.certification}</p>{cert.issuing_org && <p style={{ fontSize: '11px', color: '#64748B', margin: '2px 0 0' }}>{cert.issuing_org}</p>}</div></div><span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', backgroundColor: cert.status === 'active' ? '#F0FDF4' : '#FEF2F2', color: cert.status === 'active' ? '#16A34A' : '#DC2626' }}>{cert.status === 'active' ? 'Active' : 'Expired'}</span></div>)}</div></Section>}
+ {certifications.length > 0 && <Section title="Certifications">{attributes.credentials && <TierBadge tier={tierFromMultiplier(attributes.credentials.tier)} />}<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{certifications.map((cert: any, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#F8FAFC', borderRadius: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Shield size={16} color="#1E3A8A" /><div><p style={{ fontSize: '13px', fontWeight: 700, margin: 0 }}>{cert.certification}</p>{cert.issuing_org && <p style={{ fontSize: '11px', color: '#64748B', margin: '2px 0 0' }}>{cert.issuing_org}</p>}</div></div><span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', backgroundColor: cert.status === 'active' ? '#F0FDF4' : '#FEF2F2', color: cert.status === 'active' ? '#16A34A' : '#DC2626' }}>{cert.status === 'active' ? 'Active' : 'Expired'}</span></div>)}</div></Section>}
  </div>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
  <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
@@ -191,7 +206,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  <LogisticItem label="Live-in" value={caregiver.willing_live_in} />
  {caregiver.travel_radius && <InfoRow icon={<MapPin size={14} />} label="Travel" value={`${caregiver.travel_radius} mi`} />}
  </div>
- {(caregiver.languages || []).length > 0 && <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}><h4 style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E', marginBottom: '12px' }}>Languages</h4><div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>{(caregiver.languages || []).map((l: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: '#F8FAFC' }}>{l}</span>)}</div></div>}
+ {(caregiver.languages || []).length > 0 && <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '12px' }}><h4 style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E', margin: 0 }}>Languages</h4>{attributes.languages && <TierBadge tier={tierFromMultiplier(attributes.languages.tier)} />}</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>{(caregiver.languages || []).map((l: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: '#F8FAFC' }}>{l}</span>)}</div></div>}
  </div>
  
  <ProfileDisclaimer />
