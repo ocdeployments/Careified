@@ -4,11 +4,8 @@
 
 'use client'
 
-import { MapPin, Star, Briefcase, Globe, Shield, Zap, Home, Car } from 'lucide-react'
+import { MapPin, Briefcase, Globe, Zap, Home, Car } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-const FONT_SERIF = "'Inter', sans-serif"
-const FONT_SANS = "'Inter', sans-serif"
 
 interface PreviewData {
   firstName?: string
@@ -49,123 +46,91 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
   const completion = data.profileCompletionPct || Math.min((step - 1) * 17, 85)
 
   const tier =
-    completion >= 80 ? { label: 'Professional', color: '#1E3A8A', bg: '#EFF6FF' } :
-    completion >= 60 ? { label: 'Verified', color: '#16A34A', bg: '#F0FDF4' } :
-    completion >= 40 ? { label: 'Basic', color: '#64748B', bg: '#F8FAFC' } :
-    { label: 'Incomplete', color: '#94A3B8', bg: '#F8FAFC' }
+    completion >= 80 ? { label: 'Professional', colorClass: 'text-blue-900 bg-blue-50' } :
+    completion >= 60 ? { label: 'Verified',      colorClass: 'text-green-700 bg-green-50' } :
+    completion >= 40 ? { label: 'Basic',          colorClass: 'text-slate-500 bg-slate-50' } :
+                       { label: 'Incomplete',     colorClass: 'text-slate-400 bg-slate-50' }
 
   const availLabel =
-    data.availabilityStatus === 'available_now' ? 'Available now' :
-    data.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' :
-    data.availabilityStatus === 'available_from' ? 'Available from date' :
+    data.availabilityStatus === 'available_now'          ? 'Available now' :
+    data.availabilityStatus === 'open_to_opportunities'  ? 'Open to opportunities' :
+    data.availabilityStatus === 'available_from'         ? 'Available from date' :
     null
 
-  const availColor =
-    data.availabilityStatus === 'available_now' ? '#16A34A' :
-    data.availabilityStatus === 'open_to_opportunities' ? '#D97706' :
-    '#64748B'
+  const availClasses =
+    data.availabilityStatus === 'available_now'         ? 'text-green-700 bg-green-50' :
+    data.availabilityStatus === 'open_to_opportunities' ? 'text-amber-600 bg-amber-50' :
+    'text-slate-500 bg-slate-50'
+
+  const availDotClass =
+    data.availabilityStatus === 'available_now'         ? 'bg-green-600' :
+    data.availabilityStatus === 'open_to_opportunities' ? 'bg-amber-500' :
+    'bg-slate-400'
 
   const isEmpty = !data.firstName && !data.lastName
 
   return (
-    <div style={{
-      position: 'sticky',
-      top: '140px',
-      fontFamily: FONT_SANS,
-    }}>
+    <div className="sticky top-[140px] font-sans">
 
       {/* Label */}
-      <div style={{
-        fontSize: '10px', fontWeight: 700,
-        letterSpacing: '0.08em', textTransform: 'uppercase',
-        color: '#94A3B8', marginBottom: '12px',
-        display: 'flex', alignItems: 'center', gap: '6px',
-      }}>
-        <div style={{
-          width: '6px', height: '6px', borderRadius: '50%',
-          background: '#C9973A',
-          animation: 'pulse 2s infinite',
-        }} />
+      <div className="flex items-center gap-1.5 mb-3 text-[10px] font-bold tracking-[0.08em] uppercase text-slate-400">
+        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
         Live preview — what agencies see
       </div>
 
       {/* Card */}
       <motion.div
-whileHover={{ scale: 1.02, boxShadow: '0 12px 32px rgba(13, 27, 62, 0.12)' }}
-transition={{ duration: 0.2, ease: 'easeOut' }}
-style={{
-        background: 'white',
-        borderRadius: '16px',
-        border: '1px solid #E2E8F0',
-        overflow: 'hidden',
-        transition: 'all 0.3s ease',
-        opacity: isEmpty ? 0.5 : 1,
-        padding: '40px',
-        boxShadow: '0 8px 24px rgba(13, 27, 62, 0.06)',
-      }}>
-
+        whileHover={{ scale: 1.02, boxShadow: '0 12px 32px rgba(13, 27, 62, 0.12)' }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className={[
+          'bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-[0_8px_24px_rgba(13,27,62,0.06)] transition-all duration-300',
+          isEmpty ? 'opacity-50' : 'opacity-100',
+        ].join(' ')}
+      >
         {/* Gold accent bar */}
-        <div style={{
-          height: '3px',
-          background: 'linear-gradient(90deg, #C9973A, #E8B86D)',
-        }} />
+        <div className="h-[3px] bg-gradient-to-r from-gold to-gold-warm" />
 
-        <div style={{ padding: '16px' }}>
+        <div className="p-4">
 
           {/* Header */}
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+          <div className="flex gap-3 mb-3">
 
             {/* Avatar */}
-            <div style={{
-              width: '48px', height: '48px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '16px', fontWeight: 900, color: '#0D1B3E',
-              flexShrink: 0,
-            }}>
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-warm flex items-center justify-center text-base font-black text-navy shrink-0">
               {initials}
             </div>
 
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
                 <div>
-                  <h3 style={{
-                    fontSize: '32px', fontWeight: 900,
-                    margin: '0 0 2px', fontFamily: FONT_SERIF,
-                    letterSpacing: '-0.025em', lineHeight: 1.1,
-                    minHeight: '36px',
-                    background: isEmpty ? '#F1F5F9' : 'transparent',
-                    borderRadius: isEmpty ? '4px' : '0',
-                    color: isEmpty ? 'transparent' : '#0D1B3E',
-                  }}>
+                  <h3 className={[
+                    'text-[32px] font-black m-0 mb-0.5 tracking-tight leading-[1.1] min-h-[36px]',
+                    isEmpty ? 'bg-slate-100 rounded text-transparent' : 'text-navy',
+                  ].join(' ')}>
                     {displayName || 'Your name'}
                   </h3>
                   {data.jobTitle ? (
-                    <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px' }}>
+                    <p className="text-[11px] text-slate-500 mb-1">
                       {data.jobTitle}
                     </p>
                   ) : data.credentials?.[0] ? (
-                    <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px' }}>
+                    <p className="text-[11px] text-slate-500 mb-1">
                       {data.credentials[0]}
                     </p>
                   ) : null}
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="flex gap-2 flex-wrap">
                     {data.credentials?.[0] && (
-                      <span style={{
-                        fontSize: '10px', fontWeight: 700,
-                        color: '#1E3A8A', background: '#EFF6FF',
-                        padding: '2px 7px', borderRadius: '5px',
-                      }}>
+                      <span className="text-[10px] font-bold text-blue-900 bg-blue-50 px-[7px] py-0.5 rounded-[5px]">
                         {data.credentials[0]}
                       </span>
                     )}
                     {(data.yearsExperience || 0) > 0 && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: '#64748B' }}>
+                      <span className="flex items-center gap-[3px] text-[11px] text-slate-500">
                         <Briefcase size={10} /> {data.yearsExperience}y
                       </span>
                     )}
                     {data.city && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: '#64748B' }}>
+                      <span className="flex items-center gap-[3px] text-[11px] text-slate-500">
                         <MapPin size={10} /> {data.city}{data.state ? `, ${data.state}` : ''}
                       </span>
                     )}
@@ -177,35 +142,18 @@ style={{
 
           {/* Availability */}
           {availLabel && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                fontSize: '10px', fontWeight: 600,
-                padding: '3px 8px', borderRadius: '999px',
-                color: availColor,
-                background: data.availabilityStatus === 'available_now' ? '#F0FDF4' :
-                  data.availabilityStatus === 'open_to_opportunities' ? '#FFFBEB' : '#F8FAFC',
-              }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: availColor }} />
+            <div className="flex flex-wrap gap-[5px] mb-2.5">
+              <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-[3px] rounded-full ${availClasses}`}>
+                <span className={`w-[5px] h-[5px] rounded-full ${availDotClass}`} />
                 {availLabel}
               </span>
               {data.openToUrgent && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '3px',
-                  fontSize: '10px', fontWeight: 600,
-                  padding: '3px 8px', borderRadius: '999px',
-                  background: '#FFF7ED', color: '#C2410C',
-                }}>
+                <span className="inline-flex items-center gap-[3px] text-[10px] font-semibold px-2 py-[3px] rounded-full bg-orange-50 text-orange-700">
                   <Zap size={9} /> Urgent
                 </span>
               )}
               {data.willingLiveIn && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '3px',
-                  fontSize: '10px', fontWeight: 600,
-                  padding: '3px 8px', borderRadius: '999px',
-                  background: '#F5F3FF', color: '#7C3AED',
-                }}>
+                <span className="inline-flex items-center gap-[3px] text-[10px] font-semibold px-2 py-[3px] rounded-full bg-violet-50 text-violet-700">
                   <Home size={9} /> Live-in
                 </span>
               )}
@@ -214,17 +162,14 @@ style={{
 
           {/* Specialties */}
           {(data.specializations || []).length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
+            <div className="flex flex-wrap gap-1 mb-2.5">
               {(data.specializations || []).slice(0, 3).map((s, i) => (
-                <span key={i} style={{
-                  fontSize: '10px', padding: '3px 8px', borderRadius: '5px',
-                  background: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0',
-                }}>
+                <span key={i} className="text-[10px] px-2 py-[3px] rounded-[5px] bg-slate-50 text-slate-600 border border-slate-200">
                   {s}
                 </span>
               ))}
               {(data.specializations || []).length > 3 && (
-                <span style={{ fontSize: '10px', color: '#94A3B8', padding: '3px' }}>
+                <span className="text-[10px] text-slate-400 p-[3px]">
                   +{(data.specializations || []).length - 3} more
                 </span>
               )}
@@ -233,9 +178,9 @@ style={{
 
           {/* Languages */}
           {(data.languages || []).length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '10px' }}>
-              <Globe size={11} color="#94A3B8" />
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
+            <div className="flex items-center gap-[5px] mb-2.5">
+              <Globe size={11} className="text-slate-400" />
+              <span className="text-[11px] text-slate-500">
                 {(data.languages || []).slice(0, 3).join(' · ')}
               </span>
             </div>
@@ -243,73 +188,44 @@ style={{
 
           {/* Bio snippet */}
           {data.bio && (
-            <p style={{
-              fontSize: '11px', color: '#64748B',
-              lineHeight: 1.5, marginBottom: '10px',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
+            <p className="text-[11px] text-slate-500 leading-[1.5] mb-2.5 line-clamp-2">
               {data.bio}
             </p>
           )}
 
           {/* Footer */}
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: '10px',
-            borderTop: '1px solid #F1F5F9',
-          }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+            <div className="flex gap-2">
               {data.hasVehicle && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '10px', color: '#64748B' }}>
+                <span className="flex items-center gap-[3px] text-[10px] text-slate-500">
                   <Car size={11} /> Vehicle
                 </span>
               )}
               {data.hourlyRate && (
-                <span style={{ fontSize: '10px', color: '#64748B' }}>
+                <span className="text-[10px] text-slate-500">
                   ${data.hourlyRate}/hr
                 </span>
               )}
             </div>
-            <span style={{
-              fontSize: '10px', fontWeight: 700,
-              padding: '2px 7px', borderRadius: '5px',
-              background: tier.bg, color: tier.color,
-            }}>
+            <span className={`text-[10px] font-bold px-[7px] py-0.5 rounded-[5px] ${tier.colorClass}`}>
               {tier.label}
             </span>
           </div>
         </div>
 
         {/* Completion bar */}
-        <div style={{
-          padding: '10px 16px 12px',
-          borderTop: '1px solid #F8FAFC',
-          background: '#FAFAFA',
-        }}>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            fontSize: '10px', color: '#94A3B8', marginBottom: '5px',
-          }}>
+        <div className="px-4 pt-2.5 pb-3 border-t border-slate-50 bg-[#FAFAFA]">
+          <div className="flex justify-between text-[10px] text-slate-400 mb-[5px]">
             <span>Profile strength</span>
-            <span style={{ color: '#C9973A', fontWeight: 700 }}>{completion}%</span>
+            <span className="text-gold font-bold">{completion}%</span>
           </div>
-          <div style={{ height: '3px', background: '#F1F5F9', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{
-              height: '3px', borderRadius: '2px',
-              background: 'linear-gradient(90deg, #C9973A, #E8B86D)',
-              width: `${completion}%`,
-              transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-            }} />
+          <div className="h-[3px] bg-slate-100 rounded-sm overflow-hidden">
+            <div
+              className="h-[3px] rounded-sm bg-gradient-to-r from-gold to-gold-warm transition-[width] duration-[600ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{ width: `${completion}%` }}
+            />
           </div>
-          <p style={{
-            fontSize: '10px', color: '#94A3B8',
-            marginTop: '6px', marginBottom: 0,
-            lineHeight: 1.4,
-          }}>
+          <p className="text-[10px] text-slate-400 mt-1.5 mb-0 leading-[1.4]">
             {completion < 40
               ? 'Complete more steps to appear in agency search.'
               : completion < 60
@@ -322,11 +238,7 @@ style={{
       </motion.div>
 
       {/* What agencies see note */}
-      <p style={{
-        fontSize: '10px', color: '#94A3B8',
-        textAlign: 'center', marginTop: '10px',
-        lineHeight: 1.4,
-      }}>
+      <p className="text-[10px] text-slate-400 text-center mt-2.5 leading-[1.4]">
         This is exactly what agencies see when they find your profile.
         Complete more steps to strengthen your listing.
       </p>

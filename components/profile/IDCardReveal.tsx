@@ -5,10 +5,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Shield, MapPin, Star, ExternalLink, Share2 } from 'lucide-react'
-
-const FONT_SERIF = "'Inter', sans-serif"
-const FONT_SANS = "'Inter', sans-serif"
+import { Shield, MapPin, ExternalLink, Share2 } from 'lucide-react'
 
 interface IDCardRevealProps {
   caregiverData: {
@@ -97,23 +94,19 @@ export default function IDCardReveal({
       `}</style>
 
       {/* Full-screen overlay */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 1000,
-        background: 'linear-gradient(135deg, #0D1B3E 0%, #1E3A8A 100%)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: '24px',
-        animation: 'overlayFadeIn 0.4s ease forwards',
-        fontFamily: FONT_SANS,
-      }}>
+      <div
+        className="fixed inset-0 z-[1000] flex flex-col items-center justify-center p-6 font-sans"
+        style={{
+          background: 'linear-gradient(135deg, #0D1B3E 0%, #1E3A8A 100%)',
+          animation: 'overlayFadeIn 0.4s ease forwards',
+        }}
+      >
 
         {/* Stars background decoration */}
         {[...Array(20)].map((_, i) => (
-          <div key={i} style={{
-            position: 'absolute',
+          <div key={i} className="absolute rounded-full" style={{
             width: Math.random() * 3 + 1 + 'px',
             height: Math.random() * 3 + 1 + 'px',
-            borderRadius: '50%',
             background: 'rgba(255,255,255,' + (Math.random() * 0.3 + 0.1) + ')',
             top: Math.random() * 100 + '%',
             left: Math.random() * 100 + '%',
@@ -122,124 +115,80 @@ export default function IDCardReveal({
 
         {/* Headline */}
         <div
-          className={phase !== 'enter' ? 'text-rise' : ''}
-          style={{
-            opacity: phase === 'enter' ? 0 : 1,
-            textAlign: 'center', marginBottom: '32px',
-          }}
+          className={`text-center mb-8 ${phase !== 'enter' ? 'text-rise' : ''}`}
+          style={{ opacity: phase === 'enter' ? 0 : 1 }}
         >
-          <div style={{
-            fontSize: '10px', fontWeight: 700,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: '#C9973A', marginBottom: '8px',
-          }}>
+          <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-gold mb-2">
             Careified Verified
           </div>
-          <h1 style={{
-            fontFamily: FONT_SERIF,
-            fontSize: '28px', fontWeight: 900,
-            color: 'white', margin: 0,
-            letterSpacing: '-0.02em',
-          }}>
+          <h1 className="text-[28px] font-black text-white m-0 tracking-tight">
             Your professional identity.
           </h1>
         </div>
 
         {/* ID Card */}
         <div
-          className={phase !== 'enter' ? 'id-card-flip' : ''}
-          style={{
-            opacity: phase === 'enter' ? 0 : 1,
-            position: 'relative',
-            width: '320px',
-            marginBottom: '32px',
-            transformStyle: 'preserve-3d',
-          }}
+          className={`relative w-80 mb-8 [transform-style:preserve-3d] ${phase !== 'enter' ? 'id-card-flip' : ''}`}
+          style={{ opacity: phase === 'enter' ? 0 : 1 }}
         >
           {/* Card */}
-          <div style={{
-            background: 'linear-gradient(135deg, #0D1B3E 0%, #1E2D5E 50%, #0D1B3E 100%)',
-            borderRadius: '20px',
-            padding: '24px',
-            border: '1px solid rgba(201,151,58,0.3)',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,151,58,0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
+          <div
+            className="rounded-[20px] p-6 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #0D1B3E 0%, #1E2D5E 50%, #0D1B3E 100%)',
+              border: '1px solid rgba(201,151,58,0.3)',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,151,58,0.1)',
+            }}
+          >
 
             {/* Shimmer sweep */}
-            {phase === 'shimmer' || phase === 'complete' ? (
+            {(phase === 'shimmer' || phase === 'complete') && (
               <div
-                className="shimmer-sweep"
-                style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
-                  pointerEvents: 'none',
-                }}
+                className="shimmer-sweep absolute inset-0 pointer-events-none"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' }}
               />
-            ) : null}
+            )}
 
             {/* Card header */}
-            <div style={{
-              display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', marginBottom: '20px',
-            }}>
-              <div style={{
-                fontSize: '11px', fontWeight: 800,
-                letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: '#C9973A',
-                fontFamily: FONT_SERIF,
-              }}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="text-[11px] font-extrabold tracking-[0.08em] uppercase text-gold">
                 Careified
               </div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                fontSize: '9px', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.4)',
-              }}>
-                <Shield size={10} color="rgba(255,255,255,0.4)" />
+              <div className="flex items-center gap-1 text-[9px] font-bold tracking-[0.1em] uppercase text-white/40">
+                <Shield size={10} className="text-white/40" />
                 Verified Professional
               </div>
             </div>
 
             {/* Avatar + identity */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', marginBottom: '20px' }}>
-              <div style={{
-                width: '64px', height: '64px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '22px', fontWeight: 900, color: '#0D1B3E',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(201,151,58,0.3)',
-              }}>
+            <div className="flex gap-4 items-start mb-5">
+              <div
+                className="w-16 h-16 rounded-xl flex items-center justify-center text-[22px] font-black text-navy shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                  boxShadow: '0 4px 12px rgba(201,151,58,0.3)',
+                }}
+              >
                 {initials}
               </div>
               <div>
-                <h2 style={{
-                  fontFamily: FONT_SERIF,
-                  fontSize: '18px', fontWeight: 900,
-                  color: 'white', margin: '0 0 4px',
-                  letterSpacing: '-0.01em',
-                }}>
+                <h2 className="text-lg font-black text-white m-0 mb-1 tracking-tight">
                   {displayName || 'Care Professional'}
                 </h2>
                 {caregiverData.jobTitle && (
-                  <p style={{
-                    fontSize: '11px', color: 'rgba(255,255,255,0.5)',
-                    margin: '0 0 6px',
-                  }}>
+                  <p className="text-[11px] text-white/50 m-0 mb-1.5">
                     {caregiverData.jobTitle}
                   </p>
                 )}
                 {caregiverData.credentials?.[0] && (
-                  <span style={{
-                    fontSize: '10px', fontWeight: 700,
-                    padding: '2px 8px', borderRadius: '5px',
-                    background: 'rgba(201,151,58,0.15)',
-                    color: '#E8B86D',
-                    border: '1px solid rgba(201,151,58,0.2)',
-                  }}>
+                  <span
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-[5px]"
+                    style={{
+                      background: 'rgba(201,151,58,0.15)',
+                      color: '#E8B86D',
+                      border: '1px solid rgba(201,151,58,0.2)',
+                    }}
+                  >
                     {caregiverData.credentials[0]}
                   </span>
                 )}
@@ -248,78 +197,60 @@ export default function IDCardReveal({
 
             {/* Location */}
             {caregiverData.city && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                fontSize: '11px', color: 'rgba(255,255,255,0.4)',
-                marginBottom: '16px',
-              }}>
+              <div className="flex items-center gap-[5px] text-[11px] text-white/40 mb-4">
                 <MapPin size={11} />
                 {caregiverData.city}{caregiverData.state ? `, ${caregiverData.state}` : ''}
               </div>
             )}
 
             {/* Divider */}
-            <div style={{
-              height: '1px',
-              background: 'linear-gradient(90deg, rgba(201,151,58,0.3), transparent)',
-              marginBottom: '16px',
-            }} />
+            <div
+              className="h-px mb-4"
+              style={{ background: 'linear-gradient(90deg, rgba(201,151,58,0.3), transparent)' }}
+            />
 
             {/* ID code */}
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
+            <div className="flex items-center justify-between">
               <div>
-                <div style={{
-                  fontSize: '8px', fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.3)', marginBottom: '3px',
-                }}>
+                <div className="text-[8px] font-bold tracking-[0.1em] uppercase text-white/30 mb-[3px]">
                   Caregiver ID
                 </div>
-                <div style={{
-                  fontSize: '12px', fontWeight: 700,
-                  color: 'rgba(255,255,255,0.7)',
-                  letterSpacing: '0.05em',
-                  fontFamily: 'monospace',
-                }}>
+                <div className="text-xs font-bold text-white/70 tracking-[0.05em] font-mono">
                   {idCode}
                 </div>
               </div>
 
               {/* QR placeholder */}
-              <div style={{
-                width: '44px', height: '44px',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <div style={{
-                  width: '28px', height: '28px',
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0 0h2v2H0zM3 0h2v2H3zM1 1h1v1H1zM3 1h1v1H3zM0 3h2v2H0zM1 4h1v1H1zM3 3h1v1H3zM4 4h1v1H4zM2 2h1v1H2z'/%3E%3C/svg%3E")`,
-                  backgroundSize: 'cover',
-                }} />
+              <div
+                className="w-11 h-11 rounded-lg flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <div
+                  className="w-7 h-7"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0 0h2v2H0zM3 0h2v2H3zM1 1h1v1H1zM3 1h1v1H3zM0 3h2v2H0zM1 4h1v1H1zM3 3h1v1H3zM4 4h1v1H4zM2 2h1v1H2z'/%3E%3C/svg%3E")`,
+                    backgroundSize: 'cover',
+                  }}
+                />
               </div>
             </div>
 
             {/* Gold accent line at bottom */}
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
-              height: '3px',
-              background: 'linear-gradient(90deg, #C9973A, #E8B86D)',
-            }} />
+            <div
+              className="absolute bottom-0 left-0 right-0 h-[3px]"
+              style={{ background: 'linear-gradient(90deg, #C9973A, #E8B86D)' }}
+            />
           </div>
 
           {/* Verified badge — pops in */}
           {(phase === 'shimmer' || phase === 'complete') && (
             <div
-              className="badge-pop"
+              className="badge-pop absolute -top-3 -right-3 w-12 h-12 rounded-full flex items-center justify-center"
               style={{
-                position: 'absolute', top: '-12px', right: '-12px',
-                width: '48px', height: '48px', borderRadius: '50%',
                 background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 4px 16px rgba(201,151,58,0.5)',
               }}
             >
@@ -330,43 +261,26 @@ export default function IDCardReveal({
 
         {/* Submitted message + buttons */}
         {phase === 'complete' && (
-          <div
-            className="buttons-fade"
-            style={{ textAlign: 'center' }}
-          >
-            <p style={{
-              fontSize: '13px', color: 'rgba(255,255,255,0.5)',
-              marginBottom: '20px',
-              lineHeight: 1.5,
-            }}>
+          <div className="buttons-fade text-center">
+            <p className="text-[13px] text-white/50 mb-5 leading-[1.5]">
               Your profile has been submitted for review.<br />
-              Agencies can find you once it's approved.
+              Agencies can find you once it&apos;s approved.
             </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="flex gap-2.5 justify-center flex-wrap">
               <button
                 onClick={onViewProfile}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '12px 24px', borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                  color: '#0D1B3E', border: 'none',
-                  fontSize: '13px', fontWeight: 700,
-                  cursor: 'pointer', fontFamily: FONT_SANS,
-                }}
+                className="flex items-center gap-1.5 px-6 py-3 rounded-[10px] text-[13px] font-bold text-navy border-none cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, #C9973A, #E8B86D)' }}
               >
                 <ExternalLink size={14} />
                 View your profile
               </button>
               <button
                 onClick={onDismiss}
+                className="flex items-center gap-1.5 px-6 py-3 rounded-[10px] text-[13px] font-semibold text-white/70 cursor-pointer"
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '12px 24px', borderRadius: '10px',
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '13px', fontWeight: 600,
-                  cursor: 'pointer', fontFamily: FONT_SANS,
                 }}
               >
                 <Share2 size={14} />
