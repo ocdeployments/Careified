@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { SearchFilters, SearchResponse } from '@/lib/types/search'
+import { SearchFilters, SearchResponse, CaregiverSearchResult } from '@/lib/types/search'
 import { FilterPanel } from '@/components/search/FilterPanel'
 import { SearchResults } from '@/components/search/SearchResults'
+import { AlignmentDisclaimerBanner } from '@/components/matching/AlignmentBadge'
 
 interface ClientSearchProps {
   initialFilters: SearchFilters
@@ -13,8 +14,8 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null)
   const [loading, setLoading] = useState(true)
-
   const [excludedCount, setExcludedCount] = useState(0)
+  const [disclaimer, setDisclaimer] = useState('')
 
   const executeSearch = useCallback(async (f: SearchFilters) => {
     setLoading(true)
@@ -37,7 +38,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
       const data = await response.json()
       
       // Map rank API results to CaregiverSearchResult shape
-      const mappedResults = (data.results || []).map((r: any) => ({
+      const mappedResults: CaregiverSearchResult[] = (data.results || []).map((r: any) => ({
         id: r.caregiver_id,
         firstName: r.first_name,
         lastName: r.last_name,
@@ -46,7 +47,9 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
         languages: r.languages || [],
         yearsExperience: r.years_experience || 0,
         clientsServedCount: 0,
-        score: r.match?.overall_score || 0,
+        score: r.alignment_score ?? r.match?.overall_score ?? 0,
+        alignment_score: r.alignment_score ?? r.match?.alignment_score ?? null,
+        overall_confidence: r.overall_confidence ?? r.match?.overall_confidence ?? null,
         hasReferences: false,
         hasBackgroundCheck: false,
         city: r.city,
@@ -65,6 +68,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
       
       setSearchResponse({ results: mappedResults, totalCount: data.matched_count || 0, page: 1, totalPages: 1, filters })
       setExcludedCount(data.excluded_count || 0)
+      setDisclaimer(data.disclaimer || '')
     } catch (error) {
       console.error('Search failed:', error)
     } finally {
@@ -95,8 +99,8 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
           </h1>
           <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
             {searchResponse
-              ? `${searchResponse.totalCount} verified caregiver${searchResponse.totalCount !== 1 ? 's' : ''} match your search${excludedCount > 0 ? ` (${excludedCount} excluded)` : ''}`
-              : 'Search verified caregiver profiles'}
+              ? `${searchResponse.totalCount} caregiver${searchResponse.totalCount !== 1 ? 's' : ''} match your search${excludedCount > 0 ? ` (${excludedCount} excluded)` : ''}`
+              : 'Search caregiver profiles'}
           </p>
         </div>
       </div>
@@ -114,6 +118,11 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
 
           {/* Results */}
           <div>
+            {disclaimer && (
+              <div style={{ marginBottom: '16px' }}>
+                <AlignmentDisclaimerBanner disclaimer={disclaimer} compact />
+              </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
                 {loading ? 'Searching...' : `${searchResponse?.totalCount || 0} caregivers found`}
@@ -126,7 +135,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
                   onChange={e => setFilters(prev => ({ ...prev, sortBy: e.target.value as any, page: 1 }))}
                   style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px', backgroundColor: 'white', color: '#0D1B3E' }}
                 >
-                  <option value="score">Trust score</option>
+                  <option value="score">Alignment score</option>
                   <option value="experience">Experience</option>
                   <option value="recent">Recently active</option>
                   <option value="availability">Availability</option>

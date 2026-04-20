@@ -59,6 +59,8 @@ export interface CaregiverSearchResult {
  yearsExperience: number;
  clientsServedCount: number;
  score: number;
+ alignment_score: number | null;
+ overall_confidence: number | null;
  hasReferences: boolean;
  hasBackgroundCheck: boolean;
  city: string;

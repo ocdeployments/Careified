@@ -219,6 +219,8 @@ export class CaregiverSearchService {
  yearsExperience: row.years_experience || 0,
  clientsServedCount: row.clients_served_count || 0,
  score: row.aggregate_score ? parseFloat(row.aggregate_score) : 0,
+ alignment_score: null,
+ overall_confidence: null,
  hasReferences: parseInt(row.ref_count, 10) > 0,
  hasBackgroundCheck: parseInt(row.cert_count, 10) > 0,
  city: row.city || '',

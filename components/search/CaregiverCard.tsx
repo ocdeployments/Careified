@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { CaregiverSearchResult } from '@/lib/types/search';
 import { Star, MapPin, Briefcase, Shield, Zap, Home, Globe, Car } from 'lucide-react';
 import ShortlistButton from './ShortlistButton';
+import { AlignmentScoreBadge } from '@/components/matching/AlignmentBadge';
 
 interface CaregiverCardProps {
  caregiver: CaregiverSearchResult;
@@ -92,14 +93,20 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  </div>
  </div>
 
- {caregiver.score >= 3 && (
+ {caregiver.alignment_score != null ? (
+ <AlignmentScoreBadge 
+ score={caregiver.alignment_score} 
+ confidence={caregiver.overall_confidence} 
+ size="sm" 
+ />
+ ) : caregiver.score >= 3 ? (
  <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
  <Star size={14} fill="#C9973A" color="#C9973A" />
  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E' }}>
  {caregiver.score.toFixed(1)}
  </span>
  </div>
- )}
+ ) : null}
  </div>
  </div>
  </div>
