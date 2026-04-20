@@ -20,7 +20,7 @@ function OnboardingContent() {
     if (role === 'agency' || role === 'caregiver') {
       const redirect = role === 'agency' 
         ? '/agency/pending-approval' 
-        : '/profile/build'
+        : '/profile/start'
       fetch('/api/onboarding/set-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

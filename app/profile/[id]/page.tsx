@@ -189,8 +189,9 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  </div>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
  <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
- <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#0D1B3E', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', border: 'none', cursor: 'pointer', marginBottom: '10px' }}>Shortlist</button>
- <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#1E3A8A', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', cursor: 'pointer' }}>Request Contact</button>
+  <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#0D1B3E', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', border: 'none', cursor: 'pointer', marginBottom: '10px' }}>Shortlist</button>
+  <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#1E3A8A', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', cursor: 'pointer', marginBottom: '10px' }}>Request Contact</button>
+  <a href={`/id/${caregiver.id}`} style={{ display: 'block', width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#0D1B3E', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', cursor: 'pointer', textAlign: 'center', textDecoration: 'none' }}>🪪 View ID card</a>
  </div>
  <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
  <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E', marginBottom: '14px' }}>Availability</h4>
