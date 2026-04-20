@@ -207,7 +207,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
               ['hasVehicle', 'Has vehicle'],
               ['willingLiveIn', 'Willing to live-in'],
               ['openToUrgent', 'Open to urgent placements'],
-              ['hasDriversLicense', 'Has driver's license'],
+              ["hasDriversLicense", "Has driver's license"],
             ] as const).map(([field, label]) => (
               <label key={field} className="flex items-center gap-2 cursor-pointer group">
                 <input
