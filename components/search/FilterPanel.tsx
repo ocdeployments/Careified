@@ -115,7 +115,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy bg-white focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
             >
               <option value="">All states</option>
-              {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              {US_STATES.map(s => { const v = typeof s === 'string' ? s : s.value; const l = typeof s === 'string' ? s : (s as any).label ?? v; return <option key={v} value={v}>{l}</option> })}
             </select>
             <div className="flex items-center gap-2">
               <input
