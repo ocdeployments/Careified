@@ -73,7 +73,7 @@ export function ConfidenceBar({
   )
 }
 
-export function TierBadge({ tier }: { tier: string }) {
+export function TierBadge({ tier }: { tier: string | number }) {
   const styles: Record<string, string> = {
     high:   'bg-green-50 text-green-700 border-green-200',
     medium: 'bg-amber-50 text-amber-700 border-amber-200',
