@@ -1,449 +1,402 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { AlertCircle, CheckCircle, ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface FormData {
-  agencyName: string;
-  businessType: string;
-  licenseNumber: string;
-  contactFirstName: string;
-  contactLastName: string;
-  contactEmail: string;
-  contactPhone: string;
-  streetAddress: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  acceptedTerms: boolean;
+  agencyName: string
+  businessType: string
+  licenseNumber: string
+  contactFirstName: string
+  contactLastName: string
+  contactEmail: string
+  contactPhone: string
+  streetAddress: string
+  city: string
+  state: string
+  postalCode: string
+  acceptedTerms: boolean
 }
 
 interface FormErrors {
-  agencyName?: string;
-  contactFirstName?: string;
-  contactLastName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  streetAddress?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-  acceptedTerms?: string;
+  agencyName?: string
+  contactFirstName?: string
+  contactLastName?: string
+  contactEmail?: string
+  contactPhone?: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  acceptedTerms?: string
 }
 
+const US_STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
+  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
+  'VA','WA','WV','WI','WY',
+]
+
+const BUSINESS_TYPES = [
+  'Home Health Agency',
+  'Staffing Agency',
+  'Registry',
+  'Private Duty Agency',
+  'Hospice Agency',
+  'Other',
+]
+
 export function AgencySignupForm() {
- const router = useRouter();
- const [serverError, setServerError] = useState('');
- const [isSubmitting, setIsSubmitting] = useState(false);
- const [formData, setFormData] = useState<FormData>({
-  agencyName: '',
-  businessType: '',
-  licenseNumber: '',
-  contactFirstName: '',
-  contactLastName: '',
-  contactEmail: '',
-  contactPhone: '',
-  streetAddress: '',
-  city: '',
-  state: 'TX',
-  postalCode: '',
-  acceptedTerms: false
- });
- const [errors, setErrors] = useState<FormErrors>({});
- const [touched, setTouched] = useState<Record<string, boolean>>({});
- 
- // Auto-format phone number
- const formatPhone = (value: string) => {
-  const digits = value.replace(/\D/g, '').slice(0, 10);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) 
-   return `(${digits.slice(0,3)}) ${digits.slice(3)}`;
-  return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
- };
- 
- const handleChange = (field: keyof FormData, value: string | boolean) => {
-  if (field === 'contactPhone') {
-   value = formatPhone(value as string);
+  const router = useRouter()
+  const [serverError, setServerError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
+    agencyName: '',
+    businessType: '',
+    licenseNumber: '',
+    contactFirstName: '',
+    contactLastName: '',
+    contactEmail: '',
+    contactPhone: '',
+    streetAddress: '',
+    city: '',
+    state: 'TX',
+    postalCode: '',
+    acceptedTerms: false,
+  })
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `(${digits.slice(0,3)}) ${digits.slice(3)}`
+    return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`
   }
-  setFormData(prev => ({ ...prev, [field]: value }));
-  
-  // Clear error when user types
-  if (errors[field as keyof FormErrors]) {
-   setErrors(prev => ({ ...prev, [field]: undefined }));
+
+  const validate = (data: FormData): FormErrors => {
+    const e: FormErrors = {}
+    if (!data.agencyName.trim()) e.agencyName = 'Agency name is required'
+    if (!data.contactFirstName.trim()) e.contactFirstName = 'First name is required'
+    if (!data.contactLastName.trim()) e.contactLastName = 'Last name is required'
+    if (!data.contactEmail.trim()) e.contactEmail = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) e.contactEmail = 'Invalid email address'
+    if (!data.contactPhone.trim()) e.contactPhone = 'Phone is required'
+    else if (data.contactPhone.replace(/\D/g,'').length < 10) e.contactPhone = 'Enter a valid 10-digit phone'
+    if (!data.streetAddress.trim()) e.streetAddress = 'Street address is required'
+    if (!data.city.trim()) e.city = 'City is required'
+    if (!data.state) e.state = 'State is required'
+    if (!data.postalCode.trim()) e.postalCode = 'ZIP code is required'
+    else if (!/^\d{5}(-\d{4})?$/.test(data.postalCode)) e.postalCode = 'Invalid ZIP code'
+    if (!data.acceptedTerms) e.acceptedTerms = 'You must accept the terms'
+    return e
   }
- };
- 
- const validate = (): boolean => {
-  const newErrors: FormErrors = {};
-  
-  if (!formData.agencyName || formData.agencyName.length < 2) {
-   newErrors.agencyName = 'Agency name must be at least 2 characters';
+
+  const handleChange = (field: keyof FormData, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (touched[field]) {
+      const newErrors = validate({ ...formData, [field]: value })
+      setErrors(prev => ({ ...prev, [field]: newErrors[field as keyof FormErrors] }))
+    }
   }
-  if (!formData.contactFirstName || formData.contactFirstName.length < 2) {
-   newErrors.contactFirstName = 'First name required';
+
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }))
+    const newErrors = validate(formData)
+    setErrors(prev => ({ ...prev, [field]: newErrors[field as keyof FormErrors] }))
   }
-  if (!formData.contactLastName || formData.contactLastName.length < 2) {
-   newErrors.contactLastName = 'Last name required';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const allTouched = Object.keys(formData).reduce((acc, k) => ({ ...acc, [k]: true }), {})
+    setTouched(allTouched)
+    const validationErrors = validate(formData)
+    setErrors(validationErrors)
+    if (Object.keys(validationErrors).length > 0) return
+
+    setIsSubmitting(true)
+    setServerError('')
+    try {
+      const res = await fetch('/api/agency/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Registration failed')
+      setSubmitted(true)
+      toast.success('Application submitted! We\'ll review it within 1–2 business days.')
+      setTimeout(() => router.push('/agency/pending-approval'), 1500)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong'
+      setServerError(msg)
+      toast.error(msg)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-  if (!formData.contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
-   newErrors.contactEmail = 'Valid email required';
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-10">
+        <div className="max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={32} className="text-green-600" />
+          </div>
+          <h1 className="font-serif text-2xl text-navy mb-2">Application submitted!</h1>
+          <p className="text-sm text-slate-500">Redirecting to your status page…</p>
+        </div>
+      </div>
+    )
   }
-  if (!formData.contactPhone || !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.contactPhone)) {
-   newErrors.contactPhone = 'Phone format: (XXX) XXX-XXXX';
-  }
-  if (!formData.streetAddress || formData.streetAddress.length < 5) {
-   newErrors.streetAddress = 'Street address required';
-  }
-  if (!formData.city || formData.city.length < 2) {
-   newErrors.city = 'City required';
-  }
-  if (!formData.state) {
-   newErrors.state = 'State required';
-  }
-  if (!formData.postalCode || !/^\d{5}$/.test(formData.postalCode)) {
-   newErrors.postalCode = '5-digit ZIP code required';
-  }
-  if (!formData.acceptedTerms) {
-   newErrors.acceptedTerms = 'You must accept terms to continue';
-  }
-  
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
- };
- 
- const handleBlur = (field: string) => {
-  setTouched(prev => ({ ...prev, [field]: true }));
- };
- 
- const isValid = formData.agencyName && formData.contactFirstName && 
-  formData.contactLastName && formData.contactEmail && 
-  formData.contactPhone && formData.streetAddress && 
-  formData.city && formData.state && formData.postalCode && 
-  formData.acceptedTerms;
- 
- const onSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (!validate()) return;
-  
-  setIsSubmitting(true);
-  setServerError('');
-  
-  try {
-   const response = await fetch('/api/agency/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData),
-   });
-   
-   const result = await response.json();
-   
-   if (!response.ok) {
-    setServerError(result.error || 'Signup failed');
-    return;
-   }
-   
-   router.push('/agency/pending-approval');
-   
-  } catch (error) {
-   setServerError('Network error. Please try again.');
-  } finally {
-   setIsSubmitting(false);
-  }
- };
- 
- return (
-  <div className="min-h-screen bg-slate-50 py-12 px-4">
-   <div className="max-w-4xl mx-auto">
- 
-   <div className="text-center mb-8">
-    <h1 className="text-3xl font-bold text-slate-900 mb-2">
-     Create Your Agency Account
-    </h1>
-    <p className="text-slate-600">
-     Join 250+ care agencies finding qualified caregivers through verified profiles
-    </p>
-   </div>
- 
-   {serverError && (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-     <p className="text-sm text-red-800 flex items-center gap-2">
-      <AlertCircle className="w-4 h-4" />
-      {serverError}
-     </p>
+
+  return (
+    <div className="min-h-screen bg-cream py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="font-serif text-3xl md:text-4xl font-normal text-navy tracking-tight mb-2">
+            Register your agency
+          </h1>
+          <p className="text-sm text-slate-500">
+            Join Careified to access verified caregiver profiles and AI-powered matching.
+          </p>
+        </div>
+
+        {/* Server error */}
+        {serverError && (
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 mb-6">
+            <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{serverError}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+
+          {/* Agency info */}
+          <FormSection title="Agency Information">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field
+                label="Agency name"
+                required
+                error={touched.agencyName ? errors.agencyName : undefined}
+              >
+                <input
+                  type="text"
+                  value={formData.agencyName}
+                  onChange={e => handleChange('agencyName', e.target.value)}
+                  onBlur={() => handleBlur('agencyName')}
+                  placeholder="Sunrise Home Care"
+                  className={inputCls(touched.agencyName && !!errors.agencyName)}
+                />
+              </Field>
+              <Field label="Business type">
+                <select
+                  value={formData.businessType}
+                  onChange={e => handleChange('businessType', e.target.value)}
+                  className={inputCls(false)}
+                >
+                  <option value="">Select type</option>
+                  {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </Field>
+              <Field label="License number" className="md:col-span-2">
+                <input
+                  type="text"
+                  value={formData.licenseNumber}
+                  onChange={e => handleChange('licenseNumber', e.target.value)}
+                  placeholder="Optional"
+                  className={inputCls(false)}
+                />
+              </Field>
+            </div>
+          </FormSection>
+
+          {/* Contact info */}
+          <FormSection title="Primary Contact">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="First name" required error={touched.contactFirstName ? errors.contactFirstName : undefined}>
+                <input
+                  type="text"
+                  value={formData.contactFirstName}
+                  onChange={e => handleChange('contactFirstName', e.target.value)}
+                  onBlur={() => handleBlur('contactFirstName')}
+                  className={inputCls(touched.contactFirstName && !!errors.contactFirstName)}
+                />
+              </Field>
+              <Field label="Last name" required error={touched.contactLastName ? errors.contactLastName : undefined}>
+                <input
+                  type="text"
+                  value={formData.contactLastName}
+                  onChange={e => handleChange('contactLastName', e.target.value)}
+                  onBlur={() => handleBlur('contactLastName')}
+                  className={inputCls(touched.contactLastName && !!errors.contactLastName)}
+                />
+              </Field>
+              <Field label="Email" required error={touched.contactEmail ? errors.contactEmail : undefined}>
+                <input
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={e => handleChange('contactEmail', e.target.value)}
+                  onBlur={() => handleBlur('contactEmail')}
+                  className={inputCls(touched.contactEmail && !!errors.contactEmail)}
+                />
+              </Field>
+              <Field label="Phone" required error={touched.contactPhone ? errors.contactPhone : undefined}>
+                <input
+                  type="tel"
+                  value={formData.contactPhone}
+                  onChange={e => handleChange('contactPhone', formatPhone(e.target.value))}
+                  onBlur={() => handleBlur('contactPhone')}
+                  placeholder="(555) 000-0000"
+                  className={inputCls(touched.contactPhone && !!errors.contactPhone)}
+                />
+              </Field>
+            </div>
+          </FormSection>
+
+          {/* Address */}
+          <FormSection title="Business Address">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Street address" required error={touched.streetAddress ? errors.streetAddress : undefined} className="md:col-span-2">
+                <input
+                  type="text"
+                  value={formData.streetAddress}
+                  onChange={e => handleChange('streetAddress', e.target.value)}
+                  onBlur={() => handleBlur('streetAddress')}
+                  className={inputCls(touched.streetAddress && !!errors.streetAddress)}
+                />
+              </Field>
+              <Field label="City" required error={touched.city ? errors.city : undefined}>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={e => handleChange('city', e.target.value)}
+                  onBlur={() => handleBlur('city')}
+                  className={inputCls(touched.city && !!errors.city)}
+                />
+              </Field>
+              <Field label="State" required error={touched.state ? errors.state : undefined}>
+                <select
+                  value={formData.state}
+                  onChange={e => handleChange('state', e.target.value)}
+                  onBlur={() => handleBlur('state')}
+                  className={inputCls(touched.state && !!errors.state)}
+                >
+                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </Field>
+              <Field label="ZIP code" required error={touched.postalCode ? errors.postalCode : undefined}>
+                <input
+                  type="text"
+                  value={formData.postalCode}
+                  onChange={e => handleChange('postalCode', e.target.value)}
+                  onBlur={() => handleBlur('postalCode')}
+                  maxLength={10}
+                  className={inputCls(touched.postalCode && !!errors.postalCode)}
+                />
+              </Field>
+            </div>
+          </FormSection>
+
+          {/* Terms */}
+          <div className="bg-white rounded-2xl border border-slate-100 p-5">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.acceptedTerms}
+                onChange={e => handleChange('acceptedTerms', e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-gold focus:ring-gold mt-0.5 flex-shrink-0"
+              />
+              <span className="text-sm text-slate-600 leading-relaxed">
+                I agree to the{' '}
+                <a href="/terms" target="_blank" className="text-navy underline hover:text-gold transition-colors">
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" target="_blank" className="text-navy underline hover:text-gold transition-colors">
+                  Privacy Policy
+                </a>
+                . I confirm that I am authorized to register this agency.
+              </span>
+            </label>
+            {touched.acceptedTerms && errors.acceptedTerms && (
+              <p className="text-xs text-red-500 mt-2 ml-7">{errors.acceptedTerms}</p>
+            )}
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={[
+              'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition-all',
+              'focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none',
+              isSubmitting
+                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                : 'bg-gradient-to-br from-gold to-gold-warm text-navy hover:opacity-90 cursor-pointer',
+            ].join(' ')}
+          >
+            {isSubmitting ? 'Submitting…' : (
+              <>Submit Application <ChevronRight size={16} /></>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
-   )}
- 
-   <form onSubmit={onSubmit} className="space-y-6">
- 
-   <div className="bg-white rounded-2xl border border-slate-100 p-6">
-    <h2 className="text-lg font-bold text-slate-900 mb-4">Agency Information</h2>
-    
-    <div className="space-y-4">
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Agency Name *</label>
-      <input
-       value={formData.agencyName}
-       onChange={e => handleChange('agencyName', e.target.value)}
-       onBlur={() => handleBlur('agencyName')}
-       type="text"
-       placeholder="e.g. Sunshine Home Care Services"
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-      {touched.agencyName && errors.agencyName && (
-       <p className="text-xs text-red-600 mt-1">{errors.agencyName}</p>
-      )}
-     </div>
- 
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Business Type</label>
-      <select
-       value={formData.businessType}
-       onChange={e => handleChange('businessType', e.target.value)}
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      >
-       <option value="">Select type...</option>
-       <option value="home_care">Home care agency</option>
-       <option value="placement">Placement/staffing agency</option>
-       <option value="nursing">Nursing agency</option>
-       <option value="registry">Healthcare registry</option>
-       <option value="other">Other</option>
-      </select>
-     </div>
- 
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">
-       License/Registration Number <span className="text-slate-400 font-normal">(Optional)</span>
+  )
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function inputCls(hasError: boolean) {
+  return [
+    'w-full px-3 py-2.5 rounded-xl border text-sm text-navy placeholder-slate-400 bg-white',
+    'focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none transition-colors',
+    hasError ? 'border-red-300 bg-red-50' : 'border-slate-200 hover:border-slate-300',
+  ].join(' ')
+}
+
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 p-5">
+      <h2 className="text-sm font-bold text-navy mb-4">{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+function Field({
+  label,
+  required,
+  error,
+  children,
+  className = '',
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
-      <input
-       value={formData.licenseNumber}
-       onChange={e => handleChange('licenseNumber', e.target.value)}
-       type="text"
-       placeholder="State license number if applicable"
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-     </div>
+      {children}
+      {error && (
+        <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
+          <AlertCircle size={11} />
+          {error}
+        </p>
+      )}
     </div>
-   </div>
- 
-   <div className="bg-white rounded-2xl border border-slate-100 p-6">
-    <h2 className="text-lg font-bold text-slate-900 mb-4">Primary Contact</h2>
-    
-    <div className="space-y-4">
-     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-       <label className="block text-sm font-medium text-slate-700 mb-1">First Name *</label>
-       <input
-        value={formData.contactFirstName}
-        onChange={e => handleChange('contactFirstName', e.target.value)}
-        onBlur={() => handleBlur('contactFirstName')}
-        type="text"
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-       />
-       {touched.contactFirstName && errors.contactFirstName && (
-        <p className="text-xs text-red-600 mt-1">{errors.contactFirstName}</p>
-       )}
-      </div>
- 
-      <div>
-       <label className="block text-sm font-medium text-slate-700 mb-1">Last Name *</label>
-       <input
-        value={formData.contactLastName}
-        onChange={e => handleChange('contactLastName', e.target.value)}
-        onBlur={() => handleBlur('contactLastName')}
-        type="text"
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-       />
-       {touched.contactLastName && errors.contactLastName && (
-        <p className="text-xs text-red-600 mt-1">{errors.contactLastName}</p>
-       )}
-      </div>
-     </div>
- 
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Email Address *</label>
-      <input
-       value={formData.contactEmail}
-       onChange={e => handleChange('contactEmail', e.target.value)}
-       onBlur={() => handleBlur('contactEmail')}
-       type="email"
-       placeholder="This will be your login email"
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-      {touched.contactEmail && errors.contactEmail && (
-       <p className="text-xs text-red-600 mt-1">{errors.contactEmail}</p>
-      )}
-     </div>
- 
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number *</label>
-      <input
-       value={formData.contactPhone}
-       onChange={e => handleChange('contactPhone', e.target.value)}
-       onBlur={() => handleBlur('contactPhone')}
-       type="tel"
-       placeholder="(XXX) XXX-XXXX"
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-      {touched.contactPhone && errors.contactPhone && (
-       <p className="text-xs text-red-600 mt-1">{errors.contactPhone}</p>
-      )}
-     </div>
-    </div>
-   </div>
- 
-   <div className="bg-white rounded-2xl border border-slate-100 p-6">
-    <h2 className="text-lg font-bold text-slate-900 mb-4">Business Address</h2>
-    
-    <div className="space-y-4">
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
-      <input
-       value={formData.streetAddress}
-       onChange={e => handleChange('streetAddress', e.target.value)}
-       onBlur={() => handleBlur('streetAddress')}
-       type="text"
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-      {touched.streetAddress && errors.streetAddress && (
-       <p className="text-xs text-red-600 mt-1">{errors.streetAddress}</p>
-      )}
-     </div>
- 
-     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-       <label className="block text-sm font-medium text-slate-700 mb-1">City *</label>
-       <input
-        value={formData.city}
-        onChange={e => handleChange('city', e.target.value)}
-        onBlur={() => handleBlur('city')}
-        type="text"
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-       />
-       {touched.city && errors.city && (
-        <p className="text-xs text-red-600 mt-1">{errors.city}</p>
-       )}
-      </div>
- 
-      <div>
-       <label className="block text-sm font-medium text-slate-700 mb-1">State *</label>
-       <select
-        value={formData.state}
-        onChange={e => handleChange('state', e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-       >
-        <option value="TX">Texas</option>
-        <option value="CA">California</option>
-        <option value="NY">New York</option>
-        <option value="FL">Florida</option>
-        <option value="WA">Washington</option>
-        <option value="IL">Illinois</option>
-        <option value="PA">Pennsylvania</option>
-        <option value="OH">Ohio</option>
-        <option value="GA">Georgia</option>
-        <option value="NC">North Carolina</option>
-        <option value="MI">Michigan</option>
-        <option value="NJ">New Jersey</option>
-        <option value="VA">Virginia</option>
-        <option value="AZ">Arizona</option>
-        <option value="MA">Massachusetts</option>
-        <option value="TN">Tennessee</option>
-        <option value="IN">Indiana</option>
-        <option value="MO">Missouri</option>
-        <option value="MD">Maryland</option>
-        <option value="WI">Wisconsin</option>
-        <option value="CO">Colorado</option>
-        <option value="MN">Minnesota</option>
-        <option value="SC">South Carolina</option>
-        <option value="AL">Alabama</option>
-        <option value="LA">Louisiana</option>
-        <option value="KY">Kentucky</option>
-        <option value="OR">Oregon</option>
-        <option value="OK">Oklahoma</option>
-        <option value="CT">Connecticut</option>
-        <option value="UT">Utah</option>
-        <option value="IA">Iowa</option>
-        <option value="NV">Nevada</option>
-        <option value="AR">Arkansas</option>
-        <option value="MS">Mississippi</option>
-        <option value="KS">Kansas</option>
-        <option value="NM">New Mexico</option>
-        <option value="NE">Nebraska</option>
-        <option value="WV">West Virginia</option>
-        <option value="ID">Idaho</option>
-        <option value="HI">Hawaii</option>
-        <option value="ME">Maine</option>
-        <option value="MT">Montana</option>
-        <option value="RI">Rhode Island</option>
-        <option value="DE">Delaware</option>
-        <option value="SD">South Dakota</option>
-        <option value="ND">North Dakota</option>
-        <option value="AK">Alaska</option>
-        <option value="VT">Vermont</option>
-        <option value="WY">Wyoming</option>
-        <option value="DC">Washington D.C.</option>
-       </select>
-      </div>
-     </div>
- 
-     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">ZIP Code *</label>
-      <input
-       value={formData.postalCode}
-       onChange={e => handleChange('postalCode', e.target.value.replace(/\D/g, '').slice(0,5))}
-       onBlur={() => handleBlur('postalCode')}
-       type="text"
-       placeholder="5-digit ZIP code"
-       maxLength={5}
-       className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500"
-      />
-      {touched.postalCode && errors.postalCode && (
-       <p className="text-xs text-red-600 mt-1">{errors.postalCode}</p>
-      )}
-     </div>
-    </div>
-   </div>
- 
-   <div className="bg-white rounded-2xl border border-slate-100 p-6">
-    <label className="flex items-start gap-3 cursor-pointer mb-6">
-     <input
-      checked={formData.acceptedTerms}
-      onChange={e => handleChange('acceptedTerms', e.target.checked)}
-      type="checkbox"
-      className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-     />
-     <span className="text-sm text-slate-700">
-      I agree to Careified's{' '}
-      <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
-       Terms of Service
-      </a>
-      {' '}and{' '}
-      <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
-       Privacy Policy
-      </a>
-     </span>
-    </label>
-    {touched.acceptedTerms && errors.acceptedTerms && (
-     <p className="text-xs text-red-600 mb-4">{errors.acceptedTerms}</p>
-    )}
- 
-    <button
-     type="submit"
-     disabled={!isValid || isSubmitting}
-     className="w-full py-3 px-6 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-     {isSubmitting ? 'Creating account...' : 'Create Agency Account →'}
-    </button>
- 
-    <p className="text-xs text-slate-500 text-center mt-3">
-     By creating an account, you'll be placed in our approval queue. 
-     Most agencies are approved within 24 hours.
-    </p>
-   </div>
- 
-   </form>
-   </div>
-  </div>
- );
+  )
 }
