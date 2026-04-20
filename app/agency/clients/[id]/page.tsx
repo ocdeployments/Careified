@@ -78,6 +78,7 @@ export default function ClientDetailPage() {
   const [disclaimer, setDisclaimer] = useState('')
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [interested, setInterested] = useState<any[]>([])
 
   useEffect(() => {
     if (!params.id) return
@@ -111,6 +112,14 @@ export default function ClientDetailPage() {
         setExcluded(rd.excluded_count || 0)
         setDisclaimer(rd.disclaimer || '')
       }
+
+      // Load interested caregivers
+      const ir = await fetch(`/api/agency/clients/${params.id}/interested`)
+      if (ir.ok) {
+        const id = await ir.json()
+        setInterested(id.interested || [])
+      }
+
       setLoading(false)
     }
 
@@ -221,6 +230,49 @@ export default function ClientDetailPage() {
               <AlignmentDisclaimerBanner disclaimer={disclaimer} compact />
             </div>
           )}
+
+          {/* Interested caregivers */}
+          {interested.length > 0 && (
+            <div style={{
+              background: '#FDF6EC',
+              border: '1px solid #C9973A',
+              borderRadius: 16,
+              padding: 20,
+              marginBottom: 16,
+            }}>
+              <div style={{ fontSize: 11, color: '#92400E', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                {interested.length} caregiver{interested.length === 1 ? '' : 's'} expressed interest
+              </div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {interested.map((i) => (
+                  <Link
+                    key={i.caregiver_id}
+                    href={`/profile/${i.caregiver_id}`}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: 12,
+                      background: 'white',
+                      borderRadius: 10,
+                      textDecoration: 'none',
+                      color: 'inherit',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#0D1B3E' }}>{i.first_name} {i.last_name}</div>
+                      <div style={{ fontSize: 12, color: '#64748B' }}>
+                        {i.city}, {i.state} · {i.years_experience} yrs
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 14, color: '#C9973A', fontWeight: 600 }}>
+                      {i.alignment_score_at_expression ?? '—'}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <h2 style={{ fontFamily: FONT_SERIF, fontSize: 22, color: '#0D1B3E', margin: 0 }}>
               Matched caregivers ({results.length})
