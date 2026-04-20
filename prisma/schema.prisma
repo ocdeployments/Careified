@@ -122,6 +122,13 @@ model Caregiver {
   reliability_metrics            Json?                         @default("{}")
   best_fit_profile               Json?                         @default("{}")
   profile_strength_score         Int?                          @default(0)
+  // Ghost profile fields
+  profile_status                 String?                       @default("unclaimed") @db.VarChar(50)
+  claimed                        Boolean?                      @default(false)
+  claim_token                    String?                       @unique @db.VarChar(255)
+  npi_number                     String?                       @unique @db.VarChar(20)
+  license_source                 String?                       @db.VarChar(100)
+  verification_tier              Int?                          @default(4)
   agency_caregiver_relationships AgencyCaregiverRelationship[]
   agency_ratings                 AgencyRating[]
   caregiver_certifications       CaregiverCertification[]
