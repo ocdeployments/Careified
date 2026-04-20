@@ -24,7 +24,7 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
       </div>
 
       <Link
-        href={`/agency/profile/${id}`}
+        href={`/profile/${id}`}
         className="block p-5 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded-2xl"
         aria-label={`View profile of ${firstName} ${lastName}`}
       >
