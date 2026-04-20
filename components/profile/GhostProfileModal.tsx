@@ -1,127 +1,85 @@
-'use client';
+'use client'
 
 interface Props {
-  onDismiss: () => void;
+  onDismiss: () => void
 }
+
+const VALUE_PROPS = [
+  { emoji: '📁', title: 'You Own It', desc: 'Not trapped in agency computers. Take it anywhere.' },
+  { emoji: '👀', title: 'Be Seen', desc: 'Hundreds of agencies searching. Multiple opportunities.' },
+  { emoji: '⭐', title: 'Get Recognized', desc: 'Prove your reliability. No more starting from scratch.' },
+  { emoji: '💰', title: 'Better Matches', desc: 'Specialized skills = better pay. Work you actually want.' },
+]
 
 export default function GhostProfileModal({ onDismiss }: Props) {
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(13, 27, 62, 0.95)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
-      padding: '20px',
-      overflowY: 'auto'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '24px',
-        maxWidth: '600px',
-        width: '100%',
-        padding: '40px',
-        position: 'relative'
-      }}>
+    <div
+      className="fixed inset-0 bg-navy/95 flex items-center justify-center z-[9999] p-5 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ghost-modal-title"
+    >
+      <div className="bg-white rounded-3xl max-w-[600px] w-full p-8 md:p-10 relative">
+
         {/* Close button */}
         <button
           onClick={onDismiss}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            color: '#94A3B8'
-          }}
+          aria-label="Close"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl leading-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
         >
           ✕
         </button>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-          <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 12px' }}>
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-4">📋</div>
+          <h2 id="ghost-modal-title" className="text-[28px] font-extrabold text-navy mb-3 tracking-tight">
             Own Your Professional Story
           </h2>
-          <p style={{ fontSize: '16px', color: '#64748B', margin: 0, lineHeight: 1.6 }}>
-            For the first time, your experience belongs to you—not locked in someone else's files
+          <p className="text-base text-slate-500 leading-relaxed">
+            For the first time, your experience belongs to you—not locked in someone else&apos;s files
           </p>
         </div>
 
         {/* Value Props */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
-          <div style={{ padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>📁</div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 4px' }}>You Own It</h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Not trapped in agency computers. Take it anywhere.</p>
-          </div>
-          <div style={{ padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>👀</div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 4px' }}>Be Seen</h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Hundreds of agencies searching. Multiple opportunities.</p>
-          </div>
-          <div style={{ padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⭐</div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 4px' }}>Get Recognized</h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Prove your reliability. No more starting from scratch.</p>
-          </div>
-          <div style={{ padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>💰</div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 4px' }}>Better Matches</h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Specialized skills = better pay. Work you actually want.</p>
-          </div>
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          {VALUE_PROPS.map(({ emoji, title, desc }) => (
+            <div key={title} className="p-5 bg-slate-50 rounded-2xl text-center">
+              <div className="text-3xl mb-2">{emoji}</div>
+              <h3 className="text-sm font-bold text-navy mb-1">{title}</h3>
+              <p className="text-xs text-slate-500 leading-snug">{desc}</p>
+            </div>
+          ))}
         </div>
 
         {/* CTA */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div className="text-center mb-6">
           <button
             onClick={onDismiss}
-            style={{
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              color: '#0D1B3E',
-              padding: '16px 32px',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-br from-gold to-gold-warm text-navy text-base font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
           >
             Build My Profile →
           </button>
-          <p style={{ fontSize: '13px', color: '#94A3B8', margin: '12px 0 0' }}>
+          <p className="text-[13px] text-slate-400 mt-3">
             Takes 15 minutes. Lasts your entire career.
           </p>
         </div>
 
-        {/* Static Preview Sample */}
-        <div style={{ border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px', backgroundColor: '#F8FAFC' }}>
-          <p style={{ fontSize: '12px', color: '#94A3B8', margin: '0 0 12px', textAlign: 'center' }}>
-            ⬇️ Example: What agencies see
-          </p>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 900, color: '#0D1B3E', flexShrink: 0 }}>
+        {/* Preview sample */}
+        <div className="border border-slate-200 rounded-2xl p-5 bg-slate-50">
+          <p className="text-xs text-slate-400 mb-3 text-center">⬇️ Example: What agencies see</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-warm flex items-center justify-center text-lg font-black text-navy flex-shrink-0">
               MS
             </div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E' }}>Maria Santos</div>
-              <div style={{ fontSize: '12px', color: '#64748B' }}>Certified Personal Support Worker</div>
-              <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>📍 McKinney, TX • 📅 8 years • 🟢 Available now</div>
+              <div className="text-sm font-bold text-navy">Maria Santos</div>
+              <div className="text-xs text-slate-500">Certified Personal Support Worker</div>
+              <div className="text-[11px] text-slate-400 mt-1">📍 McKinney, TX · 📅 8 years · 🟢 Available now</div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
