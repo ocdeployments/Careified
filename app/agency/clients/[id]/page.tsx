@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { AlignmentScoreBadge, AlignmentDisclaimerBanner } from '@/components/matching/AlignmentBadge'
 
 const FONT_SANS = "'DM Sans', sans-serif"
 const FONT_SERIF = "'DM Serif Display', serif"
@@ -44,14 +45,26 @@ type MatchRow = {
   languages: string[] | null
   years_experience: number | null
   hourly_rate: number | null
-  match: {
-    overall_score: number | null
+  alignment_score: number | null
+  overall_confidence: number | null
+  alignment: {
+    alignment_score: number | null
+    overall_confidence: number | null
     scope: string
-    strong_fits: string[]
-    gaps: string[]
+    criteria_aligned: string[]
+    criteria_not_aligned: string[]
     unknowns: string[]
     gates_passed: boolean
+    disclaimer: string
+    dimensions: Record<string, {
+      score: number | null
+      confidence: string
+      confidence_multiplier: number
+      attributes_used: string[]
+    }>
   }
+  // deprecated aliases for backcompat
+  match?: any
 }
 
 export default function ClientDetailPage() {
@@ -61,6 +74,7 @@ export default function ClientDetailPage() {
   const [client, setClient] = useState<ClientNeed | null>(null)
   const [results, setResults] = useState<MatchRow[]>([])
   const [excluded, setExcluded] = useState(0)
+  const [disclaimer, setDisclaimer] = useState('')
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
@@ -94,6 +108,7 @@ export default function ClientDetailPage() {
         const rd = await rr.json()
         setResults(rd.results || [])
         setExcluded(rd.excluded_count || 0)
+        setDisclaimer(rd.disclaimer || '')
       }
       setLoading(false)
     }
@@ -200,6 +215,11 @@ export default function ClientDetailPage() {
 
         {/* Match results */}
         <div>
+          {disclaimer && (
+            <div style={{ marginBottom: 16 }}>
+              <AlignmentDisclaimerBanner disclaimer={disclaimer} compact />
+            </div>
+          )}
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <h2 style={{ fontFamily: FONT_SERIF, fontSize: 22, color: '#0D1B3E', margin: 0 }}>
               Matched caregivers ({results.length})
@@ -244,9 +264,12 @@ function DetailRow({ label, value }: { label: string; value: string | number | n
 }
 
 function CaregiverMatchCard({ row }: { row: MatchRow }) {
-  const score = row.match.overall_score
-  const scoreColor = score == null ? '#64748B' : score >= 80 ? '#15803D' : score >= 60 ? '#C9973A' : '#B45309'
-  const scoreBg = score == null ? '#F1F5F9' : score >= 80 ? '#DCFCE7' : score >= 60 ? '#FDF6EC' : '#FEF3C7'
+  // Read from alignment.* first, fall back to deprecated match.*
+  const score = row.alignment_score ?? row.alignment?.alignment_score ?? row.match?.overall_score ?? null
+  const confidence = row.overall_confidence ?? row.alignment?.overall_confidence ?? row.match?.overall_confidence ?? null
+  const aligned = row.alignment?.criteria_aligned ?? row.match?.strong_fits ?? []
+  const notAligned = row.alignment?.criteria_not_aligned ?? row.match?.gaps ?? []
+  const unknowns = row.alignment?.unknowns ?? row.match?.unknowns ?? []
 
   return (
     <Link
@@ -282,50 +305,36 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
             </div>
           </div>
 
-          {row.match.strong_fits.length > 0 && (
+          {aligned.length > 0 && (
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-                Strong fit
+                Criteria aligned
               </div>
               <div style={{ fontSize: 13, color: '#0D1B3E' }}>
-                {row.match.strong_fits.slice(0, 3).join(' · ')}
+                {aligned.slice(0, 3).join(' · ')}
               </div>
             </div>
           )}
 
-          {row.match.gaps.length > 0 && (
+          {notAligned.length > 0 && (
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-                Gaps
+                Criteria not aligned
               </div>
               <div style={{ fontSize: 13, color: '#B45309' }}>
-                {row.match.gaps.slice(0, 2).join(' · ')}
+                {notAligned.slice(0, 2).join(' · ')}
               </div>
             </div>
           )}
 
-          {row.match.unknowns.length > 0 && (
+          {unknowns.length > 0 && (
             <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
-              Unknown: {row.match.unknowns.map(u => u.replace(/_/g, ' ')).join(', ')}
+              Data unavailable: {unknowns.map(u => u.replace(/_/g, ' ')).join(', ')}
             </div>
           )}
         </div>
 
-        <div style={{
-          background: scoreBg,
-          borderRadius: 12,
-          padding: '16px 20px',
-          textAlign: 'center',
-          minWidth: 90,
-          height: 'fit-content',
-        }}>
-          <div style={{ fontSize: 28, fontWeight: 700, color: scoreColor, fontFamily: FONT_SERIF }}>
-            {score ?? '—'}
-          </div>
-          <div style={{ fontSize: 10, color: scoreColor, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2 }}>
-            {row.match.scope === 'full_client_match' ? 'Match' : 'Partial'}
-          </div>
-        </div>
+        <AlignmentScoreBadge score={score} confidence={confidence} size="md" />
       </div>
     </Link>
   )
