@@ -541,10 +541,10 @@ transition={{ duration: 0.15 }}
  credentials: formData.credentials,
  caregiverCode: formData.caregiverCode,
  }}
- onViewProfile={() => {
- setShowReveal(false)
- router.push('/profile/view')
- }}
+  onViewProfile={() => {
+  setShowReveal(false)
+  router.push('/profile/strength')
+  }}
  onDismiss={() => setShowReveal(false)}
  />
  )}

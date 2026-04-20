@@ -13,7 +13,7 @@ function StackedPill({ word, index }: { word: string; index: number }) {
 
   useEffect(() => {
     if (!ref.current) return
-    animate(ref.current, { opacity: [0, 1], x: [-16, 0] }, { duration: 0.35, ease: 'easeOut' })
+    animate(ref.current, { opacity: [0, 1], x: [-16, 0] }, { duration: 0.5, ease: [0.16, 1, 0.3, 1] })
   }, [])
 
   return (
@@ -92,19 +92,19 @@ export default function IntroAnimation({ onComplete }: Props) {
     const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
 
     // Phase 1 — Pain lines
-    await delay(400)
+    await delay(600)
     if (line1Ref.current) {
-      await animate(line1Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.7, ease: 'easeOut' })
+      await animate(line1Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
-    await delay(1000)
+    await delay(1400)
     if (line2Ref.current) {
-      await animate(line2Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.7, ease: 'easeOut' })
+      await animate(line2Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
-    await delay(1200)
+    await delay(1800)
 
     // Phase 2 — Fade out pain lines
     if (painBlockRef.current) {
-      await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: 'easeIn' })
+      await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.7, ease: [0.4, 0, 0.6, 1] })
     }
 
     // Show word stage
@@ -123,25 +123,30 @@ export default function IntroAnimation({ onComplete }: Props) {
       setCurrentWord(word)
       await delay(60)
       if (wordSlotRef.current) {
-        await animate(wordSlotRef.current, { opacity: [0, 1], y: ['100%', '0%'] }, { duration: 0.4, ease: [0.22, 1, 0.36, 1] })
+        await animate(wordSlotRef.current, { opacity: [0, 1], y: ['100%', '0%'] }, { duration: 0.7, ease: [0.16, 1, 0.3, 1] })
       }
 
-      // Pop checkmark
+      // Pop checkmark — 500ms after word starts (word anim is 700ms, so fire at ~200ms into it via delay)
+      await delay(200)
       if (checkmarkRef.current) {
-        await animate(checkmarkRef.current, { scale: [0.4, 1.15, 1], opacity: [0, 1] }, { duration: 0.35, ease: 'easeOut' })
+        await animate(checkmarkRef.current, { scale: [0.4, 1.2, 1], opacity: [0, 1] }, { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] })
       }
 
+      // Stack the word — 400ms AFTER checkmark pops (not simultaneous)
       await delay(400)
-
-      // Stack the word
       setStackedWords(prev => [...prev, word])
 
-      // Slide current word out upward
-      if (wordSlotRef.current) {
-        await animate(wordSlotRef.current, { opacity: [1, 0], y: ['0%', '-100%'] }, { duration: 0.3, ease: 'easeIn' })
-      }
-      if (checkmarkRef.current) {
-        animate(checkmarkRef.current, { opacity: 0, scale: 0.6 }, { duration: 0.2 })
+      // Hold so the bullet is visible before sliding out
+      await delay(900)
+
+      // Slide current word out upward (last word stays — no slide-out)
+      if (i < words.length - 1) {
+        if (wordSlotRef.current) {
+          await animate(wordSlotRef.current, { opacity: [1, 0], y: ['0%', '-100%'] }, { duration: 0.5, ease: 'easeIn' })
+        }
+        if (checkmarkRef.current) {
+          animate(checkmarkRef.current, { opacity: 0, scale: 0.6 }, { duration: 0.2 })
+        }
       }
 
       await delay(100)
@@ -150,31 +155,34 @@ export default function IntroAnimation({ onComplete }: Props) {
     // Phase 3 — Fade out word stage
     await delay(600)
     if (wordStageRef.current) {
-      await animate(wordStageRef.current, { opacity: [1, 0], scale: [1, 0.92] }, { duration: 0.4, ease: 'easeIn' })
+      await animate(wordStageRef.current, { opacity: [1, 0], scale: [1, 0.92] }, { duration: 0.6, ease: 'easeOut' })
     }
     setShowWordStage(false)
+
+    // Dead pause — crucial breathing room before brand appears
+    await delay(300)
 
     // Phase 4 — Brand lockup
     setShowBrand(true)
     await delay(60)
     if (brandRef.current) {
-      await animate(brandRef.current, { opacity: [0, 1], scale: [0.8, 1] }, { duration: 0.6, ease: [0.22, 1, 0.36, 1] })
+      await animate(brandRef.current, { opacity: [0, 1], scale: [0.8, 1] }, { duration: 0.8, ease: [0.16, 1, 0.3, 1] })
     }
 
-    // Gold bar sweep
-    await delay(400)
+    // Gold bar sweep — delay 600ms after brand appears
+    await delay(600)
     if (goldBarRef.current) {
-      await animate(goldBarRef.current, { width: ['0%', '60%'] }, { duration: 0.8, ease: 'easeOut' })
+      await animate(goldBarRef.current, { width: ['0%', '60%'] }, { duration: 1.0, ease: 'easeOut' })
     }
 
-    // Tagline
-    await delay(300)
+    // Tagline — delay 800ms after brand appears (200ms after gold bar starts)
+    await delay(200)
     if (taglineRef.current) {
       await animate(taglineRef.current, { opacity: [0, 1], y: [8, 0] }, { duration: 0.6, ease: 'easeOut' })
     }
 
-    // Phase 5 — Enter button
-    await delay(800)
+    // Phase 5 — Enter button — delay 1400ms after brand appears (600ms after tagline starts)
+    await delay(600)
     setShowEnter(true)
     await delay(60)
     if (enterBtnRef.current) {
