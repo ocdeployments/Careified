@@ -2,12 +2,14 @@
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Bookmark, Users, ChevronRight, Menu, X } from 'lucide-react'
+import { Search, Bookmark, Users, Briefcase, Settings, ChevronRight, Menu, X } from 'lucide-react'
 
 const NAV = [
-  { href: '/agency/search', label: 'Search', icon: Search },
-  { href: '/agency/shortlist', label: 'Shortlist', icon: Bookmark },
-  { href: '/agency/roster', label: 'Roster', icon: Users },
+  { href: '/agency/search',    label: 'Search',       icon: Search    },
+  { href: '/agency/clients',   label: 'Clients',      icon: Briefcase },
+  { href: '/agency/shortlist', label: 'Shortlist',    icon: Bookmark  },
+  { href: '/opportunities',    label: 'Opportunities', icon: Users     },
+  { href: '/settings/data-rights', label: 'Settings', icon: Settings  },
 ]
 
 export function AgencyShell({

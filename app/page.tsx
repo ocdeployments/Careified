@@ -190,6 +190,7 @@ export default function HomePage() {
               { href: '/for-caregivers', label: 'Caregivers' },
               { href: '/for-families',   label: 'Families'   },
               { href: '/about',          label: 'About'      },
+              { href: '/contact',        label: 'Contact'    },
               { href: '/privacy',        label: 'Privacy'    },
               { href: '/terms',          label: 'Terms'      },
             ].map(link => (

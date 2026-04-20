@@ -163,7 +163,6 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  <>
  {isClient && showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
  <style>{`
- @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
  @keyframes slideInForward {
  from { opacity: 0; transform: translateX(24px); }
  to { opacity: 1; transform: translateX(0); }
