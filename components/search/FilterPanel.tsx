@@ -121,7 +121,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
               <input
                 type="number"
                 placeholder="Radius (mi)"
-                value={filters.radiusMiles || ''}
+                value={filters.radiusMiles != null ? String(filters.radiusMiles) : ''}
                 onChange={e => set('radiusMiles', e.target.value ? Number(e.target.value) : undefined)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
                 min={1}
@@ -290,7 +290,7 @@ export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterP
                 type="number"
                 min={0}
                 max={30}
-                value={filters.minYearsExperience || ''}
+                value={filters.minYearsExperience != null ? String(filters.minYearsExperience) : ''}
                 onChange={e => set('minYearsExperience', e.target.value ? Number(e.target.value) : undefined)}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
                 placeholder="e.g. 2"
