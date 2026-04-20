@@ -99,8 +99,6 @@ function DimensionRow({
               style={{ width: pct != null ? `${pct}%` : '0%' }}
               role="progressbar"
               aria-valuenow={pct ?? 0}
-              aria-valuemin={0}
-              aria-valuemax={100}
             />
           </div>
           <span className="text-[12px] font-semibold text-navy w-8 text-right">
