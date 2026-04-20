@@ -2,203 +2,120 @@
 'use client'
 import { useState } from 'react'
 import {
- DIMENSION_META,
- DIMENSION_ORDER,
- confidenceLabel,
- tierFromMultiplier,
+  DIMENSION_META,
+  DIMENSION_ORDER,
+  confidenceLabel,
+  tierFromMultiplier,
 } from '@/lib/matching/dimension-meta'
 import type { DimensionKey } from '@/lib/matching/types'
 import { TierBadge } from './AlignmentBadge'
-
-const FONT_SANS = "'DM Sans', sans-serif"
-const FONT_SERIF = "'DM Serif Display', serif"
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type DimensionScoreShape = {
- score: number | null
- confidence: string
- confidence_multiplier: number
- source: string
- weight_applied: number
- attributes_used: string[]
+  score: number | null
+  confidence: string
+  confidence_multiplier: number
+  source: string
+  weight_applied: number
+  attributes_used: string[]
 }
 
 type Dimensions = Record<DimensionKey, DimensionScoreShape>
 
 export function DimensionBreakdown({
- dimensions,
- defaultExpanded = false,
+  dimensions,
+  defaultExpanded = false,
 }: {
- dimensions: Dimensions
- defaultExpanded?: boolean
+  dimensions: Dimensions
+  defaultExpanded?: boolean
 }) {
- const [expanded, setExpanded] = useState(defaultExpanded)
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
- return (
- <div>
- <button
- onClick={() => setExpanded(e => !e)}
- style={{
- display: 'flex',
- alignItems: 'center',
- gap: 6,
- background: 'transparent',
- border: 'none',
- color: '#C9973A',
- fontSize: 13,
- fontWeight: 600,
- cursor: 'pointer',
- padding: '8px 0',
- fontFamily: FONT_SANS,
- }}
- aria-expanded={expanded}
- >
- {expanded ? '− Hide' : '+ Show'} alignment breakdown
- </button>
+  return (
+    <div>
+      <button
+        onClick={() => setExpanded(e => !e)}
+        aria-expanded={expanded}
+        className="flex items-center gap-1.5 text-gold text-[13px] font-semibold py-2 hover:text-gold-warm transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+      >
+        {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        {expanded ? 'Hide' : 'Show'} alignment breakdown
+      </button>
 
- {expanded && (
- <div style={{
- marginTop: 12,
- background: '#F7F4F0',
- border: '1px solid #E2E8F0',
- borderRadius: 12,
- padding: 16,
- }}>
- <div style={{ display: 'grid', gap: 12 }}>
- {DIMENSION_ORDER.map(key => (
- <DimensionRow key={key} dimensionKey={key} data={dimensions[key]} />
- ))}
- </div>
- <div style={{
- marginTop: 16,
- paddingTop: 12,
- borderTop: '1px solid #E2E8F0',
- fontSize: 11,
- color: '#64748B',
- lineHeight: 1.6,
- fontFamily: FONT_SANS,
- }}>
- Each dimension is weighted and multiplied by its confidence level
- before contributing to the overall alignment score. Dimensions with
- no data are excluded from the calculation, not assumed.
- </div>
- </div>
- )}
- </div>
- )
+      {expanded && (
+        <div className="mt-3 bg-cream border border-slate-200 rounded-xl p-4">
+          <div className="grid gap-3">
+            {DIMENSION_ORDER.map(key => (
+              <DimensionRow
+                key={key}
+                dimensionKey={key}
+                data={dimensions[key]}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function DimensionRow({
- dimensionKey,
- data,
+  dimensionKey,
+  data,
 }: {
- dimensionKey: DimensionKey
- data: DimensionScoreShape | undefined
+  dimensionKey: DimensionKey
+  data: DimensionScoreShape
 }) {
- const meta = DIMENSION_META[dimensionKey]
+  const meta = DIMENSION_META[dimensionKey]
+  const tier = tierFromMultiplier(data.confidence_multiplier)
+  const pct = data.score != null ? Math.round(data.score) : null
 
- if (!data || data.score == null) {
- return (
- <div style={{
- display: 'grid',
- gridTemplateColumns: '160px 1fr',
- gap: 16,
- alignItems: 'center',
- padding: '8px 0',
- borderBottom: '1px solid #E2E8F0',
- }}>
- <div>
- <div style={{
- fontSize: 13,
- fontWeight: 600,
- color: '#0D1B3E',
- fontFamily: FONT_SANS,
- }}>
- {meta.label}
- </div>
- <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
- {Math.round(meta.weight * 100)}% weight
- </div>
- </div>
- <div style={{ fontSize: 12, color: '#94A3B8', fontStyle: 'italic' }}>
- No data — this dimension excluded from score
- </div>
- </div>
- )
- }
+  return (
+    <div className="flex items-start gap-3">
+      {/* Icon */}
+      <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 text-base">
+        {meta?.icon ?? '•'}
+      </div>
 
- const score = data.score
- const conf = data.confidence_multiplier
- const tier = tierFromMultiplier(conf)
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap mb-1">
+          <span className="text-[13px] font-semibold text-navy">{meta?.label ?? dimensionKey}</span>
+          <TierBadge tier={tier} />
+          <span className="text-[10px] text-slate-400">{confidenceLabel(data.confidence_multiplier)}</span>
+        </div>
 
- return (
- <div style={{
- display: 'grid',
- gridTemplateColumns: '160px 1fr',
- gap: 16,
- alignItems: 'center',
- padding: '8px 0',
- borderBottom: '1px solid #E2E8F0',
- }}>
- <div>
- <div style={{
- fontSize: 13,
- fontWeight: 600,
- color: '#0D1B3E',
- fontFamily: FONT_SANS,
- }}>
- {meta.label}
- </div>
- <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
- {Math.round(meta.weight * 100)}% weight
- </div>
- </div>
+        {/* Score bar */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              className={[
+                'h-full rounded-full transition-all duration-500',
+                pct != null && pct >= 80 ? 'bg-green-500' :
+                pct != null && pct >= 60 ? 'bg-amber-400' :
+                pct != null && pct >= 40 ? 'bg-orange-400' :
+                'bg-red-400',
+              ].join(' ')}
+              style={{ width: pct != null ? `${pct}%` : '0%' }}
+              role="progressbar"
+              aria-valuenow={pct ?? 0}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+          <span className="text-[12px] font-semibold text-navy w-8 text-right">
+            {pct != null ? pct : '—'}
+          </span>
+        </div>
 
- <div>
- <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
- <div style={{
- fontSize: 20,
- fontWeight: 700,
- color: toneColor(score),
- fontFamily: FONT_SERIF,
- minWidth: 40,
- }}>
- {score}
- </div>
- <div style={{
- flex: 1,
- height: 6,
- background: '#E2E8F0',
- borderRadius: 3,
- overflow: 'hidden',
- }}>
- <div style={{
- width: `${score}%`,
- height: '100%',
- background: toneColor(score),
- transition: 'width 200ms',
- }} />
- </div>
- </div>
-
- <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
- <TierBadge tier={tier} />
- <span style={{ fontSize: 10, color: '#64748B' }}>
- {confidenceLabel(conf)} · {Math.round(conf * 100)}% confidence
- </span>
- </div>
-
- {data.attributes_used.length > 0 && (
- <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>
- Based on: {data.attributes_used.map(a => a.replace(/_/g, ' ')).join(', ')}
- </div>
- )}
- </div>
- </div>
- )
-}
-
-function toneColor(score: number): string {
- if (score >= 80) return '#15803D'
- if (score >= 60) return '#C9973A'
- return '#B45309'
+        {/* Source */}
+        {data.source && (
+          <div className="text-[10px] text-slate-400 mt-0.5">
+            Source: {data.source}
+            {data.attributes_used.length > 0 && ` · ${data.attributes_used.slice(0, 3).join(', ')}`}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
