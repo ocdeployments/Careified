@@ -1,6 +1,8 @@
 // lib/npi/fetchNPI.ts
 // Fetches individual home health providers from the NPI Registry API (v2.1)
 
+import https from 'https'
+
 const NPI_BASE = 'https://npiregistry.cms.hhs.gov/api/'
 
 export interface NPIProvider {
@@ -62,6 +64,27 @@ interface NPIResponse {
   results?: NPIResult[]
 }
 
+// Use Node's https module to avoid Node 20 built-in fetch hanging issues
+function httpsGet(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers: { Accept: 'application/json' } }, (res) => {
+      if (res.statusCode && res.statusCode >= 400) {
+        reject(new Error(`NPI API error: ${res.statusCode}`))
+        res.resume()
+        return
+      }
+      const chunks: Buffer[] = []
+      res.on('data', (chunk: Buffer) => chunks.push(chunk))
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+      res.on('error', reject)
+    })
+    req.setTimeout(15_000, () => {
+      req.destroy(new Error('NPI API request timed out after 15s'))
+    })
+    req.on('error', reject)
+  })
+}
+
 export async function fetchNPIProviders(params: {
   city?: string
   state?: string
@@ -84,16 +107,8 @@ export async function fetchNPIProviders(params: {
 
   const url = `${NPI_BASE}?${qs.toString()}`
 
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    // Node 18+ fetch — no extra config needed
-  })
-
-  if (!res.ok) {
-    throw new Error(`NPI API error: ${res.status} ${res.statusText}`)
-  }
-
-  const data: NPIResponse = await res.json()
+  const body = await httpsGet(url)
+  const data: NPIResponse = JSON.parse(body)
   const results: NPIResult[] = data.results ?? []
 
   return results.map((r): NPIProvider => {
