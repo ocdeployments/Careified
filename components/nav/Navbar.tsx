@@ -13,12 +13,30 @@ function AuthButton() {
  if (!isLoaded) return null;
  if (userId) {
  return (
+ <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+ <Link
+ href="/profile/strength"
+ style={{
+ fontSize: '12px',
+ color: 'rgba(255,255,255,0.6)',
+ textDecoration: 'none',
+ padding: '6px 10px',
+ borderRadius: '6px',
+ transition: 'all 0.2s',
+ fontFamily: FONT_SANS,
+ }}
+ onMouseEnter={e => e.currentTarget.style.color = 'white'}
+ onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+ >
+ Profile strength
+ </Link>
  <UserButton appearance={{
  elements: {
  userButtonAvatarBox: { width: '32px', height: '32px' },
  userButtonTrigger: { padding: '4px' },
  },
  }} />
+ </div>
  );
  }
  return (
