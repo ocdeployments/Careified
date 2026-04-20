@@ -1,552 +1,389 @@
-'use client';
+'use client'
 
 import {
- SearchFilters,
- SPECIALTY_OPTIONS,
- CREDENTIAL_OPTIONS,
- PLACEMENT_TYPE_OPTIONS,
- LANGUAGE_OPTIONS,
- DAYS_OF_WEEK,
- SHIFT_TYPE_OPTIONS,
- LIFT_EXPERIENCE_OPTIONS,
- EMPLOYMENT_TYPE_OPTIONS,
- TECHNOLOGY_COMFORT_OPTIONS,
- PET_TOLERANCE_OPTIONS,
- US_STATES,
-} from '@/lib/types/search';
-import {
- ChevronDown, ChevronUp, X, MapPin, Clock,
- Star, Shield, Car, Heart
-} from 'lucide-react';
-import { useState } from 'react';
+  SearchFilters,
+  SPECIALTY_OPTIONS,
+  CREDENTIAL_OPTIONS,
+  PLACEMENT_TYPE_OPTIONS,
+  LANGUAGE_OPTIONS,
+  DAYS_OF_WEEK,
+  SHIFT_TYPE_OPTIONS,
+  LIFT_EXPERIENCE_OPTIONS,
+  EMPLOYMENT_TYPE_OPTIONS,
+  TECHNOLOGY_COMFORT_OPTIONS,
+  PET_TOLERANCE_OPTIONS,
+  US_STATES,
+} from '@/lib/types/search'
+import { ChevronDown, ChevronUp, X, MapPin, Clock, Star, Shield, Car, Heart } from 'lucide-react'
+import { useState } from 'react'
 
 interface FilterPanelProps {
- filters: SearchFilters;
- onChange: (filters: SearchFilters) => void;
- resultCount: number;
-  onClear?: () => void;
+  filters: SearchFilters
+  onChange: (filters: SearchFilters) => void
+  resultCount: number
+  onClear?: () => void
 }
 
 const EMPTY_FILTERS: SearchFilters = {
- specialties: [],
- credentials: [],
- placementTypes: [],
- languages: [],
- daysAvailable: [],
- shiftTypes: [],
- liftExperience: [],
- sortBy: 'score',
- page: 1,
- limit: 20,
-};
+  specialties: [],
+  credentials: [],
+  placementTypes: [],
+  languages: [],
+  daysAvailable: [],
+  shiftTypes: [],
+  liftExperience: [],
+  sortBy: 'score',
+  page: 1,
+  limit: 20,
+}
+
+type SectionKey =
+  | 'location' | 'availability' | 'specialties' | 'credentials'
+  | 'schedule' | 'languages' | 'logistics' | 'compatibility'
+  | 'compliance' | 'trust' | 'experience'
 
 export function FilterPanel({ filters, onChange, resultCount, onClear }: FilterPanelProps) {
+  const [expanded, setExpanded] = useState<Record<SectionKey, boolean>>({
+    location: true,
+    availability: true,
+    specialties: true,
+    credentials: false,
+    schedule: false,
+    languages: false,
+    logistics: false,
+    compatibility: false,
+    compliance: false,
+    trust: false,
+    experience: false,
+  })
 
- const [expanded, setExpanded] = useState({
- location: true,
- availability: true,
- specialties: true,
- credentials: false,
- schedule: false,
- languages: false,
- logistics: false,
- compatibility: false,
- compliance: false,
- trust: false,
- experience: false,
- });
+  const toggle = (s: SectionKey) => setExpanded(prev => ({ ...prev, [s]: !prev[s] }))
 
- const toggle = (s: keyof typeof expanded) =>
- setExpanded(prev => ({ ...prev, [s]: !prev[s] }));
+  const set = (key: keyof SearchFilters, value: unknown) =>
+    onChange({ ...filters, [key]: value, page: 1 })
 
- const set = (key: keyof SearchFilters, value: any) =>
- onChange({ ...filters, [key]: value, page: 1 });
+  const toggleArr = (key: keyof SearchFilters, item: string) => {
+    const cur = (filters[key] as string[]) || []
+    set(key, cur.includes(item) ? cur.filter(x => x !== item) : [...cur, item])
+  }
 
- const toggleArr = (key: keyof SearchFilters, item: string) => {
- const cur = (filters[key] as string[]) || [];
- set(key, cur.includes(item) ? cur.filter(i => i !== item) : [...cur, item]);
- };
+  const hasFilters = (
+    (filters.city || filters.state) ||
+    (filters.specialties?.length ?? 0) > 0 ||
+    (filters.credentials?.length ?? 0) > 0 ||
+    (filters.placementTypes?.length ?? 0) > 0 ||
+    (filters.languages?.length ?? 0) > 0 ||
+    (filters.daysAvailable?.length ?? 0) > 0 ||
+    (filters.shiftTypes?.length ?? 0) > 0
+  )
 
- const activeCount =
- (filters.specialties || []).length +
- (filters.credentials || []).length +
- (filters.placementTypes || []).length +
- (filters.languages?.length || 0) +
- (filters.daysAvailable?.length || 0) +
- (filters.shiftTypes?.length || 0) +
- (filters.liftExperience?.length || 0) +
- (filters.city ? 1 : 0) +
- (filters.state ? 1 : 0) +
- (filters.availabilityStatus ? 1 : 0) +
- (filters.minTrustScore ? 1 : 0) +
- (filters.minExperience ? 1 : 0) +
- (filters.hasVehicle ? 1 : 0) +
- (filters.hasDriversLicense ? 1 : 0) +
- (filters.willingLiveIn ? 1 : 0) +
- (filters.openToUrgent ? 1 : 0) +
- (filters.requireBackground ? 1 : 0) +
- (filters.requireReference ? 1 : 0) +
- (filters.petTolerance && filters.petTolerance !== 'no_preference' ? 1 : 0) +
- (filters.smokerHousehold ? 1 : 0) +
- (filters.employmentType && filters.employmentType !== 'either' ? 1 : 0) +
- (filters.technologyComfort ? 1 : 0);
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <span className="text-[13px] font-bold text-navy uppercase tracking-wider">Filters</span>
+        {hasFilters && (
+          <button
+            onClick={() => { onChange(EMPTY_FILTERS); onClear?.() }}
+            className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+          >
+            <X size={11} /> Clear all
+          </button>
+        )}
+      </div>
 
- return (
- <div className="w-full bg-white rounded-2xl border border-slate-100 p-4 sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
- <div className="flex items-center justify-between mb-4">
- <h3 className="font-bold text-sm text-slate-900">
- Filters
- {activeCount > 0 && (
- <span className="ml-2 text-xs font-normal text-blue-600">
- ({activeCount} active)
- </span>
- )}
- </h3>
- {activeCount > 0 && (
- <button
- onClick={() => { onChange(EMPTY_FILTERS); onClear?.(); }}
- className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
- >
- <X className="w-3 h-3" />
- Clear all
- </button>
- )}
- </div>
+      <div className="divide-y divide-slate-50">
 
- <Section title="Location" icon={<MapPin className="w-3.5 h-3.5" />}
- expanded={expanded.location} onToggle={() => toggle('location')}>
- <div className="space-y-3">
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">City</label>
- <input
- type="text"
- value={filters.city || ''}
- onChange={e => set('city', e.target.value || undefined)}
- placeholder="e.g. Austin"
- className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200"
- />
- </div>
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">State</label>
- <select
- value={filters.state || ''}
- onChange={e => set('state', e.target.value || undefined)}
- className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any state</option>
- {US_STATES.map(s => (
- <option key={s.value} value={s.value}>{s.label}</option>
- ))}
- </select>
- </div>
- </div>
- </Section>
+        {/* ── Location ── */}
+        <Section
+          label="Location"
+          icon={<MapPin size={13} />}
+          expanded={expanded.location}
+          onToggle={() => toggle('location')}
+        >
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="City"
+              value={filters.city || ''}
+              onChange={e => set('city', e.target.value || undefined)}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            />
+            <select
+              value={filters.state || ''}
+              onChange={e => set('state', e.target.value || undefined)}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy bg-white focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            >
+              <option value="">All states</option>
+              {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                placeholder="Radius (mi)"
+                value={filters.radiusMiles || ''}
+                onChange={e => set('radiusMiles', e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                min={1}
+                max={200}
+              />
+            </div>
+          </div>
+        </Section>
 
- <Section title="Availability" icon={<Clock className="w-3.5 h-3.5" />}
- expanded={expanded.availability} onToggle={() => toggle('availability')}>
- <div className="space-y-2">
- {[
- { value: 'available_now', label: 'Available now' },
- { value: 'open_to_opportunities', label: 'Open to opportunities' },
- ].map(opt => (
- <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
- <input
- type="radio"
- name="availabilityStatus"
- checked={filters.availabilityStatus === opt.value}
- onChange={() => set('availabilityStatus', opt.value)}
- className="w-4 h-4 text-blue-600"
- />
- <span className="text-sm text-slate-700">{opt.label}</span>
- </label>
- ))}
- <label className="flex items-center gap-2 cursor-pointer">
- <input
- type="radio"
- name="availabilityStatus"
- checked={!filters.availabilityStatus}
- onChange={() => set('availabilityStatus', undefined)}
- className="w-4 h-4 text-blue-600"
- />
- <span className="text-sm text-slate-700">Any</span>
- </label>
- <div className="pt-2 space-y-2">
- <Toggle
- label="Open to urgent placements"
- checked={!!filters.openToUrgent}
- onChange={v => set('openToUrgent', v || undefined)}
- />
- <Toggle
- label="Available for live-in"
- checked={!!filters.willingLiveIn}
- onChange={v => set('willingLiveIn', v || undefined)}
- />
- </div>
- </div>
- </Section>
+        {/* ── Availability ── */}
+        <Section
+          label="Availability"
+          icon={<Clock size={13} />}
+          expanded={expanded.availability}
+          onToggle={() => toggle('availability')}
+        >
+          <div className="space-y-1.5">
+            {(['available_now', 'available_soon', 'open_to_offers'] as const).map(status => (
+              <label key={status} className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={(filters.availabilityStatuses || []).includes(status)}
+                  onChange={() => toggleArr('availabilityStatuses', status)}
+                  className="w-3.5 h-3.5 rounded border-slate-300 text-gold focus:ring-gold"
+                />
+                <span className="text-xs text-slate-600 group-hover:text-navy transition-colors capitalize">
+                  {status.replace(/_/g, ' ')}
+                </span>
+              </label>
+            ))}
+          </div>
+        </Section>
 
- <Section title="Placement type" expanded={true} onToggle={() => {}} nested>
- <div className="space-y-2">
- {PLACEMENT_TYPE_OPTIONS.map(opt => (
- <label key={opt} className="flex items-center gap-2 cursor-pointer">
- <input
- type="checkbox"
- checked={(filters.placementTypes || []).includes(opt)}
- onChange={() => toggleArr('placementTypes', opt)}
- className="w-4 h-4 rounded border-slate-300 text-blue-600"
- />
- <span className="text-sm text-slate-700">{opt}</span>
- </label>
- ))}
- </div>
- </Section>
+        {/* ── Specialties ── */}
+        <Section
+          label="Specialties"
+          icon={<Star size={13} />}
+          expanded={expanded.specialties}
+          onToggle={() => toggle('specialties')}
+        >
+          <CheckboxGroup
+            options={SPECIALTY_OPTIONS}
+            selected={filters.specialties || []}
+            onToggle={item => toggleArr('specialties', item)}
+          />
+        </Section>
 
- <Section title="Schedule" expanded={expanded.schedule}
- onToggle={() => toggle('schedule')}>
- <div className="space-y-3">
- <div>
- <p className="text-xs font-medium text-slate-700 mb-2">Days needed</p>
- <div className="flex flex-wrap gap-1.5">
- {DAYS_OF_WEEK.map(day => (
- <button
- key={day}
- type="button"
- onClick={() => toggleArr('daysAvailable', day)}
- className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
- filters.daysAvailable?.includes(day)
- ? 'bg-blue-600 text-white border-blue-600'
- : 'bg-white text-slate-600 border-slate-200'
- }`}
- >
- {day}
- </button>
- ))}
- </div>
- </div>
- <div>
- <p className="text-xs font-medium text-slate-700 mb-2">Shift times</p>
- <div className="space-y-1.5">
- {SHIFT_TYPE_OPTIONS.map(opt => (
- <label key={opt} className="flex items-center gap-2 cursor-pointer">
- <input
- type="checkbox"
- checked={filters.shiftTypes?.includes(opt) || false}
- onChange={() => toggleArr('shiftTypes', opt)}
- className="w-4 h-4 rounded border-slate-300 text-blue-600"
- />
- <span className="text-sm text-slate-700">{opt}</span>
- </label>
- ))}
- </div>
- </div>
- <div className="grid grid-cols-2 gap-2">
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">Min hrs/week</label>
- <select
- value={filters.minHoursPerWeek || ''}
- onChange={e => set('minHoursPerWeek', e.target.value ? parseInt(e.target.value) : undefined)}
- className="w-full px-2 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {[8, 16, 20, 24, 32, 40].map(h => (
- <option key={h} value={h}>{h}h</option>
- ))}
- </select>
- </div>
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">Max hrs/week</label>
- <select
- value={filters.maxHoursPerWeek || ''}
- onChange={e => set('maxHoursPerWeek', e.target.value ? parseInt(e.target.value) : undefined)}
- className="w-full px-2 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {[16, 20, 24, 32, 40].map(h => (
- <option key={h} value={h}>{h}h</option>
- ))}
- </select>
- </div>
- </div>
- <Toggle
- label="Holiday availability"
- checked={!!filters.holidayAvailable}
- onChange={v => set('holidayAvailable', v || undefined)}
- />
- </div>
- </Section>
+        {/* ── Placement Type ── */}
+        <Section
+          label="Placement Type"
+          icon={<Heart size={13} />}
+          expanded={expanded.availability}
+          onToggle={() => toggle('availability')}
+        >
+          <CheckboxGroup
+            options={PLACEMENT_TYPE_OPTIONS}
+            selected={filters.placementTypes || []}
+            onToggle={item => toggleArr('placementTypes', item)}
+          />
+        </Section>
 
- <Section title="Specialties" expanded={expanded.specialties}
- onToggle={() => toggle('specialties')}>
- <div className="space-y-2 max-h-56 overflow-y-auto">
- {SPECIALTY_OPTIONS.map(s => (
- <label key={s} className="flex items-center gap-2 cursor-pointer">
- <input
- type="checkbox"
- checked={(filters.specialties || []).includes(s)}
- onChange={() => toggleArr('specialties', s)}
- className="w-4 h-4 rounded border-slate-300 text-blue-600"
- />
- <span className="text-sm text-slate-700">{s}</span>
- </label>
- ))}
- </div>
- </Section>
+        {/* ── Credentials ── */}
+        <Section
+          label="Credentials"
+          icon={<Shield size={13} />}
+          expanded={expanded.credentials}
+          onToggle={() => toggle('credentials')}
+        >
+          <CheckboxGroup
+            options={CREDENTIAL_OPTIONS}
+            selected={filters.credentials || []}
+            onToggle={item => toggleArr('credentials', item)}
+          />
+        </Section>
 
- <Section title="Credentials" expanded={expanded.credentials}
- onToggle={() => toggle('credentials')}>
- <div className="space-y-2">
- {CREDENTIAL_OPTIONS.map(c => (
- <label key={c} className="flex items-center gap-2 cursor-pointer">
- <input
- type="checkbox"
- checked={(filters.credentials || []).includes(c)}
- onChange={() => toggleArr('credentials', c)}
- className="w-4 h-4 rounded border-slate-300 text-blue-600"
- />
- <span className="text-sm text-slate-700">{c}</span>
- </label>
- ))}
- </div>
- </Section>
+        {/* ── Languages ── */}
+        <Section
+          label="Languages"
+          expanded={expanded.languages}
+          onToggle={() => toggle('languages')}
+        >
+          <CheckboxGroup
+            options={LANGUAGE_OPTIONS}
+            selected={filters.languages || []}
+            onToggle={item => toggleArr('languages', item)}
+          />
+        </Section>
 
- <Section title="Languages" expanded={expanded.languages}
- onToggle={() => toggle('languages')}>
- <div className="flex flex-wrap gap-1.5">
- {LANGUAGE_OPTIONS.map(lang => (
- <button
- key={lang}
- type="button"
- onClick={() => toggleArr('languages', lang)}
- className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
- filters.languages?.includes(lang)
- ? 'bg-blue-600 text-white border-blue-600'
- : 'bg-white text-slate-600 border-slate-200'
- }`}
- >
- {lang}
- </button>
- ))}
- </div>
- </Section>
+        {/* ── Schedule ── */}
+        <Section
+          label="Schedule"
+          icon={<Clock size={13} />}
+          expanded={expanded.schedule}
+          onToggle={() => toggle('schedule')}
+        >
+          <div className="space-y-3">
+            <div>
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Days</p>
+              <CheckboxGroup
+                options={DAYS_OF_WEEK}
+                selected={filters.daysAvailable || []}
+                onToggle={item => toggleArr('daysAvailable', item)}
+              />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Shifts</p>
+              <CheckboxGroup
+                options={SHIFT_TYPE_OPTIONS}
+                selected={filters.shiftTypes || []}
+                onToggle={item => toggleArr('shiftTypes', item)}
+              />
+            </div>
+          </div>
+        </Section>
 
- <Section title="Logistics" icon={<Car className="w-3.5 h-3.5" />}
- expanded={expanded.logistics} onToggle={() => toggle('logistics')}>
- <div className="space-y-2">
- <Toggle label="Has own vehicle"
- checked={!!filters.hasVehicle}
- onChange={v => set('hasVehicle', v || undefined)} />
- <Toggle label="Has driver's license"
- checked={!!filters.hasDriversLicense}
- onChange={v => set('hasDriversLicense', v || undefined)} />
- <Toggle label="Willing to drive client"
- checked={!!filters.willingToTransport}
- onChange={v => set('willingToTransport', v || undefined)} />
- <Toggle label="Can use client's vehicle"
- checked={!!filters.willingClientVehicle}
- onChange={v => set('willingClientVehicle', v || undefined)} />
- <Toggle label="Transit accessible"
- checked={!!filters.transitAccessible}
- onChange={v => set('transitAccessible', v || undefined)} />
- <div className="pt-2">
- <p className="text-xs font-medium text-slate-700 mb-2">Lift experience</p>
- <div className="space-y-1.5">
- {LIFT_EXPERIENCE_OPTIONS.map(opt => (
- <label key={opt} className="flex items-center gap-2 cursor-pointer">
- <input
- type="checkbox"
- checked={filters.liftExperience?.includes(opt) || false}
- onChange={() => toggleArr('liftExperience', opt)}
- className="w-4 h-4 rounded border-slate-300 text-blue-600"
- />
- <span className="text-sm text-slate-700">{opt}</span>
- </label>
- ))}
- </div>
- </div>
- </div>
- </Section>
+        {/* ── Logistics ── */}
+        <Section
+          label="Logistics"
+          icon={<Car size={13} />}
+          expanded={expanded.logistics}
+          onToggle={() => toggle('logistics')}
+        >
+          <div className="space-y-1.5">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.hasVehicle === true}
+                onChange={e => set('hasVehicle', e.target.checked ? true : undefined)}
+                className="w-3.5 h-3.5 rounded border-slate-300 text-gold focus:ring-gold"
+              />
+              <span className="text-xs text-slate-600 group-hover:text-navy transition-colors">Has vehicle</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.willingLiveIn === true}
+                onChange={e => set('willingLiveIn', e.target.checked ? true : undefined)}
+                className="w-3.5 h-3.5 rounded border-slate-300 text-gold focus:ring-gold"
+              />
+              <span className="text-xs text-slate-600 group-hover:text-navy transition-colors">Willing to live-in</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.openToUrgent === true}
+                onChange={e => set('openToUrgent', e.target.checked ? true : undefined)}
+                className="w-3.5 h-3.5 rounded border-slate-300 text-gold focus:ring-gold"
+              />
+              <span className="text-xs text-slate-600 group-hover:text-navy transition-colors">Open to urgent placements</span>
+            </label>
+          </div>
+        </Section>
 
- <Section title="Work environment" icon={<Heart className="w-3.5 h-3.5" />}
- expanded={expanded.compatibility} onToggle={() => toggle('compatibility')}>
- <div className="space-y-3">
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">Pets</label>
- <select
- value={filters.petTolerance || ''}
- onChange={e => set('petTolerance', e.target.value || undefined)}
- className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {PET_TOLERANCE_OPTIONS.map(o => (
- <option key={o.value} value={o.value}>{o.label}</option>
- ))}
- </select>
- </div>
- <Toggle label="Comfortable in smoker's household"
- checked={!!filters.smokerHousehold}
- onChange={v => set('smokerHousehold', v || undefined)} />
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">
- Technology comfort
- </label>
- <select
- value={filters.technologyComfort || ''}
- onChange={e => set('technologyComfort', e.target.value || undefined)}
- className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {TECHNOLOGY_COMFORT_OPTIONS.map(o => (
- <option key={o.value} value={o.value}>{o.label}</option>
- ))}
- </select>
- </div>
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">
- Employment type
- </label>
- <select
- value={filters.employmentType || ''}
- onChange={e => set('employmentType', e.target.value || undefined)}
- className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {EMPLOYMENT_TYPE_OPTIONS.map(o => (
- <option key={o.value} value={o.value}>{o.label}</option>
- ))}
- </select>
- </div>
- </div>
- </Section>
+        {/* ── Experience ── */}
+        <Section
+          label="Experience"
+          expanded={expanded.experience}
+          onToggle={() => toggle('experience')}
+        >
+          <div className="space-y-2">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block mb-1">
+                Min years
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={30}
+                value={filters.minYearsExperience || ''}
+                onChange={e => set('minYearsExperience', e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs text-navy placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                placeholder="e.g. 2"
+              />
+            </div>
+            <CheckboxGroup
+              options={LIFT_EXPERIENCE_OPTIONS}
+              selected={filters.liftExperience || []}
+              onToggle={item => toggleArr('liftExperience', item)}
+              label="Lift experience"
+            />
+          </div>
+        </Section>
 
- <Section title="Compliance" icon={<Shield className="w-3.5 h-3.5" />}
- expanded={expanded.compliance} onToggle={() => toggle('compliance')}>
- <div className="space-y-2">
- <Toggle label="Background check required"
- checked={!!filters.requireBackground}
- onChange={v => set('requireBackground', v || undefined)} />
- <Toggle label="References required"
- checked={!!filters.requireReference}
- onChange={v => set('requireReference', v || undefined)} />
- <Toggle label="Medicare / Medicaid certified"
- checked={!!filters.medicareCertified}
- onChange={v => set('medicareCertified', v || undefined)} />
- </div>
- </Section>
+      </div>
 
- <Section title="Trust & quality" icon={<Star className="w-3.5 h-3.5" />}
- expanded={expanded.trust} onToggle={() => toggle('trust')}>
- <div className="space-y-3">
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">
- Min trust score: <span className="text-blue-600 font-bold">{filters.minTrustScore || 0}</span>
- </label>
- <input
- type="range" min="0" max="5" step="0.5"
- value={filters.minTrustScore || 0}
- onChange={e => set('minTrustScore', parseFloat(e.target.value) || undefined)}
- className="w-full accent-blue-600"
- />
- <div className="flex justify-between text-xs text-slate-400 mt-0.5">
- <span>Any</span><span>5.0</span>
- </div>
- </div>
- <div>
- <label className="block text-xs font-medium text-slate-700 mb-1">
- Min profile completion: <span className="text-blue-600 font-bold">{filters.minProfileCompletion || 0}%</span>
- </label>
- <input
- type="range" min="0" max="100" step="10"
- value={filters.minProfileCompletion || 0}
- onChange={e => set('minProfileCompletion', parseInt(e.target.value) || undefined)}
- className="w-full accent-blue-600"
- />
- <div className="flex justify-between text-xs text-slate-400 mt-0.5">
- <span>Any</span><span>100%</span>
- </div>
- </div>
- </div>
- </Section>
-
- <Section title="Experience" expanded={expanded.experience}
- onToggle={() => toggle('experience')}>
- <div className="grid grid-cols-2 gap-2">
- {[
- { label: 'Min years', key: 'minExperience' as const },
- { label: 'Max years', key: 'maxExperience' as const },
- ].map(({ label, key }) => (
- <div key={key}>
- <label className="block text-xs font-medium text-slate-700 mb-1">{label}</label>
- <select
- value={filters[key] || ''}
- onChange={e => set(key, e.target.value ? parseInt(e.target.value) : undefined)}
- className="w-full px-2 py-2 text-sm rounded-lg border border-slate-200"
- >
- <option value="">Any</option>
- {[1, 2, 3, 5, 10, 15, 20].map(y => (
- <option key={y} value={y}>{y}+</option>
- ))}
- </select>
- </div>
- ))}
- </div>
- </Section>
-
- <div className="mt-4 pt-4 border-t border-slate-100 text-center">
- <p className="text-sm font-medium text-slate-700">
- {resultCount.toLocaleString()} {resultCount === 1 ? 'caregiver' : 'caregivers'} found
- </p>
- </div>
- </div>
- );
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-slate-100 bg-slate-50">
+        <p className="text-[11px] text-slate-400 text-center">
+          {resultCount} caregiver{resultCount !== 1 ? 's' : ''} match
+        </p>
+      </div>
+    </div>
+  )
 }
+
+// ── Reusable sub-components ───────────────────────────────────────────────────
 
 function Section({
- title, icon, expanded, onToggle, children, nested = false
+  label,
+  icon,
+  expanded,
+  onToggle,
+  children,
 }: {
- title: string;
- icon?: React.ReactNode;
- expanded: boolean;
- onToggle: () => void;
- children: React.ReactNode;
- nested?: boolean;
+  label: string
+  icon?: React.ReactNode
+  expanded: boolean
+  onToggle: () => void
+  children: React.ReactNode
 }) {
- return (
- <div className={`border-t border-slate-100 pt-4 mt-4 ${nested ? 'ml-0' : ''}`}>
- <button onClick={onToggle} className="w-full flex items-center justify-between mb-3">
- <span className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
- {icon}
- {title}
- </span>
- {expanded
- ? <ChevronUp className="w-4 h-4 text-slate-400" />
- : <ChevronDown className="w-4 h-4 text-slate-400" />}
- </button>
- {expanded && children}
- </div>
- );
+  return (
+    <div className="px-4 py-3">
+      <button
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="w-full flex items-center justify-between text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+      >
+        <span className="flex items-center gap-1.5 text-[12px] font-semibold text-navy uppercase tracking-wide">
+          {icon}
+          {label}
+        </span>
+        {expanded
+          ? <ChevronUp size={13} className="text-slate-400" />
+          : <ChevronDown size={13} className="text-slate-400" />
+        }
+      </button>
+      {expanded && <div className="mt-3">{children}</div>}
+    </div>
+  )
 }
 
-function Toggle({
- label, checked, onChange
+function CheckboxGroup({
+  options,
+  selected,
+  onToggle,
+  label,
 }: {
- label: string;
- checked: boolean;
- onChange: (v: boolean) => void;
+  options: readonly string[]
+  selected: string[]
+  onToggle: (item: string) => void
+  label?: string
 }) {
- return (
- <label className="flex items-center justify-between cursor-pointer py-0.5">
- <span className="text-sm text-slate-700">{label}</span>
- <button
- type="button"
- onClick={() => onChange(!checked)}
- className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${
- checked ? 'bg-blue-600' : 'bg-slate-200'
- }`}
- >
- <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
- checked ? 'translate-x-4' : 'translate-x-0.5'
- }`} />
- </button>
- </label>
- );
+  return (
+    <div>
+      {label && (
+        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{label}</p>
+      )}
+      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+        {options.map(opt => (
+          <label key={opt} className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={selected.includes(opt)}
+              onChange={() => onToggle(opt)}
+              className="w-3.5 h-3.5 rounded border-slate-300 text-gold focus:ring-gold flex-shrink-0"
+            />
+            <span className="text-xs text-slate-600 group-hover:text-navy transition-colors leading-tight">
+              {opt}
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
 }
