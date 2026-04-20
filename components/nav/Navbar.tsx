@@ -30,6 +30,22 @@ function AuthButton() {
  >
  Profile strength
  </Link>
+ <Link
+ href="/settings/data-rights"
+ style={{
+ fontSize: '12px',
+ color: 'rgba(255,255,255,0.6)',
+ textDecoration: 'none',
+ padding: '6px 10px',
+ borderRadius: '6px',
+ transition: 'all 0.2s',
+ fontFamily: FONT_SANS,
+ }}
+ onMouseEnter={e => e.currentTarget.style.color = 'white'}
+ onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+ >
+ Data rights
+ </Link>
  <UserButton appearance={{
  elements: {
  userButtonAvatarBox: { width: '32px', height: '32px' },
