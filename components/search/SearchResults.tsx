@@ -1,7 +1,7 @@
 'use client'
 import { CaregiverSearchResult } from '@/lib/types/search'
 import { CaregiverCard } from './CaregiverCard'
-import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton'
 import { Search } from 'lucide-react'
 
 interface SearchResultsProps {
