@@ -1,7 +1,6 @@
 'use client'
 import { CaregiverSearchResult } from '@/lib/types/search'
 import { CaregiverCard } from './CaregiverCard'
-import LoadingSkeleton from '@/components/ui/LoadingSkeleton'
 import { Search } from 'lucide-react'
 
 interface SearchResultsProps {
@@ -20,7 +19,11 @@ export function SearchResults({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <LoadingSkeleton key={i} className="h-48 rounded-2xl" />
+          <div
+            key={i}
+            className="h-48 rounded-2xl bg-slate-200 animate-pulse"
+            aria-hidden="true"
+          />
         ))}
       </div>
     )
