@@ -1,13 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Pool } from 'pg'
+import { pool } from '@/lib/db'
 import { ClientSearch } from '@/components/search/ClientSearch'
 import { SearchFilters } from '@/lib/types/search'
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-})
 
 const DEFAULT_FILTERS: SearchFilters = {
   specialties: [],
@@ -24,12 +19,12 @@ const DEFAULT_FILTERS: SearchFilters = {
 
 export default async function CaregiverSearchPage() {
   const { userId } = await auth()
-  
+
   if (!userId) {
     redirect('/sign-in')
   }
 
-  // Check agency approval status
+  // Check agency approval status using shared pool from lib/db
   const { rows } = await pool.query(
     'SELECT status FROM agencies WHERE clerk_user_id = $1',
     [userId]
