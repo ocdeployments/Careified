@@ -3,6 +3,7 @@ import { CaregiverSearchResult } from '@/lib/types/search';
 import { Star, MapPin, Briefcase, Shield, Zap, Home, Globe, Car } from 'lucide-react';
 import ShortlistButton from './ShortlistButton';
 import { AlignmentScoreBadge } from '@/components/matching/AlignmentBadge';
+import { DimensionBreakdown } from '@/components/matching/DimensionBreakdown';
 
 interface CaregiverCardProps {
  caregiver: CaregiverSearchResult;
@@ -110,6 +111,13 @@ export function CaregiverCard({ caregiver }: CaregiverCardProps) {
  </div>
  </div>
  </div>
+
+ {/* Dimension Breakdown */}
+ {caregiver.alignment?.dimensions && (
+ <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 4 }}>
+ <DimensionBreakdown dimensions={caregiver.alignment.dimensions as any} />
+ </div>
+ )}
 
  {/* Availability */}
  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>

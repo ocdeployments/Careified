@@ -61,6 +61,17 @@ export interface CaregiverSearchResult {
  score: number;
  alignment_score: number | null;
  overall_confidence: number | null;
+ alignment?: {
+   criteria_aligned: string[];
+   criteria_not_aligned: string[];
+   unknowns: string[];
+   dimensions?: Record<string, {
+     score: number | null;
+     confidence: string;
+     confidence_multiplier: number;
+     attributes_used: string[];
+   }>;
+ };
  hasReferences: boolean;
  hasBackgroundCheck: boolean;
  city: string;
