@@ -1,190 +1,101 @@
-import Link from 'next/link';
-import { CaregiverSearchResult } from '@/lib/types/search';
-import { Star, MapPin, Briefcase, Shield, Zap, Home, Globe, Car } from 'lucide-react';
-import ShortlistButton from './ShortlistButton';
-import { AlignmentScoreBadge } from '@/components/matching/AlignmentBadge';
-import { DimensionBreakdown } from '@/components/matching/DimensionBreakdown';
+'use client'
+import Link from 'next/link'
+import { User, MapPin, Star } from 'lucide-react'
+import { CaregiverSearchResult } from '@/lib/types/search'
+import { AlignmentScoreBadge } from '@/components/matching/AlignmentBadge'
+import { ShortlistButton } from './ShortlistButton'
 
 interface CaregiverCardProps {
- caregiver: CaregiverSearchResult;
+  caregiver: CaregiverSearchResult
 }
 
 export function CaregiverCard({ caregiver }: CaregiverCardProps) {
+  const {
+    id, firstName, lastName, specialties, languages,
+    yearsExperience, city, state, availabilityLabel,
+    score, alignment_score, overall_confidence,
+  } = caregiver
 
- const displayName = caregiver.preferredName
- ? `${caregiver.preferredName} ${caregiver.lastName}`
- : `${caregiver.firstName} ${caregiver.lastName}`;
+  return (
+    <div className="group relative bg-white rounded-2xl border border-slate-100 hover:border-gold/40 hover:shadow-lg hover:shadow-gold/10 hover:-translate-y-0.5 transition-all duration-200">
+      {/* Shortlist button */}
+      <div className="absolute top-3 right-3 z-10">
+        <ShortlistButton caregiverId={id} />
+      </div>
 
- const initials = `${caregiver.firstName?.[0] || ''}${caregiver.lastName?.[0] || ''}`.toUpperCase();
+      <Link
+        href={`/agency/profile/${id}`}
+        className="block p-5 focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded-2xl"
+        aria-label={`View profile of ${firstName} ${lastName}`}
+      >
+        {/* Header row */}
+        <div className="flex items-start gap-3 mb-4 pr-8">
+          {/* Avatar */}
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+            <User size={20} className="text-slate-400" />
+          </div>
+          {/* Name + location */}
+          <div className="flex-1 min-w-0">
+            <div className="text-[15px] font-semibold text-navy truncate">
+              {firstName} {lastName}
+            </div>
+            {(city || state) && (
+              <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-500">
+                <MapPin size={11} />
+                {[city, state].filter(Boolean).join(', ')}
+              </div>
+            )}
+          </div>
+          {/* Score badge */}
+          <AlignmentScoreBadge
+            score={alignment_score ?? score ?? null}
+            confidence={overall_confidence ?? null}
+            size="sm"
+          />
+        </div>
 
- const availBg =
- caregiver.availabilityStatus === 'available_now' ? '#F0FDF4' :
- caregiver.availabilityStatus === 'open_to_opportunities' ? '#FFFBEB' :
- '#F8FAFC';
+        {/* Availability */}
+        {availabilityLabel && (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true" />
+            {availabilityLabel}
+          </div>
+        )}
 
- const availColor =
- caregiver.availabilityStatus === 'available_now' ? '#16A34A' :
- caregiver.availabilityStatus === 'open_to_opportunities' ? '#D97706' :
- '#64748B';
+        {/* Experience */}
+        {yearsExperience > 0 && (
+          <div className="flex items-center gap-1 text-xs text-slate-500 mb-3">
+            <Star size={11} className="text-gold" />
+            {yearsExperience} yr{yearsExperience !== 1 ? 's' : ''} experience
+          </div>
+        )}
 
- const availDot =
- caregiver.availabilityStatus === 'available_now' ? '#16A34A' :
- caregiver.availabilityStatus === 'open_to_opportunities' ? '#D97706' :
- '#94A3B8';
+        {/* Specialties */}
+        {specialties.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {specialties.slice(0, 3).map(s => (
+              <span
+                key={s}
+                className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium"
+              >
+                {s}
+              </span>
+            ))}
+            {specialties.length > 3 && (
+              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px]">
+                +{specialties.length - 3}
+              </span>
+            )}
+          </div>
+        )}
 
- return (
- <Link href={`/profile/${caregiver.id}`} style={{ textDecoration: 'none', display: 'block' }}>
- <div style={{
- backgroundColor: 'white',
- borderRadius: '16px',
- border: '1px solid #E2E8F0',
- padding: '20px',
- cursor: 'pointer',
- transition: 'all 0.2s',
- height: '100%',
- }}
- onMouseEnter={e => {
- (e.currentTarget as HTMLDivElement).style.borderColor = '#C9973A';
- (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(201,151,58,0.15)';
- (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
- }}
- onMouseLeave={e => {
- (e.currentTarget as HTMLDivElement).style.borderColor = '#E2E8F0';
- (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
- (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
- }}
- >
- {/* Header */}
- <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
- <div style={{
- width: '52px', height: '52px', borderRadius: '50%',
- background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
- display: 'flex', alignItems: 'center', justifyContent: 'center',
- fontSize: '16px', fontWeight: 900, color: '#0D1B3E',
- flexShrink: 0, overflow: 'hidden'
- }}>
- {caregiver.photoUrl
- ? <img src={caregiver.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
- : initials}
- </div>
-
- <div style={{ flex: 1, minWidth: 0 }}>
- <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
- <div style={{ minWidth: 0 }}>
- <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
- {displayName}
- </h3>
- {caregiver.jobTitle && (
- <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
- {caregiver.jobTitle}
- </p>
- )}
- <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
- {caregiver.credentials[0] && (
- <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E3A8A', backgroundColor: '#EFF6FF', padding: '2px 8px', borderRadius: '6px' }}>
- {caregiver.credentials[0]}
- </span>
- )}
- <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: '#64748B' }}>
- <Briefcase size={11} /> {caregiver.yearsExperience}y
- </span>
- <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: '#64748B' }}>
- <MapPin size={11} /> {caregiver.city}
- </span>
- </div>
- </div>
-
- {caregiver.alignment_score != null ? (
- <AlignmentScoreBadge 
- score={caregiver.alignment_score} 
- confidence={caregiver.overall_confidence} 
- size="sm" 
- />
- ) : caregiver.score >= 3 ? (
- <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
- <Star size={14} fill="#C9973A" color="#C9973A" />
- <span style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E' }}>
- {caregiver.score.toFixed(1)}
- </span>
- </div>
- ) : null}
- </div>
- </div>
- </div>
-
- {/* Dimension Breakdown */}
- {caregiver.alignment?.dimensions && (
- <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 4 }}>
- <DimensionBreakdown dimensions={caregiver.alignment.dimensions as any} />
- </div>
- )}
-
- {/* Availability */}
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
- <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '999px', backgroundColor: availBg, color: availColor }}>
- <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: availDot }} />
- {caregiver.availabilityLabel}
- </span>
- {caregiver.openToUrgent && (
- <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '999px', backgroundColor: '#FFF7ED', color: '#C2410C' }}>
- <Zap size={10} /> Urgent
- </span>
- )}
- {caregiver.willingLiveIn && (
- <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '999px', backgroundColor: '#F5F3FF', color: '#7C3AED' }}>
- <Home size={10} /> Live-in
- </span>
- )}
- </div>
-
- {/* Specialties */}
- {(caregiver.specialties || []).length > 0 && (
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
- {caregiver.specialties.slice(0, 3).map((s, i) => (
- <span key={i} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', backgroundColor: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0' }}>
- {s}
- </span>
- ))}
- </div>
- )}
-
- {/* Languages */}
- {(caregiver.languages || []).length > 0 && (
- <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '12px' }}>
- <Globe size={12} color="#94A3B8" />
- <span style={{ fontSize: '11px', color: '#64748B' }}>
- {caregiver.languages.slice(0, 3).join(' · ')}
- </span>
- </div>
- )}
-
- {/* Footer */}
- <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
- <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
- {caregiver.hasBackgroundCheck && (
- <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#16A34A', fontWeight: 600 }}>
- <Shield size={12} /> Verified
- </span>
- )}
- {caregiver.hasVehicle && (
- <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#64748B' }}>
- <Car size={12} /> Vehicle
- </span>
- )}
- {caregiver.hourlyRate && (
- <span style={{ fontSize: '11px', color: '#64748B' }}>
- ${caregiver.hourlyRate}/hr
- </span>
- )}
- </div>
- <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
- <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', backgroundColor: caregiver.profileCompletionPct >= 80 ? '#EFF6FF' : caregiver.profileCompletionPct >= 60 ? '#F0FDF4' : '#F8FAFC', color: caregiver.profileCompletionPct >= 80 ? '#1E3A8A' : caregiver.profileCompletionPct >= 60 ? '#16A34A' : '#94A3B8' }}>
- {caregiver.profileCompletionPct >= 80 ? 'Professional' : caregiver.profileCompletionPct >= 60 ? 'Verified' : caregiver.profileCompletionPct >= 40 ? 'Basic' : 'Incomplete'}
- </span>
- <ShortlistButton caregiverId={caregiver.id} size="sm" />
- </div>
- </div>
- </div>
- </Link>
- );
+        {/* Languages */}
+        {languages.length > 0 && (
+          <div className="mt-2 text-[11px] text-slate-400">
+            {languages.slice(0, 3).join(' · ')}
+          </div>
+        )}
+      </Link>
+    </div>
+  )
 }
