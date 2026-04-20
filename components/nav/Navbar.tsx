@@ -1,471 +1,289 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
-import { UserButton, useAuth } from '@clerk/nextjs';
+import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
+import { Menu, X, ChevronDown } from 'lucide-react'
+import { UserButton, useAuth } from '@clerk/nextjs'
 
-const FONT_SERIF = "'Inter', sans-serif";
-const FONT_SANS = "'Inter', sans-serif";
-
+// ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
- const { isLoaded, userId } = useAuth();
- if (!isLoaded) return null;
- if (userId) {
- return (
- <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
- <Link
- href="/profile/strength"
- style={{
- fontSize: '12px',
- color: 'rgba(255,255,255,0.6)',
- textDecoration: 'none',
- padding: '6px 10px',
- borderRadius: '6px',
- transition: 'all 0.2s',
- fontFamily: FONT_SANS,
- }}
- onMouseEnter={e => e.currentTarget.style.color = 'white'}
- onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
- >
- Profile strength
- </Link>
- <Link
- href="/settings/data-rights"
- style={{
- fontSize: '12px',
- color: 'rgba(255,255,255,0.6)',
- textDecoration: 'none',
- padding: '6px 10px',
- borderRadius: '6px',
- transition: 'all 0.2s',
- fontFamily: FONT_SANS,
- }}
- onMouseEnter={e => e.currentTarget.style.color = 'white'}
- onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
- >
- Data rights
- </Link>
- <UserButton appearance={{
- elements: {
- userButtonAvatarBox: { width: '32px', height: '32px' },
- userButtonTrigger: { padding: '4px' },
- },
- }} />
- </div>
- );
- }
- return (
- <>
- <Link href="/sign-in" style={{
- fontSize: '12px', fontWeight: 500, padding: '7px 14px',
- borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
- color: 'rgba(255,255,255,0.6)', textDecoration: 'none',
- transition: 'all 0.2s', fontFamily: FONT_SANS,
- }}>
- Sign in
- </Link>
- <Link href="/sign-up" style={{
- fontSize: '12px', fontWeight: 700, padding: '7px 14px',
- borderRadius: '8px',
- background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
- color: '#0D1B3E', textDecoration: 'none',
- transition: 'all 0.2s', fontFamily: FONT_SANS,
- }}>
- Get started
- </Link>
- </>
- );
+  const { isLoaded, userId } = useAuth()
+  if (!isLoaded) return null
+  if (userId) {
+    return (
+      <div className="flex items-center gap-3">
+        <Link
+          href="/profile/strength"
+          className="text-xs text-white/60 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+        >
+          Profile strength
+        </Link>
+        <Link
+          href="/settings/data-rights"
+          className="text-xs text-white/60 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+        >
+          Data rights
+        </Link>
+        <UserButton
+          appearance={{
+            elements: {
+              userButtonAvatarBox: { width: '32px', height: '32px' },
+              userButtonTrigger: { padding: '4px' },
+            },
+          }}
+        />
+      </div>
+    )
+  }
+  return (
+    <>
+      <Link
+        href="/sign-in"
+        className="text-xs font-medium px-3.5 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+      >
+        Sign in
+      </Link>
+      <Link
+        href="/sign-up"
+        className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-gradient-to-br from-gold to-gold-warm text-navy hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+      >
+        Get started
+      </Link>
+    </>
+  )
 }
 
+// ── Dropdown panel data ───────────────────────────────────────────────────────
 const panels = {
- agencies: {
- accent: '#2563EB',
- accentLight: 'rgba(37,99,235,0.08)',
- links: [
- { label: 'Search caregivers', desc: 'Filter by specialty, score, availability', href: '/agency/search' },
- { label: 'How it works', desc: 'Verification, scoring, shortlisting', href: '/for-agencies' },
- { label: 'Pricing', desc: 'Plans for every agency size', href: '/for-agencies#pricing' },
- ],
- preview: {
- eyebrow: 'AGENCY DASHBOARD',
- title: 'Find the right caregiver in seconds',
- stat: '15+ verified caregivers live in Texas',
- cta: 'Start hiring',
- href: '/sign-up?role=agency',
- },
- },
- caregivers: {
- accent: '#C9973A',
- accentLight: 'rgba(201,151,58,0.08)',
- links: [
- { label: 'Build your profile', desc: 'Free. 6 steps. Yours forever.', href: '/sign-up?role=caregiver' },
- { label: 'Your ID card', desc: 'Verified credential with QR code', href: '/for-caregivers' },
- { label: 'How scoring works', desc: 'Earn your reputation through real work', href: '/for-caregivers#scoring' },
- ],
- preview: {
- eyebrow: 'CAREGIVER PROFILE',
- title: 'Your reputation follows you everywhere',
- stat: 'Profiles with photos get 5x more views',
- cta: 'Build free profile',
- href: '/sign-up?role=caregiver',
- },
- },
- families: {
- accent: '#B45309',
- accentLight: 'rgba(180,83,9,0.08)',
- links: [
- { label: 'Family portal', desc: 'See who is caring for your loved one', href: '/for-families' },
- { label: 'Shift tracker', desc: 'Know when care starts and ends', href: '/for-families#tracker' },
- { label: 'Care notes feed', desc: 'Daily updates after every visit', href: '/for-families#notes' },
- ],
- preview: {
- eyebrow: 'FAMILY PORTAL',
- title: 'Peace of mind, every single shift',
- stat: '"Maria arrived at 9:04 AM — shift in progress"',
- cta: 'Ask your agency',
- href: '/for-families',
- },
- },
-};
+  agencies: {
+    accent: '#2563EB',
+    title: 'For Agencies',
+    desc: 'Find, vet, and place caregivers faster with AI-powered matching.',
+    links: [
+      { href: '/agency/search', label: 'Search caregivers', desc: 'Browse verified profiles' },
+      { href: '/agency/shortlist', label: 'Shortlist', desc: 'Save and compare candidates' },
+      { href: '/for-agencies', label: 'How it works', desc: 'See the full agency workflow' },
+    ],
+    cta: { href: '/agency/signup', label: 'Start as an agency' },
+  },
+  caregivers: {
+    accent: '#C9973A',
+    title: 'For Caregivers',
+    desc: 'Build a verified profile and get matched with agencies that fit you.',
+    links: [
+      { href: '/profile/build', label: 'Build your profile', desc: 'Free — takes 10 minutes' },
+      { href: '/opportunities', label: 'Browse opportunities', desc: 'See open placements' },
+      { href: '/for-caregivers', label: 'How it works', desc: 'See the caregiver journey' },
+    ],
+    cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
+  },
+  families: {
+    accent: '#16A34A',
+    title: 'For Families',
+    desc: 'Find trusted, verified caregivers for your loved ones.',
+    links: [
+      { href: '/for-families', label: 'How it works', desc: 'See how families use Careified' },
+      { href: '/about', label: 'About us', desc: 'Our mission and team' },
+    ],
+    cta: { href: '/sign-up?role=family', label: 'Find a caregiver' },
+  },
+} as const
 
-type PanelKey = keyof typeof panels;
+type PanelKey = keyof typeof panels
 
+// ── Main Navbar ───────────────────────────────────────────────────────────────
 export default function Navbar() {
- const [mobileOpen, setMobileOpen] = useState(false);
- const [activePanel, setActivePanel] = useState< PanelKey | null>(null);
- const [mounted, setMounted] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelKey | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
 
- useEffect(() => {
- setMounted(true);
- }, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
- // Prevent hydration mismatch
- if (!mounted) {
- return (
- <nav style={{ height: '64px', background: '#0D1B3E' }}>
- {/* Static placeholder while loading */}
- </nav>
- );
- }
+  // Close panel on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActivePanel(null)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
- const handleMouseEnter = (key: PanelKey) => setActivePanel(key);
- const handleMouseLeave = () => setActivePanel(null);
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handler = () => { if (window.innerWidth >= 768) setMobileOpen(false) }
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
- return (
- <>
- {/* Google Fonts */}
- <style>{`
- @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
- `}</style>
+  const togglePanel = (key: PanelKey) =>
+    setActivePanel(prev => (prev === key ? null : key))
 
- <nav
- style={{
- position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
- backgroundColor: 'rgba(13,27,62,0.97)',
- backdropFilter: 'blur(20px)',
- borderBottom: '1px solid rgba(255,255,255,0.06)',
- fontFamily: FONT_SANS,
- }}
- onMouseLeave={handleMouseLeave}
- >
- {/* Main bar */}
- <div style={{
- maxWidth: '1280px', margin: '0 auto',
- padding: '0 24px', height: '60px',
- display: 'flex', alignItems: 'center',
- justifyContent: 'space-between',
- }}>
- {/* Logo */}
- <Link href="/" style={{
- display: 'flex', alignItems: 'center',
- gap: '10px', textDecoration: 'none', flexShrink: 0,
- }}>
- <div style={{
- width: '28px', height: '28px', borderRadius: '7px',
- background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
- display: 'flex', alignItems: 'center', justifyContent: 'center',
- }}>
- <svg width="12" height="12" viewBox="0 0 14 14" fill="#0D1B3E">
- <path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" />
- </svg>
- </div>
- <span style={{
- fontSize: '14px', fontWeight: 600, color: 'white',
- letterSpacing: '-0.02em',
- }}>
- Careified
- </span>
- </Link>
+  return (
+    <nav
+      ref={navRef}
+      className={[
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-200',
+        scrolled
+          ? 'bg-navy/95 backdrop-blur-md shadow-lg shadow-navy/20'
+          : 'bg-navy',
+      ].join(' ')}
+      aria-label="Main navigation"
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
 
- {/* Desktop nav links */}
- <div style={{
- display: 'flex', alignItems: 'center', gap: '2px',
- }}>
- {(['agencies', 'caregivers', 'families'] as PanelKey[]).map((key) => (
- <button
- key={key}
- onMouseEnter={() => handleMouseEnter(key)}
- style={{
- display: 'flex', alignItems: 'center', gap: '4px',
- fontSize: '13px', fontWeight: 500,
- color: activePanel === key ? 'white' : 'rgba(255,255,255,0.5)',
- padding: '8px 12px', borderRadius: '8px',
- background: activePanel === key ? 'rgba(255,255,255,0.06)' : 'transparent',
- border: 'none', cursor: 'pointer',
- transition: 'all 0.15s', fontFamily: FONT_SANS,
- }}
- >
- {key === 'agencies' ? 'For Agencies' : key === 'caregivers' ? 'For Caregivers' : 'For Families'}
- <ChevronDown
- size={12}
- style={{
- opacity: 0.4,
- transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
- transition: 'transform 0.2s',
- }}
- />
- </button>
- ))}
- <Link href="/about" style={{
- fontSize: '13px', fontWeight: 500,
- color: 'rgba(255,255,255,0.5)',
- padding: '8px 12px', borderRadius: '8px',
- textDecoration: 'none', transition: 'all 0.15s',
- }}>
- About
- </Link>
- </div>
+        {/* Logo */}
+        <Link
+          href="/"
+          className="font-serif text-xl font-normal text-white tracking-tight focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+          onClick={() => { setActivePanel(null); setMobileOpen(false) }}
+        >
+          Careified
+        </Link>
 
- {/* Auth + mobile toggle */}
- <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
- <AuthButton />
- <button
- onClick={() => setMobileOpen(!mobileOpen)}
- style={{
- display: 'none',
- background: 'none', border: 'none',
- color: 'white', cursor: 'pointer', padding: '4px',
- }}
- className="mobile-menu-btn"
- >
- {mobileOpen ? <X size={20} /> : <Menu size={20} />}
- </button>
- </div>
- </div>
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-1">
+          {(Object.keys(panels) as PanelKey[]).map(key => (
+            <button
+              key={key}
+              onClick={() => togglePanel(key)}
+              aria-expanded={activePanel === key}
+              aria-haspopup="true"
+              className={[
+                'flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors',
+                'focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none',
+                activePanel === key
+                  ? 'text-white bg-white/10'
+                  : 'text-white/70 hover:text-white hover:bg-white/5',
+              ].join(' ')}
+            >
+              <span className="capitalize">{key}</span>
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-200 ${activePanel === key ? 'rotate-180' : ''}`}
+              />
+            </button>
+          ))}
+          <Link
+            href="/about"
+            className="px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          >
+            About
+          </Link>
+        </div>
 
- {/* Dropdown panel */}
- {activePanel && (
- <div
- onMouseEnter={() => setActivePanel(activePanel)}
- style={{
- position: 'absolute', top: '60px', left: 0, right: 0,
- background: 'rgba(10,20,50,0.98)',
- backdropFilter: 'blur(24px)',
- borderBottom: '1px solid rgba(255,255,255,0.06)',
- borderTop: `2px solid ${panels[activePanel].accent}`,
- }}
- >
- <div style={{
- maxWidth: '1280px', margin: '0 auto',
- padding: '28px 24px',
- display: 'grid',
- gridTemplateColumns: '1fr 1fr',
- gap: '40px',
- }}>
- {/* Left — links */}
- <div>
- <div style={{
- fontSize: '10px', fontWeight: 700,
- letterSpacing: '0.1em', textTransform: 'uppercase',
- color: panels[activePanel].accent,
- marginBottom: '16px',
- }}>
- {activePanel === 'agencies' ? 'For Agencies'
- : activePanel === 'caregivers' ? 'For Caregivers'
- : 'For Families'}
- </div>
- <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
- {panels[activePanel].links.map((link) => (
- <Link
- key={link.href}
- href={link.href}
- onClick={() => setActivePanel(null)}
- style={{
- display: 'flex', flexDirection: 'column',
- padding: '10px 12px', borderRadius: '10px',
- textDecoration: 'none',
- transition: 'background 0.15s',
- background: 'transparent',
- }}
- onMouseEnter={e => (e.currentTarget.style.background = panels[activePanel].accentLight)}
- onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
- >
- <span style={{
- fontSize: '13px', fontWeight: 600, color: 'white',
- marginBottom: '2px',
- }}>
- {link.label}
- </span>
- <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>
- {link.desc}
- </span>
- </Link>
- ))}
- </div>
- </div>
+        {/* Desktop auth */}
+        <div className="hidden md:flex items-center gap-2">
+          <AuthButton />
+        </div>
 
- {/* Right — preview card */}
- <div style={{
- background: panels[activePanel].accentLight,
- border: `1px solid ${panels[activePanel].accent}22`,
- borderRadius: '14px',
- padding: '20px',
- display: 'flex', flexDirection: 'column',
- justifyContent: 'space-between',
- }}>
- <div>
- <div style={{
- fontSize: '9px', fontWeight: 700,
- letterSpacing: '0.1em', textTransform: 'uppercase',
- color: panels[activePanel].accent, marginBottom: '10px',
- }}>
- {panels[activePanel].preview.eyebrow}
- </div>
- <div style={{
- fontFamily: FONT_SERIF,
- fontSize: '18px', color: 'white',
- lineHeight: 1.25, marginBottom: '12px',
- letterSpacing: '-0.01em',
- }}>
- {panels[activePanel].preview.title}
- </div>
- <div style={{
- fontSize: '12px', color: 'rgba(255,255,255,0.4)',
- lineHeight: 1.5, fontStyle: 'italic',
- }}>
- {panels[activePanel].preview.stat}
- </div>
- </div>
- <Link
- href={panels[activePanel].preview.href}
- onClick={() => setActivePanel(null)}
- style={{
- marginTop: '16px',
- display: 'inline-block',
- fontSize: '12px', fontWeight: 700,
- padding: '9px 18px', borderRadius: '8px',
- background: panels[activePanel].accent,
- color: 'white', textDecoration: 'none',
- alignSelf: 'flex-start',
- transition: 'opacity 0.2s',
- }}
- >
- {panels[activePanel].preview.cta} →
- </Link>
- </div>
- </div>
- </div>
- )}
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
 
- {/* Mobile drawer */}
- {mobileOpen && (
- <div style={{
- position: 'fixed', inset: 0, top: '60px',
- background: '#0D1B3E', zIndex: 99,
- overflowY: 'auto', padding: '24px',
- }}>
- {/* Agencies */}
- <div style={{
- fontSize: '10px', fontWeight: 700,
- letterSpacing: '0.1em', textTransform: 'uppercase',
- color: '#2563EB', marginBottom: '8px', marginTop: '8px',
- }}>For Agencies</div>
- {panels.agencies.links.map(l => (
- <Link key={l.href} href={l.href}
- onClick={() => setMobileOpen(false)}
- style={{
- display: 'block', padding: '12px 0',
- fontSize: '15px', fontWeight: 500, color: 'white',
- textDecoration: 'none',
- borderBottom: '1px solid rgba(255,255,255,0.06)',
- }}>
- {l.label}
- </Link>
- ))}
+      {/* ── Desktop dropdown panel ── */}
+      {activePanel && (
+        <div className="hidden md:block absolute top-full left-0 right-0 bg-navy border-t border-white/10 shadow-2xl">
+          <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-3 gap-8">
+            {/* Panel info */}
+            <div>
+              <h2 className="text-white font-serif text-xl font-normal mb-2">
+                {panels[activePanel].title}
+              </h2>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {panels[activePanel].desc}
+              </p>
+              <Link
+                href={panels[activePanel].cta.href}
+                onClick={() => setActivePanel(null)}
+                className="inline-block mt-4 px-4 py-2 rounded-lg bg-gradient-to-br from-gold to-gold-warm text-navy text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+              >
+                {panels[activePanel].cta.label}
+              </Link>
+            </div>
+            {/* Links */}
+            <div className="col-span-2 grid grid-cols-2 gap-3">
+              {panels[activePanel].links.map(link => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setActivePanel(null)}
+                  className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                >
+                  <div className="text-sm font-semibold text-white group-hover:text-gold transition-colors">
+                    {link.label}
+                  </div>
+                  <div className="text-xs text-white/50 mt-0.5">{link.desc}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
- {/* Caregivers */}
- <div style={{
- fontSize: '10px', fontWeight: 700,
- letterSpacing: '0.1em', textTransform: 'uppercase',
- color: '#C9973A', marginBottom: '8px', marginTop: '20px',
- }}>For Caregivers</div>
- {panels.caregivers.links.map(l => (
- <Link key={l.href} href={l.href}
- onClick={() => setMobileOpen(false)}
- style={{
- display: 'block', padding: '12px 0',
- fontSize: '15px', fontWeight: 500, color: 'white',
- textDecoration: 'none',
- borderBottom: '1px solid rgba(255,255,255,0.06)',
- }}>
- {l.label}
- </Link>
- ))}
-
- {/* Families */}
- <div style={{
- fontSize: '10px', fontWeight: 700,
- letterSpacing: '0.1em', textTransform: 'uppercase',
- color: '#B45309', marginBottom: '8px', marginTop: '20px',
- }}>For Families</div>
- {panels.families.links.map(l => (
- <Link key={l.href} href={l.href}
- onClick={() => setMobileOpen(false)}
- style={{
- display: 'block', padding: '12px 0',
- fontSize: '15px', fontWeight: 500, color: 'white',
- textDecoration: 'none',
- borderBottom: '1px solid rgba(255,255,255,0.06)',
- }}>
- {l.label}
- </Link>
- ))}
-
- <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
- <Link href="/sign-in"
- onClick={() => setMobileOpen(false)}
- style={{
- display: 'block', textAlign: 'center',
- padding: '14px', borderRadius: '12px',
- border: '1px solid rgba(255,255,255,0.1)',
- color: 'rgba(255,255,255,0.7)',
- textDecoration: 'none', fontSize: '14px', fontWeight: 500,
- }}>
- Sign in
- </Link>
- <Link href="/sign-up"
- onClick={() => setMobileOpen(false)}
- style={{
- display: 'block', textAlign: 'center',
- padding: '14px', borderRadius: '12px',
- background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
- color: '#0D1B3E',
- textDecoration: 'none', fontSize: '14px', fontWeight: 700,
- }}>
- Get started free
- </Link>
- </div>
- </div>
- )}
-
- {/* Mobile responsive override */}
- <style>{`
- @media (max-width: 768px) {
- .mobile-menu-btn { display: flex !important; }
- }
- `}</style>
- </nav>
- </>
- );
+      {/* ── Mobile menu ── */}
+      {mobileOpen && (
+        <div className="md:hidden bg-navy border-t border-white/10 px-4 py-4 space-y-1">
+          {(Object.keys(panels) as PanelKey[]).map(key => (
+            <div key={key}>
+              <button
+                onClick={() => togglePanel(key)}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+              >
+                <span className="capitalize font-medium">{key}</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${activePanel === key ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {activePanel === key && (
+                <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
+                  {panels[key].links.map(link => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => { setActivePanel(null); setMobileOpen(false) }}
+                      className="block px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <Link
+                    href={panels[key].cta.href}
+                    onClick={() => { setActivePanel(null); setMobileOpen(false) }}
+                    className="block px-3 py-2 rounded-lg text-sm font-semibold text-gold hover:text-gold-warm transition-colors"
+                  >
+                    {panels[key].cta.label} →
+                  </Link>
+                </div>
+              )}
+            </div>
+          ))}
+          <Link
+            href="/about"
+            onClick={() => setMobileOpen(false)}
+            className="block px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            About
+          </Link>
+          <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+            <AuthButton />
+          </div>
+        </div>
+      )}
+    </nav>
+  )
 }
