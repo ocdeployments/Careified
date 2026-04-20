@@ -49,7 +49,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  const availabilityLabel = caregiver.availability_status === 'available_now' ? 'Available now' : caregiver.availability_status === 'open_to_opportunities' ? 'Open to opportunities' : caregiver.availability_status === 'available_from' ? 'Available from date' : 'Not available'
 
  const tierColor = caregiver.profile_completion_pct >= 80 ? '#1E3A8A' : caregiver.profile_completion_pct >= 60 ? '#16A34A' : caregiver.profile_completion_pct >= 40 ? '#64748B' : '#94A3B8'
- const tierLabel = caregiver.profile_completion_pct >= 80 ? 'Professional' : caregiver.profile_completion_pct >= 60 ? 'Verified' : caregiver.profile_completion_pct >= 40 ? 'Basic' : 'Incomplete'
+ const tierLabel = caregiver.profile_completion_pct >= 80 ? 'Professional' : caregiver.profile_completion_pct >= 60 ? 'Profile Complete' : caregiver.profile_completion_pct >= 40 ? 'Basic' : 'Incomplete'
 
  return (
  <div className="min-h-screen" style={{ backgroundColor: '#F7F4F0' }}>
@@ -193,6 +193,8 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  </div>
  {(caregiver.languages || []).length > 0 && <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}><h4 style={{ fontSize: '13px', fontWeight: 800, color: '#0D1B3E', marginBottom: '12px' }}>Languages</h4><div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>{(caregiver.languages || []).map((l: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: '#F8FAFC' }}>{l}</span>)}</div></div>}
  </div>
+ 
+ <ProfileDisclaimer />
  </div>
  </div>
  )
@@ -212,6 +214,31 @@ function LogisticItem({ label, value }: { label: string; value: boolean }) {
  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
  <span style={{ fontSize: '12px', color: '#64748B' }}>{label}</span>
  <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: value ? '#F0FDF4' : '#F8FAFC', color: value ? '#16A34A' : '#94A3B8' }}>{value ? 'Yes' : 'No'}</span>
+ </div>
+ )
+}
+
+// Disclaimer footer
+const disclaimerStyle: React.CSSProperties = {
+ marginTop: 40,
+ padding: 20,
+ background: '#F7F4F0',
+ border: '1px solid #E2E8F0',
+ borderRadius: 12,
+ fontSize: 12,
+ color: '#64748B',
+ lineHeight: 1.6,
+ fontFamily: "'DM Sans', sans-serif",
+}
+
+function ProfileDisclaimer() {
+ return (
+ <div style={disclaimerStyle}>
+ <strong style={{ color: '#0D1B3E' }}>About this profile:&nbsp;</strong>
+ Information shown is self-disclosed by the caregiver and presented by Careified
+ as submitted. Careified does not recommend, vouch for, or verify any caregiver.
+ Any employment or engagement decision is the responsibility of the hiring agency
+ or family.
  </div>
  )
 }
