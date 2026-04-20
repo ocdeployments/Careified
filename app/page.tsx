@@ -34,44 +34,54 @@ export default function HomePage() {
           </h1>
 
           {/* Subtext */}
-          <p className="text-[15px] text-white/45 leading-[1.7] max-w-[480px] mx-auto mb-12 font-light">
+          <p className="text-[15px] text-white/75 leading-[1.7] max-w-[480px] mx-auto mb-12 font-light">
             The platform where caregivers earn credibility and agencies hire with confidence.
           </p>
+
+          {/* Hero CTA buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
+            <Link
+              href="/agency/signup"
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white text-navy text-sm font-semibold hover:bg-white/90 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            >
+              Start hiring →
+            </Link>
+            <Link
+              href="/sign-up?role=caregiver"
+              className="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-white text-white text-sm font-semibold hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            >
+              Build free profile →
+            </Link>
+            <Link
+              href="/for-families"
+              className="w-full sm:w-auto px-6 py-3 rounded-lg text-gold text-sm font-semibold hover:text-gold-warm transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            >
+              Learn more →
+            </Link>
+          </div>
 
           {/* Feature cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[700px] mx-auto text-left">
             {/* Agencies */}
-            <Link
-              href="/agency/signup"
-              className="group relative block p-5 rounded-[14px] bg-white/4 border border-white/8 hover:bg-white/8 hover:border-white/15 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none overflow-hidden"
-            >
+            <div className="relative p-5 rounded-[14px] bg-white/8 border border-white/15 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-800 to-blue-500" />
               <div className="text-[13px] font-semibold text-white mb-1">For Agencies</div>
-              <div className="text-[11px] text-white/35 leading-[1.5] mb-3.5">Search verified profiles.</div>
-              <span className="text-[11px] font-bold text-blue-400 group-hover:text-blue-300 transition-colors">Start hiring →</span>
-            </Link>
+              <div className="text-[11px] text-white/60 leading-[1.5]">Search verified profiles. AI-powered matching.</div>
+            </div>
 
             {/* Caregivers */}
-            <Link
-              href="/sign-up?role=caregiver"
-              className="group relative block p-5 rounded-[14px] bg-white/4 border border-white/8 hover:bg-white/8 hover:border-white/15 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none overflow-hidden"
-            >
+            <div className="relative p-5 rounded-[14px] bg-white/8 border border-white/15 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-gold to-gold-warm" />
               <div className="text-[13px] font-semibold text-white mb-1">For Caregivers</div>
-              <div className="text-[11px] text-white/35 leading-[1.5] mb-3.5">Free. Always. Build once.</div>
-              <span className="text-[11px] font-bold text-gold group-hover:text-gold-warm transition-colors">Build free profile →</span>
-            </Link>
+              <div className="text-[11px] text-white/60 leading-[1.5]">Free. Always. Build your portable professional identity.</div>
+            </div>
 
             {/* Families */}
-            <Link
-              href="/for-families"
-              className="group relative block p-5 rounded-[14px] bg-white/4 border border-white/8 hover:bg-white/8 hover:border-white/15 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none overflow-hidden"
-            >
+            <div className="relative p-5 rounded-[14px] bg-white/8 border border-white/15 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-700 to-amber-500" />
               <div className="text-[13px] font-semibold text-white mb-1">For Families</div>
-              <div className="text-[11px] text-white/35 leading-[1.5] mb-3.5">Know who is caring.</div>
-              <span className="text-[11px] font-bold text-amber-400 group-hover:text-amber-300 transition-colors">Learn more →</span>
-            </Link>
+              <div className="text-[11px] text-white/60 leading-[1.5]">Know who is caring for your loved ones.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -80,14 +90,14 @@ export default function HomePage() {
       <section className="bg-[#080F1E] px-4 md:px-6 py-5" aria-label="Industry statistics">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4">
           {[
-            { n: '75%',   l: 'Annual turnover', s: '2025' },
+            { n: '75%',    l: 'Annual turnover',   s: '2025' },
             { n: '4 in 5', l: 'Leave in 100 days', s: '2024' },
-            { n: '9.7M',  l: 'Jobs by 2034',     s: 'PHI'  },
-            { n: '15+',   l: 'Live in TX',        s: 'Now'  },
+            { n: '9.7M',   l: 'Jobs by 2034',      s: 'PHI'  },
+            { n: '15+',    l: 'Live in TX',         s: 'Now'  },
           ].map(stat => (
             <div key={stat.n} className="p-3">
               <div className="font-serif text-[22px] text-white">{stat.n}</div>
-              <div className="text-[11px] text-white/30 mt-1 leading-tight">{stat.l}</div>
+              <div className="text-[11px] text-slate-300 mt-1 leading-tight">{stat.l}</div>
             </div>
           ))}
         </div>
@@ -102,26 +112,26 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                icon: <UserCheck size={22} className="text-gold" />,
+                icon: <UserCheck size={24} className="text-navy" />,
                 num: '01',
                 title: 'Build your profile',
                 desc: '7 steps. Your complete professional record — credentials, experience, references.',
               },
               {
-                icon: <Search size={22} className="text-gold" />,
+                icon: <Search size={24} className="text-navy" />,
                 num: '02',
                 title: 'Get placed',
                 desc: 'Agencies search by match score, availability, and specialization.',
               },
               {
-                icon: <Shield size={22} className="text-gold" />,
+                icon: <Shield size={24} className="text-navy" />,
                 num: '03',
                 title: 'Earn your score',
                 desc: 'Verified badges and ratings no one can take away.',
               },
             ].map(step => (
               <div key={step.num} className="bg-white rounded-2xl p-7 shadow-sm">
-                <div className="font-serif text-[44px] leading-none text-gold/10 mb-3 select-none">{step.num}</div>
+                <div className="font-serif text-[44px] font-bold leading-none text-gold mb-3 select-none">{step.num}</div>
                 <div className="mb-3">{step.icon}</div>
                 <div className="text-[15px] font-semibold text-navy mb-2">{step.title}</div>
                 <div className="text-[13px] text-slate-500 leading-relaxed">{step.desc}</div>
@@ -138,10 +148,10 @@ export default function HomePage() {
         aria-label="Call to action"
       >
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-[44px] font-normal text-white tracking-tight leading-tight mb-3">
+          <h2 className="font-serif text-3xl md:text-[44px] font-bold text-white tracking-tight leading-tight mb-3">
             The information problem<br />in caregiving ends here
           </h2>
-          <p className="text-sm text-white/40 mb-9 leading-relaxed">
+          <p className="text-sm text-white/80 mb-9 leading-relaxed">
             75% annual turnover. Every hire starts blind. Not anymore.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -153,8 +163,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/sign-up?role=caregiver"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white/10 border border-white/30 text-white text-sm font-medium hover:bg-white/20 transition-all focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
             >
               I&apos;m a caregiver — it&apos;s free
             </Link>
@@ -171,7 +180,7 @@ export default function HomePage() {
             </div>
             <span className="text-[13px] font-semibold text-white">Careified</span>
           </div>
-          <p className="text-xs text-white/20 max-w-[200px] leading-relaxed mb-8">
+          <p className="text-xs text-slate-400 max-w-[200px] leading-relaxed mb-8">
             Verified reputations for the caregiving profession. Texas-first.
           </p>
           <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label="Footer navigation">
@@ -186,7 +195,7 @@ export default function HomePage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs text-white/40 hover:text-white/70 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
+                className="text-xs text-slate-300 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none rounded"
               >
                 {link.label}
               </Link>
