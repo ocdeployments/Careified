@@ -64,9 +64,7 @@ export function ConfidenceBar({
           className={`h-full ${barColor} rounded-full transition-all duration-500`}
           style={{ width: `${pct}%` }}
           role="progressbar"
-          aria-valuenow={pct}
-          aria-valuemin={0}
-          aria-valuemax={100}
+          aria-valuenow={pct ?? 0}
           aria-label={`Confidence: ${pct}%`}
         />
       </div>
