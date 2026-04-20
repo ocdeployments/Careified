@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AlignmentScoreBadge, AlignmentDisclaimerBanner } from '@/components/matching/AlignmentBadge'
+import { DimensionBreakdown } from '@/components/matching/DimensionBreakdown'
 
 const FONT_SANS = "'DM Sans', sans-serif"
 const FONT_SERIF = "'DM Serif Display', serif"
@@ -264,78 +265,77 @@ function DetailRow({ label, value }: { label: string; value: string | number | n
 }
 
 function CaregiverMatchCard({ row }: { row: MatchRow }) {
-  // Read from alignment.* first, fall back to deprecated match.*
   const score = row.alignment_score ?? row.alignment?.alignment_score ?? row.match?.overall_score ?? null
   const confidence = row.overall_confidence ?? row.alignment?.overall_confidence ?? row.match?.overall_confidence ?? null
   const aligned = row.alignment?.criteria_aligned ?? row.match?.strong_fits ?? []
   const notAligned = row.alignment?.criteria_not_aligned ?? row.match?.gaps ?? []
   const unknowns = row.alignment?.unknowns ?? row.match?.unknowns ?? []
+  const dimensions = row.alignment?.dimensions ?? null
 
   return (
-    <Link
-      href={`/profile/${row.caregiver_id}`}
+    <div
       style={{
-        display: 'block',
         background: 'white',
         border: '1px solid #E2E8F0',
         borderRadius: 16,
         padding: 24,
-        textDecoration: 'none',
-        color: 'inherit',
         transition: 'all 150ms ease',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#C9973A'
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(201,151,58,0.15)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#E2E8F0'
-        e.currentTarget.style.boxShadow = 'none'
-      }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <div style={{ fontSize: 18, fontWeight: 600, color: '#0D1B3E' }}>
-              {row.first_name} {row.last_name}
+      <Link
+        href={`/profile/${row.caregiver_id}`}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <div style={{ fontSize: 18, fontWeight: 600, color: '#0D1B3E' }}>
+                {row.first_name} {row.last_name}
+              </div>
+              <div style={{ fontSize: 13, color: '#64748B' }}>
+                {row.city}, {row.state} · {row.years_experience} yrs
+                {row.hourly_rate && ` · $${row.hourly_rate}/hr`}
+              </div>
             </div>
-            <div style={{ fontSize: 13, color: '#64748B' }}>
-              {row.city}, {row.state} · {row.years_experience} yrs
-              {row.hourly_rate && ` · $${row.hourly_rate}/hr`}
-            </div>
+
+            {aligned.length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                  Criteria aligned
+                </div>
+                <div style={{ fontSize: 13, color: '#0D1B3E' }}>
+                  {aligned.slice(0, 3).join(' · ')}
+                </div>
+              </div>
+            )}
+
+            {notAligned.length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                  Criteria not aligned
+                </div>
+                <div style={{ fontSize: 13, color: '#B45309' }}>
+                  {notAligned.slice(0, 2).join(' · ')}
+                </div>
+              </div>
+            )}
+
+            {unknowns.length > 0 && (
+              <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
+                Data unavailable: {unknowns.map(u => u.replace(/_/g, ' ')).join(', ')}
+              </div>
+            )}
           </div>
 
-          {aligned.length > 0 && (
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-                Criteria aligned
-              </div>
-              <div style={{ fontSize: 13, color: '#0D1B3E' }}>
-                {aligned.slice(0, 3).join(' · ')}
-              </div>
-            </div>
-          )}
-
-          {notAligned.length > 0 && (
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-                Criteria not aligned
-              </div>
-              <div style={{ fontSize: 13, color: '#B45309' }}>
-                {notAligned.slice(0, 2).join(' · ')}
-              </div>
-            </div>
-          )}
-
-          {unknowns.length > 0 && (
-            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
-              Data unavailable: {unknowns.map(u => u.replace(/_/g, ' ')).join(', ')}
-            </div>
-          )}
+          <AlignmentScoreBadge score={score} confidence={confidence} size="md" />
         </div>
+      </Link>
 
-        <AlignmentScoreBadge score={score} confidence={confidence} size="md" />
-      </div>
-    </Link>
+      {dimensions && (
+        <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 4 }}>
+          <DimensionBreakdown dimensions={dimensions as any} />
+        </div>
+      )}
+    </div>
   )
 }
