@@ -62,7 +62,6 @@ export default function IntroAnimation({ onComplete }: Props) {
   const line2Ref = useRef<HTMLParagraphElement>(null)
   const painBlockRef = useRef<HTMLDivElement>(null)
   const wordStageRef = useRef<HTMLDivElement>(null)
-  const wordSlotRef = useRef<HTMLDivElement>(null)
   const checkmarkRef = useRef<HTMLDivElement>(null)
   const brandRef = useRef<HTMLDivElement>(null)
   const goldBarRef = useRef<HTMLDivElement>(null)
@@ -70,7 +69,8 @@ export default function IntroAnimation({ onComplete }: Props) {
   const enterBtnRef = useRef<HTMLButtonElement>(null)
 
   const [stackedWords, setStackedWords] = useState<string[]>([])
-  const [currentWord, setCurrentWord] = useState<string | null>(null)
+  const [displayedWord, setDisplayedWord] = useState('')
+  const [showCursor, setShowCursor] = useState(false)
   const [showWordStage, setShowWordStage] = useState(false)
   const [showBrand, setShowBrand] = useState(false)
   const [showEnter, setShowEnter] = useState(false)
@@ -87,102 +87,137 @@ export default function IntroAnimation({ onComplete }: Props) {
     runSequence()
   }, [])
 
+  // ── Typewriter helpers ───────────────────────────────────────────────────
+  async function typeWord(word: string) {
+    setShowCursor(true)
+    for (let i = 0; i <= word.length; i++) {
+      setDisplayedWord(word.slice(0, i))
+      await new Promise(r => setTimeout(r, 75))
+    }
+    setShowCursor(false)
+  }
+
+  async function deleteWord(word: string) {
+    setShowCursor(true)
+    for (let i = word.length; i >= 0; i--) {
+      setDisplayedWord(word.slice(0, i))
+      await new Promise(r => setTimeout(r, 40))
+    }
+    setShowCursor(false)
+  }
+
   // ── Main animation sequence ───────────────────────────────────────────────
   async function runSequence() {
     const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-    // Phase 1 — Pain lines
+    // PHASE 1 — Pain lines
+    // p1 fades in: delay 600ms, duration 800ms
     await delay(600)
     if (line1Ref.current) {
       await animate(line1Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
-    await delay(1400)
+    // p2 fades in: delay 1600ms, duration 800ms
+    await delay(1000) // 1600 - 600 = 1000ms more
     if (line2Ref.current) {
       await animate(line2Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
+    // Hold: 1800ms
     await delay(1800)
-
-    // Phase 2 — Fade out pain lines
+    // Both fade out: duration 700ms
     if (painBlockRef.current) {
       await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.7, ease: [0.4, 0, 0.6, 1] })
     }
 
-    // Show word stage
+    // PHASE 2 — Word cycling (word stage visible, bullet list HIDDEN)
     setShowWordStage(true)
     await delay(80) // let DOM render
-
     if (wordStageRef.current) {
       animate(wordStageRef.current, { opacity: [0, 1] }, { duration: 0.4, ease: 'easeOut' })
     }
 
-    // Cycle through words
+    // For each word (Qualified → Recognized → Verified)
     for (let i = 0; i < words.length; i++) {
       const word = words[i]
 
-      // Slide in new word from below
-      setCurrentWord(word)
-      await delay(60)
-      if (wordSlotRef.current) {
-        await animate(wordSlotRef.current, { opacity: [0, 1], y: ['100%', '0%'] }, { duration: 0.7, ease: [0.16, 1, 0.3, 1] })
-      }
+      // Type letter by letter: 75ms per letter
+      await typeWord(word)
 
-      // Pop checkmark — 500ms after word starts (word anim is 700ms, so fire at ~200ms into it via delay)
-      await delay(200)
+      // Hold after last letter: 500ms
+      await delay(500)
+
+      // Checkmark pops: spring scale 0→1, duration 400ms
       if (checkmarkRef.current) {
-        await animate(checkmarkRef.current, { scale: [0.4, 1.2, 1], opacity: [0, 1] }, { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] })
+        await animate(checkmarkRef.current, { scale: [0, 1], opacity: [0, 1] }, { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] })
       }
 
-      // Stack the word — 400ms AFTER checkmark pops (not simultaneous)
-      await delay(400)
+      // Hold with checkmark: 600ms
+      await delay(600)
+
+      // Add to stacked pills
       setStackedWords(prev => [...prev, word])
 
-      // Hold so the bullet is visible before sliding out
-      await delay(900)
-
-      // Slide current word out upward (last word stays — no slide-out)
       if (i < words.length - 1) {
-        if (wordSlotRef.current) {
-          await animate(wordSlotRef.current, { opacity: [1, 0], y: ['0%', '-100%'] }, { duration: 0.5, ease: 'easeIn' })
-        }
-        if (checkmarkRef.current) {
-          animate(checkmarkRef.current, { opacity: 0, scale: 0.6 }, { duration: 0.2 })
-        }
+        // Erase letter by letter: 40ms per letter
+        await deleteWord(word)
+        // Pause: 200ms
+        await delay(200)
       }
-
-      await delay(100)
+      // If LAST WORD (Verified): Do NOT erase — hold Verified + checkmark visible
     }
 
-    // Phase 3 — Fade out word stage
-    await delay(600)
+    // PHASE 3 — 500ms dead pause (nothing animates)
+    await delay(500)
+
+    // PHASE 4 — Word stage fades out: duration 500ms ease-in
+    // Simultaneously: nothing else moves
     if (wordStageRef.current) {
-      await animate(wordStageRef.current, { opacity: [1, 0], scale: [1, 0.92] }, { duration: 0.6, ease: 'easeOut' })
+      await animate(wordStageRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: 'easeIn' })
     }
     setShowWordStage(false)
 
-    // Dead pause — crucial breathing room before brand appears
+    // PHASE 5 — 300ms dead pause
     await delay(300)
 
-    // Phase 4 — Brand lockup
+    // PHASE 6 — Bullet list builds (word stage gone)
+    // Each bullet slides in from left with checkmark circle:
+    // Bullet 1 (Qualified): delay 0ms, duration 500ms
+    // Bullet 2 (Recognized): delay 300ms, duration 500ms
+    // Bullet 3 (Verified): delay 600ms, duration 500ms
+    // Hold all three visible: 800ms
+    // (StackedPill component handles its own animation on mount via useEffect)
+    await delay(800)
+
+    // PHASE 7 — 400ms dead pause
+    await delay(400)
+
+    // PHASE 8 — Bullet list fades out: duration 400ms
+    // 300ms pause after
+    // (We hide stackedWords by unmounting when showWordStage=false, so this is implicit)
+    await delay(300)
+
+    // PHASE 9 — CAREIFIED brand lockup appears:
+    // scale 0.85 → 1, opacity 0 → 1
+    // duration 900ms cubic-bezier(0.16, 1, 0.3, 1)
     setShowBrand(true)
     await delay(60)
     if (brandRef.current) {
-      await animate(brandRef.current, { opacity: [0, 1], scale: [0.8, 1] }, { duration: 0.8, ease: [0.16, 1, 0.3, 1] })
+      await animate(brandRef.current, { opacity: [0, 1], scale: [0.85, 1] }, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
     }
 
-    // Gold bar sweep — delay 600ms after brand appears
-    await delay(600)
+    // PHASE 10 — Gold bar sweeps in: delay 500ms, duration 1000ms
+    await delay(500)
     if (goldBarRef.current) {
       await animate(goldBarRef.current, { width: ['0%', '60%'] }, { duration: 1.0, ease: 'easeOut' })
     }
 
-    // Tagline — delay 800ms after brand appears (200ms after gold bar starts)
-    await delay(200)
+    // PHASE 11 — Tagline fades in: delay 900ms, duration 600ms
+    await delay(400) // 900 - 500 = 400ms more
     if (taglineRef.current) {
       await animate(taglineRef.current, { opacity: [0, 1], y: [8, 0] }, { duration: 0.6, ease: 'easeOut' })
     }
 
-    // Phase 5 — Enter button — delay 1400ms after brand appears (600ms after tagline starts)
-    await delay(600)
+    // PHASE 12 — Enter button slides up: delay 1400ms, duration 500ms
+    await delay(500) // 1400 - 900 = 500ms more
     setShowEnter(true)
     await delay(60)
     if (enterBtnRef.current) {
@@ -207,46 +242,33 @@ export default function IntroAnimation({ onComplete }: Props) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
-        background: '#080f23',
+        background: '#0D1B3E',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 9999,
         overflow: 'hidden',
       }}
     >
-      {/* Ambient glow */}
+      {/* Subtle radial glow */}
       <div
         ref={glowRef}
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '600px',
-          height: '600px',
+          width: '800px',
+          height: '800px',
           borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(201,151,58,0.08) 0%, transparent 70%)',
-          animation: 'pulse-glow 4s ease-in-out infinite',
           pointerEvents: 'none',
         }}
       />
-
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
-        }
-      `}</style>
 
       {/* Phase 1 — Pain lines */}
       <div
         ref={painBlockRef}
         style={{
-          position: 'absolute',
           textAlign: 'center',
-          padding: '0 24px',
-          maxWidth: '560px',
           display: showWordStage || showBrand ? 'none' : 'block',
         }}
       >
@@ -308,20 +330,36 @@ export default function IntroAnimation({ onComplete }: Props) {
             }}>
               care
             </span>
-            <div style={{ position: 'relative', overflow: 'hidden', height: 'clamp(3rem, 8vw, 5rem)', display: 'flex', alignItems: 'center' }}>
-              <div
-                ref={wordSlotRef}
-                style={{
-                  fontFamily: 'var(--font-dm-serif, DM Serif Display, serif)',
-                  fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-                  color: '#E8B86D',
-                  fontWeight: 400,
-                  lineHeight: 1,
-                  opacity: 0,
-                }}
-              >
-                {currentWord}
-              </div>
+            {/* Word container with fixed min-width for "Recognized" (9 chars) */}
+            <div style={{
+              position: 'relative',
+              overflow: 'hidden',
+              height: 'clamp(3rem, 8vw, 5rem)',
+              display: 'flex',
+              alignItems: 'center',
+              minWidth: '9ch', // longest word "Recognized" = 9 chars
+              textAlign: 'left',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-dm-serif, DM Serif Display, serif)',
+                fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+                color: '#E8B86D',
+                fontWeight: 400,
+                lineHeight: 1,
+              }}>
+                {displayedWord}
+                {/* Blinking cursor */}
+                {showCursor && (
+                  <span style={{
+                    display: 'inline-block',
+                    width: '3px',
+                    height: '1em',
+                    background: '#E8B86D',
+                    marginLeft: '2px',
+                    animation: 'cursorBlink 0.6s infinite',
+                  }} />
+                )}
+              </span>
             </div>
             {/* Checkmark */}
             <div
@@ -354,89 +392,84 @@ export default function IntroAnimation({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Phase 4 — Brand lockup */}
+      {/* Phase 9 — Brand lockup */}
       {showBrand && (
         <div
           ref={brandRef}
           style={{
-            position: 'absolute',
             textAlign: 'center',
             opacity: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
           }}
         >
-          {/* Brand name */}
-          <div style={{
+          <h1 style={{
             fontFamily: 'var(--font-dm-serif, DM Serif Display, serif)',
-            fontSize: 'clamp(3.5rem, 10vw, 7rem)',
+            fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
+            color: '#F7F4F0',
             fontWeight: 400,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            lineHeight: 1,
-            marginBottom: '16px',
+            letterSpacing: '0.02em',
+            marginBottom: '12px',
           }}>
-            <span style={{ color: '#F7F4F0' }}>CARE</span>
-            <span style={{ color: '#E8B86D' }}>IFIED</span>
-          </div>
-
+            Careified
+          </h1>
           {/* Gold bar */}
-          <div style={{
-            height: '2px',
-            width: '0%',
-            background: 'linear-gradient(90deg, transparent, #C9973A, transparent)',
-            marginBottom: '20px',
-          }}
+          <div
             ref={goldBarRef}
+            style={{
+              height: '3px',
+              width: '0%',
+              background: 'linear-gradient(90deg, #C9973A, #E8B86D)',
+              margin: '0 auto 16px',
+              borderRadius: '2px',
+            }}
           />
-
           {/* Tagline */}
           <p
             ref={taglineRef}
             style={{
               fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
-              fontSize: 'clamp(0.65rem, 1.5vw, 0.8rem)',
-              fontWeight: 300,
-              letterSpacing: '0.22em',
+              fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+              color: 'rgba(247,244,240,0.6)',
+              fontWeight: 400,
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              color: 'rgba(247,244,240,0.5)',
               opacity: 0,
-              margin: 0,
             }}
           >
-            Your care career. Careified.
+            Your credentials. Your story. Your value.
           </p>
-
-          {/* Enter button */}
-          {showEnter && (
-            <button
-              ref={enterBtnRef}
-              onClick={handleEnter}
-              style={{
-                marginTop: '48px',
-                padding: '0.85rem 2.5rem',
-                background: '#E8B86D',
-                color: '#0D1B3E',
-                fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                border: 'none',
-                borderRadius: '2px',
-                cursor: 'pointer',
-                opacity: 0,
-                transition: 'background 0.2s ease',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#C9973A' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#E8B86D' }}
-            >
-              Enter →
-            </button>
-          )}
         </div>
       )}
+
+      {/* Phase 12 — Enter button */}
+      {showEnter && (
+        <button
+          ref={enterBtnRef}
+          onClick={handleEnter}
+          style={{
+            marginTop: '40px',
+            padding: '14px 36px',
+            background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+            color: '#0D1B3E',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: 600,
+            fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
+            cursor: 'pointer',
+            opacity: 0,
+          }}
+        >
+          Enter Careified
+        </button>
+      )}
+
+      {/* Cursor blink keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes cursorBlink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+      ` }} />
     </div>
   )
 }
