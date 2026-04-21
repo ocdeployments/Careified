@@ -8,13 +8,19 @@ interface Props {
 }
 
 // ── Stacked pill item ─────────────────────────────────────────────────────────
-function StackedPill({ word, index }: { word: string; index: number }) {
+function StackedPill({ word, index, delay }: { word: string; index: number; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!ref.current) return
-    animate(ref.current, { opacity: [0, 1], x: [-16, 0] }, { duration: 0.5, ease: [0.16, 1, 0.3, 1] })
-  }, [])
+    // Each bullet: opacity 0, translateX(-20px) → opacity 1, translateX(0)
+    // Duration 600ms ease-out
+    animate(
+      ref.current,
+      { opacity: [0, 1], x: [-20, 0] },
+      { duration: 0.6, ease: 'easeOut', delay: delay / 1000 }
+    )
+  }, [delay])
 
   return (
     <div
@@ -67,6 +73,7 @@ export default function IntroAnimation({ onComplete }: Props) {
   const goldBarRef = useRef<HTMLDivElement>(null)
   const taglineRef = useRef<HTMLParagraphElement>(null)
   const enterBtnRef = useRef<HTMLButtonElement>(null)
+  const bulletListRef = useRef<HTMLDivElement>(null)
 
   const [stackedWords, setStackedWords] = useState<string[]>([])
   const [displayedWord, setDisplayedWord] = useState('')
@@ -74,6 +81,8 @@ export default function IntroAnimation({ onComplete }: Props) {
   const [showWordStage, setShowWordStage] = useState(false)
   const [showBrand, setShowBrand] = useState(false)
   const [showEnter, setShowEnter] = useState(false)
+  const [showBulletList, setShowBulletList] = useState(false)
+  const [glowActive, setGlowActive] = useState(false)
   const [exiting, setExiting] = useState(false)
 
   const words = ['Qualified', 'Recognized', 'Verified']
@@ -110,113 +119,142 @@ export default function IntroAnimation({ onComplete }: Props) {
   async function runSequence() {
     const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-    // PHASE 1 — Pain lines
-    // p1 fades in: delay 600ms, duration 800ms
+    // ═══════════════════════════════════════════════════════════════════════
+    // ACT 1 — Word cycling (no bullet list visible at all)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Pain line 1 fades in: delay 600ms, duration 800ms
     await delay(600)
     if (line1Ref.current) {
       await animate(line1Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
-    // p2 fades in: delay 1600ms, duration 800ms
-    await delay(1000) // 1600 - 600 = 1000ms more
+
+    // Pain line 2 fades in: delay 1600ms, duration 800ms
+    await delay(15000) // 16000 - 600 - 800 = 15000ms more (after line1 completes at 1400ms)
     if (line2Ref.current) {
       await animate(line2Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
+
     // Hold: 1800ms
-    await delay(1800)
-    // Both fade out: duration 700ms
+    await delay(18000)
+
+    // Both fade out: duration 700ms ease-in-out
     if (painBlockRef.current) {
       await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.7, ease: [0.4, 0, 0.6, 1] })
     }
 
-    // PHASE 2 — Word cycling (word stage visible, bullet list HIDDEN)
+    // Pause: 500ms
+    await delay(500)
+
+    // Show word stage: "care" prefix + typewriter slot
+    // Hide bullet list completely (display: none, not just opacity 0)
     setShowWordStage(true)
     await delay(80) // let DOM render
     if (wordStageRef.current) {
       animate(wordStageRef.current, { opacity: [0, 1] }, { duration: 0.4, ease: 'easeOut' })
     }
 
-    // For each word (Qualified → Recognized → Verified)
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i]
+    // For Qualified:
+    // Type letter by letter: 75ms per letter
+    await typeWord('Qualified')
 
-      // Type letter by letter: 75ms per letter
-      await typeWord(word)
+    // Hold: 600ms
+    await delay(600)
 
-      // Hold after last letter: 500ms
-      await delay(500)
+    // Erase letter by letter: 40ms per letter
+    await deleteWord('Qualified')
 
-      // Checkmark pops: spring scale 0→1, duration 400ms
-      if (checkmarkRef.current) {
-        await animate(checkmarkRef.current, { scale: [0, 1], opacity: [0, 1] }, { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] })
-      }
+    // Pause: 250ms
+    await delay(250)
 
-      // Hold with checkmark: 600ms
-      await delay(600)
+    // For Recognized:
+    // Type letter by letter: 75ms per letter
+    await typeWord('Recognized')
 
-      // Add to stacked pills
-      setStackedWords(prev => [...prev, word])
+    // Hold: 600ms
+    await delay(600)
 
-      if (i < words.length - 1) {
-        // Erase letter by letter: 40ms per letter
-        await deleteWord(word)
-        // Pause: 200ms
-        await delay(200)
-      }
-      // If LAST WORD (Verified): Do NOT erase — hold Verified + checkmark visible
-    }
+    // Erase letter by letter: 40ms per letter
+    await deleteWord('Recognized')
 
-    // PHASE 3 — 500ms dead pause (nothing animates)
-    await delay(500)
+    // Pause: 250ms
+    await delay(250)
 
-    // PHASE 4 — Word stage fades out: duration 500ms ease-in
-    // Simultaneously: nothing else moves
+    // For Verified:
+    // Type letter by letter: 75ms per letter
+    await typeWord('Verified')
+
+    // Hold: 900ms ← holds longer, final word
+    await delay(900)
+
+    // Do NOT erase Verified
+
+    // Pause: 600ms (Verified + checkmark still visible)
+    await delay(600)
+
+    // Word stage fades out entirely: duration 600ms ease-in
     if (wordStageRef.current) {
-      await animate(wordStageRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: 'easeIn' })
+      await animate(wordStageRef.current, { opacity: [1, 0] }, { duration: 0.6, ease: 'easeIn' })
     }
     setShowWordStage(false)
 
-    // PHASE 5 — 300ms dead pause
-    await delay(300)
-
-    // PHASE 6 — Bullet list builds (word stage gone)
-    // Each bullet slides in from left with checkmark circle:
-    // Bullet 1 (Qualified): delay 0ms, duration 500ms
-    // Bullet 2 (Recognized): delay 300ms, duration 500ms
-    // Bullet 3 (Verified): delay 600ms, duration 500ms
-    // Hold all three visible: 800ms
-    // (StackedPill component handles its own animation on mount via useEffect)
+    // Pause: 800ms dead silence — nothing on screen but background
     await delay(800)
 
-    // PHASE 7 — 400ms dead pause
-    await delay(400)
+    // ═══════════════════════════════════════════════════════════════════════
+    // ACT 2 — Checkmark bullets (word stage gone, bullets only)
+    // ═══════════════════════════════════════════════════════════════════════
 
-    // PHASE 8 — Bullet list fades out: duration 400ms
-    // 300ms pause after
-    // (We hide stackedWords by unmounting when showWordStage=false, so this is implicit)
+    // After 800ms silence, show bullet list
+    setShowBulletList(true)
+    await delay(80) // let DOM render
+
+    // Hold all three visible: 1000ms
+    await delay(1000)
+
+    // Pause: 600ms dead silence
+    await delay(600)
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ACT 3 — Sunrise glow (bullets fade, glow expands)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Fade out bullets: duration 500ms ease-in
+    if (bulletListRef.current) {
+      await animate(bulletListRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: 'easeIn' })
+    }
+    setShowBulletList(false)
+
+    // Pause: 300ms
     await delay(300)
 
-    // PHASE 9 — CAREIFIED brand lockup appears:
-    // scale 0.85 → 1, opacity 0 → 1
-    // duration 900ms cubic-bezier(0.16, 1, 0.3, 1)
+    // Now trigger the sunrise glow effect
+    setGlowActive(true)
+
+    // While glow is expanding (after 800ms into glow):
+    // CAREIFIED brand lockup fades in ON TOP of glow
+    // scale 0.9 → 1, opacity 0 → 1
+    // duration 800ms cubic-bezier(0.16, 1, 0.3, 1)
+    await delay(800)
     setShowBrand(true)
     await delay(60)
     if (brandRef.current) {
-      await animate(brandRef.current, { opacity: [0, 1], scale: [0.85, 1] }, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
+      await animate(brandRef.current, { opacity: [0, 1], scale: [0.9, 1] }, { duration: 0.8, ease: [0.16, 1, 0.3, 1] })
     }
 
-    // PHASE 10 — Gold bar sweeps in: delay 500ms, duration 1000ms
+    // Gold bar sweeps: delay 500ms after brand appears
     await delay(500)
     if (goldBarRef.current) {
       await animate(goldBarRef.current, { width: ['0%', '60%'] }, { duration: 1.0, ease: 'easeOut' })
     }
 
-    // PHASE 11 — Tagline fades in: delay 900ms, duration 600ms
+    // Tagline fades: delay 900ms after brand appears
     await delay(400) // 900 - 500 = 400ms more
     if (taglineRef.current) {
       await animate(taglineRef.current, { opacity: [0, 1], y: [8, 0] }, { duration: 0.6, ease: 'easeOut' })
     }
 
-    // PHASE 12 — Enter button slides up: delay 1400ms, duration 500ms
+    // Enter button: delay 1400ms after brand appears
     await delay(500) // 1400 - 900 = 500ms more
     setShowEnter(true)
     await delay(60)
@@ -242,25 +280,30 @@ export default function IntroAnimation({ onComplete }: Props) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#0D1B3E',
+        background: glowActive ? '#0D1525' : '#080f23',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999,
+        zIndex: 99,
         overflow: 'hidden',
+        transition: 'background 20s ease',
       }}
     >
-      {/* Subtle radial glow */}
+      {/* Sunrise glow effect - positioned behind text, above background */}
       <div
         ref={glowRef}
+        className={glowActive ? 'sunrise-glow' : ''}
         style={{
           position: 'absolute',
           width: '800px',
           height: '800px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(201,151,58,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(232,184,109,0.35) 0%, rgba(201,151,58,0.2) 30%, rgba(201,151,58,0.08) 60%, transparent 75%)',
           pointerEvents: 'none',
+          zIndex: 5,
+          opacity: 0,
+          transform: 'scale(0)',
         }}
       />
 
@@ -269,7 +312,7 @@ export default function IntroAnimation({ onComplete }: Props) {
         ref={painBlockRef}
         style={{
           textAlign: 'center',
-          display: showWordStage || showBrand ? 'none' : 'block',
+          display: showWordStage || showBrand || showBulletList ? 'none' : 'block',
         }}
       >
         <p
@@ -284,7 +327,7 @@ export default function IntroAnimation({ onComplete }: Props) {
             fontWeight: 400,
           }}
         >
-          You&apos;ve spent years caring for others.
+          You've spent years caring for others.
         </p>
         <p
           ref={line2Ref}
@@ -382,13 +425,27 @@ export default function IntroAnimation({ onComplete }: Props) {
               </svg>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Stacked pills */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: '200px' }}>
-            {stackedWords.map((w, i) => (
-              <StackedPill key={w} word={w} index={i} />
-            ))}
-          </div>
+      {/* Phase 2b — Bullet list (shown after word stage is gone) */}
+      {showBulletList && (
+        <div
+          ref={bulletListRef}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            minWidth: '200px',
+            opacity: 1,
+          }}
+        >
+          {/* Bullet 1 "Qualified": duration 600ms ease-out, delay 0ms */}
+          <StackedPill word="Qualified" index={0} delay={0} />
+          {/* Bullet 2 "Recognized": duration 600ms ease-out, delay 400ms */}
+          <StackedPill word="Recognized" index={1} delay={400} />
+          {/* Bullet 3 "Verified": duration 600ms ease-out, delay 800ms */}
+          <StackedPill word="Verified" index={2} delay={800} />
         </div>
       )}
 
@@ -399,6 +456,7 @@ export default function IntroAnimation({ onComplete }: Props) {
           style={{
             textAlign: 'center',
             opacity: 0,
+            zIndex: 10, // Above the glow
           }}
         >
           <h1 style={{
@@ -457,17 +515,49 @@ export default function IntroAnimation({ onComplete }: Props) {
             fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
             cursor: 'pointer',
             opacity: 0,
+            zIndex: 10,
           }}
         >
           Enter Careified
         </button>
       )}
 
-      {/* Cursor blink keyframes */}
+      {/* Cursor blink keyframes and Sunrise glow animation */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes cursorBlink {
           0%, 50% { opacity: 1; }
           51%, 100% { opacity: 0; }
+        }
+
+        @keyframes sunriseExpand {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          25% {
+            transform: scale(0.4);
+            opacity: 0.4;
+          }
+          50% {
+            transform: scale(0.75);
+            opacity: 0.7;
+          }
+          75% {
+            transform: scale(1.1);
+            opacity: 0.85;
+          }
+          85% {
+            transform: scale(1.2);
+            opacity: 0.9;
+          }
+          100% {
+            transform: scale(1.15);
+            opacity: 0.75;
+          }
+        }
+
+        .sunrise-glow {
+          animation: sunriseExpand 20000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       ` }} />
     </div>
