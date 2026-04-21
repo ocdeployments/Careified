@@ -246,58 +246,73 @@ export default function IntroAnimation({ onComplete }: Props) {
     setShowBulletList(true)
     await delay(80) // let DOM render
 
-    // Hold all three visible: 700ms — Hold after all bullets visible: 1000ms → 700ms
-    await delay(700)
-
-    // Pause: 250ms dead silence — Pause before glow: 600ms → 250ms
-    await delay(250)
+    // Hold all three visible: 14s — Hold after all bullets visible: 700ms → 14s
+    await delay(14_000)
 
     // ═══════════════════════════════════════════════════════════════════════
-    // ACT 3 — Sunrise glow (bullets fade, glow expands)
+    // ACT 3 — Checkmarks transition INTO brand
     // ═══════════════════════════════════════════════════════════════════════
 
-    // Fade out bullets: duration 350ms ease-in — Bullets fade out duration: 500ms → 350ms
+    // Step 1: Bullets slide UP together (not fade out)
+    // All three cards: translateY(0) → translateY(-30px) + opacity → 0
+    // Duration: 500ms ease-in, all three move simultaneously
     if (bulletListRef.current) {
-      await animate(bulletListRef.current, { opacity: [1, 0] }, { duration: 0.35, ease: 'easeIn' })
+      await animate(bulletListRef.current, { opacity: [1, 0], y: [-30, 0] }, { duration: 0.5, ease: 'easeIn' })
     }
     setShowBulletList(false)
 
-    // Pause: 150ms — Pause after bullets fade: 300ms → 150ms
-    await delay(150)
+    // Step 2: 200ms pause
+    await delay(200)
 
-    // Now trigger the sunrise glow effect
+    // Step 3: Glow pulses once — "breath" before brand appears
+    // Current glow scale: briefly scale(1.15 → 1.25 → 1.1)
+    // Duration: 600ms ease-in-out
     setGlowActive(true)
+    if (glowRef.current) {
+      await animate(glowRef.current, { scale: [1.15, 1.25, 1.1] }, { duration: 0.6, ease: [0.4, 0, 0.6, 1] })
+    }
 
-    // While glow is expanding (after 800ms into glow):
-    // CAREIFIED brand lockup fades in ON TOP of glow
-    // scale 0.9 → 1, opacity 0 → 1
-    // duration 800ms cubic-bezier(0.16, 1, 0.3, 1)
-    await delay(800)
+    // Step 4: CAREIFIED wordmark appears centered in glow
+    // opacity 0 → 1, scale 0.92 → 1
+    // Duration: 900ms cubic-bezier(0.16, 1, 0.3, 1)
     setShowBrand(true)
     await delay(60)
     if (brandRef.current) {
-      await animate(brandRef.current, { opacity: [0, 1], scale: [0.9, 1] }, { duration: 0.8, ease: [0.16, 1, 0.3, 1] })
+      await animate(brandRef.current, { opacity: [0, 1], scale: [0.92, 1] }, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
     }
 
-    // Gold bar sweeps: delay 500ms after brand appears
-    await delay(500)
+    // Step 5: Thin gold line sweeps under wordmark
+    // width: 0 → 55%, height: 1.5px
+    // Color: linear-gradient(90deg, transparent, #C9973A, transparent)
+    // Duration: 800ms ease-out, delay 400ms after wordmark appears
+    await delay(400)
     if (goldBarRef.current) {
-      await animate(goldBarRef.current, { width: ['0%', '60%'] }, { duration: 1.0, ease: 'easeOut' })
+      await animate(goldBarRef.current, { width: ['0%', '55%'] }, { duration: 0.8, ease: 'easeOut' })
     }
 
-    // Tagline fades: delay 900ms after brand appears
-    await delay(400) // 900 - 500 = 400ms more
+    // Step 6: Tagline appears below line
+    // Text: "Qualified. Recognized. Verified." — echoes the three cards
+    // Font: DM Sans 300, letter-spacing 0.2em, uppercase
+    // Color: rgba(247,244,240,0.6)
+    // opacity 0 → 1, translateY(6px) → 0
+    // Duration: 600ms, delay 800ms after wordmark appears
+    await delay(400) // 800 - 400 = 400ms more
     if (taglineRef.current) {
-      await animate(taglineRef.current, { opacity: [0, 1], y: [8, 0] }, { duration: 0.6, ease: 'easeOut' })
+      await animate(taglineRef.current, { opacity: [0, 1], y: [6, 0] }, { duration: 0.6, ease: 'easeOut' })
     }
 
-    // Enter button: delay 1400ms after brand appears
-    await delay(500) // 1400 - 900 = 500ms more
-    setShowEnter(true)
-    await delay(60)
-    if (enterBtnRef.current) {
-      await animate(enterBtnRef.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.5, ease: 'easeOut' })
+    // Step 7: Hold everything for 18s
+    await delay(18_000)
+
+    // Step 8: Entire intro screen fades out
+    // opacity 1 → 0, duration 800ms ease-in
+    // Simultaneously: landing page fades in (opacity 0 → 1)
+    // Call onComplete() after fade completes
+    if (containerRef.current) {
+      await animate(containerRef.current, { opacity: [1, 0] }, { duration: 0.8, ease: 'easeIn' })
     }
+    sessionStorage.setItem('careified_intro_seen', '1')
+    onComplete()
   }
 
   // ── Enter click ───────────────────────────────────────────────────────────
@@ -500,38 +515,37 @@ export default function IntroAnimation({ onComplete }: Props) {
           <h1 style={{
             fontFamily: 'var(--font-dm-serif, DM Serif Display, serif)',
             fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
-            color: '#F7F4F0',
             fontWeight: 400,
             letterSpacing: '0.02em',
             marginBottom: '12px',
           }}>
-            Careified
+            <span style={{ color: '#F7F4F0' }}>CARE</span><span style={{ color: '#E8B86D' }}>IFIED</span>
           </h1>
           {/* Gold bar */}
           <div
             ref={goldBarRef}
             style={{
-              height: '3px',
+              height: '1.5px',
               width: '0%',
-              background: 'linear-gradient(90deg, #C9973A, #E8B86D)',
+              background: 'linear-gradient(90deg, transparent, #C9973A, transparent)',
               margin: '0 auto 16px',
-              borderRadius: '2px',
+              borderRadius: '1px',
             }}
           />
-          {/* Tagline */}
+          {/* Tagline - echoes the three cards */}
           <p
             ref={taglineRef}
             style={{
               fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
               fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
               color: 'rgba(247,244,240,0.6)',
-              fontWeight: 400,
-              letterSpacing: '0.08em',
+              fontWeight: 300,
+              letterSpacing: '0.2em',
               textTransform: 'uppercase',
               opacity: 0,
             }}
           >
-            Your credentials. Your story. Your value.
+            Qualified. Recognized. Verified.
           </p>
         </div>
       )}
