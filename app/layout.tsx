@@ -19,8 +19,11 @@ const dmSans = DM_Sans({
 })
 
 export const metadata = {
-  title: 'Careified — Verified Caregiver Matching',
-  description: 'Connect agencies with top-matched, verified caregivers. Powered by 7-dimension alignment scoring.',
+  title: 'Careified™ — Qualified. Recognized. Verified.',
+  description: 'The decision engine for agencies choosing caregivers. Verified profiles, match scores, and placement outcomes — all in one platform.',
+  icons: {
+    icon: '/Careified_logo.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
