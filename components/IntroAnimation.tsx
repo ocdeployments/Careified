@@ -7,54 +7,91 @@ interface Props {
   onComplete: () => void
 }
 
-// ── Stacked pill item ─────────────────────────────────────────────────────────
-function StackedPill({ word, index, delay }: { word: string; index: number; delay: number }) {
-  const ref = useRef<HTMLDivElement>(null)
+// ── Statement card item ─────────────────────────────────────────────────────────
+function StatementCard({ word, index, delay }: { word: string; index: number; delay: number }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const borderRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current) return
-    // Each bullet: opacity 0, translateX(-20px) → opacity 1, translateX(0)
-    // Duration 600ms ease-out
+    if (!cardRef.current || !borderRef.current) return
+    // Card: opacity 0, translateY(20px) → opacity 1, translateY(0)
+    // Duration 500ms cubic-bezier(0.16, 1, 0.3, 1)
     animate(
-      ref.current,
-      { opacity: [0, 1], x: [-20, 0] },
-      { duration: 0.6, ease: 'easeOut', delay: delay / 1000 }
+      cardRef.current,
+      { opacity: [0, 1], y: [20, 0] },
+      { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: delay / 1_000 }
+    )
+    // Border: scaleY(0) → scaleY(1), transform-origin: top
+    // Duration 400ms ease-out
+    animate(
+      borderRef.current,
+      { scaleY: [0, 1] },
+      { duration: 0.4, ease: 'easeOut', delay: delay / 1_000 }
     )
   }, [delay])
 
   return (
     <div
-      ref={ref}
+      ref={cardRef}
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        width: '100%',
+        maxWidth: '480px',
+        height: '72px',
+        background: 'rgba(201, 151, 58, 0.08)',
+        borderLeft: '3px solid #C9973A',
+        borderRadius: '4px',
+        padding: '1rem 1.5rem',
+        marginBottom: '1rem',
         opacity: 0,
-        marginBottom: '8px',
+        transform: 'translateY(20px)',
       }}
     >
+      {/* Gold left accent bar that grows from top */}
+      <div
+        ref={borderRef}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '3px',
+          height: '100%',
+          background: '#C9973A',
+          borderRadius: '4px 0 0 4px',
+          transformOrigin: 'top',
+          transform: 'scaleY(0)',
+        }}
+      />
+      {/* Large checkmark circle */}
       <div style={{
-        width: '20px',
-        height: '20px',
+        width: '40px',
+        height: '40px',
         borderRadius: '50%',
-        background: '#C9973A',
+        background: 'rgba(201,151,58,0.15)',
+        border: '2px solid #E8B86D',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        marginRight: '1rem',
       }}>
-        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-          <path d="M1 4L3.5 6.5L9 1" stroke="#0D1B3E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <span style={{
+          color: '#E8B86D',
+          fontSize: '1.1rem',
+          fontWeight: 'bold',
+          lineHeight: 1,
+        }}>✓</span>
       </div>
+      {/* Word label */}
       <span style={{
-        fontFamily: 'var(--font-dm-sans, DM Sans, sans-serif)',
-        fontSize: '14px',
-        fontWeight: 500,
-        color: 'rgba(247,244,240,0.85)',
-        letterSpacing: '0.04em',
+        fontFamily: 'var(--font-dm-serif, DM Serif Display, serif)',
+        fontStyle: 'italic',
+        fontSize: '1.6rem',
+        color: '#F7F4F0',
+        letterSpacing: '0.02em',
       }}>
-        care{word}
+        {word}
       </span>
     </div>
   )
@@ -123,28 +160,28 @@ export default function IntroAnimation({ onComplete }: Props) {
     // ACT 1 — Word cycling (no bullet list visible at all)
     // ═══════════════════════════════════════════════════════════════════════
 
-    // Pain line 1 fades in: delay 600ms, duration 800ms
-    await delay(600)
+    // Pain line 1 fades in: delay 300ms, duration 800ms
+    await delay(300)
     if (line1Ref.current) {
       await animate(line1Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
 
-    // Pain line 2 fades in: delay 1600ms, duration 800ms
-    await delay(15000) // 16000 - 600 - 800 = 15000ms more (after line1 completes at 1400ms)
+    // Pain line 2 fades in: delay 900ms, duration 800ms
+    await delay(900) // 900 - 300 - 800 = -200ms (runs concurrently after line1 completes at 1100ms)
     if (line2Ref.current) {
       await animate(line2Ref.current, { opacity: [0, 1], y: [12, 0] }, { duration: 0.8, ease: 'easeOut' })
     }
 
-    // Hold: 1800ms
-    await delay(18000)
+    // Hold: 1200ms
+    await delay(1200)
 
-    // Both fade out: duration 700ms ease-in-out
+    // Both fade out: duration 500ms ease-in-out
     if (painBlockRef.current) {
-      await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.7, ease: [0.4, 0, 0.6, 1] })
+      await animate(painBlockRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: [0.4, 0, 0.6, 1] })
     }
 
-    // Pause: 500ms
-    await delay(500)
+    // Pause: 300ms
+    await delay(300)
 
     // Show word stage: "care" prefix + typewriter slot
     // Hide bullet list completely (display: none, not just opacity 0)
@@ -164,8 +201,8 @@ export default function IntroAnimation({ onComplete }: Props) {
     // Erase letter by letter: 40ms per letter
     await deleteWord('Qualified')
 
-    // Pause: 250ms
-    await delay(250)
+    // Pause: 150ms
+    await delay(150)
 
     // For Recognized:
     // Type letter by letter: 75ms per letter
@@ -177,8 +214,8 @@ export default function IntroAnimation({ onComplete }: Props) {
     // Erase letter by letter: 40ms per letter
     await deleteWord('Recognized')
 
-    // Pause: 250ms
-    await delay(250)
+    // Pause: 150ms
+    await delay(150) // Between word erases: 250ms → 150ms
 
     // For Verified:
     // Type letter by letter: 75ms per letter
@@ -189,44 +226,44 @@ export default function IntroAnimation({ onComplete }: Props) {
 
     // Do NOT erase Verified
 
-    // Pause: 600ms (Verified + checkmark still visible)
-    await delay(600)
+    // Pause: 300ms (Verified + checkmark still visible) — After "Verified" holds: 600ms → 300ms
+    await delay(300)
 
-    // Word stage fades out entirely: duration 600ms ease-in
+    // Word stage fades out entirely: duration 400ms ease-in — Word stage fade out duration: 600ms → 400ms
     if (wordStageRef.current) {
-      await animate(wordStageRef.current, { opacity: [1, 0] }, { duration: 0.6, ease: 'easeIn' })
+      await animate(wordStageRef.current, { opacity: [1, 0] }, { duration: 0.4, ease: 'easeIn' })
     }
     setShowWordStage(false)
 
-    // Pause: 800ms dead silence — nothing on screen but background
-    await delay(800)
+    // Pause: 250ms dead silence — nothing on screen but background — Dead silence after word stage gone: 800ms → 250ms
+    await delay(250)
 
     // ═══════════════════════════════════════════════════════════════════════
     // ACT 2 — Checkmark bullets (word stage gone, bullets only)
     // ═══════════════════════════════════════════════════════════════════════
 
-    // After 800ms silence, show bullet list
+    // After 250ms silence, show bullet list
     setShowBulletList(true)
     await delay(80) // let DOM render
 
-    // Hold all three visible: 1000ms
-    await delay(1000)
+    // Hold all three visible: 700ms — Hold after all bullets visible: 1000ms → 700ms
+    await delay(700)
 
-    // Pause: 600ms dead silence
-    await delay(600)
+    // Pause: 250ms dead silence — Pause before glow: 600ms → 250ms
+    await delay(250)
 
     // ═══════════════════════════════════════════════════════════════════════
     // ACT 3 — Sunrise glow (bullets fade, glow expands)
     // ═══════════════════════════════════════════════════════════════════════
 
-    // Fade out bullets: duration 500ms ease-in
+    // Fade out bullets: duration 350ms ease-in — Bullets fade out duration: 500ms → 350ms
     if (bulletListRef.current) {
-      await animate(bulletListRef.current, { opacity: [1, 0] }, { duration: 0.5, ease: 'easeIn' })
+      await animate(bulletListRef.current, { opacity: [1, 0] }, { duration: 0.35, ease: 'easeIn' })
     }
     setShowBulletList(false)
 
-    // Pause: 300ms
-    await delay(300)
+    // Pause: 150ms — Pause after bullets fade: 300ms → 150ms
+    await delay(150)
 
     // Now trigger the sunrise glow effect
     setGlowActive(true)
@@ -428,24 +465,25 @@ export default function IntroAnimation({ onComplete }: Props) {
         </div>
       )}
 
-      {/* Phase 2b — Bullet list (shown after word stage is gone) */}
+      {/* Phase 2b — Statement cards (shown after word stage is gone) */}
       {showBulletList && (
         <div
           ref={bulletListRef}
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
-            minWidth: '200px',
+            alignItems: 'center',
+            width: '100%',
+            maxWidth: '480px',
             opacity: 1,
           }}
         >
-          {/* Bullet 1 "Qualified": duration 600ms ease-out, delay 0ms */}
-          <StackedPill word="Qualified" index={0} delay={0} />
-          {/* Bullet 2 "Recognized": duration 600ms ease-out, delay 400ms */}
-          <StackedPill word="Recognized" index={1} delay={400} />
-          {/* Bullet 3 "Verified": duration 600ms ease-out, delay 800ms */}
-          <StackedPill word="Verified" index={2} delay={800} />
+          {/* Card 1 "Qualified": delay 0ms */}
+          <StatementCard word="Qualified" index={0} delay={0} />
+          {/* Card 2 "Recognized": delay 350ms */}
+          <StatementCard word="Recognized" index={1} delay={350} />
+          {/* Card 3 "Verified": delay 700ms */}
+          <StatementCard word="Verified" index={2} delay={700} />
         </div>
       )}
 
