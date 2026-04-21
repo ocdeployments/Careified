@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { UserButton, useAuth } from '@clerk/nextjs'
+import BrandLogo from '../BrandLogo'
 
 // ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
@@ -142,31 +143,7 @@ export default function Navbar() {
           className="focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{
-              color: '#E8B86D',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              marginTop: '1px'
-            }}>✓</span>
-            <div>
-              <div style={{
-                fontFamily: 'DM Serif Display, serif',
-                fontSize: '1.3rem',
-                letterSpacing: '0.04em',
-                color: '#F7F4F0',
-                lineHeight: 1
-              }}>
-                CARE<span style={{ color: '#E8B86D' }}>IFIED</span>
-              </div>
-              <div style={{
-                height: '1.5px',
-                width: '60%',
-                background: 'linear-gradient(90deg, #C9973A, transparent)',
-                marginTop: '2px'
-              }} />
-            </div>
-          </div>
+          <BrandLogo size="sm" />
         </Link>
 
         {/* Desktop nav links */}
