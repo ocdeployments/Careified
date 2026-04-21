@@ -139,10 +139,34 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="font-serif text-xl font-bold text-white tracking-tight focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
+          className="focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
-          Careified
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{
+              color: '#E8B86D',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              marginTop: '1px'
+            }}>✓</span>
+            <div>
+              <div style={{
+                fontFamily: 'DM Serif Display, serif',
+                fontSize: '1.3rem',
+                letterSpacing: '0.04em',
+                color: '#F7F4F0',
+                lineHeight: 1
+              }}>
+                CARE<span style={{ color: '#E8B86D' }}>IFIED</span>
+              </div>
+              <div style={{
+                height: '1.5px',
+                width: '60%',
+                background: 'linear-gradient(90deg, #C9973A, transparent)',
+                marginTop: '2px'
+              }} />
+            </div>
+          </div>
         </Link>
 
         {/* Desktop nav links */}
