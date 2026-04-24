@@ -1,29 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { UserCheck, Search, Shield } from 'lucide-react'
-import IntroAnimation from '@/components/IntroAnimation'
 
 export default function HomePage() {
-  const [introComplete, setIntroComplete] = useState(false)
-
   return (
-    <>
-      {/* Intro animation — fixed overlay, z-index 100 */}
-      {!introComplete && (
-        <IntroAnimation onComplete={() => setIntroComplete(true)} />
-      )}
-
-      {/* Landing page — pre-renders beneath intro, fades in on complete */}
-      <div
-        style={{
-          opacity: introComplete ? 1 : 0,
-          pointerEvents: introComplete ? 'auto' : 'none',
-          transition: introComplete ? 'opacity 0.8s ease' : 'none',
-        }}
-        className="font-sans bg-[#F7F4F0]"
-      >
+    <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
         <section className="relative bg-[#0D1B3E] pt-20 pb-[72px] px-6 overflow-hidden">
@@ -225,7 +207,6 @@ export default function HomePage() {
             </nav>
           </div>
         </footer>
-      </div>
-    </>
+    </div>
   )
 }
