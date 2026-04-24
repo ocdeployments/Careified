@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { UserCheck, Search, Shield } from 'lucide-react'
+import HeroAnimation from '@/components/HeroAnimation'
 
 export default function HomePage() {
   return (
     <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
-        <section className="relative bg-[#0D1B3E] pt-20 pb-[72px] px-6 overflow-hidden">
+        <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#0D1B3E]">
           {/* Grid overlay */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -20,32 +21,22 @@ export default function HomePage() {
             }}
           />
 
-          <div className="relative max-w-[960px] mx-auto z-[2]">
-            {/* Badge */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-[14px] py-[5px] mb-7"
-              style={{ background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.2)' }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C9973A]" aria-hidden="true" />
-              <span className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#C9973A]">
-                Caregiving&apos;s trust layer
-              </span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="font-serif text-[58px] leading-[1.0] tracking-tight text-white mb-1.5">
-              Verified reputations.
-            </h1>
-            <h1 className="font-serif text-[58px] leading-[1.0] tracking-tight text-[#C9973A] italic mb-6">
-              Built on real work.
-            </h1>
-
-            {/* Subtext */}
-            <p className="text-[15px] text-white/70 leading-[1.7] max-w-[480px] mb-12 font-light">
+          <div className="relative w-full max-w-4xl mx-auto aspect-video flex items-center justify-center">
+            <HeroAnimation />
+          </div>
+          <div 
+            className="relative z-10 text-center px-6 mt-8 opacity-0 animate-fadeInUp"
+            style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}
+          >
+            <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
               The platform where caregivers earn credibility and agencies hire with confidence.
             </p>
+          </div>
+        </section>
 
-            {/* Feature cards */}
+        {/* Feature cards */}
+        <section className="bg-[#0D1B3E] px-6 pb-[72px]">
+          <div className="max-w-[960px] mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[700px]">
               {/* Agencies */}
               <div

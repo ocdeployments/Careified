@@ -36,6 +36,15 @@ const config: Config = {
         'sidebar': '220px 1fr',
         'sidebar-collapsed': '56px 1fr',
       },
+      animation: {
+        fadeInUp: 'fadeInUp 0.8s ease forwards',
+      },
+      keyframes: {
+        fadeInUp: {
+          from: { opacity: '0', transform: 'translateY(20px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [],
