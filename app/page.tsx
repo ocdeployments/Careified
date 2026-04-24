@@ -2,35 +2,44 @@
 
 import Link from 'next/link'
 import { UserCheck, Search, Shield } from 'lucide-react'
-import HeroAnimation from '@/components/HeroAnimation'
 
 export default function HomePage() {
   return (
     <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#0D1B3E]">
-          {/* Grid overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden="true"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(201,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,151,58,0.04) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-            }}
-          />
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#0D1B3E]">
+          <div className="text-center max-w-3xl mx-auto">
+            
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/careified-logo.svg" 
+                alt="Careified" 
+                className="h-20 w-auto"
+              />
+            </div>
 
-          <div className="relative w-full max-w-4xl mx-auto aspect-video flex items-center justify-center">
-            <HeroAnimation />
-          </div>
-          <div 
-            className="relative z-10 text-center px-6 mt-8 opacity-0 animate-fadeInUp"
-            style={{ animationDelay: '2000ms', animationFillMode: 'forwards' }}
-          >
-            <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+            {/* Headline */}
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Verified reputations.<br />Built on real work.
+            </h1>
+
+            {/* Tagline */}
+            <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-10">
               The platform where caregivers earn credibility and agencies hire with confidence.
             </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="/agency" className="px-8 py-3 bg-[#C9A84C] text-[#0D1B3E] font-semibold rounded-lg hover:bg-[#b8973b] transition-colors">
+                Start Hiring →
+              </a>
+              <a href="/for-caregivers" className="px-8 py-3 border border-[#C9A84C] text-[#C9A84C] font-semibold rounded-lg hover:bg-[#C9A84C]/10 transition-colors">
+                Build Free Profile →
+              </a>
+            </div>
+
           </div>
         </section>
 
@@ -153,13 +162,13 @@ export default function HomePage() {
                 href="/sign-up?role=agency"
                 className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-br from-[#C9973A] to-[#E8B86D] text-[#0D1B3E] text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
               >
-                I&apos;m an agency
+                I'm an agency
               </Link>
               <Link
                 href="/sign-up?role=caregiver"
                 className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white/10 border border-white/30 text-white text-sm font-medium hover:bg-white/20 transition-all focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
               >
-                I&apos;m a caregiver — it&apos;s free
+                I'm a caregiver — it's free
               </Link>
             </div>
           </div>
