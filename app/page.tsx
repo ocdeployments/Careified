@@ -2,90 +2,77 @@
 
 import Link from 'next/link'
 import { UserCheck, Search, Shield } from 'lucide-react'
+import LandingAnimation from '@/components/LandingAnimation'
 
 export default function HomePage() {
   return (
     <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#0D1B3E]">
-          <div className="text-center max-w-3xl mx-auto">
-            
-            {/* Logo */}
-            <div className="flex justify-center mb-8">
-              <img 
-                src="/careified-logo.svg" 
-                alt="Careified" 
-                className="h-20 w-auto"
-              />
-            </div>
+        <section className="relative min-h-[80vh] flex flex-col items-center justify-center px-6 bg-[#0D1B3E] pt-24 pb-16">
 
-            {/* Headline */}
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Verified reputations.<br />Built on real work.
-            </h1>
-
-            {/* Tagline */}
-            <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-              The platform where caregivers earn credibility and agencies hire with confidence.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/agency" className="px-8 py-3 bg-[#C9A84C] text-[#0D1B3E] font-semibold rounded-lg hover:bg-[#b8973b] transition-colors">
-                Start Hiring →
-              </a>
-              <a href="/for-caregivers" className="px-8 py-3 border border-[#C9A84C] text-[#C9A84C] font-semibold rounded-lg hover:bg-[#C9A84C]/10 transition-colors">
-                Build Free Profile →
-              </a>
-            </div>
-
+          {/* Inline animation — plays once on load, stays visible */}
+          <div className="w-full max-w-lg mx-auto mb-16 flex items-center justify-center">
+            <LandingAnimation />
           </div>
-        </section>
 
-        {/* Feature cards */}
-        <section className="bg-[#0D1B3E] px-6 pb-[72px]">
-          <div className="max-w-[960px] mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[700px]">
-              {/* Agencies */}
-              <div
-                className="relative p-5 rounded-[14px] overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-800 to-blue-500" />
-                <div className="text-[13px] font-semibold text-white mb-1">For Agencies</div>
-                <div className="text-[11px] text-white/70 leading-[1.5] mb-3.5">Search verified profiles.</div>
-                <Link href="/sign-up?role=agency" className="text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors">
-                  Start hiring →
-                </Link>
+          {/* Audience cards — Caregivers, Agencies, Families */}
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            {/* Card 1 — For Caregivers */}
+            <a
+              href="/for-caregivers"
+              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
+            >
+              {/* Default visible content */}
+              <div className="transition-all duration-300 group-hover:-translate-y-2">
+                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Caregivers</p>
+                <h3 className="text-white text-2xl font-bold mb-2">Free. Always.<br />Build once.</h3>
+                <span className="text-[#C9A84C] text-sm font-medium">Build free profile →</span>
               </div>
 
-              {/* Caregivers */}
-              <div
-                className="relative p-5 rounded-[14px] overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#C9973A] to-[#E8B86D]" />
-                <div className="text-[13px] font-semibold text-white mb-1">For Caregivers</div>
-                <div className="text-[11px] text-white/70 leading-[1.5] mb-3.5">Free. Always. Build once.</div>
-                <Link href="/sign-up?role=caregiver" className="text-[11px] font-bold text-[#C9973A] hover:text-[#E8B86D] transition-colors">
-                  Build free profile →
-                </Link>
+              {/* Hover reveal message — slides up from bottom */}
+              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Build your verified professional profile once. Let your reputation speak for you across every agency you work with.
+                </p>
               </div>
+            </a>
 
-              {/* Families */}
-              <div
-                className="relative p-5 rounded-[14px] overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-700 to-amber-500" />
-                <div className="text-[13px] font-semibold text-white mb-1">For Families</div>
-                <div className="text-[11px] text-white/70 leading-[1.5] mb-3.5">Know who is caring.</div>
-                <Link href="/for-families" className="text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors">
-                  Learn more →
-                </Link>
+            {/* Card 2 — For Agencies */}
+            <a
+              href="/agency"
+              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
+            >
+              <div className="transition-all duration-300 group-hover:-translate-y-2">
+                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Agencies</p>
+                <h3 className="text-white text-2xl font-bold mb-2">Search verified<br />profiles.</h3>
+                <span className="text-[#C9A84C] text-sm font-medium">Start hiring →</span>
               </div>
-            </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Stop hiring blind. Search caregivers by match score, credentials, and verified placement history — all in one place.
+                </p>
+              </div>
+            </a>
+
+            {/* Card 3 — For Families */}
+            <a
+              href="/families"
+              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
+            >
+              <div className="transition-all duration-300 group-hover:-translate-y-2">
+                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Families</p>
+                <h3 className="text-white text-2xl font-bold mb-2">Know who<br />is caring.</h3>
+                <span className="text-[#C9A84C] text-sm font-medium">Learn more →</span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Make confident care decisions. Access verified caregiver profiles with real credentials, ratings, and placement history.
+                </p>
+              </div>
+            </a>
+
           </div>
         </section>
 
