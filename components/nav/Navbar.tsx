@@ -56,17 +56,6 @@ function AuthButton() {
 
 // ── Dropdown panel data ───────────────────────────────────────────────────────
 const panels = {
-  agencies: {
-    accent: '#2563EB',
-    title: 'For Agencies',
-    desc: 'Find, vet, and place caregivers faster with AI-powered matching.',
-    links: [
-      { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
-      { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
-      { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
-    ],
-    cta: { href: '/agency/signup', label: 'Start as an agency' },
-  },
   caregivers: {
     accent: '#C9973A',
     title: 'For Caregivers',
@@ -77,6 +66,17 @@ const panels = {
       { href: '/for-caregivers',   label: 'How it works',          desc: 'See the caregiver journey'    },
     ],
     cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
+  },
+  agencies: {
+    accent: '#2563EB',
+    title: 'For Agencies',
+    desc: 'Find, vet, and place caregivers faster with AI-powered matching.',
+    links: [
+      { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
+      { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
+      { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
+    ],
+    cta: { href: '/agency/signup', label: 'Start as an agency' },
   },
   families: {
     accent: '#16A34A',
