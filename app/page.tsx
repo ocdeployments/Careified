@@ -1,79 +1,144 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { UserCheck, Search, Shield } from 'lucide-react'
-import LandingAnimation from '@/components/LandingAnimation'
+
+const cardData = [
+  {
+    id: 'caregivers',
+    label: 'For Caregivers',
+    headline: 'Free. Always. Build once.',
+    cta: 'Build free profile →',
+    href: '/for-caregivers',
+    popup: {
+      hook: "You don't need another app.",
+      sub: "You need a platform that sees you, values you, and treats you like the professional you are.",
+      follow: "CareShepherds is built for caregivers who are done being invisible.",
+      cta: 'Start your free profile',
+      ctaHref: '/for-caregivers',
+    }
+  },
+  {
+    id: 'agencies',
+    label: 'For Agencies',
+    headline: 'Search verified profiles.',
+    cta: 'Start hiring →',
+    href: '/agency',
+    popup: {
+      hook: "Stop hiring blind.",
+      sub: "Every caregiver on Careified has a verified record — credentials, placements, and peer ratings you can trust.",
+      follow: "Make confident hiring decisions from day one.",
+      cta: 'Start searching now',
+      ctaHref: '/agency',
+    }
+  },
+  {
+    id: 'families',
+    label: 'For Families',
+    headline: 'Know who is caring.',
+    cta: 'Learn more →',
+    href: '/families',
+    popup: {
+      hook: "Your family deserves more than a resume.",
+      sub: "See real credentials, verified work history, and ratings from other families — before you decide.",
+      follow: "Because who cares for your family matters more than anything.",
+      cta: 'Find a caregiver',
+      ctaHref: '/families',
+    }
+  }
+]
 
 export default function HomePage() {
+  const [activeCard, setActiveCard] = useState<string | null>(null)
+
   return (
     <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
-        <section className="relative min-h-[80vh] flex flex-col items-center justify-center px-6 bg-[#0D1B3E] pt-24 pb-16">
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#0D1B3E] pt-24 pb-20">
 
-          {/* Inline animation — plays once on load, stays visible */}
-          <div className="w-full max-w-lg mx-auto mb-16 flex items-center justify-center">
-            <LandingAnimation />
+          {/* Logo — large, centered, impactful */}
+          <div className="mb-16 flex justify-center">
+            <img
+              src="/careified-logo.svg"
+              alt="Careified — Qualified. Recognized. Verified."
+              className="h-28 md:h-36 w-auto"
+            />
           </div>
 
-          {/* Audience cards — Caregivers, Agencies, Families */}
-          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Cards row — with hover popup */}
+          <div className="relative w-full max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {cardData.map((card) => (
+                <div
+                  key={card.id}
+                  className="relative group"
+                  onMouseEnter={() => setActiveCard(card.id)}
+                  onMouseLeave={() => setActiveCard(null)}
+                >
+                  {/* Main card */}
+                  <a
+                    href={card.href}
+                    className="block bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[200px] flex flex-col justify-between transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(201,168,76,0.15)]"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <div>
+                      <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-4">
+                        {card.label}
+                      </p>
+                      <h3 className="text-white text-xl font-bold mb-4 leading-snug">
+                        {card.headline}
+                      </h3>
+                    </div>
+                    <span className="text-[#C9A84C] text-sm font-medium">{card.cta}</span>
+                  </a>
 
-            {/* Card 1 — For Caregivers */}
-            <a
-              href="/for-caregivers"
-              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
-            >
-              {/* Default visible content */}
-              <div className="transition-all duration-300 group-hover:-translate-y-2">
-                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Caregivers</p>
-                <h3 className="text-white text-2xl font-bold mb-2">Free. Always.<br />Build once.</h3>
-                <span className="text-[#C9A84C] text-sm font-medium">Build free profile →</span>
-              </div>
+                  {/* Hover popup — appears to the right */}
+                  <div
+                    className={`
+                      absolute top-0 ${card.id === 'families' ? 'right-[calc(100%+16px)]' : 'left-[calc(100%+16px)]'} w-80 z-50
+                      bg-[#0A1628] border border-[#C9A84C]/40 rounded-2xl p-7
+                      shadow-[0_16px_48px_rgba(0,0,0,0.6)]
+                      backdrop-blur-sm
+                      transition-all duration-300 ease-out
+                      ${activeCard === card.id
+                        ? 'opacity-100 translate-x-0 pointer-events-auto'
+                        : 'opacity-0 -translate-x-2 pointer-events-none'
+                      }
+                    `}
+                  >
+                    {/* Gold accent line top */}
+                    <div className="w-8 h-0.5 bg-[#C9A84C] mb-5" />
 
-              {/* Hover reveal message — slides up from bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white/80 text-sm leading-relaxed">
-                  Build your verified professional profile once. Let your reputation speak for you across every agency you work with.
-                </p>
-              </div>
-            </a>
+                    {/* Hook headline */}
+                    <h4 className="text-white text-xl font-bold mb-3 leading-tight">
+                      {card.popup.hook}
+                    </h4>
 
-            {/* Card 2 — For Agencies */}
-            <a
-              href="/agency"
-              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
-            >
-              <div className="transition-all duration-300 group-hover:-translate-y-2">
-                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Agencies</p>
-                <h3 className="text-white text-2xl font-bold mb-2">Search verified<br />profiles.</h3>
-                <span className="text-[#C9A84C] text-sm font-medium">Start hiring →</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white/80 text-sm leading-relaxed">
-                  Stop hiring blind. Search caregivers by match score, credentials, and verified placement history — all in one place.
-                </p>
-              </div>
-            </a>
+                    {/* Sub-headline */}
+                    <p className="text-white/70 text-sm leading-relaxed mb-4">
+                      {card.popup.sub}
+                    </p>
 
-            {/* Card 3 — For Families */}
-            <a
-              href="/families"
-              className="group relative overflow-hidden bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[220px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-2 hover:shadow-[0_8px_32px_rgba(201,168,76,0.2)]"
-            >
-              <div className="transition-all duration-300 group-hover:-translate-y-2">
-                <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-3">For Families</p>
-                <h3 className="text-white text-2xl font-bold mb-2">Know who<br />is caring.</h3>
-                <span className="text-[#C9A84C] text-sm font-medium">Learn more →</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-[#C9A84C]/10 border-t border-[#C9A84C]/30 px-8 py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white/80 text-sm leading-relaxed">
-                  Make confident care decisions. Access verified caregiver profiles with real credentials, ratings, and placement history.
-                </p>
-              </div>
-            </a>
+                    {/* Follow-up line */}
+                    <p className="text-[#C9A84C]/80 text-xs leading-relaxed mb-6 italic">
+                      {card.popup.follow}
+                    </p>
 
+                    {/* CTA button */}
+                    <a
+                      href={card.popup.ctaHref}
+                      className="inline-block w-full text-center px-5 py-3 bg-[#C9A84C] text-[#0D1B3E] text-sm font-bold rounded-lg hover:bg-[#b8973b] transition-colors"
+                    >
+                      {card.popup.cta}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
         </section>
 
         {/* ── Stats bar (very dark) ── */}
