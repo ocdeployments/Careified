@@ -13,6 +13,12 @@ type Card = {
   statLabel: string
   image: string
   imageAlt: string
+  popup: {
+    hook: string
+    sub: string
+    follow: string
+    cta: string
+  }
 }
 
 const CARDS: Card[] = [
@@ -26,6 +32,12 @@ const CARDS: Card[] = [
     statLabel: 'jobs by 2034',
     image: '/images/caregivers-hero.jpg',
     imageAlt: 'Professional caregivers',
+    popup: {
+      hook: "You don't need another app.",
+      sub: 'You need a platform that sees you, values you, and treats you like the professional you are.',
+      follow: 'Careified is built for caregivers who are done being invisible.',
+      cta: 'Claim your profile — free',
+    },
   },
   {
     id: 'agencies',
@@ -37,6 +49,12 @@ const CARDS: Card[] = [
     statLabel: 'annual turnover',
     image: '/images/agencies-hero.jpg',
     imageAlt: 'Agency staff in conversation',
+    popup: {
+      hook: 'Stop hiring blind.',
+      sub: 'Every caregiver has a verified record — credentials, placements, and peer ratings you can review.',
+      follow: 'Make confident hiring decisions from day one.',
+      cta: 'See how it works',
+    },
   },
   {
     id: 'families',
@@ -48,6 +66,12 @@ const CARDS: Card[] = [
     statLabel: 'cities live',
     image: '/images/families-hero.jpg',
     imageAlt: 'Caregiver with senior client',
+    popup: {
+      hook: 'Your family deserves more than a resume.',
+      sub: 'See real credentials, verified work history, and ratings from other families.',
+      follow: 'Because who cares for your family matters more than anything.',
+      cta: 'Tell us what you need',
+    },
   },
 ]
 
@@ -182,6 +206,7 @@ function PhotoCard({
   total: number
 }) {
   const [active, setActive] = useState(false)
+  const popupOnLeft = index === total - 1
 
   return (
     <div
@@ -326,6 +351,94 @@ function PhotoCard({
           </div>
         </div>
       </a>
+
+      {/* Side popup — desktop only */}
+      <div
+        className="absolute top-1/2 z-30 hidden w-[340px] -translate-y-1/2 md:block"
+        style={{
+          left: popupOnLeft ? 'auto' : 'calc(100% + 16px)',
+          right: popupOnLeft ? 'calc(100% + 16px)' : 'auto',
+          opacity: active ? 1 : 0,
+          transform: `translateY(-50%) translateX(${
+            active ? '0' : popupOnLeft ? '10px' : '-10px'
+          })`,
+          transition:
+            'opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: active ? 'auto' : 'none',
+        }}
+      >
+        <div
+          className="relative rounded-2xl p-7"
+          style={{
+            background: CREAM,
+            color: NAVY,
+            boxShadow: `0 40px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px ${GOLD}33`,
+          }}
+        >
+          <div
+            className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rotate-45"
+            style={{
+              background: CREAM,
+              left: popupOnLeft ? 'auto' : '-6px',
+              right: popupOnLeft ? '-6px' : 'auto',
+            }}
+          />
+
+          <div
+            className="text-[10px] font-medium uppercase tracking-[0.28em]"
+            style={{ color: GOLD }}
+          >
+            {card.label}
+          </div>
+
+          <div
+            className="mt-3 leading-[1.15]"
+            style={{
+              fontFamily:
+                "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+              fontSize: '22px',
+              fontWeight: 400,
+              fontStyle: 'italic',
+              color: NAVY,
+            }}
+          >
+            &ldquo;{card.popup.hook}&rdquo;
+          </div>
+
+          <p className="mt-3 text-[13px] leading-[1.6]" style={{ color: '#475569' }}>
+            {card.popup.sub}
+          </p>
+
+          <p className="mt-3 text-[12px] leading-[1.6]" style={{ color: '#64748B' }}>
+            {card.popup.follow}
+          </p>
+
+          <div
+            className="mt-5 h-[1px] w-full"
+            style={{ background: 'rgba(13,27,62,0.08)' }}
+          />
+
+          <a
+            href={card.href}
+            className="mt-5 flex items-center justify-between rounded-xl px-5 py-3 text-[12px] font-medium uppercase tracking-[0.14em] transition-opacity hover:opacity-90"
+            style={{
+              background: NAVY,
+              color: CREAM,
+            }}
+          >
+            {card.popup.cta}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M1 7H13M13 7L7 1M13 7L7 13"
+                stroke={GOLD}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
