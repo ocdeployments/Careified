@@ -102,14 +102,14 @@ export default function CareifiedHero() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 'clamp(320px, 55vw, 700px)',
+          width: 'clamp(180px, 28vw, 340px)',
           pointerEvents: 'none',
           userSelect: 'none',
           zIndex: 0,
         }}
       >
         <img
-          src="/careified-logo.svg"
+          src="/Careified-logo.png"
           alt=""
           style={{
             width: '100%',
