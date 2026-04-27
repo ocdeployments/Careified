@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 
 type Card = {
   id: 'caregivers' | 'agencies' | 'families'
@@ -11,6 +12,8 @@ type Card = {
   stat: string
   statLabel: string
   gradient: string
+  image: string
+  imageAlt: string
   popup: {
     hook: string
     sub: string
@@ -29,6 +32,8 @@ const CARDS: Card[] = [
     stat: '9.7M',
     statLabel: 'jobs by 2034',
     gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0F1F3D 45%, #1A1530 100%)',
+    image: '/images/caregivers-hero.jpg',
+    imageAlt: 'Professional caregivers',
     popup: {
       hook: "You don't need another app.",
       sub: 'You need a platform that sees you, values you, and treats you like the professional you are.',
@@ -45,6 +50,8 @@ const CARDS: Card[] = [
     stat: '75%',
     statLabel: 'annual turnover',
     gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0C1A38 50%, #0A1628 100%)',
+    image: '/images/agencies-hero.jpg',
+    imageAlt: 'Agency staff in conversation',
     popup: {
       hook: 'Stop hiring blind.',
       sub: 'Every caregiver has a verified record — credentials, placements, and peer ratings you can review.',
@@ -61,6 +68,8 @@ const CARDS: Card[] = [
     stat: '15+',
     statLabel: 'cities live',
     gradient: 'linear-gradient(160deg, #0D1B3E 0%, #13203F 45%, #1D1A30 100%)',
+    image: '/images/families-hero.jpg',
+    imageAlt: 'Caregiver with senior client',
     popup: {
       hook: 'Your family deserves more than a resume.',
       sub: 'See real credentials, verified work history, and ratings from other families.',
@@ -252,6 +261,43 @@ function AccordionCard({
           'flex 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease, border-color 300ms ease, box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
+      {/* Photo */}
+      <Image
+        src={card.image}
+        alt={card.imageAlt}
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
+        className="object-cover"
+        style={{
+          opacity: isActive ? 0.55 : isDimmed ? 0.2 : 0.35,
+          transition: 'opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        priority={index === 0}
+      />
+
+      {/* Gradient scrim */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: isActive
+            ? 'linear-gradient(180deg, rgba(13,27,62,0.35) 0%, rgba(13,27,62,0.55) 50%, rgba(13,27,62,0.92) 100%)'
+            : 'linear-gradient(180deg, rgba(13,27,62,0.55) 0%, rgba(13,27,62,0.75) 50%, rgba(13,27,62,0.95) 100%)',
+          transition: 'background 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      />
+
+      {/* Top gold hairline */}
+      <div
+        className="absolute left-0 right-0 top-0"
+        style={{
+          height: '1px',
+          background: `linear-gradient(90deg, transparent, ${GOLD_SOFT}, transparent)`,
+          opacity: isActive ? 1 : 0.4,
+          transition: 'opacity 500ms ease',
+        }}
+      />
+
+      {/* Vertical label */}
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
@@ -263,19 +309,21 @@ function AccordionCard({
           style={{
             transform: 'rotate(-90deg)',
             whiteSpace: 'nowrap',
-            fontSize: '0.62rem',
-            fontWeight: 700,
-            letterSpacing: '0.22em',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            letterSpacing: '0.32em',
             textTransform: 'uppercase',
             color: GOLD,
+            textShadow: '0 2px 12px rgba(0,0,0,0.5)',
           }}
         >
           {card.label}
         </span>
       </div>
 
+      {/* Expanded content */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-10"
         style={{
           opacity: isActive ? 1 : 0,
           transition: 'opacity 500ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -458,6 +506,25 @@ function MobileCardStack() {
             border: '1px solid rgba(245, 240, 232, 0.08)',
           }}
         >
+          {/* Photo */}
+          <Image
+            src={card.image}
+            alt={card.imageAlt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            style={{ opacity: 0.4 }}
+          />
+
+          {/* Gradient scrim */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(13,27,62,0.45) 0%, rgba(13,27,62,0.7) 50%, rgba(13,27,62,0.95) 100%)',
+            }}
+          />
+
           <div className="absolute left-6 top-6">
             <div
               style={{
