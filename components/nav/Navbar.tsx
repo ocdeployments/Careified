@@ -143,7 +143,15 @@ export default function Navbar() {
           className="focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
-          <BrandLogo size="sm" />
+          <img
+            src="/Careified-logo.png"
+            alt="Careified"
+            style={{
+              height: '38px',
+              width: 'auto',
+              display: 'block',
+            }}
+          />
         </Link>
 
         {/* Desktop nav links */}
