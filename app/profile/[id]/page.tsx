@@ -66,51 +66,57 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  const tierColor = caregiver.profile_completion_pct >= 80 ? '#1E3A8A' : caregiver.profile_completion_pct >= 60 ? '#16A34A' : caregiver.profile_completion_pct >= 40 ? '#64748B' : '#94A3B8'
  const tierLabel = caregiver.profile_completion_pct >= 80 ? 'Professional' : caregiver.profile_completion_pct >= 60 ? 'Profile Complete' : caregiver.profile_completion_pct >= 40 ? 'Basic' : 'Incomplete'
 
- return (
- <div className="min-h-screen" style={{ backgroundColor: '#F7F4F0' }}>
-  {/* Top bar */}
-  <div className="bg-[#0D1B3E] px-6 py-3">
-   <div className="max-w-6xl mx-auto flex items-center gap-2">
- <a href="/agency/search" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>Search</a>
- <ChevronRight size={14} color="rgba(255,255,255,0.3)" />
- <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>{displayName}</span>
- </div>
- </div>
- <div style={{ backgroundColor: '#0D1B3E', paddingBottom: '48px' }}>
- <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px 0' }}>
- <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
- <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 900, color: '#0D1B3E', flexShrink: 0 }}>
- {caregiver.photo_url ? <img src={caregiver.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
- </div>
- <div style={{ flex: 1, minWidth: '200px' }}>
- <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
- <h1 style={{ fontSize: '24px', fontWeight: 900, color: 'white', margin: 0 }}>{displayName}</h1>
- {caregiver.open_to_urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(251,146,60,0.15)', color: '#FB923C' }}><Zap size={11} /> Urgent</span>}
- </div>
- {caregiver.job_title && <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 12px' }}>{caregiver.job_title}</p>}
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
- <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><MapPin size={14} /> {caregiver.city}, {caregiver.state}</span>
- <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Briefcase size={14} /> {caregiver.years_experience} yrs</span>{attributes.years_experience && <span style={{ marginLeft: 4 }}><TierBadge tier={tierFromMultiplier(attributes.years_experience.tier)} /></span>}
- {caregiver.clients_served_count > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Users size={14} /> {caregiver.clients_served_count} clients</span>}
- <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: availabilityColor, fontWeight: 600 }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: availabilityColor }} />{availabilityLabel}</span>
- </div>
- </div>
- <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '20px', minWidth: '160px', textAlign: 'center' }}>
- {caregiver.aggregate_score > 0 ? (<><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Star size={20} fill="#C9973A" color="#C9973A" /><span style={{ fontSize: '28px', fontWeight: 900, color: 'white' }}>{parseFloat(caregiver.aggregate_score).toFixed(1)}</span></div><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '0' }}>{caregiver.rating_count} reviews</p></>) : <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '0' }}>New</p>}
- <div style={{ fontSize: '11px', fontWeight: 700, color: tierColor, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '8px', padding: '4px 10px', marginTop: '8px' }}>{tierLabel}</div>
- </div>
- </div>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '24px' }}>
- {caregiver.willing_live_in && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(139,92,246,0.15)', color: '#A78BFA' }}><Home size={12} /> Live-in</span>}
- {caregiver.has_vehicle && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}><Car size={12} /> Vehicle</span>}
- {(caregiver.languages || []).length > 0 && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}><Globe size={12} />{(caregiver.languages || []).slice(0,2).join(',')}</span>}
- </div>
- </div>
- </div>
+  return (
+  <div className="min-h-screen" style={{ backgroundColor: '#F5F3EE' }}>
+   {/* Top bar */}
+   <div className="bg-[#0D1B3E] px-6 py-3">
+    <div className="max-w-6xl mx-auto flex items-center gap-2">
+  <a href="/agency/search" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration: 'none' }}>Search</a>
+  <ChevronRight size={14} color="rgba(255,255,255,0.3)" />
+  <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>{displayName}</span>
+  </div>
+  </div>
+  <div style={{ backgroundColor: '#0D1B3E', position: 'relative', overflow: 'hidden', paddingTop: '48px', paddingBottom: '48px' }}>
+    {/* Grain texture overlay */}
+    <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'1\'/%3E%3C/svg%3E")', opacity: 0.04, pointerEvents: 'none', zIndex: 0 }} />
+    {/* Gold glow behind avatar */}
+    <div style={{ position: 'absolute', top: '-60px', left: '-60px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(201,151,58,0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+  <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px 0', position: 'relative', zIndex: 1 }}>
+  <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+  <div style={{ width: '96px', height: '96px', borderRadius: '50%', padding: '3px', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', flexShrink: 0 }}>
+    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#1a2a4a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {caregiver.photo_url ? <img src={caregiver.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '28px', fontWeight: 900, color: '#F5F0E8' }}>{initials}</span>}
+    </div>
+  </div>
+  <div style={{ flex: 1, minWidth: '200px' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+  <h1 style={{ fontFamily: "'DM Serif Display', 'Georgia', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.01em', color: '#F5F0E8', margin: 0 }}>{displayName}</h1>
+  {caregiver.open_to_urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(251,146,60,0.15)', color: '#FB923C' }}><Zap size={11} /> Urgent</span>}
+  </div>
+  {caregiver.job_title && <p style={{ color: '#C9973A', fontStyle: 'italic', fontSize: '0.95rem', letterSpacing: '0.02em', margin: '0 0 12px' }}>{caregiver.job_title}</p>}
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><MapPin size={14} /> {caregiver.city}, {caregiver.state}</span>
+  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Briefcase size={14} /> {caregiver.years_experience} yrs</span>{attributes.years_experience && <span style={{ marginLeft: 4 }}><TierBadge tier={tierFromMultiplier(attributes.years_experience.tier)} /></span>}
+  {caregiver.clients_served_count > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}><Users size={14} /> {caregiver.clients_served_count} clients</span>}
+  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: availabilityColor, fontWeight: 600 }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: availabilityColor }} />{availabilityLabel}</span>
+  </div>
+  </div>
+  <div style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(201,151,58,0.25)', borderRadius: '12px', padding: '12px 20px', minWidth: '160px', textAlign: 'center' }}>
+  {caregiver.aggregate_score > 0 ? (<><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Star size={20} fill="#C9973A" color="#C9973A" /><span style={{ fontSize: '28px', fontWeight: 900, color: 'white' }}>{parseFloat(caregiver.aggregate_score).toFixed(1)}</span></div><p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '0' }}>{caregiver.rating_count} reviews</p></>) : <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: '0' }}>New</p>}
+  <div style={{ fontSize: '11px', fontWeight: 700, color: tierColor, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '8px', padding: '4px 10px', marginTop: '8px' }}>{tierLabel}</div>
+  </div>
+  </div>
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '24px' }}>
+  {caregiver.willing_live_in && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(139,92,246,0.15)', color: '#A78BFA' }}><Home size={12} /> Live-in</span>}
+  {caregiver.has_vehicle && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}><Car size={12} /> Vehicle</span>}
+  {(caregiver.languages || []).length > 0 && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}><Globe size={12} />{(caregiver.languages || []).slice(0,2).join(',')}</span>}
+  </div>
+  </div>
+  </div>
  <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
  {caregiver.bio && <Section title="About"><p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, margin: 0 }}>{caregiver.bio}</p></Section>}
- {(caregiver.specializations || []).length > 0 && <Section title="Specialties">{attributes.specializations && <TierBadge tier={tierFromMultiplier(attributes.specializations.tier)} />}<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{(caregiver.specializations || []).map((s: string, i: number) => <span key={i} style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1E3A8A' }}>{s}</span>)}</div></Section>}
+ {(caregiver.specializations || []).length > 0 && <Section title="Specialties">{attributes.specializations && <TierBadge tier={tierFromMultiplier(attributes.specializations.tier)} />}<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{(caregiver.specializations || []).map((s: string, i: number) => <span key={i} style={{ fontSize: '0.82rem', fontWeight: 500, padding: '4px 14px', borderRadius: '9999px', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', color: '#0D1B3E' }}>{s}</span>)}</div></Section>}
  {(caregiver.services || []).length > 0 && <Section title="Services"><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>{(caregiver.services || []).map((s: string, i: number) => <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569' }}><CheckCircle size={14} color="#16A34A" />{s}</div>)}</div></Section>}
  
  {/* Work History Accordion */}
@@ -189,8 +195,8 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  </div>
  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
  <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
-  <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#0D1B3E', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', border: 'none', cursor: 'pointer', marginBottom: '10px' }}>Shortlist</button>
-  <button style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#1E3A8A', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', cursor: 'pointer', marginBottom: '10px' }}>Request Contact</button>
+  <button style={{ width: '100%', padding: '14px 24px', borderRadius: '9999px', fontSize: '14px', fontWeight: 600, letterSpacing: '0.03em', color: '#0D1B3E', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', border: 'none', cursor: 'pointer', marginBottom: '10px', boxShadow: '0 4px 16px rgba(201,151,58,0.3)' }}>Shortlist</button>
+  <button style={{ width: '100%', padding: '14px 24px', borderRadius: '9999px', fontSize: '14px', fontWeight: 600, letterSpacing: '0.03em', color: '#C9973A', background: 'transparent', border: '2px solid #C9973A', cursor: 'pointer', marginBottom: '10px' }}>Request Contact</button>
   <a href={`/id/${caregiver.id}`} style={{ display: 'block', width: '100%', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#0D1B3E', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', cursor: 'pointer', textAlign: 'center', textDecoration: 'none' }}>🪪 View ID card</a>
  </div>
  <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
@@ -216,7 +222,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}><h3 style={{ fontSize: '14px', fontWeight: 800, color: '#0D1B3E', marginBottom: '16px' }}>{title}</h3>{children}</div> }
+function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid rgba(13,27,62,0.07)', padding: '24px', boxShadow: '0 2px 12px rgba(13,27,62,0.06)' }}><h3 style={{ borderLeft: '3px solid #C9973A', paddingLeft: '12px', color: '#0D1B3E', fontFamily: "'DM Serif Display', 'Georgia', serif", fontSize: '1.1rem', fontWeight: 400, marginBottom: '16px' }}>{title}</h3>{children}</div> }
 function InfoRow({ icon, label, value, valueColor }: { icon: React.ReactNode; label: string; value: string; valueColor?: string }) { return (
  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748B' }}>{icon} {label}</span>
