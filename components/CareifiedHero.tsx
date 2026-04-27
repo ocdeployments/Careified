@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 
 type Card = {
   id: 'caregivers' | 'agencies' | 'families'
@@ -11,8 +10,7 @@ type Card = {
   href: string
   stat: string
   statLabel: string
-  image: string
-  imageAlt: string
+  gradient: string
   popup: {
     hook: string
     sub: string
@@ -30,8 +28,7 @@ const CARDS: Card[] = [
     href: '/for-caregivers',
     stat: '9.7M',
     statLabel: 'jobs by 2034',
-    image: '/images/caregivers-hero.jpg',
-    imageAlt: 'Professional caregivers',
+    gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0F1F3D 45%, #1A1530 100%)',
     popup: {
       hook: "You don't need another app.",
       sub: 'You need a platform that sees you, values you, and treats you like the professional you are.',
@@ -47,8 +44,7 @@ const CARDS: Card[] = [
     href: '/for-agencies',
     stat: '75%',
     statLabel: 'annual turnover',
-    image: '/images/agencies-hero.jpg',
-    imageAlt: 'Agency staff in conversation',
+    gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0C1A38 50%, #0A1628 100%)',
     popup: {
       hook: 'Stop hiring blind.',
       sub: 'Every caregiver has a verified record — credentials, placements, and peer ratings you can review.',
@@ -64,8 +60,7 @@ const CARDS: Card[] = [
     href: '/for-families',
     stat: '15+',
     statLabel: 'cities live',
-    image: '/images/families-hero.jpg',
-    imageAlt: 'Caregiver with senior client',
+    gradient: 'linear-gradient(160deg, #0D1B3E 0%, #13203F 45%, #1D1A30 100%)',
     popup: {
       hook: 'Your family deserves more than a resume.',
       sub: 'See real credentials, verified work history, and ratings from other families.',
@@ -75,8 +70,8 @@ const CARDS: Card[] = [
   },
 ]
 
-const GOLD = '#C9973A'
-const GOLD_SOFT = 'rgba(201, 151, 58, 0.5)'
+const GOLD = '#C9A84C'
+const GOLD_SOFT = 'rgba(201, 168, 76, 0.5)'
 const NAVY = '#0D1B3E'
 const CREAM = '#F5F0E8'
 
@@ -169,11 +164,10 @@ export default function CareifiedHero() {
         </div>
 
         {/* Card grid */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-          {CARDS.map((card, idx) => (
-            <PhotoCard key={card.id} card={card} index={idx} total={CARDS.length} />
-          ))}
-        </div>
+        <>
+          <AccordionRow />
+          <MobileCardStack />
+        </>
 
         {/* Bottom ledger */}
         <div
@@ -196,111 +190,133 @@ export default function CareifiedHero() {
   )
 }
 
-function PhotoCard({
-  card,
-  index,
-  total,
-}: {
-  card: Card
-  index: number
-  total: number
-}) {
-  const [active, setActive] = useState(false)
-  const popupOnLeft = index === total - 1
+function AccordionRow() {
+  const [activeCard, setActiveCard] = useState<string | null>(null)
 
   return (
     <div
-      className="group relative"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
+      className="hidden md:flex w-full overflow-hidden rounded-2xl"
+      style={{ height: '420px', gap: '8px' }}
+      onMouseLeave={() => setActiveCard(null)}
     >
-      <a
-        href={card.href}
-        className="relative block h-[520px] overflow-hidden rounded-2xl"
+      {CARDS.map((card, idx) => (
+        <AccordionCard
+          key={card.id}
+          card={card}
+          index={idx}
+          isActive={activeCard === card.id}
+          isDimmed={activeCard !== null && activeCard !== card.id}
+          onEnter={() => setActiveCard(card.id)}
+          onLeave={() => setActiveCard(null)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function AccordionCard({
+  card,
+  index,
+  isActive,
+  isDimmed,
+  onEnter,
+  onLeave,
+}: {
+  card: Card
+  index: number
+  isActive: boolean
+  isDimmed: boolean
+  onEnter: () => void
+  onLeave: () => void
+}) {
+  const flexValue = isActive ? 2.8 : isDimmed ? 0.4 : 1
+
+  return (
+    <a
+      href={card.href}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      className="relative block overflow-hidden rounded-2xl"
+      style={{
+        flex: flexValue,
+        minWidth: '72px',
+        background: card.gradient,
+        border: isActive
+          ? `1px solid ${GOLD}`
+          : '1px solid rgba(245, 240, 232, 0.08)',
+        boxShadow: isActive
+          ? `0 30px 60px -15px rgba(0,0,0,0.6), 0 0 80px -20px ${GOLD}66`
+          : '0 12px 30px -12px rgba(0,0,0,0.4)',
+        opacity: isDimmed ? 0.5 : 1,
+        transition:
+          'flex 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease, border-color 300ms ease, box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+    >
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          border: active ? `1px solid ${GOLD}` : '1px solid rgba(245,240,232,0.08)',
-          boxShadow: active
-            ? `0 30px 60px -15px rgba(0,0,0,0.6), 0 0 60px -20px ${GOLD}66`
-            : '0 12px 30px -12px rgba(0,0,0,0.4)',
-          transform: active ? 'translateY(-8px)' : 'translateY(0)',
-          transition:
-            'transform 600ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease',
+          opacity: isActive ? 0 : 1,
+          transition: 'opacity 400ms ease',
         }}
       >
-        {/* Photo — luminous */}
-        <Image
-          src={card.image}
-          alt={card.imageAlt}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover"
+        <span
           style={{
-            opacity: active ? 0.95 : 0.78,
-            transform: active ? 'scale(1.04)' : 'scale(1.0)',
-            transition:
-              'opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-          priority={index === 0}
-        />
-
-        {/* Gradient scrim — dark bottom for legibility, transparent top */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(13,27,62,0.20) 0%, rgba(13,27,62,0.55) 55%, rgba(13,27,62,0.92) 100%)',
-          }}
-        />
-
-        {/* Large faded number — bottom-right corner */}
-        <div
-          className="pointer-events-none absolute select-none"
-          style={{
-            right: '-1%',
-            bottom: '-12%',
-            fontSize: 'clamp(200px, 22vw, 300px)',
-            fontWeight: 400,
-            lineHeight: 1,
-            letterSpacing: '-0.04em',
-            fontFamily: "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+            transform: 'rotate(-90deg)',
+            whiteSpace: 'nowrap',
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
             color: GOLD,
-            opacity: active ? 0.22 : 0.13,
-            transition: 'opacity 600ms ease',
-            mixBlendMode: 'screen',
           }}
-        >
-          {card.number}
-        </div>
-
-        {/* Top hairline */}
-        <div
-          className="absolute left-7 top-7 h-[1px] transition-all duration-500"
-          style={{
-            width: active ? '64px' : '24px',
-            background: GOLD,
-          }}
-        />
-
-        {/* Gold label */}
-        <div
-          className="absolute left-7 top-11 text-[10px] font-medium uppercase tracking-[0.28em]"
-          style={{ color: GOLD }}
         >
           {card.label}
+        </span>
+      </div>
+
+      <div
+        className="absolute inset-0"
+        style={{
+          opacity: isActive ? 1 : 0,
+          transition: 'opacity 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isActive ? 'auto' : 'none',
+        }}
+      >
+        <div className="absolute left-7 top-7">
+          <div
+            style={{
+              width: '32px',
+              height: '1px',
+              background: GOLD,
+              marginBottom: '12px',
+            }}
+          />
+          <div
+            style={{
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+              color: GOLD,
+            }}
+          >
+            {card.label}
+          </div>
         </div>
 
-        {/* Checkmark indicator top-right */}
         <div
-          className="absolute right-7 top-7 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500"
+          className="absolute right-7 top-7 flex items-center justify-center rounded-full transition-all duration-500"
           style={{
-            border: `1px solid ${active ? GOLD : `${GOLD}50`}`,
-            background: active ? GOLD : 'transparent',
+            width: '30px',
+            height: '30px',
+            border: `1px solid ${GOLD}`,
+            background: 'transparent',
           }}
         >
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path
-              d="M2 5.5L4.5 8L9 3"
-              stroke={active ? NAVY : GOLD}
+              d="M1 6H11M11 6L6 1M11 6L6 11"
+              stroke={GOLD}
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -308,137 +324,237 @@ function PhotoCard({
           </svg>
         </div>
 
-        {/* Headline bottom-left — over photo */}
-        <div className="absolute bottom-7 left-7 z-10 max-w-[78%]">
+        <div
+          className="pointer-events-none absolute select-none"
+          style={{
+            right: '-2%',
+            bottom: '-12%',
+            fontSize: '200px',
+            fontWeight: 400,
+            lineHeight: 1,
+            letterSpacing: '-0.04em',
+            fontFamily:
+              "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+            color: GOLD,
+            opacity: 0.12,
+          }}
+        >
+          {card.number}
+        </div>
+
+        <div
+          className="absolute z-10"
+          style={{
+            left: '28px',
+            bottom: '28px',
+            maxWidth: '70%',
+            transform: isActive ? 'translateY(-52px)' : 'translateY(0)',
+            transition: 'transform 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
           <div
             style={{
               fontFamily:
                 "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
-              fontSize: 'clamp(28px, 2.4vw, 36px)',
-              fontWeight: 400,
-              lineHeight: 1.05,
+              fontSize: 'clamp(2rem, 2.5vw, 3rem)',
+              fontWeight: 800,
+              lineHeight: 0.95,
               letterSpacing: '-0.02em',
               color: CREAM,
               whiteSpace: 'pre-line',
-              textShadow: '0 2px 24px rgba(0,0,0,0.5)',
             }}
           >
             {card.headline}
           </div>
         </div>
 
-        {/* Stat bottom-right */}
-        <div className="absolute bottom-7 right-7 z-10 text-right">
+        <div
+          className="absolute z-10 text-right"
+          style={{
+            right: '28px',
+            bottom: '28px',
+            opacity: isActive ? 0 : 1,
+            transition: 'opacity 400ms ease',
+          }}
+        >
           <div
             style={{
-              fontFamily:
-                "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
               color: GOLD,
-              fontSize: 'clamp(28px, 2.2vw, 36px)',
-              fontWeight: 400,
+              fontSize: '1.8rem',
+              fontWeight: 700,
               lineHeight: 1,
               letterSpacing: '-0.02em',
-              textShadow: '0 2px 12px rgba(0,0,0,0.5)',
+              fontFamily:
+                "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
             }}
           >
             {card.stat}
           </div>
           <div
-            className="mt-1 text-[10px] uppercase tracking-[0.2em]"
-            style={{ color: 'rgba(245,240,232,0.7)' }}
+            style={{
+              marginTop: '4px',
+              fontSize: '0.58rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              color: 'rgba(245, 240, 232, 0.5)',
+            }}
           >
             {card.statLabel}
           </div>
         </div>
-      </a>
 
-      {/* Side popup — desktop only */}
-      <div
-        className="absolute top-1/2 z-30 hidden w-[340px] -translate-y-1/2 md:block"
-        style={{
-          left: popupOnLeft ? 'auto' : 'calc(100% + 16px)',
-          right: popupOnLeft ? 'calc(100% + 16px)' : 'auto',
-          opacity: active ? 1 : 0,
-          transform: `translateY(-50%) translateX(${
-            active ? '0' : popupOnLeft ? '10px' : '-10px'
-          })`,
-          transition:
-            'opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-          pointerEvents: active ? 'auto' : 'none',
-        }}
-      >
         <div
-          className="relative rounded-2xl p-7"
+          className="absolute left-0 right-0 bottom-0 z-20"
           style={{
-            background: CREAM,
-            color: NAVY,
-            boxShadow: `0 40px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px ${GOLD}33`,
+            background:
+              'linear-gradient(to top, rgba(201, 168, 76, 0.15), transparent)',
+            borderTop: '1px solid rgba(201, 168, 76, 0.2)',
+            padding: '18px 26px',
+            transform: isActive ? 'translateY(0)' : 'translateY(100%)',
+            opacity: isActive ? 1 : 0,
+            transition:
+              'transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease',
           }}
         >
-          <div
-            className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rotate-45"
+          <p
             style={{
-              background: CREAM,
-              left: popupOnLeft ? 'auto' : '-6px',
-              right: popupOnLeft ? '-6px' : 'auto',
-            }}
-          />
-
-          <div
-            className="text-[10px] font-medium uppercase tracking-[0.28em]"
-            style={{ color: GOLD }}
-          >
-            {card.label}
-          </div>
-
-          <div
-            className="mt-3 leading-[1.15]"
-            style={{
-              fontFamily:
-                "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
-              fontSize: '22px',
-              fontWeight: 400,
-              fontStyle: 'italic',
-              color: NAVY,
+              fontSize: '0.78rem',
+              lineHeight: 1.55,
+              color: 'rgba(245, 240, 232, 0.72)',
+              margin: 0,
+              marginBottom: '10px',
             }}
           >
-            &ldquo;{card.popup.hook}&rdquo;
-          </div>
-
-          <p className="mt-3 text-[13px] leading-[1.6]" style={{ color: '#475569' }}>
             {card.popup.sub}
           </p>
-
-          <p className="mt-3 text-[12px] leading-[1.6]" style={{ color: '#64748B' }}>
-            {card.popup.follow}
-          </p>
-
-          <div
-            className="mt-5 h-[1px] w-full"
-            style={{ background: 'rgba(13,27,62,0.08)' }}
-          />
-
-          <a
-            href={card.href}
-            className="mt-5 flex items-center justify-between rounded-xl px-5 py-3 text-[12px] font-medium uppercase tracking-[0.14em] transition-opacity hover:opacity-90"
+          <span
             style={{
-              background: NAVY,
-              color: CREAM,
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+              color: GOLD,
             }}
           >
-            {card.popup.cta}
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path
-                d="M1 7H13M13 7L7 1M13 7L7 13"
-                stroke={GOLD}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
+            {card.popup.cta} →
+          </span>
         </div>
       </div>
+    </a>
+  )
+}
+
+function MobileCardStack() {
+  return (
+    <div className="md:hidden flex flex-col gap-4">
+      {CARDS.map((card) => (
+        <a
+          key={card.id}
+          href={card.href}
+          className="relative block overflow-hidden rounded-2xl"
+          style={{
+            height: '260px',
+            background: card.gradient,
+            border: '1px solid rgba(245, 240, 232, 0.08)',
+          }}
+        >
+          <div className="absolute left-6 top-6">
+            <div
+              style={{
+                width: '32px',
+                height: '1px',
+                background: GOLD,
+                marginBottom: '10px',
+              }}
+            />
+            <div
+              style={{
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: GOLD,
+              }}
+            >
+              {card.label}
+            </div>
+          </div>
+
+          <div
+            className="pointer-events-none absolute select-none"
+            style={{
+              right: '-2%',
+              bottom: '-10%',
+              fontSize: '160px',
+              fontWeight: 400,
+              lineHeight: 1,
+              letterSpacing: '-0.04em',
+              fontFamily:
+                "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+              color: GOLD,
+              opacity: 0.12,
+            }}
+          >
+            {card.number}
+          </div>
+
+          <div className="absolute left-6 bottom-20 z-10 max-w-[80%]">
+            <div
+              style={{
+                fontFamily:
+                  "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+                fontSize: '1.6rem',
+                fontWeight: 800,
+                lineHeight: 0.98,
+                letterSpacing: '-0.02em',
+                color: CREAM,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {card.headline}
+            </div>
+          </div>
+
+          <div className="absolute left-6 right-6 bottom-6 z-10 flex items-end justify-between">
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.16em',
+                color: GOLD,
+              }}
+            >
+              {card.popup.cta} →
+            </span>
+            <div className="text-right">
+              <div
+                style={{
+                  color: GOLD,
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  fontFamily:
+                    "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+                }}
+              >
+                {card.stat}
+              </div>
+              <div
+                style={{
+                  marginTop: '2px',
+                  fontSize: '0.55rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.18em',
+                  color: 'rgba(245, 240, 232, 0.5)',
+                }}
+              >
+                {card.statLabel}
+              </div>
+            </div>
+          </div>
+        </a>
+      ))}
     </div>
   )
 }
