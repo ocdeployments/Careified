@@ -95,31 +95,6 @@ export default function CareifiedHero() {
         }}
       />
 
-      {/* Large logo watermark behind */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'clamp(180px, 28vw, 340px)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          zIndex: 0,
-        }}
-      >
-        <img
-          src="/Careified-logo.png"
-          alt=""
-          style={{
-            width: '100%',
-            height: 'auto',
-            opacity: 0.07,
-            filter: 'brightness(0) invert(1)',
-          }}
-        />
-      </div>
-
       {/* Subtle grid overlay */}
       <div
         style={{
@@ -144,9 +119,36 @@ export default function CareifiedHero() {
           textAlign: 'center',
         }}
       >
+        {/* Large logo watermark behind */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 'clamp(180px, 28vw, 340px)',
+            zIndex: 0,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
+          <img
+            src="/Careified-logo.png"
+            alt=""
+            style={{
+              width: '100%',
+              height: 'auto',
+              opacity: 0.07,
+              filter: 'brightness(0) invert(1)',
+            }}
+          />
+        </div>
+
         {/* Gold pill badge */}
         <div
           style={{
+            position: 'relative',
+            zIndex: 1,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
@@ -168,6 +170,8 @@ export default function CareifiedHero() {
 
         {/* Main headline */}
         <h1 style={{
+          position: 'relative',
+          zIndex: 1,
           fontFamily: "'Cormorant Garamond', Georgia, serif",
           lineHeight: 1.05,
           marginBottom: '24px',
@@ -210,6 +214,8 @@ export default function CareifiedHero() {
         {/* Tagline */}
         <p
           style={{
+            position: 'relative',
+            zIndex: 1,
             fontSize: 'clamp(0.9rem, 1.4vw, 1.05rem)',
             color: 'rgba(245,240,232,0.55)',
             maxWidth: '580px',
@@ -229,6 +235,8 @@ export default function CareifiedHero() {
         {/* Divider lines with bridge text */}
         <div
           style={{
+            position: 'relative',
+            zIndex: 1,
             display: 'flex',
             alignItems: 'center',
             gap: '16px',
