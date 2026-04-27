@@ -144,7 +144,7 @@ export default function Navbar() {
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
           <img
-            src="/Careified-logo.png"
+            src="/Carefied-logo.png"
             alt="Careified"
             style={{
               height: '38px',

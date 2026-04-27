@@ -133,7 +133,7 @@ export default function CareifiedHero() {
           }}
         >
           <img
-            src="/Careified-logo.png"
+            src="/Carefied-logo.png"
             alt=""
             style={{
               width: '100%',
