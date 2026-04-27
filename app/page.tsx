@@ -1,145 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 import { UserCheck, Search, Shield } from 'lucide-react'
-
-const cardData = [
-  {
-    id: 'caregivers',
-    label: 'For Caregivers',
-    headline: 'Free. Always. Build once.',
-    cta: 'Build free profile →',
-    href: '/for-caregivers',
-    popup: {
-      hook: "You don't need another app.",
-      sub: "You need a platform that sees you, values you, and treats you like the professional you are.",
-      follow: "CareShepherds is built for caregivers who are done being invisible.",
-      cta: 'Start your free profile',
-      ctaHref: '/for-caregivers',
-    }
-  },
-  {
-    id: 'agencies',
-    label: 'For Agencies',
-    headline: 'Search verified profiles.',
-    cta: 'Start hiring →',
-    href: '/agency',
-    popup: {
-      hook: "Stop hiring blind.",
-      sub: "Every caregiver on Careified has a verified record — credentials, placements, and peer ratings you can trust.",
-      follow: "Make confident hiring decisions from day one.",
-      cta: 'Start searching now',
-      ctaHref: '/agency',
-    }
-  },
-  {
-    id: 'families',
-    label: 'For Families',
-    headline: 'Know who is caring.',
-    cta: 'Learn more →',
-    href: '/families',
-    popup: {
-      hook: "Your family deserves more than a resume.",
-      sub: "See real credentials, verified work history, and ratings from other families — before you decide.",
-      follow: "Because who cares for your family matters more than anything.",
-      cta: 'Find a caregiver',
-      ctaHref: '/families',
-    }
-  }
-]
+import CareifiedHero from '@/components/CareifiedHero'
 
 export default function HomePage() {
-  const [activeCard, setActiveCard] = useState<string | null>(null)
-
   return (
     <div className="font-sans bg-[#F7F4F0]">
 
         {/* ── Hero (dark navy) ── */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#0D1B3E] pt-24 pb-20">
-
-          {/* Logo — large, centered, impactful */}
-          <div className="mb-16 flex justify-center">
-            <img
-              src="/careified-logo.svg"
-              alt="Careified — Qualified. Recognized. Verified."
-              className="h-28 md:h-36 w-auto"
-            />
-          </div>
-
-          {/* Cards row — with hover popup */}
-          <div className="relative w-full max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {cardData.map((card) => (
-                <div
-                  key={card.id}
-                  className="relative group"
-                  onMouseEnter={() => setActiveCard(card.id)}
-                  onMouseLeave={() => setActiveCard(null)}
-                >
-                  {/* Main card */}
-                  <a
-                    href={card.href}
-                    className="block bg-[#0D1B3E] border border-[#C9A84C]/30 rounded-2xl p-8 min-h-[200px] flex flex-col justify-between transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(201,168,76,0.15)]"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <div>
-                      <p className="text-[#C9A84C] text-xs font-semibold tracking-widest uppercase mb-4">
-                        {card.label}
-                      </p>
-                      <h3 className="text-white text-xl font-bold mb-4 leading-snug">
-                        {card.headline}
-                      </h3>
-                    </div>
-                    <span className="text-[#C9A84C] text-sm font-medium">{card.cta}</span>
-                  </a>
-
-                  {/* Hover popup — appears to the right */}
-                  <div
-                    className={`
-                      absolute top-0 ${card.id === 'families' ? 'right-[calc(100%+16px)]' : 'left-[calc(100%+16px)]'} w-80 z-50
-                      bg-[#0A1628] border border-[#C9A84C]/40 rounded-2xl p-7
-                      shadow-[0_16px_48px_rgba(0,0,0,0.6)]
-                      backdrop-blur-sm
-                      transition-all duration-300 ease-out
-                      ${activeCard === card.id
-                        ? 'opacity-100 translate-x-0 pointer-events-auto'
-                        : 'opacity-0 -translate-x-2 pointer-events-none'
-                      }
-                    `}
-                  >
-                    {/* Gold accent line top */}
-                    <div className="w-8 h-0.5 bg-[#C9A84C] mb-5" />
-
-                    {/* Hook headline */}
-                    <h4 className="text-white text-xl font-bold mb-3 leading-tight">
-                      {card.popup.hook}
-                    </h4>
-
-                    {/* Sub-headline */}
-                    <p className="text-white/70 text-sm leading-relaxed mb-4">
-                      {card.popup.sub}
-                    </p>
-
-                    {/* Follow-up line */}
-                    <p className="text-[#C9A84C]/80 text-xs leading-relaxed mb-6 italic">
-                      {card.popup.follow}
-                    </p>
-
-                    {/* CTA button */}
-                    <a
-                      href={card.popup.ctaHref}
-                      className="inline-block w-full text-center px-5 py-3 bg-[#C9A84C] text-[#0D1B3E] text-sm font-bold rounded-lg hover:bg-[#b8973b] transition-colors"
-                    >
-                      {card.popup.cta}
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </section>
+        <CareifiedHero />
 
         {/* ── Stats bar (very dark) ── */}
         <section className="bg-[#080F1E] px-6 py-5" aria-label="Industry statistics">
