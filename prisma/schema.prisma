@@ -135,6 +135,7 @@ model Caregiver {
   caregiver_references           CaregiverReference[]
   caregiver_shifts               CaregiverShift[]
   users                          User?                         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  airecruit_calls                AIRecruitCall[]
 
   @@map("caregivers")
 }
@@ -197,6 +198,8 @@ model Agency {
   agency_ratings                 AgencyRating[]
   agency_saved_searches          AgencySavedSearch[]
   caregiver_shifts               CaregiverShift[]
+  airecruit_campaigns            AIRecruitCampaign[]
+  airecruit_waitlist             AIRecruitWaitlist[]
 
   @@map("agencies")
 }
@@ -352,4 +355,54 @@ model placement_outcomes {
 
   @@index([agency_id], map: "idx_placement_outcomes_agency")
   @@index([caregiver_id], map: "idx_placement_outcomes_caregiver")
+}
+
+model AIRecruitCampaign {
+  id                  String            @id @default(cuid())
+  agencyId            String
+  agency              Agency            @relation(fields: [agencyId], references: [id])
+  title               String
+  roleDescription     String
+  screeningQuestions  String[]
+  status              String            @default("draft")
+  totalCandidates     Int               @default(0)
+  callsCompleted      Int               @default(0)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  calls               AIRecruitCall[]
+
+  @@index([agencyId], map: "idx_airecruit_campaign_agency")
+}
+
+model AIRecruitCall {
+  id              String            @id @default(cuid())
+  campaignId      String
+  campaign        AIRecruitCampaign @relation(fields: [campaignId], references: [id])
+  caregiverId     String
+  caregiver       Caregiver         @relation(fields: [caregiverId], references: [id])
+  status          String            @default("pending")
+  phoneNumber     String
+  vapiCallId      String?
+  transcript     String?
+  rawScore        Float?
+  scoreBreakdown Json?
+  recommendation  String?
+  duration        Int?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([campaignId], map: "idx_airecruit_call_campaign")
+  @@index([caregiverId], map: "idx_airecruit_call_caregiver")
+}
+
+model AIRecruitWaitlist {
+  id        String   @id @default(cuid())
+  agencyId  String
+  agency    Agency   @relation(fields: [agencyId], references: [id])
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([agencyId], map: "idx_airecruit_waitlist_agency")
 }
