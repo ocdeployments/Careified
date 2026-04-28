@@ -1,12 +1,8 @@
 const VAPI_API_KEY = process.env.VAPI_API_KEY!
-const VAPI_ASSISTANT_ID = process.env.VAPI_ASSISTANT_ID!
 const VAPI_BASE_URL = 'https://api.vapi.ai'
 
 if (!VAPI_API_KEY) {
   throw new Error('VAPI_API_KEY environment variable is not set')
-}
-if (!VAPI_ASSISTANT_ID) {
-  throw new Error('VAPI_ASSISTANT_ID environment variable is not set')
 }
 
 export interface VapiCallParams {
@@ -16,6 +12,8 @@ export interface VapiCallParams {
   candidateName?: string
   roleTitle: string
   screeningQuestions: string[]
+  vapiAssistantId: string
+  vapiPhoneNumberId: string
 }
 
 export interface VapiCallResult {
@@ -34,6 +32,8 @@ export async function initiateVapiCall(
     candidateName,
     roleTitle,
     screeningQuestions,
+    vapiAssistantId,
+    vapiPhoneNumberId,
   } = params
 
   // Build the dynamic system prompt for this specific call
@@ -81,7 +81,7 @@ Call ID: ${callId}`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        assistantId: VAPI_ASSISTANT_ID,
+        assistantId: vapiAssistantId,
         assistantOverrides: {
           firstMessage: `Hi${candidateName ? `, ${candidateName}` : ''}! My name is Alex, and I'm an AI recruiting assistant calling from Careified. I'm reaching out because you may be a great fit for a ${roleTitle} position. Do you have about 5 to 10 minutes to answer a few quick questions?`,
           model: {
@@ -93,7 +93,7 @@ Call ID: ${callId}`
             ]
           }
         },
-        phoneNumberId: process.env.VAPI_PHONE_NUMBER_ID,
+        phoneNumberId: vapiPhoneNumberId,
         customer: {
           number: phoneNumber,
         },
