@@ -269,7 +269,7 @@ function AccordionCard({
         sizes="(max-width: 768px) 100vw, 33vw"
         className="object-cover"
         style={{
-          opacity: isActive ? 0.55 : isDimmed ? 0.2 : 0.35,
+          opacity: isActive ? 0.75 : isDimmed ? 0.3 : 0.55,
           transition: 'opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         priority={index === 0}
@@ -280,8 +280,8 @@ function AccordionCard({
         className="absolute inset-0 pointer-events-none"
         style={{
           background: isActive
-            ? 'linear-gradient(180deg, rgba(13,27,62,0.35) 0%, rgba(13,27,62,0.55) 50%, rgba(13,27,62,0.92) 100%)'
-            : 'linear-gradient(180deg, rgba(13,27,62,0.55) 0%, rgba(13,27,62,0.75) 50%, rgba(13,27,62,0.95) 100%)',
+            ? 'linear-gradient(180deg, rgba(13,27,62,0.20) 0%, rgba(13,27,62,0.45) 55%, rgba(13,27,62,0.88) 100%)'
+            : 'linear-gradient(180deg, rgba(13,27,62,0.30) 0%, rgba(13,27,62,0.50) 55%, rgba(13,27,62,0.85) 100%)',
           transition: 'background 600ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       />
@@ -307,8 +307,8 @@ function AccordionCard({
       >
         <span
           style={{
-            transform: 'rotate(-90deg)',
-            whiteSpace: 'nowrap',
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
             fontSize: '0.78rem',
             fontWeight: 600,
             letterSpacing: '0.32em',
