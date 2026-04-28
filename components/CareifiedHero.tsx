@@ -173,13 +173,10 @@ export default function CareifiedHero() {
             color: 'rgba(245,240,232,0.4)',
           }}
         >
-          <span>
-            <span style={{ color: GOLD }}>●</span> Live in 15+ cities
-          </span>
-          <span className="hidden md:inline">
-            Caregiving is a profession · Careified is its standard
-          </span>
-          <span>Est. 2026 — Frisco, TX → North America</span>
+          <span>CAREGIVING IS A PROFESSION</span>
+          <span className="hidden md:inline">VERIFIED. RECOGNIZED. TRUSTED.</span>
+          <span>BUILT FOR CAREGIVERS · AGENCIES · FAMILIES</span>
+          <span>YOUR CAREER. YOUR REPUTATION. YOUR RECORD.</span>
         </div>
       </div>
     </section>
