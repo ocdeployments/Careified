@@ -120,7 +120,10 @@ export async function POST(req: NextRequest) {
     // 9. Return created campaign
     return NextResponse.json({
       success: true,
-      campaignId
+      campaignId,
+      vapiResults: vapiResults.map(r => 
+        r.status === 'fulfilled' ? r.value : { error: r.reason?.message }
+      )
     })
   } catch (error) {
     console.error('AIRECRUIT ERROR:', error)
