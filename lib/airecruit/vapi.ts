@@ -25,6 +25,14 @@ export interface VapiCallResult {
 export async function initiateVapiCall(
   params: VapiCallParams
 ): Promise<VapiCallResult> {
+  console.log("VAPI CALL ATTEMPT:", { 
+    phoneNumber: params.phoneNumber,
+    campaignId: params.campaignId,
+    hasApiKey: !!process.env.VAPI_API_KEY,
+    hasAssistantId: !!process.env.VAPI_ASSISTANT_ID,
+    hasPhoneNumberId: !!process.env.VAPI_PHONE_NUMBER_ID,
+  })
+
   const {
     phoneNumber,
     campaignId,
@@ -104,15 +112,17 @@ Call ID: ${callId}`
       }),
     })
 
+    console.log("VAPI RESPONSE STATUS:", response.status)
     if (!response.ok) {
       const errorText = await response.text()
+      console.error("VAPI ERROR BODY:", errorText)
       return { 
         success: false, 
-        error: `Vapi API error: ${response.status} ${errorText}` 
+        error: errorText 
       }
     }
-
     const data = await response.json()
+    console.log("VAPI SUCCESS:", data.id)
     return { 
       success: true, 
       vapiCallId: data.id 
