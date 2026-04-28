@@ -123,24 +123,11 @@ export default function CareifiedHero() {
 
         {/* Headline */}
         <div className="mb-6 text-center">
-          <div
-            className="mb-4 text-[14px] font-medium uppercase tracking-[0.28em]"
-            style={{
-              fontFamily: "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
-              color: CREAM,
-            }}
-          >
-            Caregiving is a profession.
-          </div>
-          <div
-            className="mx-auto mb-6 h-[1px] w-12"
-            style={{ background: GOLD }}
-          />
           <h1
-            className="mx-auto max-w-5xl leading-[1.0] tracking-[-0.02em]"
+            className="mx-auto max-w-4xl leading-[1.0] tracking-[-0.02em]"
             style={{
               fontFamily: "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
-              fontSize: 'clamp(44px, 6vw, 92px)',
+              fontSize: 'clamp(40px, 4.5vw, 72px)',
               fontStyle: 'italic',
               fontWeight: 400,
               color: GOLD,
@@ -152,25 +139,13 @@ export default function CareifiedHero() {
 
         {/* Subhead */}
         <p
-          className="mx-auto mb-12 max-w-2xl text-center text-[15px] leading-[1.7]"
+          className="mx-auto mb-16 max-w-2xl text-center text-[15px] leading-[1.7]"
           style={{ color: 'rgba(245,240,232,0.6)' }}
         >
           For caregivers who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>recognition</em>.
           Agencies who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>credibility</em>.
           Families who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>visibility</em>.
         </p>
-
-        {/* Divider */}
-        <div className="mb-14 flex items-center justify-center gap-3">
-          <span className="h-[1px] w-12" style={{ background: 'rgba(245,240,232,0.2)' }} />
-          <span
-            className="text-[10px] font-medium uppercase tracking-[0.32em]"
-            style={{ color: 'rgba(245,240,232,0.45)' }}
-          >
-            This platform was built for you
-          </span>
-          <span className="h-[1px] w-12" style={{ background: 'rgba(245,240,232,0.2)' }} />
-        </div>
 
         {/* Card grid */}
         <>
