@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { Briefcase, Eye, Star, TrendingUp } from 'lucide-react'
 
 export default function ForCaregiversPage() {
   const [isDesktop, setIsDesktop] = useState(false)
@@ -14,6 +13,7 @@ export default function ForCaregiversPage() {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
+
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4F0' }}>
       {/* Hero */}
@@ -75,117 +75,98 @@ export default function ForCaregiversPage() {
         </div>
       </section>
 
-      {/* Story Section - Two Column Layout */}
-      <section 
-        id="story"
-        style={{ 
-          padding: '80px 20px', 
-          background: 'white',
-          display: 'grid',
-          gridTemplateColumns: isDesktop ? '55fr 45fr' : '1fr',
-          gap: '64px',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
-        }}
-      >
-        {/* Left Column - Conversational Story */}
-        <div>
-          {/* Section Label */}
+      {/* Story Section - Organic Editorial Layout */}
+      <section style={{
+        position: 'relative',
+        backgroundColor: '#F5F3EE',
+        overflow: 'hidden',
+        minHeight: '600px',
+        display: 'grid',
+        gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+        alignItems: 'stretch',
+      }}>
+        {/* LEFT COLUMN — text story */}
+        <div style={{
+          padding: isDesktop ? '80px 64px 100px 64px' : '60px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: '24px',
+        }}>
+          {/* Small label */}
           <div style={{ 
             fontSize: '12px', 
             color: '#C9A84C', 
             textTransform: 'uppercase', 
             letterSpacing: '0.2em',
             fontWeight: 600,
-            marginBottom: '16px'
           }}>
-            01 / FOR CAREGIVERS
+            FOR CAREGIVERS
           </div>
 
-          {/* Main Headline */}
+          {/* Section number */}
+          <div style={{ 
+            fontSize: '14px', 
+            color: '#C9A84C',
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            marginBottom: '-8px'
+          }}>
+            01/
+          </div>
+
+          {/* Large headline */}
           <h2 style={{ 
             fontFamily: "'DM Serif Display', Georgia, serif",
-            fontSize: 'clamp(32px, 4vw, 40px)',
+            fontSize: '42px',
             color: '#1B2A4A',
-            lineHeight: 1.15,
-            marginBottom: '24px'
+            lineHeight: 1.2,
+            margin: 0
           }}>
             Your career deserves
             <br />to be seen.
           </h2>
 
-          {/* Lead Paragraph */}
+          {/* Gold divider */}
+          <div style={{ width: '48px', height: '2px', backgroundColor: '#C9A84C' }} />
+
+          {/* Paragraph 1 */}
           <p style={{ 
-            fontSize: '18px',
-            color: '#4A4A4A',
-            lineHeight: 1.7,
-            marginBottom: '24px'
+            fontSize: '17px', 
+            color: '#4A5568', 
+            lineHeight: 1.75,
+            margin: 0
           }}>
-            You've spent years showing up, caring deeply, and building real
-            skills. But when the shift ends — none of that lives anywhere.
-            No record. No reputation. No proof of what you've built.
+            You've spent years showing up — caring deeply, building real
+            skills, earning the trust of every family you've served.
+            But when the shift ends, none of that lives anywhere.
+            It's locked in someone else's filing system, or worse,
+            it simply disappears.
           </p>
 
-          {/* Gold Divider */}
-          <div style={{ 
-            width: '48px', 
-            height: '2px', 
-            background: '#C9A84C',
-            marginBottom: '24px'
-          }} />
-
-          {/* Second Paragraph */}
+          {/* Paragraph 2 */}
           <p style={{ 
-            fontSize: '18px',
-            color: '#4A4A4A',
-            lineHeight: 1.7,
-            marginBottom: '32px'
+            fontSize: '17px', 
+            color: '#4A5568', 
+            lineHeight: 1.75,
+            margin: 0
           }}>
-            Careified changes that. Build your profile once — your
-            certifications, your experience, your specialties — and carry
-            it with you for your entire career. Agencies find you.
-            Families trust you. Your work finally speaks for itself.
+            Careified gives your career a permanent home. Your
+            certifications, your experience, your specialties — all in
+            one verified profile that you own and carry with you.
+            Agencies find you directly. Families trust you on sight.
+            Your work finally speaks for itself.
           </p>
 
-          {/* Pain Point Cards - 2x2 Grid */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '16px',
-            marginBottom: '32px'
+          {/* Paragraph 3 */}
+          <p style={{ 
+            fontSize: '15px', 
+            color: '#6B7280', 
+            lineHeight: 1.75,
+            margin: 0
           }}>
-            {[
-              { icon: Briefcase, title: "You Own It", body: "Not trapped in agency files. Your profile lives with you, not with them." },
-              { icon: Eye, title: "Be Seen", body: "Agencies searching for exactly your skills find you directly — multiple opportunities at once." },
-              { icon: Star, title: "Get Recognized", body: "Your reliability is public and provable. No more starting from scratch with every new employer." },
-              { icon: TrendingUp, title: "Better Matches", body: "Specialized skills mean better pay and work you actually want to do." },
-            ].map((card, i) => (
-              <div key={i} style={{ 
-                background: 'white',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
-              }}>
-                <card.icon size={20} color="#C9A84C" style={{ marginBottom: '12px' }} />
-                <h3 style={{ 
-                  fontFamily: "'DM Serif Display', Georgia, serif",
-                  fontSize: '16px',
-                  color: '#1B2A4A',
-                  marginBottom: '8px'
-                }}>
-                  {card.title}
-                </h3>
-                <p style={{ 
-                  fontSize: '14px',
-                  color: '#6B7280',
-                  lineHeight: 1.5
-                }}>
-                  {card.body}
-                </p>
-              </div>
-            ))}
-          </div>
+            You own your record. You own your reputation.
+            No starting over. No proving yourself from scratch.
+          </p>
 
           {/* CTA Button */}
           <Link 
@@ -193,12 +174,16 @@ export default function ForCaregiversPage() {
             style={{ 
               display: 'inline-block',
               padding: '14px 32px',
-              background: '#C9A84C',
-              color: 'white',
+              backgroundColor: '#C9A84C',
+              color: '#FFFFFF',
               borderRadius: '9999px',
               textDecoration: 'none',
               fontWeight: 600,
-              fontSize: '16px'
+              fontSize: '16px',
+              border: 'none',
+              cursor: 'pointer',
+              marginTop: '8px',
+              width: 'fit-content'
             }}
           >
             Build My Profile — Free →
@@ -214,21 +199,38 @@ export default function ForCaregiversPage() {
           </div>
         </div>
 
-        {/* Right Column - Photo */}
-        <div style={{ 
-          position: 'relative', 
-          height: '100%', 
-          minHeight: isDesktop ? '520px' : '320px',
-          borderRadius: '16px 16px 0 0',
-          overflow: 'hidden'
+        {/* RIGHT COLUMN — photo bleeds to edge */}
+        <div style={{
+          position: 'relative',
+          overflow: 'hidden',
+          height: isDesktop ? '100%' : '360px',
+          minHeight: isDesktop ? 'auto' : '360px',
         }}>
           <Image
             src="/3Caregivers.jpg"
-            alt="Caregivers who use Careified"
+            alt="Caregivers"
             fill
-            style={{ objectFit: 'cover', borderRadius: '16px 16px 0 0' }}
+            style={{ objectFit: 'cover', objectPosition: 'center top' }}
           />
         </div>
+
+        {/* CURVED BOTTOM — navy wave (desktop only) */}
+        {isDesktop && (
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '100%',
+            lineHeight: 0,
+            zIndex: 2,
+          }}>
+            <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg"
+                 style={{ display: 'block', width: '100%' }}>
+              <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z"
+                    fill="#1B2A4A"/>
+            </svg>
+          </div>
+        )}
       </section>
 
       {/* Benefits */}
