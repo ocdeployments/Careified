@@ -73,15 +73,10 @@ export async function POST(req: NextRequest) {
     const campaignId = campaignResult.rows[0].id
 
     // 6. Create one AIRecruitCall per phone number
-    const callValues = phoneNumbers.map((phoneNumber: string) => 
-      `(gen_random_uuid(), '${campaignId}', 'pending', '${phoneNumber}', NULL, NOW(), NOW())`
-    ).join(', ')
-
-    if (callValues) {
+    for (const phoneNumber of phoneNumbers) {
       await pool.query(
-        `INSERT INTO "AIRecruitCall" 
-          (id, "campaignId", status, "phoneNumber", "createdAt", "updatedAt") 
-        VALUES ${callValues}`
+        `INSERT INTO "AIRecruitCall" (id, "campaignId", "phoneNumber") VALUES (gen_random_uuid(), $1, $2)`,
+        [campaignId, phoneNumber]
       )
     }
 
