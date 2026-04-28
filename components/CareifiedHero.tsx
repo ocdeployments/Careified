@@ -133,6 +133,18 @@ export default function CareifiedHero() {
               color: GOLD,
             }}
           >
+            Caregiving is a profession.
+          </h1>
+          <h1
+            className="mx-auto max-w-4xl leading-[1.0] tracking-[-0.02em]"
+            style={{
+              fontFamily: "var(--font-dm-serif), 'DM Serif Display', Georgia, serif",
+              fontSize: 'clamp(40px, 4.5vw, 72px)',
+              fontStyle: 'italic',
+              fontWeight: 400,
+              color: GOLD,
+            }}
+          >
             It's time the world knew it.
           </h1>
         </div>
