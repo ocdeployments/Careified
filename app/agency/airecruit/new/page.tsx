@@ -12,6 +12,7 @@ export default function NewCampaignPage() {
   const [roleDescription, setRoleDescription] = useState('')
   const [questions, setQuestions] = useState<string[]>(['', '', ''])
   const [phoneNumbers, setPhoneNumbers] = useState('')
+  const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -55,6 +56,7 @@ export default function NewCampaignPage() {
           roleDescription,
           screeningQuestions,
           phoneNumbers: phoneNumbersArray,
+          consentConfirmed,
         }),
       })
 
@@ -308,20 +310,60 @@ export default function NewCampaignPage() {
                 </p>
               </div>
 
+              {/* Consent Section */}
+              <div style={{
+                background: 'rgba(201,168,76,0.06)',
+                border: '1px solid rgba(201,168,76,0.2)',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <input
+                    type="checkbox"
+                    id="consent"
+                    checked={consentConfirmed}
+                    onChange={(e) => setConsentConfirmed(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      marginTop: '2px',
+                      accentColor: '#C9A84C'
+                    }}
+                  />
+                  <label htmlFor="consent" style={{
+                    fontSize: '13px',
+                    color: '#0D1B3E',
+                    lineHeight: 1.5,
+                    cursor: 'pointer'
+                  }}>
+                    I confirm that all candidates on this list have provided prior consent to be contacted by automated AI calling systems for recruitment purposes, and that I have complied with all applicable Canadian telecommunications regulations including the CRTC Do Not Call List requirements.
+                  </label>
+                </div>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#C9A84C',
+                  marginTop: '8px',
+                  marginLeft: '30px'
+                }}>
+                  Required — agencies are responsible for ensuring CRTC and PIPEDA compliance for all contacts.
+                </p>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !consentConfirmed}
                 style={{
                   width: '100%',
                   padding: '16px 32px',
-                  background: isSubmitting ? '#94A3B8' : 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                  background: isSubmitting || !consentConfirmed ? '#94A3B8' : 'linear-gradient(135deg, #C9973A, #E8B86D)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
                   fontSize: '16px',
                   fontWeight: 600,
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  cursor: isSubmitting || !consentConfirmed ? 'not-allowed' : 'pointer',
                   transition: 'background 0.2s'
                 }}
               >
