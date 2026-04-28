@@ -214,3 +214,4 @@ Typography: Inter (body), DM Serif Display (headlines)
 Styles: Inline only — no styled-jsx, no Tailwind classes
 Components: lucide-react icons, AgencyShell wrapper
 Animations: Framer Motion
+- CRITICAL: When rewriting files Cline must use the bash heredoc method (cat > file << 'EOF') NOT str_replace or write_file — Cline's patching causes duplicate code merges on complex files
