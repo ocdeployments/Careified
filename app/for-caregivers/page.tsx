@@ -1,8 +1,19 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { Briefcase, Eye, Star, TrendingUp } from 'lucide-react'
 
 export default function ForCaregiversPage() {
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4F0' }}>
       {/* Hero */}
@@ -71,20 +82,13 @@ export default function ForCaregiversPage() {
           padding: '80px 20px', 
           background: 'white',
           display: 'grid',
-          gridTemplateColumns: '1fr',
+          gridTemplateColumns: isDesktop ? '55fr 45fr' : '1fr',
           gap: '64px',
           alignItems: 'center',
           maxWidth: '1200px',
           margin: '0 auto',
         }}
       >
-        <style jsx>{`
-          @media (min-width: 768px) {
-            section#story {
-              grid-template-columns: 55fr 45fr;
-            }
-          }
-        `}</style>
         {/* Left Column - Conversational Story */}
         <div>
           {/* Section Label */}
@@ -214,17 +218,10 @@ export default function ForCaregiversPage() {
         <div style={{ 
           position: 'relative', 
           height: '100%', 
-          minHeight: '320px',
+          minHeight: isDesktop ? '520px' : '320px',
           borderRadius: '16px 16px 0 0',
           overflow: 'hidden'
         }}>
-        <style jsx>{`
-          @media (min-width: 768px) {
-            div[style*="minHeight: 320px"] {
-              min-height: 520px !important;
-            }
-          }
-        `}</style>
           <Image
             src="/3Caregivers.jpg"
             alt="Caregivers who use Careified"
