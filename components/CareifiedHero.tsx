@@ -176,6 +176,9 @@ export default function CareifiedHero() {
 
 function AccordionRow() {
   const [activeCard, setActiveCard] = useState<string | null>(null)
+  const activeIndex = activeCard
+    ? CARDS.findIndex((c) => c.id === activeCard)
+    : -1
 
   return (
     <div
@@ -188,6 +191,7 @@ function AccordionRow() {
           key={card.id}
           card={card}
           index={idx}
+          activeIndex={activeIndex}
           isActive={activeCard === card.id}
           isDimmed={activeCard !== null && activeCard !== card.id}
           onEnter={() => setActiveCard(card.id)}
@@ -201,6 +205,7 @@ function AccordionRow() {
 function AccordionCard({
   card,
   index,
+  activeIndex,
   isActive,
   isDimmed,
   onEnter,
@@ -208,12 +213,18 @@ function AccordionCard({
 }: {
   card: Card
   index: number
+  activeIndex: number
   isActive: boolean
   isDimmed: boolean
   onEnter: () => void
   onLeave: () => void
 }) {
   const flexValue = isActive ? 2.8 : isDimmed ? 0.4 : 1
+
+  const labelSlideX =
+    activeIndex === -1 ? 0 : index < activeIndex ? 24 : index > activeIndex ? -24 : 0
+
+  const labelOpacity = isActive ? 0 : isDimmed ? 0 : 1
 
   return (
     <a
@@ -272,23 +283,35 @@ function AccordionCard({
         }}
       />
 
-      {/* Vertical label */}
+      {/* Horizontal label */}
       <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          opacity: isActive ? 0 : 1,
-          transition: 'opacity 400ms ease',
+          left: '28px',
+          top: '28px',
+          opacity: labelOpacity,
+          transform: `translateX(${labelSlideX}px)`,
+          transition:
+            'opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+          zIndex: 5,
         }}
       >
+        <div
+          style={{
+            width: '24px',
+            height: '1px',
+            background: GOLD,
+            marginBottom: '10px',
+          }}
+        />
         <span
           style={{
-            writingMode: 'vertical-rl',
-            transform: 'rotate(180deg)',
-            fontSize: '0.78rem',
+            fontSize: '0.7rem',
             fontWeight: 600,
-            letterSpacing: '0.32em',
+            letterSpacing: '0.28em',
             textTransform: 'uppercase',
             color: GOLD,
+            whiteSpace: 'nowrap',
             textShadow: '0 2px 12px rgba(0,0,0,0.5)',
           }}
         >
