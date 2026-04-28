@@ -1,0 +1,92 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { pool } from '@/lib/db'
+
+async function getAgencyId(clerkUserId: string): Promise<string | null> {
+  const { rows } = await pool.query(
+    `SELECT id FROM agencies WHERE clerk_user_id = $1 LIMIT 1`,
+    [clerkUserId]
+  )
+  return rows[0]?.id ?? null
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Auth check
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // 2. Parse body
+    const body = await req.json()
+    const { title, roleDescription, screeningQuestions, phoneNumbers } = body
+
+    // 3. Validate required fields
+    if (!title || !roleDescription || !screeningQuestions || !phoneNumbers) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+    if (!Array.isArray(screeningQuestions) || screeningQuestions.length === 0) {
+      return NextResponse.json(
+        { error: 'At least one screening question required' },
+        { status: 400 }
+      )
+    }
+    if (!Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
+      return NextResponse.json(
+        { error: 'At least one phone number required' },
+        { status: 400 }
+      )
+    }
+
+    // 4. Look up agency by Clerk userId
+    const agencyId = await getAgencyId(userId)
+    if (!agencyId) {
+      return NextResponse.json(
+        { error: 'Agency not found' },
+        { status: 404 }
+      )
+    }
+
+    // 5. Create campaign
+    const campaignResult = await pool.query(
+      `INSERT INTO "AIRecruitCampaign" 
+        (id, "agencyId", title, "roleDescription", "screeningQuestions", status, "totalCandidates", "callsPending", "callsCompleted", "callsFailed", "createdAt", "updatedAt") 
+      VALUES (gen_random_uuid(), $1, $2, $3, $4, 'draft', $5, $5, 0, 0, NOW(), NOW()) 
+      RETURNING id`,
+      [agencyId, title, roleDescription, screeningQuestions, phoneNumbers.length]
+    )
+    const campaignId = campaignResult.rows[0].id
+
+    // 6. Create one AIRecruitCall per phone number
+    const callValues = phoneNumbers.map((phoneNumber: string) => 
+      `(gen_random_uuid(), '${campaignId}', 'pending', '${phoneNumber}', NOW(), NOW())`
+    ).join(', ')
+
+    if (callValues) {
+      await pool.query(
+        `INSERT INTO "AIRecruitCall" 
+          (id, "campaignId", status, "phoneNumber", "createdAt", "updatedAt") 
+        VALUES ${callValues}`
+      )
+    }
+
+    // 7. Return created campaign
+    return NextResponse.json({
+      success: true,
+      campaignId
+    })
+  } catch (error) {
+    console.error('AIRecruit campaign creation error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
