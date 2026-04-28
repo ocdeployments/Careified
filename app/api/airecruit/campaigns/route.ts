@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const { title, roleDescription, screeningQuestions, phoneNumbers } = body
-    console.log('BODY:', { title, screeningQuestions, phoneNumbers })
+    console.log('BODY received:', { title, phoneNumbers })
 
     if (!title || !roleDescription || !screeningQuestions || !phoneNumbers) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -30,20 +30,21 @@ export async function POST(req: NextRequest) {
       [userId]
     )
     const agency = rows[0]
-    console.log('AGENCY:', agency?.id, agency?.vapiAssistantId, agency?.vapiPhoneNumberId)
+    console.log("VAPI IDs:", agency?.vapiAssistantId, agency?.vapiPhoneNumberId)
+    console.log('AGENCY found:', agency?.id)
 
     if (!agency) {
       return NextResponse.json({ error: 'Agency not found' }, { status: 404 })
     }
 
     const campaignResult = await pool.query(
-      `INSERT INTO "AIRecruitCampaign" 
-        (id, "agencyId", title, "roleDescription", "screeningQuestions", 
-         status, "totalCandidates", "callsPending", "callsCompleted", 
-         "callsFailed", "createdAt", "updatedAt") 
-       VALUES 
-        (gen_random_uuid(), $1, $2, $3, $4, 
-         'active', $5, $5, 0, 0, NOW(), NOW()) 
+      `INSERT INTO "AIRecruitCampaign"
+        (id, "agencyId", title, "roleDescription", "screeningQuestions",
+         status, "totalCandidates", "callsPending", "callsCompleted",
+         "callsFailed", "createdAt", "updatedAt")
+       VALUES
+        (gen_random_uuid(), $1, $2, $3, $4,
+         'active', $5, $5, 0, 0, NOW(), NOW())
        RETURNING id`,
       [agency.id, title, roleDescription, screeningQuestions, phoneNumbers.length]
     )
@@ -52,9 +53,9 @@ export async function POST(req: NextRequest) {
 
     for (const phoneNumber of phoneNumbers) {
       await pool.query(
-        `INSERT INTO "AIRecruitCall" 
-          (id, "campaignId", "phoneNumber", status, "createdAt", "updatedAt") 
-         VALUES 
+        `INSERT INTO "AIRecruitCall"
+          (id, "campaignId", "phoneNumber", status, "createdAt", "updatedAt")
+         VALUES
           (gen_random_uuid(), $1, $2, 'pending', NOW(), NOW())`,
         [campaignId, phoneNumber]
       )
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     const vapiResults = await Promise.allSettled(
       createdCalls.map(async (call: { id: string; phoneNumber: string }) => {
-        console.log('FIRING VAPI CALL for:', call.phoneNumber)
+        console.log('FIRING VAPI for:', call.phoneNumber)
 
         const result = await initiateVapiCall({
           phoneNumber: call.phoneNumber,
@@ -85,8 +86,8 @@ export async function POST(req: NextRequest) {
 
         if (result.success && result.vapiCallId) {
           await pool.query(
-            `UPDATE "AIRecruitCall" 
-             SET "vapiCallId" = $1, status = 'calling', "startedAt" = NOW() 
+            `UPDATE "AIRecruitCall"
+             SET "vapiCallId" = $1, status = 'calling', "startedAt" = NOW()
              WHERE id = $2`,
             [result.vapiCallId, call.id]
           )
