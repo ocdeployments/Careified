@@ -113,8 +113,9 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // Launch all calls in parallel, don't block response
-    Promise.allSettled(vapiPromises)
+    // Launch all calls in parallel and await results
+    const vapiResults = await Promise.allSettled(vapiPromises)
+    console.log("VAPI RESULTS:", JSON.stringify(vapiResults))
 
     // 9. Return created campaign
     return NextResponse.json({
