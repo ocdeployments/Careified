@@ -59,12 +59,13 @@ export default function NewCampaignPage() {
       })
 
       if (!res.ok) {
-        throw new Error('Failed to create campaign')
+        const errorMessage = await res.json()
+        throw new Error(errorMessage.error || 'Failed to create campaign')
       }
 
       router.push('/agency/airecruit')
     } catch (err) {
-      setError('Failed to create campaign. Please try again.')
+      setError(err instanceof Error ? err.message : 'Failed to create campaign. Please try again.')
     } finally {
       setIsSubmitting(false)
     }

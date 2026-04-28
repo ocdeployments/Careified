@@ -127,9 +127,9 @@ export async function POST(req: NextRequest) {
       campaignId
     })
   } catch (error) {
-    console.error('AIRecruit campaign creation error:', error)
+    console.error('AIRECRUIT ERROR:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
