@@ -154,9 +154,9 @@ export default function CareifiedHero() {
           className="mx-auto mb-16 max-w-2xl text-center text-[15px] leading-[1.7]"
           style={{ color: 'rgba(245,240,232,0.6)' }}
         >
-          For caregivers who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>recognition</em>.
-          Agencies who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>credibility</em>.
-          Families who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>visibility</em>.
+          Built for caregivers who demand <em style={{ color: GOLD, fontStyle: 'italic' }}>recognition</em>,
+          agencies who recruit with <em style={{ color: GOLD, fontStyle: 'italic' }}>confidence</em>,
+          and families who want <em style={{ color: GOLD, fontStyle: 'italic' }}>nothing but the best</em>.
         </p>
 
         {/* Card grid */}
