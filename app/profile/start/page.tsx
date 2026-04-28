@@ -2,10 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { Briefcase, Eye, Star, TrendingUp } from 'lucide-react';
 
 export default function ProfileStart() {
   const router = useRouter();
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   return (
     <div style={{ 
@@ -24,17 +33,10 @@ export default function ProfileStart() {
           maxWidth: '1200px', 
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: '1fr',
+          gridTemplateColumns: isDesktop ? '55fr 45fr' : '1fr',
           gap: '64px',
           alignItems: 'center'
         }}>
-          <style jsx>{`
-            @media (min-width: 768px) {
-              div[style*="grid-template-columns: 1fr"] {
-                grid-template-columns: 55fr 45fr !important;
-              }
-            }
-          `}</style>
           
           {/* Left Column - Content */}
           <div>
@@ -99,17 +101,10 @@ export default function ProfileStart() {
           <div style={{ 
             position: 'relative', 
             height: '100%', 
-            minHeight: '400px',
+            minHeight: isDesktop ? '560px' : '400px',
             borderRadius: '16px 16px 0 0',
             overflow: 'hidden'
           }}>
-            <style jsx>{`
-              @media (min-width: 768px) {
-                div[style*="minHeight: 400px"] {
-                  min-height: 560px !important;
-                }
-              }
-            `}</style>
             <Image
               src="/3Caregivers.jpg"
               alt="Caregivers who use Careified"
