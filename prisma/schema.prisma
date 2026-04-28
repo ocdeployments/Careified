@@ -382,8 +382,8 @@ model AIRecruitCall {
   id              String            @id @default(cuid())
   campaignId      String
   campaign        AIRecruitCampaign @relation(fields: [campaignId], references: [id])
-  caregiverId     String
-  caregiver       Caregiver         @relation(fields: [caregiverId], references: [id])
+  caregiverId     String?
+  caregiver       Caregiver?        @relation(fields: [caregiverId], references: [id])
   status          String            @default("pending")
   phoneNumber     String
   vapiCallId      String?
