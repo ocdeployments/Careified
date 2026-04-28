@@ -1,101 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
+import { scoreTranscript } from '@/lib/airecruit/scoring'
 
-// Scoring helper function
 async function scoreCallTranscript(
   callId: string,
-  transcript: string | null,
+  transcript: string,
   campaignId: string
 ) {
-  if (!transcript) return
-
   try {
-    // Get campaign screening questions and role
     const { rows: campaignRows } = await pool.query(
-      `SELECT title, "screeningQuestions" 
-       FROM "AIRecruitCampaign" 
-       WHERE id = $1 LIMIT 1`,
+      `SELECT title, "screeningQuestions" FROM "AIRecruitCampaign" WHERE id = $1 LIMIT 1`,
       [campaignId]
     )
-
     if (!campaignRows.length) return
 
     const campaign = campaignRows[0]
-    
-    const { scoreTranscript } = await import('@/lib/airecruit/scoring')
-    
     const result = await scoreTranscript(
       transcript,
       campaign.screeningQuestions,
       campaign.title
     )
-
     if (!result) return
 
     await pool.query(
       `UPDATE "AIRecruitCall"
-       SET
-         "rawScore" = $1,
-         "scoreBreakdown" = $2,
-         recommendation = $3,
-         "updatedAt" = NOW()
+       SET "rawScore" = $1, "scoreBreakdown" = $2, recommendation = $3, "updatedAt" = NOW()
        WHERE id = $4`,
-      [
-        result.overallScore,
-        JSON.stringify(result),
-        result.recommendation,
-        callId,
-      ]
+      [result.overallScore, JSON.stringify(result), result.recommendation, callId]
     )
-
-    console.log('SCORING COMPLETE:', { 
-      callId, 
-      score: result.overallScore, 
-      recommendation: result.recommendation 
-    })
-
+    console.log('SCORING COMPLETE:', { callId, score: result.overallScore, recommendation: result.recommendation })
   } catch (error) {
-    console.error('Score call error:', error)
+    console.error('SCORE CALL ERROR:', error)
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    console.log('VAPI WEBHOOK:', JSON.stringify(body))
 
-    // Vapi sends different event types
-    // We only care about call completion
     const { message } = body
-
     if (!message) {
       return NextResponse.json({ received: true })
     }
 
-    const { type, call } = message
+    const { type } = message
 
-    // Only process end-of-call-report events
     if (type !== 'end-of-call-report') {
       return NextResponse.json({ received: true })
     }
 
-    if (!call) {
-      return NextResponse.json({ received: true })
-    }
-
-    // Extract data from Vapi payload
-    const vapiCallId = call.id
-    const transcript = call.transcript || null
-    const duration = call.duration 
-      ? Math.round(call.duration) 
+    const vapiCallId = message?.call?.id
+    const transcript = message?.artifact?.transcript || null
+    const duration = message?.durationSeconds
+      ? Math.round(message.durationSeconds)
       : null
-    const endedReason = call.endedReason || null
+    const endedReason = message?.endedReason || null
 
-    console.log('CALL ENDED:', { 
-      vapiCallId, 
-      duration, 
+    console.log('CALL ENDED:', {
+      vapiCallId,
+      duration,
       endedReason,
-      hasTranscript: !!transcript 
+      hasTranscript: !!transcript
     })
 
     if (!vapiCallId) {
@@ -103,10 +68,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // Find the call record by vapiCallId
     const { rows } = await pool.query(
-      `SELECT id, "campaignId" FROM "AIRecruitCall" 
-       WHERE "vapiCallId" = $1 LIMIT 1`,
+      `SELECT id, "campaignId" FROM "AIRecruitCall" WHERE "vapiCallId" = $1 LIMIT 1`,
       [vapiCallId]
     )
 
@@ -117,44 +80,30 @@ export async function POST(req: NextRequest) {
 
     const callRecord = rows[0]
 
-    // Update the call record with transcript and completion data
     await pool.query(
-      `UPDATE "AIRecruitCall" 
-       SET 
-         status = 'completed',
-         transcript = $1,
-         duration = $2,
-         "completedAt" = NOW(),
-         "updatedAt" = NOW()
+      `UPDATE "AIRecruitCall"
+       SET status = 'completed', transcript = $1, duration = $2, "completedAt" = NOW(), "updatedAt" = NOW()
        WHERE id = $3`,
       [transcript, duration, callRecord.id]
     )
-
     console.log('CALL RECORD UPDATED:', callRecord.id)
 
-    // Update campaign counters
     await pool.query(
       `UPDATE "AIRecruitCampaign"
-       SET
-         "callsCompleted" = "callsCompleted" + 1,
-         "callsPending" = GREATEST("callsPending" - 1, 0),
-         "updatedAt" = NOW()
+       SET "callsCompleted" = "callsCompleted" + 1, "callsPending" = GREATEST("callsPending" - 1, 0), "updatedAt" = NOW()
        WHERE id = $1`,
       [callRecord.campaignId]
     )
-
     console.log('CAMPAIGN COUNTERS UPDATED')
 
-    // Trigger scoring asynchronously
-    // Don't await — don't block the webhook response
-    scoreCallTranscript(callRecord.id, transcript, callRecord.campaignId)
+    if (transcript) {
+      scoreCallTranscript(callRecord.id, transcript, callRecord.campaignId)
+    }
 
     return NextResponse.json({ received: true })
 
   } catch (error) {
     console.error('WEBHOOK ERROR:', error)
-    // Always return 200 to Vapi even on error
-    // Otherwise Vapi will retry repeatedly
     return NextResponse.json({ received: true })
   }
 }
