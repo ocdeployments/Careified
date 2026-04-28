@@ -28,7 +28,7 @@ const CARDS: Card[] = [
     number: '01',
     label: 'For Caregivers',
     headline: 'Build once.\nBe seen forever.',
-    href: '/for-caregivers',
+    href: '/profile/start',
     stat: '9.7M',
     statLabel: 'jobs by 2034',
     gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0F1F3D 45%, #1A1530 100%)',
@@ -36,9 +36,9 @@ const CARDS: Card[] = [
     imageAlt: 'Professional caregivers',
     popup: {
       hook: "You don't need another app.",
-      sub: 'You need a platform that sees you, values you, and treats you like the professional you are.',
-      follow: 'Careified is built for caregivers who are done being invisible.',
-      cta: 'Claim your profile — free',
+      sub: 'A platform built to recognize what you\'ve earned, showcase who you are, and put your career exactly where it belongs — front and centre.',
+      follow: 'Your record. Your reputation. Your profession.',
+      cta: 'Claim your profile — free →',
     },
   },
   {
@@ -54,9 +54,9 @@ const CARDS: Card[] = [
     imageAlt: 'Agency staff in conversation',
     popup: {
       hook: 'Stop hiring blind.',
-      sub: 'Every caregiver has a verified record — credentials, placements, and peer ratings you can review.',
-      follow: 'Make confident hiring decisions from day one.',
-      cta: 'See how it works',
+      sub: 'Careified screens candidates, handles scheduling, and delivers interview-ready professionals — so your team focuses on people, not paperwork.',
+      follow: 'Source. Screen. Schedule. Done.',
+      cta: 'See how it works →',
     },
   },
   {
@@ -72,9 +72,9 @@ const CARDS: Card[] = [
     imageAlt: 'Caregiver with senior client',
     popup: {
       hook: 'Your family deserves more than a resume.',
-      sub: 'See real credentials, verified work history, and ratings from other families.',
-      follow: 'Because who cares for your family matters more than anything.',
-      cta: 'Tell us what you need',
+      sub: "Your loved one deserves someone professionally trained, verified, and screened. We match your family's needs to agencies who meet that standard — every time.",
+      follow: 'Clarity. Confidence. Care.',
+      cta: 'Tell us what you need →',
     },
   },
 ]
