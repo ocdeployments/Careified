@@ -15,67 +15,69 @@ export default function ForCaregiversPage() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F4F0' }}>
-      {/* Hero */}
-      <section style={{ padding: '140px 20px 80px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F3EE' }}>
+      {/* SECTION 1 — Hero */}
+      <section style={{ 
+        position: 'relative', 
+        paddingTop: '96px', 
+        paddingBottom: '80px', 
+        background: '#1B2A4A',
+        textAlign: 'center',
+        overflow: 'hidden'
+      }}>
+        {/* Grain texture overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
+          opacity: 0.4, pointerEvents: 'none'
+        }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
+          {/* Gold badge */}
           <div style={{ 
             display: 'inline-block', 
-            padding: '8px 16px', 
-            background: '#FDF6EC', 
-            borderRadius: '100px', 
-            marginBottom: '24px',
-            border: '1px solid #E8B86D'
-          }}>
-            <span style={{ fontSize: '14px', color: '#92400E', fontWeight: 500 }}>
-              For Healthcare Professionals
-            </span>
-          </div>
-          
-          <h1 style={{ 
-            fontSize: 'clamp(36px, 5vw, 56px)', 
-            fontWeight: 900, 
-            color: '#0D1B3E', 
-            lineHeight: 1.1,
+            border: '1px solid #C9A84C', 
+            color: '#C9A84C', 
+            borderRadius: '9999px',
+            padding: '6px 16px', 
+            fontSize: '11px', 
+            letterSpacing: '0.12em',
             marginBottom: '24px'
           }}>
-            Find Your Perfect<br />
-            <span style={{ background: 'linear-gradient(135deg, #C9973A, #E8B86D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Care Placement
-            </span>
-          </h1>
-          
-          <p style={{ 
-            fontSize: '20px', 
-            color: '#64748B', 
-            maxWidth: '600px', 
-            margin: '0 auto 40px',
-            lineHeight: 1.6
+            FOR CAREGIVERS
+          </div>
+
+          {/* Headline */}
+          <h1 style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontStyle: 'italic',
+            fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
+            color: '#C9A84C', 
+            textAlign: 'center',
+            lineHeight: 1.2,
+            margin: 0
           }}>
-            Create your free profile, showcase your skills, and connect with 
-            agencies looking for talented caregivers like you.
+            You've earned this.
+            <br />It's time the world knew it.
+          </h1>
+
+          {/* Subtext */}
+          <p style={{ 
+            color: 'rgba(255,255,255,0.75)', 
+            fontSize: '18px',
+            maxWidth: '560px', 
+            margin: '24px auto 0', 
+            textAlign: 'center', 
+            lineHeight: 1.7
+          }}>
+            Agencies are searching for caregivers like you right now.
+            A Careified profile puts your verified credentials, experience,
+            and reputation exactly where they're looking.
           </p>
-          
-          <Link 
-            href="/profile/build"
-            style={{ 
-              display: 'inline-block',
-              padding: '16px 32px', 
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              color: '#0D1B3E', 
-              borderRadius: '12px', 
-              textDecoration: 'none', 
-              fontWeight: 700,
-              fontSize: '16px',
-              boxShadow: '0 4px 14px rgba(201, 151, 58, 0.4)'
-            }}
-          >
-            Build Your Profile Free →
-          </Link>
         </div>
       </section>
 
-      {/* Story Section - Organic Editorial Layout */}
+      {/* SECTION 2 — Story section (KEEP AS-IS - existing two-column layout) */}
       <section style={{
         position: 'relative',
         backgroundColor: '#F5F3EE',
@@ -233,68 +235,387 @@ export default function ForCaregiversPage() {
         )}
       </section>
 
-      {/* Benefits */}
-      <section style={{ padding: '60px 20px', background: 'white' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#0D1B3E', textAlign: 'center', marginBottom: '48px' }}>
-            Why Caregivers Love Careified
+      {/* SECTION 3 — What You Get (3 outcome cards) */}
+      <section style={{
+        background: '#FFFFFF',
+        paddingTop: '80px',
+        paddingBottom: '80px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+          {/* Section label */}
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#C9A84C', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.2em',
+            fontWeight: 600,
+            marginBottom: '16px'
+          }}>
+            WHAT YOU GET
+          </div>
+
+          {/* Section headline */}
+          <h2 style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: '36px',
+            color: '#1B2A4A',
+            marginBottom: '48px'
+          }}>
+            Three things that change your career.
           </h2>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
-            {[
-              { title: 'Free Profile Builder', desc: 'Create a professional profile that highlights your skills and experience.', icon: '📝' },
-              { title: 'Get Discovered', desc: 'Agencies search our database to find and recruit caregivers like you.', icon: '👀' },
-              { title: 'Build Your Reputation', desc: 'Earn ratings from agencies to showcase your reliability and quality.', icon: '⭐' },
-              { title: 'Find Better Fits', desc: 'Match with agencies that align with your schedule, location, and preferences.', icon: '🎯' },
-              { title: 'Track Your Shifts', desc: 'Keep a record of all your work history in one convenient place.', icon: '📊' },
-              { title: 'Grow Your Career', desc: 'Access resources and opportunities to advance your healthcare career.', icon: '📈' },
-            ].map((item, i) => (
-              <div key={i} style={{ 
-                padding: '24px', 
-                background: '#F7F4F0',
-                borderRadius: '12px'
+
+          {/* Three cards */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr',
+            gap: '24px'
+          }}>
+            {/* Card 1 */}
+            <div style={{ 
+              background: '#F5F3EE', 
+              borderRadius: '16px', 
+              padding: '40px 32px',
+              textAlign: 'left',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '48px',
+                color: '#C9A84C',
+                marginBottom: '16px'
               }}>
-                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
-                  {item.title}
-                </h3>
-                <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.5 }}>
-                  {item.desc}
-                </p>
+                01
               </div>
-            ))}
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Agencies come to you.
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Your profile is searchable by hundreds of agencies.
+                Instead of applying and waiting, you get contacted directly
+                for roles that match your skills and schedule.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div style={{ 
+              background: '#F5F3EE', 
+              borderRadius: '16px', 
+              padding: '40px 32px',
+              textAlign: 'left',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '48px',
+                color: '#C9A84C',
+                marginBottom: '16px'
+              }}>
+                02
+              </div>
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Your credentials are trusted.
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Careified verifies your certifications, experience,
+                and references. Agencies see a vetted professional —
+                not just a resume. No more proving yourself from scratch.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div style={{ 
+              background: '#F5F3EE', 
+              borderRadius: '16px', 
+              padding: '40px 32px',
+              textAlign: 'left',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '48px',
+                color: '#C9A84C',
+                marginBottom: '16px'
+              }}>
+                03
+              </div>
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Your profile is yours forever.
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Unlike agency records that disappear when you leave,
+                your Careified profile travels with you. Every job, every
+                rating, every credential — permanently yours.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ 
-        padding: '80px 20px', 
-        background: '#0D1B3E',
+      {/* SECTION 4 — How it works (3 steps) */}
+      <section style={{
+        background: '#F5F3EE',
+        paddingTop: '80px',
+        paddingBottom: '80px',
         textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: 800, color: 'white', marginBottom: '16px' }}>
-            Ready to Get Started?
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
+          {/* Section label */}
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#C9A84C', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.2em',
+            fontWeight: 600,
+            marginBottom: '16px'
+          }}>
+            HOW IT WORKS
+          </div>
+
+          {/* Section headline */}
+          <h2 style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: '36px',
+            color: '#1B2A4A',
+            marginBottom: '48px'
+          }}>
+            15 minutes. Your entire career.
           </h2>
-          <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', marginBottom: '32px' }}>
-            Create your free profile in just 10 minutes.
+
+          {/* Three steps */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr',
+            gap: isDesktop ? '16px' : '32px',
+            alignItems: 'start'
+          }}>
+            {/* Step 1 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                display: 'inline-block',
+                border: '1px solid #C9A84C',
+                color: '#C9A84C',
+                borderRadius: '9999px',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: 600,
+                marginBottom: '16px'
+              }}>
+                Step 1
+              </div>
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Tell us about yourself
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Your name, location, specialties, and the type of
+                care you provide. Simple questions, no guesswork.
+              </p>
+            </div>
+
+            {/* Arrow separator (desktop only) */}
+            {isDesktop && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <span style={{ color: '#C9A84C', fontSize: '24px' }}>→</span>
+              </div>
+            )}
+
+            {/* Step 2 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                display: 'inline-block',
+                border: '1px solid #C9A84C',
+                color: '#C9A84C',
+                borderRadius: '9999px',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: 600,
+                marginBottom: '16px'
+              }}>
+                Step 2
+              </div>
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Add your credentials
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Upload certifications, list your experience, and
+                add references. We verify what matters most to agencies.
+              </p>
+            </div>
+
+            {/* Arrow separator (desktop only) */}
+            {isDesktop && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <span style={{ color: '#C9A84C', fontSize: '24px' }}>→</span>
+              </div>
+            )}
+
+            {/* Step 3 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                display: 'inline-block',
+                border: '1px solid #C9A84C',
+                color: '#C9A84C',
+                borderRadius: '9999px',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: 600,
+                marginBottom: '16px'
+              }}>
+                Step 3
+              </div>
+              <h3 style={{ 
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontSize: '20px',
+                color: '#1B2A4A',
+                marginBottom: '12px'
+              }}>
+                Go live and get found
+              </h3>
+              <p style={{ 
+                fontSize: '15px',
+                color: '#4A5568',
+                lineHeight: 1.6
+              }}>
+                Your profile is instantly searchable. Agencies
+                in your area can find, shortlist, and contact you directly.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5 — Trust line */}
+      <section style={{
+        background: '#1B2A4A',
+        paddingTop: '60px',
+        paddingBottom: '60px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 20px' }}>
+          <p style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontStyle: 'italic',
+            color: 'white',
+            fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)',
+            margin: 0
+          }}>
+            Caregivers on Careified get contacted by agencies
+            within days of going live.
           </p>
+          <p style={{ 
+            color: 'rgba(255,255,255,0.5)', 
+            fontSize: '13px',
+            marginTop: '16px'
+          }}>
+            — Based on caregiver profile activity
+          </p>
+        </div>
+      </section>
+
+      {/* SECTION 6 — Final CTA */}
+      <section style={{
+        background: '#F5F3EE',
+        paddingTop: '80px',
+        paddingBottom: '100px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 20px' }}>
+          <h2 style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: '40px',
+            color: '#1B2A4A',
+            marginBottom: '16px'
+          }}>
+            Your profile is free.
+            <br />Your career is priceless.
+          </h2>
+
+          <p style={{ 
+            color: '#6B7280', 
+            fontSize: '17px',
+            marginBottom: '40px'
+          }}>
+            Join caregivers who've stopped being invisible.
+          </p>
+
           <Link 
-            href="/profile/build"
+            href="/profile/start"
             style={{ 
               display: 'inline-block',
-              padding: '18px 40px', 
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              color: '#0D1B3E', 
-              borderRadius: '12px', 
-              textDecoration: 'none', 
-              fontWeight: 700,
-              fontSize: '18px'
+              padding: '16px 40px',
+              backgroundColor: '#C9A84C',
+              color: 'white',
+              borderRadius: '9999px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '17px'
             }}
           >
-            Build Your Profile →
+            Build My Profile — Free →
           </Link>
+
+          <p style={{ 
+            fontSize: '13px', 
+            color: '#9CA3AF', 
+            marginTop: '12px'
+          }}>
+            Takes 15 minutes. No credit card. No commitment.
+          </p>
         </div>
       </section>
     </div>

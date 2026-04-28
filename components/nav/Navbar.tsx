@@ -63,7 +63,7 @@ const panels = {
     links: [
       { href: '/profile/build',    label: 'Build your profile',    desc: 'Free — takes 10 minutes'      },
       { href: '/opportunities',    label: 'Browse opportunities',  desc: 'See open placements'          },
-      { href: '/for-caregivers',   label: 'How it works',          desc: 'See the caregiver journey'    },
+      { href: '/for-caregivers',   label: 'For Caregivers',       desc: 'See the caregiver journey'    },
     ],
     cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
   },
