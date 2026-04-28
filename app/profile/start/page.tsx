@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Briefcase, Eye, Star, TrendingUp } from 'lucide-react';
 
 export default function ProfileStart() {
   const router = useRouter();
@@ -8,80 +10,134 @@ export default function ProfileStart() {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      backgroundColor: '#F7F4F0',
-      padding: '40px 20px'
+      backgroundColor: '#F5F3EE',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-          <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 16px' }}>
-            Own Your Professional Story
-          </h1>
-          <p style={{ fontSize: '18px', color: '#64748B', margin: 0, lineHeight: 1.6 }}>
-            For the first time, your experience belongs to you—not locked in someone else's files
-          </p>
-        </div>
+      {/* Main Content */}
+      <div style={{ 
+        padding: '80px 20px 0',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '64px',
+          alignItems: 'center'
+        }}>
+          <style jsx>{`
+            @media (min-width: 768px) {
+              div[style*="grid-template-columns: 1fr"] {
+                grid-template-columns: 55fr 45fr !important;
+              }
+            }
+          `}</style>
+          
+          {/* Left Column - Content */}
+          <div>
+            {/* Header */}
+            <div style={{ textAlign: 'left', marginBottom: '32px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+              <h1 style={{ fontSize: 'clamp(32px, 4vw, 44px)', fontWeight: 800, color: '#1B2A4A', margin: '0 0 16px', lineHeight: 1.1 }}>
+                Own Your Professional Story
+              </h1>
+              <p style={{ fontSize: '18px', color: '#4A4A4A', margin: 0, lineHeight: 1.6, maxWidth: '520px' }}>
+                For the first time, your experience belongs to you—not locked in someone else's files
+              </p>
+            </div>
 
-        {/* Value Props */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '48px' }}>
-          <div style={{ padding: '24px', backgroundColor: 'white', borderRadius: '16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>📁</div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>You Own It</h3>
-            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Not trapped in agency computers. Take it anywhere. Your profile lives with you.</p>
+            {/* Value Props - 2x2 Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              {[
+                { icon: Briefcase, title: "You Own It", desc: "Not trapped in agency computers. Take it anywhere." },
+                { icon: Eye, title: "Be Seen", desc: "Hundreds of agencies searching. Multiple opportunities." },
+                { icon: Star, title: "Get Recognized", desc: "Prove your reliability. No more starting from scratch." },
+                { icon: TrendingUp, title: "Better Matches", desc: "Specialized skills = better pay. Work you actually want." },
+              ].map((item, i) => (
+                <div key={i} style={{ 
+                  padding: '20px', 
+                  backgroundColor: 'white', 
+                  borderRadius: '12px', 
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
+                }}>
+                  <item.icon size={20} color="#C9A84C" style={{ marginBottom: '12px' }} />
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1B2A4A', margin: '0 0 8px' }}>{item.title}</h3>
+                  <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div style={{ marginBottom: '32px' }}>
+              <button
+                onClick={() => router.push('/profile/build')}
+                style={{
+                  background: '#C9A84C',
+                  color: 'white',
+                  padding: '14px 32px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  textDecoration: 'none'
+                }}
+              >
+                Build My Profile — Free →
+              </button>
+              <p style={{ fontSize: '13px', color: '#9CA3AF', margin: '8px 0 0' }}>
+                Takes 15 minutes. Lasts your entire career.
+              </p>
+            </div>
           </div>
-          <div style={{ padding: '24px', backgroundColor: 'white', borderRadius: '16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>👀</div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>Be Seen</h3>
-            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Hundreds of agencies searching daily. Multiple opportunities, not just one.</p>
-          </div>
-          <div style={{ padding: '24px', backgroundColor: 'white', borderRadius: '16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>⭐</div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>Get Recognized</h3>
-            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Prove your reliability publicly. No more starting from scratch.</p>
-          </div>
-          <div style={{ padding: '24px', backgroundColor: 'white', borderRadius: '16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>💰</div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>Better Matches</h3>
-            <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Specialized skills = better pay. Work you actually want.</p>
+
+          {/* Right Column - Photo */}
+          <div style={{ 
+            position: 'relative', 
+            height: '100%', 
+            minHeight: '400px',
+            borderRadius: '16px 16px 0 0',
+            overflow: 'hidden'
+          }}>
+            <style jsx>{`
+              @media (min-width: 768px) {
+                div[style*="minHeight: 400px"] {
+                  min-height: 560px !important;
+                }
+              }
+            `}</style>
+            <Image
+              src="/3Caregivers.jpg"
+              alt="Caregivers who use Careified"
+              fill
+              style={{ objectFit: 'cover', borderRadius: '16px 16px 0 0' }}
+            />
           </div>
         </div>
+      </div>
 
-        {/* CTA */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <button
-            onClick={() => router.push('/profile/build')}
-            style={{
-              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-              color: '#0D1B3E',
-              padding: '20px 60px',
-              borderRadius: '12px',
-              border: 'none',
-              fontSize: '18px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 8px 20px rgba(201, 151, 58, 0.4)',
-              marginBottom: '12px'
-            }}
-          >
-            Build My Profile — Free →
-          </button>
-          <p style={{ fontSize: '14px', color: '#94A3B8', margin: 0 }}>
-            Takes 15 minutes. Lasts your entire career.
-          </p>
-        </div>
+      {/* Curved Bottom Wave */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', lineHeight: 0, zIndex: 2 }}>
+        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%' }}>
+          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#1B2A4A"/>
+        </svg>
+      </div>
 
-        {/* Scrollable Iframe Preview */}
-        <div style={{ marginBottom: '32px' }}>
-          <p style={{ fontSize: '14px', color: '#64748B', margin: '0 0 16px', textAlign: 'center', fontWeight: 500 }}>
+      {/* Iframe Preview Section (below the wave) */}
+      <div style={{ backgroundColor: '#1B2A4A', padding: '60px 20px', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 16px', textAlign: 'center', fontWeight: 500 }}>
             ⬇️ Scroll to see your complete professional profile
           </p>
           <div style={{ 
             borderRadius: '16px', 
             overflow: 'hidden', 
-            border: '1px solid #E2E8F0',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
           }}>
             <iframe
               src="/profile/demo-preview"
@@ -94,16 +150,6 @@ export default function ProfileStart() {
               title="Profile Preview"
             />
           </div>
-        </div>
-
-        {/* Skip Link */}
-        <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <button 
-            onClick={() => router.push('/profile/build')}
-            style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
-          >
-            Skip — I already have a profile
-          </button>
         </div>
       </div>
     </div>
