@@ -28,7 +28,7 @@ const CARDS: Card[] = [
     number: '01',
     label: 'For Caregivers',
     headline: "You don't need another app.\nBuild once. Be seen forever.",
-    href: '/profile/start',
+    href: '/for-caregivers',
     stat: '9.7M',
     statLabel: 'jobs by 2034',
     gradient: 'linear-gradient(160deg, #0D1B3E 0%, #0F1F3D 45%, #1A1530 100%)',
