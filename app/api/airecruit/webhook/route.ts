@@ -1,6 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 
+// Scoring helper function
+async function scoreCallTranscript(
+  callId: string,
+  transcript: string | null,
+  campaignId: string
+) {
+  if (!transcript) return
+
+  try {
+    // Get campaign screening questions and role
+    const { rows: campaignRows } = await pool.query(
+      `SELECT title, "screeningQuestions" 
+       FROM "AIRecruitCampaign" 
+       WHERE id = $1 LIMIT 1`,
+      [campaignId]
+    )
+
+    if (!campaignRows.length) return
+
+    const campaign = campaignRows[0]
+    
+    const { scoreTranscript } = await import('@/lib/airecruit/scoring')
+    
+    const result = await scoreTranscript(
+      transcript,
+      campaign.screeningQuestions,
+      campaign.title
+    )
+
+    if (!result) return
+
+    await pool.query(
+      `UPDATE "AIRecruitCall"
+       SET
+         "rawScore" = $1,
+         "scoreBreakdown" = $2,
+         recommendation = $3,
+         "updatedAt" = NOW()
+       WHERE id = $4`,
+      [
+        result.overallScore,
+        JSON.stringify(result),
+        result.recommendation,
+        callId,
+      ]
+    )
+
+    console.log('SCORING COMPLETE:', { 
+      callId, 
+      score: result.overallScore, 
+      recommendation: result.recommendation 
+    })
+
+  } catch (error) {
+    console.error('Score call error:', error)
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -86,6 +144,10 @@ export async function POST(req: NextRequest) {
     )
 
     console.log('CAMPAIGN COUNTERS UPDATED')
+
+    // Trigger scoring asynchronously
+    // Don't await — don't block the webhook response
+    scoreCallTranscript(callRecord.id, transcript, callRecord.campaignId)
 
     return NextResponse.json({ received: true })
 
