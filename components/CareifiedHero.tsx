@@ -27,7 +27,7 @@ const CARDS: Card[] = [
     id: 'caregivers',
     number: '01',
     label: 'For Caregivers',
-    headline: 'Build once.\nBe seen forever.',
+    headline: "You don't need another app.\nBuild once. Be seen forever.",
     href: '/profile/start',
     stat: '9.7M',
     statLabel: 'jobs by 2034',
