@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
+import { initiateVapiCall } from '@/lib/airecruit/vapi'
 
 async function getAgencyId(clerkUserId: string): Promise<string | null> {
   const { rows } = await pool.query(
@@ -77,7 +78,41 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 7. Return created campaign
+    // 7. Fetch the created calls to get their IDs
+    const createdCallsResult = await pool.query(
+      `SELECT id, "phoneNumber" FROM "AIRecruitCall" WHERE "campaignId" = $1`,
+      [campaignId]
+    )
+    const createdCalls = createdCallsResult.rows
+
+    // 8. Launch Vapi calls for each — fire and don't await
+    const vapiPromises = createdCalls.map(async (call: { id: string; phoneNumber: string }) => {
+      const result = await initiateVapiCall({
+        phoneNumber: call.phoneNumber,
+        campaignId: campaignId,
+        callId: call.id,
+        roleTitle: title,
+        screeningQuestions,
+      })
+
+      // Update call record with vapiCallId or error status
+      if (result.success && result.vapiCallId) {
+        await pool.query(
+          `UPDATE "AIRecruitCall" SET "vapiCallId" = $1, status = 'calling', "startedAt" = NOW() WHERE id = $2`,
+          [result.vapiCallId, call.id]
+        )
+      } else {
+        await pool.query(
+          `UPDATE "AIRecruitCall" SET status = 'failed' WHERE id = $1`,
+          [call.id]
+        )
+      }
+    })
+
+    // Launch all calls in parallel, don't block response
+    Promise.allSettled(vapiPromises)
+
+    // 9. Return created campaign
     return NextResponse.json({
       success: true,
       campaignId
