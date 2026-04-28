@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     // 6. Create one AIRecruitCall per phone number
     for (const phoneNumber of phoneNumbers) {
       await pool.query(
-        `INSERT INTO "AIRecruitCall" (id, "campaignId", "phoneNumber") VALUES (gen_random_uuid(), $1, $2)`,
+        `INSERT INTO "AIRecruitCall" (id, "campaignId", "phoneNumber", "updatedAt") VALUES (gen_random_uuid(), $1, $2, NOW())`,
         [campaignId, phoneNumber]
       )
     }
