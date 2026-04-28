@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     // 6. Create one AIRecruitCall per phone number
     const callValues = phoneNumbers.map((phoneNumber: string) => 
-      `(gen_random_uuid(), '${campaignId}', 'pending', '${phoneNumber}', NOW(), NOW())`
+      `(gen_random_uuid(), '${campaignId}', 'pending', '${phoneNumber}', NULL, NOW(), NOW())`
     ).join(', ')
 
     if (callValues) {
