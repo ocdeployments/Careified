@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
 import { initiateVapiCall } from '@/lib/airecruit/vapi'
+import { isWithinCallingHours } from '@/lib/airecruit/calling-hours'
 
 export async function POST(req: NextRequest) {
   try {
@@ -85,8 +86,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Check calling hours before firing calls
+    const allowedCalls: typeof phoneNumbersToCall = []
+    const queuedCalls: typeof phoneNumbersToCall = []
+
+    for (const call of phoneNumbersToCall) {
+      const hoursCheck = isWithinCallingHours(call.phoneNumber)
+      if (!hoursCheck.allowed) {
+        queuedCalls.push(call)
+        await pool.query(
+          `UPDATE "AIRecruitCall"
+           SET status = 'queued_compliance',
+               "callbackNotes" = $1,
+               "updatedAt" = NOW()
+           WHERE id = $2`,
+          [hoursCheck.reason, call.id]
+        )
+        console.log('OUTSIDE CALLING HOURS:', call.phoneNumber, hoursCheck.reason)
+      } else {
+        allowedCalls.push(call)
+      }
+    }
+
     const vapiResults = await Promise.allSettled(
-      phoneNumbersToCall.map(async (call: { id: string; phoneNumber: string }) => {
+      allowedCalls.map(async (call: { id: string; phoneNumber: string }) => {
         const result = await initiateVapiCall({
           phoneNumber: call.phoneNumber,
           campaignId: campaignId,
@@ -116,6 +139,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       campaignId,
+      callsInitiated: allowedCalls.length,
+      callsQueued: queuedCalls.length,
+      callsSuppressed: suppressedCalls.length,
       vapiResults: vapiResults.map(r =>
         r.status === 'fulfilled' ? r.value : { error: String(r.reason) }
       )
