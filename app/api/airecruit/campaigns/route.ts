@@ -9,11 +9,9 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.log('AUTH userId:', userId)
 
     const body = await req.json()
     const { title, roleDescription, screeningQuestions, phoneNumbers } = body
-    console.log('BODY received:', { title, phoneNumbers })
 
     if (!title || !roleDescription || !screeningQuestions || !phoneNumbers) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -26,13 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { rows } = await pool.query(
-      `SELECT id, "vapiAssistantId", "vapiPhoneNumberId" FROM agencies WHERE clerk_user_id = $1 LIMIT 1`,
+      `SELECT id FROM agencies WHERE clerk_user_id = $1 LIMIT 1`,
       [userId]
     )
     const agency = rows[0]
-    console.log("VAPI IDs:", agency?.vapiAssistantId, agency?.vapiPhoneNumberId)
-    console.log('AGENCY found:', agency?.id)
-
     if (!agency) {
       return NextResponse.json({ error: 'Agency not found' }, { status: 404 })
     }
@@ -49,7 +44,6 @@ export async function POST(req: NextRequest) {
       [agency.id, title, roleDescription, screeningQuestions, phoneNumbers.length]
     )
     const campaignId = campaignResult.rows[0].id
-    console.log('CAMPAIGN CREATED:', campaignId)
 
     for (const phoneNumber of phoneNumbers) {
       await pool.query(
@@ -66,23 +60,16 @@ export async function POST(req: NextRequest) {
       [campaignId]
     )
     const createdCalls = callsResult.rows
-    console.log('CALLS CREATED:', createdCalls.length)
 
     const vapiResults = await Promise.allSettled(
       createdCalls.map(async (call: { id: string; phoneNumber: string }) => {
-        console.log('FIRING VAPI for:', call.phoneNumber)
-
         const result = await initiateVapiCall({
           phoneNumber: call.phoneNumber,
           campaignId: campaignId,
           callId: call.id,
           roleTitle: title,
           screeningQuestions,
-          vapiAssistantId: agency.vapiAssistantId || '',
-          vapiPhoneNumberId: agency.vapiPhoneNumberId || '',
         })
-
-        console.log('VAPI RESULT:', JSON.stringify(result))
 
         if (result.success && result.vapiCallId) {
           await pool.query(
@@ -101,8 +88,6 @@ export async function POST(req: NextRequest) {
         return result
       })
     )
-
-    console.log('ALL VAPI RESULTS:', JSON.stringify(vapiResults))
 
     return NextResponse.json({
       success: true,
