@@ -135,7 +135,7 @@ export default function Navbar() {
       ].join(' ')}
       aria-label="Main navigation"
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
 
         {/* Logo */}
         <Link
@@ -147,9 +147,10 @@ export default function Navbar() {
             src="/Carefied-logo.png"
             alt="Careified"
             style={{
-              height: '38px',
+              height: '64px',
               width: 'auto',
               display: 'block',
+              objectFit: 'contain',
             }}
           />
         </Link>
