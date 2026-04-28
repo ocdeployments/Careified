@@ -202,6 +202,7 @@ model Agency {
   caregiver_shifts               CaregiverShift[]
   airecruit_campaigns            AIRecruitCampaign[]
   airecruit_waitlist             AIRecruitWaitlist[]
+  airecruit_suppressions        AIRecruitSuppression[]
 
   @@map("agencies")
 }
@@ -392,10 +393,14 @@ model AIRecruitCall {
   scoreBreakdown Json?
   recommendation  String?
   duration        Int?
-  startedAt       DateTime?
-  completedAt     DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  startedAt           DateTime?
+  completedAt         DateTime?
+  candidateName      String?
+  callbackRequestedAt String?
+  callbackNotes       String?
+  callStatus          String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   @@index([campaignId], map: "idx_airecruit_call_campaign")
   @@index([caregiverId], map: "idx_airecruit_call_caregiver")
@@ -409,4 +414,15 @@ model AIRecruitWaitlist {
   createdAt DateTime @default(now())
 
   @@index([agencyId], map: "idx_airecruit_waitlist_agency")
+}
+
+model AIRecruitSuppression {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique
+  reason      String
+  addedBy     String
+  agencyId    String?
+  agency      Agency?  @relation(fields: [agencyId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
