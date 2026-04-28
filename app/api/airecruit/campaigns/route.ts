@@ -47,13 +47,20 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Look up agency by Clerk userId
-    const agencyId = await getAgencyId(userId)
-    if (!agencyId) {
+    const agencyResult = await pool.query(
+      `SELECT id, "vapiAssistantId", "vapiPhoneNumberId" FROM agencies WHERE clerk_user_id = $1 LIMIT 1`,
+      [userId]
+    )
+    const agency = agencyResult.rows[0]
+    if (!agency) {
       return NextResponse.json(
         { error: 'Agency not found' },
         { status: 404 }
       )
     }
+    const agencyId = agency.id
+    const vapiAssistantId = agency.vapiAssistantId
+    const vapiPhoneNumberId = agency.vapiPhoneNumberId
 
     // 5. Create campaign
     const campaignResult = await pool.query(
@@ -93,6 +100,8 @@ export async function POST(req: NextRequest) {
         callId: call.id,
         roleTitle: title,
         screeningQuestions,
+        vapiAssistantId: vapiAssistantId || '',
+        vapiPhoneNumberId: vapiPhoneNumberId || '',
       })
 
       // Update call record with vapiCallId or error status
