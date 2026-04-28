@@ -61,8 +61,32 @@ export async function POST(req: NextRequest) {
     )
     const createdCalls = callsResult.rows
 
+    // Check suppression list before firing calls
+    const phoneNumbersToCall: typeof createdCalls = []
+    const suppressedCalls: typeof createdCalls = []
+
+    for (const call of createdCalls) {
+      const { rows: suppressed } = await pool.query(
+        `SELECT id FROM "AIRecruitSuppression" 
+         WHERE "phoneNumber" = $1 LIMIT 1`,
+        [call.phoneNumber]
+      )
+      if (suppressed.length > 0) {
+        suppressedCalls.push(call)
+        await pool.query(
+          `UPDATE "AIRecruitCall" 
+           SET status = 'suppressed', "updatedAt" = NOW() 
+           WHERE id = $1`,
+          [call.id]
+        )
+        console.log('SUPPRESSED:', call.phoneNumber)
+      } else {
+        phoneNumbersToCall.push(call)
+      }
+    }
+
     const vapiResults = await Promise.allSettled(
-      createdCalls.map(async (call: { id: string; phoneNumber: string }) => {
+      phoneNumbersToCall.map(async (call: { id: string; phoneNumber: string }) => {
         const result = await initiateVapiCall({
           phoneNumber: call.phoneNumber,
           campaignId: campaignId,
