@@ -5,7 +5,9 @@ import { scoreTranscript } from '@/lib/airecruit/scoring'
 async function scoreCallTranscript(
   callId: string,
   transcript: string,
-  campaignId: string
+  campaignId: string,
+  phoneNumber: string,
+  agencyId: string
 ) {
   try {
     const { rows: campaignRows } = await pool.query(
@@ -29,6 +31,36 @@ async function scoreCallTranscript(
       [result.overallScore, JSON.stringify(result), result.recommendation, callId]
     )
     console.log('SCORING COMPLETE:', { callId, score: result.overallScore, recommendation: result.recommendation })
+
+    // Check for opt-out phrases in transcript
+    const optOutPhrases = [
+      'remove me', 'take me off', 'do not call',
+      'stop calling', 'unsubscribe', 'not interested',
+      'leave me alone', 'opted out'
+    ]
+
+    const transcriptLower = transcript.toLowerCase()
+    const optedOut = optOutPhrases.some(phrase =>
+      transcriptLower.includes(phrase)
+    )
+
+    if (optedOut) {
+      await pool.query(
+        `INSERT INTO "AIRecruitSuppression"
+          (id, "phoneNumber", reason, "addedBy", "agencyId", "createdAt", "updatedAt")
+         VALUES
+          (gen_random_uuid(), $1, 'opted_out_during_call', 'system', $2, NOW(), NOW())
+         ON CONFLICT ("phoneNumber") DO NOTHING`,
+        [phoneNumber, agencyId]
+      )
+      await pool.query(
+        `UPDATE "AIRecruitCall"
+         SET "callStatus" = 'opted_out', "updatedAt" = NOW()
+         WHERE id = $1`,
+        [callId]
+      )
+      console.log('OPT OUT RECORDED:', phoneNumber)
+    }
   } catch (error) {
     console.error('SCORE CALL ERROR:', error)
   }
@@ -69,7 +101,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { rows } = await pool.query(
-      `SELECT id, "campaignId" FROM "AIRecruitCall" WHERE "vapiCallId" = $1 LIMIT 1`,
+      `SELECT id, "campaignId", "phoneNumber" FROM "AIRecruitCall" WHERE "vapiCallId" = $1 LIMIT 1`,
       [vapiCallId]
     )
 
@@ -96,8 +128,15 @@ export async function POST(req: NextRequest) {
     )
     console.log('CAMPAIGN COUNTERS UPDATED')
 
-    if (transcript) {
-      scoreCallTranscript(callRecord.id, transcript, callRecord.campaignId)
+    // Get agencyId for scoring and opt-out detection
+    const { rows: campaignRows } = await pool.query(
+      `SELECT "agencyId" FROM "AIRecruitCampaign" WHERE id = $1 LIMIT 1`,
+      [callRecord.campaignId]
+    )
+    const agencyId = campaignRows[0]?.agencyId
+
+    if (transcript && agencyId) {
+      scoreCallTranscript(callRecord.id, transcript, callRecord.campaignId, callRecord.phoneNumber, agencyId)
     }
 
     return NextResponse.json({ received: true })
