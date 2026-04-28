@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { Briefcase, Eye, Star, TrendingUp } from 'lucide-react'
 
 export default function ForCaregiversPage() {
   return (
@@ -59,6 +61,176 @@ export default function ForCaregiversPage() {
           >
             Build Your Profile Free →
           </Link>
+        </div>
+      </section>
+
+      {/* Story Section - Two Column Layout */}
+      <section 
+        id="story"
+        style={{ 
+          padding: '80px 20px', 
+          background: 'white',
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '64px',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}
+      >
+        <style jsx>{`
+          @media (min-width: 768px) {
+            section#story {
+              grid-template-columns: 55fr 45fr;
+            }
+          }
+        `}</style>
+        {/* Left Column - Conversational Story */}
+        <div>
+          {/* Section Label */}
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#C9A84C', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.2em',
+            fontWeight: 600,
+            marginBottom: '16px'
+          }}>
+            01 / FOR CAREGIVERS
+          </div>
+
+          {/* Main Headline */}
+          <h2 style={{ 
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: 'clamp(32px, 4vw, 40px)',
+            color: '#1B2A4A',
+            lineHeight: 1.15,
+            marginBottom: '24px'
+          }}>
+            Your career deserves
+            <br />to be seen.
+          </h2>
+
+          {/* Lead Paragraph */}
+          <p style={{ 
+            fontSize: '18px',
+            color: '#4A4A4A',
+            lineHeight: 1.7,
+            marginBottom: '24px'
+          }}>
+            You've spent years showing up, caring deeply, and building real
+            skills. But when the shift ends — none of that lives anywhere.
+            No record. No reputation. No proof of what you've built.
+          </p>
+
+          {/* Gold Divider */}
+          <div style={{ 
+            width: '48px', 
+            height: '2px', 
+            background: '#C9A84C',
+            marginBottom: '24px'
+          }} />
+
+          {/* Second Paragraph */}
+          <p style={{ 
+            fontSize: '18px',
+            color: '#4A4A4A',
+            lineHeight: 1.7,
+            marginBottom: '32px'
+          }}>
+            Careified changes that. Build your profile once — your
+            certifications, your experience, your specialties — and carry
+            it with you for your entire career. Agencies find you.
+            Families trust you. Your work finally speaks for itself.
+          </p>
+
+          {/* Pain Point Cards - 2x2 Grid */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '16px',
+            marginBottom: '32px'
+          }}>
+            {[
+              { icon: Briefcase, title: "You Own It", body: "Not trapped in agency files. Your profile lives with you, not with them." },
+              { icon: Eye, title: "Be Seen", body: "Agencies searching for exactly your skills find you directly — multiple opportunities at once." },
+              { icon: Star, title: "Get Recognized", body: "Your reliability is public and provable. No more starting from scratch with every new employer." },
+              { icon: TrendingUp, title: "Better Matches", body: "Specialized skills mean better pay and work you actually want to do." },
+            ].map((card, i) => (
+              <div key={i} style={{ 
+                background: 'white',
+                borderRadius: '12px',
+                padding: '20px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
+              }}>
+                <card.icon size={20} color="#C9A84C" style={{ marginBottom: '12px' }} />
+                <h3 style={{ 
+                  fontFamily: "'DM Serif Display', Georgia, serif",
+                  fontSize: '16px',
+                  color: '#1B2A4A',
+                  marginBottom: '8px'
+                }}>
+                  {card.title}
+                </h3>
+                <p style={{ 
+                  fontSize: '14px',
+                  color: '#6B7280',
+                  lineHeight: 1.5
+                }}>
+                  {card.body}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <Link 
+            href="/profile/start"
+            style={{ 
+              display: 'inline-block',
+              padding: '14px 32px',
+              background: '#C9A84C',
+              color: 'white',
+              borderRadius: '9999px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '16px'
+            }}
+          >
+            Build My Profile — Free →
+          </Link>
+
+          {/* Sub-label */}
+          <div style={{ 
+            fontSize: '13px', 
+            color: '#9CA3AF', 
+            marginTop: '8px'
+          }}>
+            Takes 15 minutes. Lasts your entire career.
+          </div>
+        </div>
+
+        {/* Right Column - Photo */}
+        <div style={{ 
+          position: 'relative', 
+          height: '100%', 
+          minHeight: '320px',
+          borderRadius: '16px 16px 0 0',
+          overflow: 'hidden'
+        }}>
+        <style jsx>{`
+          @media (min-width: 768px) {
+            div[style*="minHeight: 320px"] {
+              min-height: 520px !important;
+            }
+          }
+        `}</style>
+          <Image
+            src="/3Caregivers.jpg"
+            alt="Caregivers who use Careified"
+            fill
+            style={{ objectFit: 'cover', borderRadius: '16px 16px 0 0' }}
+          />
         </div>
       </section>
 
