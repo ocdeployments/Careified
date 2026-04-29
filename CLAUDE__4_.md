@@ -155,12 +155,17 @@ Routes:
 - /agency/airecruit — hub page
 - /agency/airecruit/new — campaign creation form
 - /api/airecruit/campaigns — POST handler
+- /api/airecruit/webhook — POST handler
 
 Key files:
 - app/agency/airecruit/page.tsx
 - app/agency/airecruit/new/page.tsx
 - app/api/airecruit/campaigns/route.ts
+- app/api/airecruit/webhook/route.ts
 - lib/airecruit/vapi.ts
+- lib/airecruit/scoring.ts
+- lib/airecruit/calling-hours.ts
+- prisma/schema.prisma (AIRecruitCampaign, AIRecruitCall, AIRecruitSuppression, AIRecruitWaitlist)
 
 Vapi config:
 - Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
@@ -171,11 +176,10 @@ Vapi config:
 - Canadian calls supported via US Twilio number
 
 Build phases:
-COMPLETE: Phase 1 (DB), Phase 2 (UI), Phase 3 (Vapi)
+COMPLETE: Phase 1 (DB), Phase 2 (UI), Phase 3 (Vapi), Phase 4 (Webhook), Phase 5 (Scoring)
+COMPLIANCE (8 commits): Suppression list, calling hours, opt-out detection, CRTC consent
 PENDING:
-- Phase 4: Webhook handler /api/airecruit/webhook
-- Phase 5: Scoring engine (Claude on transcript)
-- Phase 6: Campaign dashboard
+- Phase 6: Campaign dashboard (list, statuses, results)
 - Phase 7: Retry/re-engagement logic
 - Phase 8: Self-scheduling
 - Phase 9: Outcome tracking feedback loop
