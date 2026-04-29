@@ -91,7 +91,7 @@ Return only the JSON object.`
         'X-Title': 'Careified AIRecruit',
       },
       body: JSON.stringify({
-        model: 'minimax/minimax-2.5-flash',
+        model: 'minimax/minimax-m2.5',
         messages: [
           {
             role: 'user',
