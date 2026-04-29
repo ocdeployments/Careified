@@ -61,41 +61,46 @@ Routes built:
 - /agency/airecruit — hub page (live)
 - /agency/airecruit/new — campaign creation form (live)
 - /api/airecruit/campaigns — POST handler (live)
+- /api/airecruit/webhook — POST handler (live)
 
 Files:
 - app/agency/airecruit/page.tsx
 - app/agency/airecruit/new/page.tsx
 - app/api/airecruit/campaigns/route.ts
+- app/api/airecruit/webhook/route.ts
 - lib/airecruit/vapi.ts
+- lib/airecruit/scoring.ts
+- lib/airecruit/calling-hours.ts
+- prisma/schema.prisma (AIRecruitCampaign, AIRecruitCall, AIRecruitSuppression, AIRecruitWaitlist)
 
 Voice provider: Vapi (vapi.ai)
 - Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
 - Phone: US Twilio number imported into Vapi
 - Canada supported via Twilio number import
 
-Current status: Campaign creation works. Vapi call 
-initiation wired. Last known error was:
-1. phoneNumberId must be UUID — fix: correct 
-   VAPI_PHONE_NUMBER_ID in Vercel env vars
-2. assistantOverrides.model.provider error — fix: 
-   removed model override, now uses systemPrompt 
-   override only (committed 2026-04-28)
+Current status: ALL 8 COMPLIANCE COMMITS COMPLETE
+- Campaign creation with CRTC consent checkbox
+- Suppression list check before calling
+- Calling hours enforcement (CRTC/TCPA)
+- Webhook receives call completion
+- Transcript scoring via OpenRouter/Minimax
+- Opt-out phrase detection
 
-Next step: Test call end to end after env var fix.
+Next: Phase 6 campaign dashboard
 
 ---
 
 ## 5. AIRecruit Build Phases
 
-COMPLETE:
-- Phase 1: Database schema (AIRecruitCampaign, AIRecruitCall, AIRecruitWaitlist)
-- Phase 2: Campaign creation UI
-- Phase 3: Vapi integration layer (in progress — pending test)
+COMPLETE (Phases 1-5):
+- Phase 1: Database schema ✓
+- Phase 2: Campaign creation UI ✓
+- Phase 3: Vapi integration layer ✓
+- Phase 4: Webhook handler ✓
+- Phase 5: Scoring engine ✓
+- Compliance layer (8 commits) ✓
 
 PENDING:
-- Phase 4: Webhook handler (/api/airecruit/webhook) 
-  to receive Vapi call results
-- Phase 5: Scoring engine (Claude API on transcript)
 - Phase 6: Campaign dashboard (list, statuses, results)
 - Phase 7: Scheduling integration
 
