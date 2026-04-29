@@ -30,10 +30,14 @@ export default async function AIRecruitPage() {
   const totalCalls = campaigns.reduce((sum, c) => sum + (c.callsCompleted || 0), 0)
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleString('en-CA', {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/Toronto'
     })
   }
 
