@@ -12,16 +12,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { title, roleDescription, screeningQuestions, phoneNumbers } = body
+    const { title, roleDescription, screeningQuestions, candidates, consentConfirmed } = body
 
-    if (!title || !roleDescription || !screeningQuestions || !phoneNumbers) {
+    if (!title || !roleDescription || !screeningQuestions || !candidates) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
     if (!Array.isArray(screeningQuestions) || screeningQuestions.length === 0) {
       return NextResponse.json({ error: 'At least one screening question required' }, { status: 400 })
     }
-    if (!Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
-      return NextResponse.json({ error: 'At least one phone number required' }, { status: 400 })
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return NextResponse.json({ error: 'At least one candidate required' }, { status: 400 })
+    }
+    // Validate each candidate has firstName and phone
+    const invalidCandidates = candidates.filter(
+      (c: any) => !c.firstName || !c.phone
+    )
+    if (invalidCandidates.length > 0) {
+      return NextResponse.json({ error: 'Each candidate must have firstName and phone' }, { status: 400 })
     }
 
     const { rows } = await pool.query(
@@ -42,22 +49,36 @@ export async function POST(req: NextRequest) {
         (gen_random_uuid(), $1, $2, $3, $4,
          'active', $5, $5, 0, 0, NOW(), NOW())
        RETURNING id`,
-      [agency.id, title, roleDescription, screeningQuestions, phoneNumbers.length]
+      [agency.id, title, roleDescription, screeningQuestions, candidates.length]
     )
     const campaignId = campaignResult.rows[0].id
 
-    for (const phoneNumber of phoneNumbers) {
+    // Insert candidates with structured data
+    for (const candidate of candidates) {
       await pool.query(
         `INSERT INTO "AIRecruitCall"
-          (id, "campaignId", "phoneNumber", status, "createdAt", "updatedAt")
+          (id, "campaignId", "phoneNumber", 
+           "candidateFirstName", "candidateLastName",
+           "candidateEmail", "candidateNotes",
+           status, "createdAt", "updatedAt")
          VALUES
-          (gen_random_uuid(), $1, $2, 'pending', NOW(), NOW())`,
-        [campaignId, phoneNumber]
+          (gen_random_uuid(), $1, $2, $3, $4, $5, $6,
+           'pending', NOW(), NOW())`,
+        [
+          campaignId,
+          candidate.phone,
+          candidate.firstName,
+          candidate.lastName || null,
+          candidate.email || null,
+          candidate.notes || null,
+        ]
       )
     }
 
     const callsResult = await pool.query(
-      `SELECT id, "phoneNumber" FROM "AIRecruitCall" WHERE "campaignId" = $1`,
+      `SELECT id, "phoneNumber", "candidateFirstName", 
+              "candidateLastName", "candidateNotes"
+       FROM "AIRecruitCall" WHERE "campaignId" = $1`,
       [campaignId]
     )
     const createdCalls = callsResult.rows
@@ -109,11 +130,14 @@ export async function POST(req: NextRequest) {
     }
 
     const vapiResults = await Promise.allSettled(
-      allowedCalls.map(async (call: { id: string; phoneNumber: string }) => {
+      allowedCalls.map(async (call: { id: string; phoneNumber: string; candidateFirstName: string; candidateLastName: string; candidateNotes: string }) => {
         const result = await initiateVapiCall({
           phoneNumber: call.phoneNumber,
           campaignId: campaignId,
           callId: call.id,
+          candidateFirstName: call.candidateFirstName,
+          candidateLastName: call.candidateLastName,
+          candidateNotes: call.candidateNotes,
           roleTitle: title,
           screeningQuestions,
         })
