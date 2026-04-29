@@ -1,19 +1,49 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { auth } from '@clerk/nextjs/server'
+import { pool } from '@/lib/db'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Phone, Target, Calendar, FileText, ArrowRight } from 'lucide-react'
+import { Phone, ArrowRight } from 'lucide-react'
 import AgencyShell from '@/components/shells/AgencyShell'
 
-export default function AIRecruitPage() {
-  const [isDesktop, setIsDesktop] = useState(false)
+export default async function AIRecruitPage() {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
 
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
+  const { rows: agencyRows } = await pool.query(
+    `SELECT id FROM agencies WHERE clerk_user_id = $1 LIMIT 1`,
+    [userId]
+  )
+  if (!agencyRows.length) redirect('/agency/pending-approval')
+  const agencyId = agencyRows[0].id
+
+  const { rows: campaigns } = await pool.query(
+    `SELECT 
+      id, title, status, "totalCandidates",
+      "callsCompleted", "callsPending", "callsFailed",
+      "createdAt"
+     FROM "AIRecruitCampaign"
+     WHERE "agencyId" = $1
+     ORDER BY "createdAt" DESC`,
+    [agencyId]
+  )
+
+  const totalCalls = campaigns.reduce((sum, c) => sum + (c.callsCompleted || 0), 0)
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return { bg: '#DBEAFE', color: '#1D4ED8' }
+      case 'completed': return { bg: '#DCFCE7', color: '#16A34A' }
+      default: return { bg: '#F1F5F9', color: '#64748B' }
+    }
+  }
 
   return (
     <AgencyShell title="AIRecruit" subtitle="AI-Powered Hiring">
@@ -27,7 +57,7 @@ export default function AIRecruitPage() {
           maxWidth: '1100px',
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+          gridTemplateColumns: '1fr 1fr',
           gap: '32px',
           alignItems: 'center'
         }}>
@@ -37,7 +67,7 @@ export default function AIRecruitPage() {
               display: 'inline-block',
               background: 'rgba(201, 168, 76, 0.15)',
               border: '1px solid #C9A84C',
-              borderRadius: '9999px',
+              borderRadius: '99pxpx',
               padding: '4px 12px',
               fontSize: '11px',
               color: '#C9A84C',
@@ -83,7 +113,7 @@ export default function AIRecruitPage() {
                 color: '#C9A84C',
                 marginBottom: '4px'
               }}>
-                0
+                {campaigns.length}
               </div>
               <div style={{
                 fontSize: '12px',
@@ -91,7 +121,7 @@ export default function AIRecruitPage() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em'
               }}>
-                Calls Made
+                Total Campaigns
               </div>
             </div>
             <div style={{
@@ -107,7 +137,7 @@ export default function AIRecruitPage() {
                 color: '#C9A84C',
                 marginBottom: '4px'
               }}>
-                0
+                {totalCalls}
               </div>
               <div style={{
                 fontSize: '12px',
@@ -115,216 +145,278 @@ export default function AIRecruitPage() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em'
               }}>
-                Candidates Screened
+                Calls Made
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Four Feature Cards */}
+      {/* Campaigns Table Section */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
         padding: '0 24px 48px'
       }}>
+        {/* Section Header */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: isDesktop ? 'repeat(2, 1fr)' : '1fr',
-          gap: '24px'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px'
         }}>
-          {/* Card 1 */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
+          <h2 style={{
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontSize: '24px',
+            color: '#0D1B3E'
           }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(201, 168, 76, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '20px'
-            }}>
-              <Phone size={24} color="#C9A84C" />
-            </div>
-            <h3 style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: '20px',
-              color: '#0D1B3E',
-              marginBottom: '8px'
-            }}>
-              AI Voice Screening
-            </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#64748B',
-              lineHeight: 1.6,
-              marginBottom: '16px'
-            }}>
-              Automated phone interviews for caregiver candidates
-            </p>
-            <span style={{
-              display: 'inline-block',
+            Your Campaigns
+          </h2>
+          <Link
+            href="/agency/airecruit/new"
+            style={{
               background: '#C9A84C',
               color: 'white',
-              borderRadius: '9999px',
-              padding: '6px 14px',
-              fontSize: '11px',
-              fontWeight: 600
-            }}>
-              Coming Soon
-            </span>
-          </div>
-
-          {/* Card 2 */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
-          }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(201, 168, 76, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '20px'
-            }}>
-              <Target size={24} color="#C9A84C" />
-            </div>
-            <h3 style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: '20px',
-              color: '#0D1B3E',
-              marginBottom: '8px'
-            }}>
-              Candidate Scoring
-            </h3>
-            <p style={{
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 20px',
               fontSize: '14px',
-              color: '#64748B',
-              lineHeight: 1.6,
-              marginBottom: '16px'
-            }}>
-              Every call scored against your open role requirements
-            </p>
-            <span style={{
-              display: 'inline-block',
-              background: '#C9A84C',
-              color: 'white',
-              borderRadius: '9999px',
-              padding: '6px 14px',
-              fontSize: '11px',
-              fontWeight: 600
-            }}>
-              Coming Soon
-            </span>
-          </div>
-
-          {/* Card 3 */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
-          }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(201, 168, 76, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '20px'
-            }}>
-              <Calendar size={24} color="#C9A84C" />
-            </div>
-            <h3 style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: '20px',
-              color: '#0D1B3E',
-              marginBottom: '8px'
-            }}>
-              Smart Scheduling
-            </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#64748B',
-              lineHeight: 1.6,
-              marginBottom: '16px'
-            }}>
-              Top candidates auto-booked into your calendar
-            </p>
-            <span style={{
-              display: 'inline-block',
-              background: '#C9A84C',
-              color: 'white',
-              borderRadius: '9999px',
-              padding: '6px 14px',
-              fontSize: '11px',
-              fontWeight: 600
-            }}>
-              Coming Soon
-            </span>
-          </div>
-
-          {/* Card 4 */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
-          }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(201, 168, 76, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '20px'
-            }}>
-              <FileText size={24} color="#C9A84C" />
-            </div>
-            <h3 style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: '20px',
-              color: '#0D1B3E',
-              marginBottom: '8px'
-            }}>
-              Interview Summaries
-            </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#64748B',
-              lineHeight: 1.6,
-              marginBottom: '16px'
-            }}>
-              Full transcripts and insights delivered to your dashboard
-            </p>
-            <span style={{
-              display: 'inline-block',
-              background: '#C9A84C',
-              color: 'white',
-              borderRadius: '9999px',
-              padding: '6px 14px',
-              fontSize: '11px',
-              fontWeight: 600
-            }}>
-              Coming Soon
-            </span>
-          </div>
+              fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            New Campaign
+          </Link>
         </div>
+
+        {campaigns.length === 0 ? (
+          /* Empty State */
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            border: '1px solid #E2E8F0',
+            padding: '64px 32px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              background: 'rgba(201, 168, 76, 0.1)',
+              borderRadius: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px'
+            }}>
+              <Phone size={32} color="#C9A84C" />
+            </div>
+            <h3 style={{
+              fontFamily: "'DM Serif Display', Georgia, serif",
+              fontSize: '20px',
+              color: '#0D1B3E',
+              marginBottom: '8px'
+            }}>
+              No campaigns yet
+            </h3>
+            <p style={{
+              fontSize: '14px',
+              color: '#64748B',
+              marginBottom: '24px'
+            }}>
+              Create your first campaign to start screening candidates
+            </p>
+            <Link
+              href="/agency/airecruit/new"
+              style={{
+                display: 'inline-block',
+                background: '#C9A84C',
+                color: 'white',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'none'
+              }}
+            >
+              Create Campaign
+            </Link>
+          </div>
+        ) : (
+          /* Campaigns Table */
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC' }}>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Campaign
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Status
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Candidates
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Completed
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Pending
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Created
+                  </th>
+                  <th style={{
+                    padding: '14px 20px',
+                    textAlign: 'right',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((campaign) => {
+                  const statusStyle = getStatusColor(campaign.status)
+                  return (
+                    <tr key={campaign.id} style={{
+                      borderBottom: '1px solid #F1F5F9',
+                      background: 'white'
+                    }}>
+                      <td style={{
+                        padding: '16px 20px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#1E293B'
+                      }}>
+                        {campaign.title}
+                      </td>
+                      <td style={{ padding: '16px 20px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          background: statusStyle.bg,
+                          color: statusStyle.color,
+                          borderRadius: '99px',
+                          padding: '4px 12px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          textTransform: 'capitalize'
+                        }}>
+                          {campaign.status}
+                        </span>
+                      </td>
+                      <td style={{
+                        padding: '16px 20px',
+                        fontSize: '14px',
+                        color: '#1E293B',
+                        textAlign: 'center'
+                      }}>
+                        {campaign.totalCandidates || 0}
+                      </td>
+                      <td style={{
+                        padding: '16px 20px',
+                        fontSize: '14px',
+                        color: '#1E293B',
+                        textAlign: 'center'
+                      }}>
+                        {campaign.callsCompleted || 0}
+                      </td>
+                      <td style={{
+                        padding: '16px 20px',
+                        fontSize: '14px',
+                        color: '#1E293B',
+                        textAlign: 'center'
+                      }}>
+                        {campaign.callsPending || 0}
+                      </td>
+                      <td style={{
+                        padding: '16px 20px',
+                        fontSize: '14px',
+                        color: '#64748B'
+                      }}>
+                        {formatDate(campaign.createdAt)}
+                      </td>
+                      <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                        <Link
+                          href={`/agency/airecruit/${campaign.id}`}
+                          style={{
+                            display: 'inline-block',
+                            padding: '6px 14px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            color: '#C9A84C',
+                            textDecoration: 'none',
+                            border: '1px solid #C9A84C',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          View Results
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* How It Works */}
@@ -345,8 +437,8 @@ export default function AIRecruitPage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : '1fr',
-            gap: isDesktop ? '16px' : '32px',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '16px',
             alignItems: 'start'
           }}>
             {/* Step 1 */}
@@ -384,11 +476,9 @@ export default function AIRecruitPage() {
             </div>
 
             {/* Arrow */}
-            {isDesktop && (
-              <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-                <ArrowRight size={20} color="#C9A84C" />
-              </div>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+              <ArrowRight size={20} color="#C9A84C" />
+            </div>
 
             {/* Step 2 */}
             <div style={{ textAlign: 'center' }}>
@@ -425,11 +515,9 @@ export default function AIRecruitPage() {
             </div>
 
             {/* Arrow */}
-            {isDesktop && (
-              <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-                <ArrowRight size={20} color="#C9A84C" />
-              </div>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+              <ArrowRight size={20} color="#C9A84C" />
+            </div>
 
             {/* Step 3 */}
             <div style={{ textAlign: 'center' }}>
@@ -466,11 +554,9 @@ export default function AIRecruitPage() {
             </div>
 
             {/* Arrow */}
-            {isDesktop && (
-              <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-                <ArrowRight size={20} color="#C9A84C" />
-              </div>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+              <ArrowRight size={20} color="#C9A84C" />
+            </div>
 
             {/* Step 4 */}
             <div style={{ textAlign: 'center' }}>
@@ -530,22 +616,22 @@ export default function AIRecruitPage() {
             opacity: 0.8,
             marginBottom: '24px'
           }}>
-            AIRecruit is currently in beta. Join the waitlist to be notified when it launches for your account.
+            Create a campaign to start screening candidates with AI voice interviews.
           </p>
           <Link
-            href="/contact"
+            href="/agency/airecruit/new"
             style={{
               display: 'inline-block',
               background: '#0D1B3E',
               color: 'white',
-              borderRadius: '9999px',
+              borderRadius: '99px',
               padding: '14px 32px',
               fontSize: '15px',
               fontWeight: 600,
               textDecoration: 'none'
             }}
           >
-            Join the Waitlist
+            Create Campaign
           </Link>
         </div>
       </div>
