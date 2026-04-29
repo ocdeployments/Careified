@@ -259,6 +259,7 @@ export default async function CampaignDetailPage({ params }: Props) {
                   <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Score</th>
                   <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Recommendation</th>
                   <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Duration</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Called At</th>
                   <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Callback</th>
                   <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Action</th>
                 </tr>
@@ -287,6 +288,9 @@ export default async function CampaignDetailPage({ params }: Props) {
                       </td>
                       <td style={{ padding: '16px 20px', fontSize: '14px', color: '#1E293B', textAlign: 'center' }}>
                         {formatDuration(call.duration)}
+                      </td>
+                      <td style={{ padding: '16px 20px', fontSize: '14px', color: '#64748B' }}>
+                        {new Date(call.completedAt || call.createdAt).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Toronto' })}
                       </td>
                       <td style={{ padding: '16px 20px', fontSize: '14px', color: '#64748B' }}>
                         {call.callbackRequestedAt ? (
