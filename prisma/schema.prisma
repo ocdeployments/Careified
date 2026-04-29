@@ -393,13 +393,16 @@ model AIRecruitCall {
   scoreBreakdown Json?
   recommendation  String?
   duration        Int?
-  startedAt           DateTime?
-  completedAt         DateTime?
-  candidateName      String?
-  callbackRequestedAt String?
-  callbackNotes       String?
-  callStatus          String?
-  createdAt           DateTime          @default(now())
+  startedAt              DateTime?
+  completedAt            DateTime?
+  candidateFirstName    String?
+  candidateLastName     String?
+  candidateEmail        String?
+  candidateNotes        String?
+  callbackRequestedAt   String?
+  callbackNotes         String?
+  callStatus            String?
+  createdAt              DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
   @@index([campaignId], map: "idx_airecruit_call_campaign")
