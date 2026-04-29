@@ -52,12 +52,14 @@ export default async function CallTranscriptPage({ params }: Props) {
   }
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleString('en-CA', {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/Toronto'
     })
   }
 
@@ -148,7 +150,7 @@ export default async function CallTranscriptPage({ params }: Props) {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Date</div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#0D1B3E' }}>
-                  {call.completedAt ? formatDate(call.completedAt) : '-'}
+                  {formatDate(call.completedAt || call.createdAt)}
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
