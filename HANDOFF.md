@@ -60,12 +60,16 @@ Vercel dashboard + .env.local:
 Routes built:
 - /agency/airecruit — hub page (live)
 - /agency/airecruit/new — campaign creation form (live)
+- /agency/airecruit/[campaignId] — campaign detail with calls (live)
+- /agency/airecruit/[campaignId]/[callId] — call transcript (live)
 - /api/airecruit/campaigns — POST handler (live)
 - /api/airecruit/webhook — POST handler (live)
 
 Files:
 - app/agency/airecruit/page.tsx
 - app/agency/airecruit/new/page.tsx
+- app/agency/airecruit/[campaignId]/page.tsx
+- app/agency/airecruit/[campaignId]/[callId]/page.tsx
 - app/api/airecruit/campaigns/route.ts
 - app/api/airecruit/webhook/route.ts
 - lib/airecruit/vapi.ts
@@ -78,15 +82,33 @@ Voice provider: Vapi (vapi.ai)
 - Phone: US Twilio number imported into Vapi
 - Canada supported via Twilio number import
 
-Current status: ALL 8 COMPLIANCE COMMITS COMPLETE
-- Campaign creation with CRTC consent checkbox
-- Suppression list check before calling
-- Calling hours enforcement (CRTC/TCPA)
-- Webhook receives call completion
-- Transcript scoring via OpenRouter/Minimax
-- Opt-out phrase detection
+COMPLETED THIS SESSION:
+- Structured candidate entry (name + phone required)
+- candidateFirstName, candidateLastName, candidateEmail, candidateNotes fields on AIRecruitCall
+- Agent briefed with candidate name and notes before call
+- Careified signup invitation in call closing
+- Full timestamps on all dashboard pages
+- Campaign naming guidance
 
-Next: Phase 6 campaign dashboard
+PENDING — NEXT SESSIONS:
+
+Session B — Option A Part 1:
+- Agency TCPA/CRTC consent at onboarding
+- Caregiver AIRecruit calling consent in Step 6
+- Screen with AIRecruit button on search and shortlist
+
+Session C — Option A Part 2:
+- Profile analysis API (strengths, gaps, questions)
+- Campaign creation from Careified profiles
+- Full caregiver profile context passed to Vapi
+
+Session D — Enhancements:
+- SMS invitation to Careified after completed call (requires Twilio SMS — dedicated session)
+- Retry logic for no-answer calls
+- Callback auto-scheduling via Vercel Cron
+- Scoring calibration tuning
+- Agency branding (display name in calls)
+- Bulk advance/pass actions on campaign results
 
 ---
 
