@@ -117,7 +117,8 @@ export default function NewCampaignPage() {
                 </h2>
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Campaign Title *</label>
-                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. PSW Screening — Frisco TX — May 2026" required style={{ width: '100%', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. PSW — Scarborough — Apr 2026 — Morning Shifts" required style={{ width: '100%', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                  <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '8px', fontStyle: 'italic' }}>Use a descriptive name that includes role, location, and date so you can identify campaigns easily later. Example: PSW — Frisco TX — May 2026 — Dementia Care</p>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Role Description *</label>
