@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       `INSERT INTO agencies (
         name, business_type, license_number,
         contact_first_name, contact_last_name, contact_email, contact_phone,
-        street_address, city, state, postal_code,
+        street, city, state, postal_code,
         status, created_at, updated_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', NOW(), NOW())
       RETURNING id`,
