@@ -1,5 +1,5 @@
 # Careified — Project Handoff Document
-Generated: 2026-04-28
+Generated: 2026-05-01
 
 ## 1. Project Overview
 Careified is a professional caregiving platform connecting 
@@ -34,6 +34,8 @@ Key tables:
 - AIRecruitCampaign
 - AIRecruitCall  
 - AIRecruitWaitlist
+- AIRecruitSuppression
+- AuditLog (admin action logging)
 
 IMPORTANT: prisma db push must be run locally with 
 DATABASE_URL in .env.local — Vercel does not run it.
@@ -51,11 +53,27 @@ Vercel dashboard + .env.local:
 - VAPI_API_KEY (private, no NEXT_PUBLIC prefix)
 - VAPI_ASSISTANT_ID (private)
 - VAPI_PHONE_NUMBER_ID (private — must be UUID from Vapi dashboard)
+- OPENROUTER_API_KEY (private)
 - PHI_ENCRYPTION_KEY
+- ADMIN_CLERK_USER_ID (private — for admin route protection)
 
 ---
 
-## 4. AIRecruit Module — Current State
+## 4. Security Infrastructure
+
+Admin Protection:
+- middleware.ts protects /admin routes
+- ADMIN_CLERK_USER_ID env var required
+- Unauthorized users redirected to home
+
+Audit Logging:
+- lib/security/audit.ts provides logAdminAction()
+- All admin API routes should call logAdminAction()
+- AuditLog table stores: adminId, action, recordId, table, previousValue, newValue, createdAt
+
+---
+
+## 5. AIRecruit Module — Current State
 
 Routes built:
 - /agency/airecruit — hub page (live)
@@ -82,13 +100,15 @@ Voice provider: Vapi (vapi.ai)
 - Phone: US Twilio number imported into Vapi
 - Canada supported via Twilio number import
 
-COMPLETED THIS SESSION:
+COMPLETED:
 - Structured candidate entry (name + phone required)
 - candidateFirstName, candidateLastName, candidateEmail, candidateNotes fields on AIRecruitCall
 - Agent briefed with candidate name and notes before call
 - Careified signup invitation in call closing
 - Full timestamps on all dashboard pages
 - Campaign naming guidance
+- Scoring engine with OpenRouter/minimax
+- Compliance layer (TCPA/CRTC)
 
 PENDING — NEXT SESSIONS:
 
@@ -112,23 +132,23 @@ Session D — Enhancements:
 
 ---
 
-## 5. AIRecruit Build Phases
+## 6. AIRecruit Build Phases
 
-COMPLETE (Phases 1-5):
+COMPLETE (Phases 1-6):
 - Phase 1: Database schema ✓
 - Phase 2: Campaign creation UI ✓
 - Phase 3: Vapi integration layer ✓
 - Phase 4: Webhook handler ✓
 - Phase 5: Scoring engine ✓
-- Compliance layer (8 commits) ✓
+- Phase 6: Campaign dashboard ✓
+- Compliance layer (TCPA/CRTC) ✓
 
 PENDING:
-- Phase 6: Campaign dashboard (list, statuses, results)
 - Phase 7: Scheduling integration
 
 ---
 
-## 6. Competitive Context
+## 7. Competitive Context
 Main competitor: Activated Insights Recruit
 Our advantage:
 - Caregivers already in DB with verified profiles
@@ -139,7 +159,7 @@ Our advantage:
 
 ---
 
-## 7. Vapi Configuration
+## 8. Vapi Configuration
 Account: vapi.ai
 Assistant name: AIRecruit Screener
 Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
@@ -152,11 +172,12 @@ Call flow:
 2. POST /api/airecruit/campaigns creates DB records
 3. initiateVapiCall fires for each phone number
 4. Vapi calls candidate with dynamic system prompt
-5. Webhook fires on call completion (Phase 4 — pending)
+5. Webhook fires on call completion
+6. Scoring runs async via OpenRouter/minimax
 
 ---
 
-## 8. Key Technical Decisions
+## 9. Key Technical Decisions
 - Vapi over pure Twilio: Vapi handles conversation 
   orchestration, turn detection, voicemail detection
 - ElevenLabs voice via Vapi TTS provider setting
@@ -169,10 +190,10 @@ Call flow:
 
 ---
 
-## 9. Known Issues / Pre-launch Checklist
-- [ ] VAPI_PHONE_NUMBER_ID must be UUID in Vercel env
-- [ ] Test end-to-end call to real phone number
-- [ ] Vapi webhook handler not yet built (Phase 4)
+## 10. Known Issues / Pre-launch Checklist
+- [x] VAPI_PHONE_NUMBER_ID must be UUID in Vercel env
+- [x] Test end-to-end call to real phone number
+- [x] Vapi webhook handler built
 - [ ] Database password rotation (old password in git history)
 - [ ] Lawyer review of lib/legal/text.ts
 - [ ] E&O / Cyber / General Liability insurance
@@ -181,7 +202,7 @@ Call flow:
 
 ---
 
-## 10. Page Routes (Full List)
+## 11. Page Routes (Full List)
 
 Public:
 / | app/page.tsx
@@ -208,9 +229,11 @@ Agency:
 /agency/pending-approval | app/agency/pending-approval/page.tsx
 /agency/airecruit | app/agency/airecruit/page.tsx
 /agency/airecruit/new | app/agency/airecruit/new/page.tsx
+/agency/signup | app/agency/signup/page.tsx
 
 Admin:
-/admin/agencies | app/admin/agencies/page.tsx
+/admin | app/admin/page.tsx
+/admin/caregivers | app/admin/caregivers/page.tsx
 
 Auth:
 /sign-in | app/sign-in/[[...sign-in]]/page.tsx
@@ -218,12 +241,15 @@ Auth:
 /onboarding | app/onboarding/page.tsx
 /settings/data-rights | app/settings/data-rights/page.tsx
 
-API (AIRecruit):
+API:
 /api/airecruit/campaigns | POST — create campaign + fire calls
+/api/airecruit/webhook | POST — Vapi webhook handler
+/api/agency/register | POST — agency signup form
+/api/admin/caregivers | PATCH — admin caregiver edit
 
 ---
 
-## 11. Git Workflow Rules (Non-negotiable)
+## 12. Git Workflow Rules (Non-negotiable)
 - One file per commit
 - npx tsc --noEmit before every commit
 - git push origin main after every commit
@@ -235,7 +261,7 @@ API (AIRecruit):
 
 ---
 
-## 12. Design System
+## 13. Design System
 Colors: Navy #0D1B3E, Gold #C9A84C, Gold Light #E8B86D
 Typography: Inter (body), DM Serif Display (headlines)
 Styles: Inline only — no styled-jsx, no Tailwind classes
