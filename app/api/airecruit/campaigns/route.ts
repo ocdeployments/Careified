@@ -4,6 +4,39 @@ import { pool } from '@/lib/db'
 import { initiateVapiCall } from '@/lib/airecruit/vapi'
 import { isWithinCallingHours } from '@/lib/airecruit/calling-hours'
 
+function normalizePhone(raw: string): string | null {
+  if (!raw) return null
+  
+  // Strip all non-digit characters except leading +
+  const cleaned = raw.trim()
+  const digits = cleaned.replace(/\D/g, '')
+  
+  // Must have at least 10 digits to be valid
+  if (digits.length < 10) return null
+  
+  // Already E.164 with + prefix
+  if (cleaned.startsWith('+') && digits.length >= 10) {
+    return `+${digits}`
+  }
+  
+  // 11 digits starting with 1 — North American with country code
+  if (digits.length === 11 && digits.startsWith('1')) {
+    return `+${digits}`
+  }
+  
+  // 10 digits — assume North American, add +1
+  if (digits.length === 10) {
+    return `+1${digits}`
+  }
+  
+  // 12+ digits — assume already has country code, add +
+  if (digits.length >= 12) {
+    return `+${digits}`
+  }
+  
+  return `+1${digits}`
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth()
@@ -55,6 +88,13 @@ export async function POST(req: NextRequest) {
 
     // Insert candidates with structured data
     for (const candidate of candidates) {
+      const normalizedPhone = normalizePhone(candidate.phone)
+      
+      if (!normalizedPhone) {
+        console.warn('INVALID PHONE SKIPPED:', candidate.phone)
+        continue
+      }
+      
       await pool.query(
         `INSERT INTO "AIRecruitCall"
           (id, "campaignId", "phoneNumber", 
@@ -66,7 +106,7 @@ export async function POST(req: NextRequest) {
            'pending', NOW(), NOW())`,
         [
           campaignId,
-          candidate.phone,
+          normalizedPhone,
           candidate.firstName,
           candidate.lastName || null,
           candidate.email || null,
