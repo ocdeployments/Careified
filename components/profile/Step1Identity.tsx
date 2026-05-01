@@ -1,22 +1,28 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { motion, useInView } from 'framer-motion'
-import { User, Mail, MapPin, Upload, Camera, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
-import { generateBio } from '@/lib/profile-templates'
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 }
+// Design system colors
+const COLORS = {
+  navy: '#0D1B3E',
+  gold: '#C9973A',
+  warmWhite: '#F7F4F0',
+  red: '#DC2626',
+  slate: '#64748B',
+  border: '#E2E8F0',
+  errorBg: '#FEF2F2',
 }
 
-const LANGUAGES = ['English', 'Spanish', 'French', 'Mandarin', 'Cantonese', 'Tagalog', 'Hindi', 'Punjabi', 'Arabic', 'Portuguese', 'Vietnamese', 'Polish', 'Sign Language', 'Other']
+// Constants
+const LANGUAGES = ['English', 'French', 'Spanish', 'Tagalog', 'Mandarin', 'Cantonese', 'Hindi', 'Punjabi', 'Arabic', 'Portuguese', 'Other']
 const FLUENCY_LEVELS = ['Basic', 'Conversational', 'Fluent', 'Native']
-const GENDER_OPTIONS = [{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Non-binary', label: 'Non-binary' }, { value: 'Prefer not to say', label: 'Prefer not to say' }]
+const GENDER_OPTIONS = ['Male', 'Female', 'Non-binary', 'Prefer not to say']
+const WORK_AUTH_OPTIONS = ['Citizen', 'Permanent Resident', 'Work Permit', 'Study Permit', 'Other']
 const EMERGENCY_RELATIONSHIPS = ['Spouse / Partner', 'Parent', 'Sibling', 'Child', 'Friend', 'Other']
 
+// Helper functions
 function isOver18(dob: string): boolean {
   if (!dob) return false
   const birth = new Date(dob)
@@ -33,58 +39,97 @@ function formatPhone(value: string): string {
   return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6)
 }
 
-function FieldLabel({ label, required, hint }: { label: string; required?: boolean; hint?: string }) {
-  return (
-    <div className="mb-2">
-      <label className="block text-[13px] font-semibold text-navy">
-        {label} {required && <span className="text-red-500 ml-[3px]">*</span>}
-      </label>
-      <p className={`text-[11px] min-h-[18px] mt-0.5 ${hint ? 'text-slate-400' : 'text-transparent'}`}>
-        {hint || '\u200E'}
-      </p>
-    </div>
-  )
-}
-
-function FieldError({ message }: { message: string }) {
-  return (
-    <div className="flex items-center gap-1 mt-[5px]">
-      <AlertCircle size={12} className="text-red-500" />
-      <span className="text-[11px] text-red-500">{message}</span>
-    </div>
-  )
-}
-
-function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
-  return (
-    <div className="mb-6">
-      <h3 className="text-[28px] font-black text-navy m-0 mb-1 flex items-center gap-2 tracking-tight leading-tight">
-        {icon} {title}
-      </h3>
-      {subtitle && <p className="text-[15px] text-slate-500 m-0 leading-relaxed">{subtitle}</p>}
-    </div>
-  )
+// Styles
+const styles = {
+  sectionHeader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: COLORS.slate,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '16px',
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '8px',
+    fontSize: '15px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  inputFocus: {
+    borderColor: COLORS.gold,
+    boxShadow: '0 0 0 3px rgba(201,151,58,0.15)',
+  },
+  inputError: {
+    border: '2px solid ' + COLORS.red,
+    backgroundColor: COLORS.errorBg,
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  required: {
+    color: COLORS.red,
+    marginLeft: '3px',
+  },
+  errorText: {
+    fontSize: '12px',
+    color: COLORS.red,
+    marginTop: '4px',
+  },
+  section: {
+    marginBottom: '32px',
+  },
+  row: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '16px',
+  },
+  tripleRow: {
+    display: 'grid',
+    gridTemplateColumns: '140px 1fr 100px',
+    gap: '16px',
+  },
 }
 
 export default function Step1Identity() {
   const { formData } = useProfileForm()
-  const { saveField, saveStep, saveStatus } = useProfileSave()
+  const { saveField } = useProfileSave()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [zipLooking, setZipLooking] = useState(false)
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(formData.photoUrl || null)
+  const [focused, setFocused] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Animation refs for scroll-triggered fade-in
-  const languagesRef = useRef(null)
-  const languagesInView = useInView(languagesRef, { once: true, margin: '-100px' })
+  const getInputStyle = (field: string) => {
+    let s = { ...styles.input }
+    if (focused === field) {
+      s = { ...s, ...styles.inputFocus }
+    }
+    if (touched[field] && errors[field]) {
+      s = { ...s, ...styles.inputError }
+    }
+    return s
+  }
 
-  const handleChange = useCallback((field: string, value: any) => { saveField(field as any, value) }, [saveField])
+  const handleChange = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
   const handleBlur = useCallback((field: string, value: any, required?: boolean) => {
     setTouched(prev => ({ ...prev, [field]: true }))
-    if (required && !value) setErrors(prev => ({ ...prev, [field]: 'This field is required' }))
-    else setErrors(prev => { const n = { ...prev }; delete n[field]; return n })
+    if (required && !value) {
+      setErrors(prev => ({ ...prev, [field]: 'This field is required' }))
+    } else {
+      setErrors(prev => { const n = { ...prev }; delete n[field]; return n })
+    }
     saveField(field as any, value)
   }, [saveField])
 
@@ -102,21 +147,15 @@ export default function Step1Identity() {
             saveField('city', data.places[0]['place name'])
             saveField('state', data.places[0]['state abbreviation'])
           }
+        } else {
+          setErrors(prev => ({ ...prev, postalCode: 'Invalid ZIP code' }))
         }
-      } catch (e) { /* silent */ }
+      } catch (e) {
+        setErrors(prev => ({ ...prev, postalCode: 'Could not verify ZIP code' }))
+      }
       finally { setZipLooking(false) }
     }
   }, [saveField])
-
-  const handleGenerateBio = useCallback(() => {
-    const generated = generateBio({
-      jobTitle: formData.jobTitle,
-      specializations: formData.specializations || [],
-      yearsExperience: formData.yearsExperience || 0,
-      certifications: []
-    })
-    handleChange('bio', generated)
-  }, [formData.jobTitle, formData.specializations, formData.yearsExperience, handleChange])
 
   const handlePhotoClick = () => { fileInputRef.current?.click() }
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +164,12 @@ export default function Step1Identity() {
     if (!file.type.startsWith('image/')) { setErrors(prev => ({ ...prev, photo: 'Please upload an image file' })); return }
     if (file.size > 5 * 1024 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo must be under 5MB' })); return }
     const reader = new FileReader()
-    reader.onload = (ev) => { const dataUrl = ev.target?.result as string; setPhotoPreview(dataUrl); saveField('photoUrl', dataUrl) }
+    reader.onload = (ev) => { 
+      const dataUrl = ev.target?.result as string
+      setPhotoPreview(dataUrl)
+      saveField('photoUrl', dataUrl)
+      // TODO: POST to /api/profile/upload-photo (route does not exist yet)
+    }
     reader.readAsDataURL(file)
   }
 
@@ -142,205 +186,241 @@ export default function Step1Identity() {
     saveField('emergencyContact', { ...(formData.emergencyContact || {}), [field]: value })
   }, [formData.emergencyContact, saveField])
 
-  // Returns Tailwind border class based on validation state
-  const inputBorderClass = (field: string) =>
-    touched[field] && errors[field]
-      ? 'border-red-400'
-      : touched[field]
-      ? 'border-green-500'
-      : 'border-slate-200'
-
-  const baseInputClass = 'w-full px-4 py-3 rounded-xl border-[1.5px] bg-white text-[13px] text-navy outline-none box-border'
-
-  const inputClass = (field: string) => `${baseInputClass} ${inputBorderClass(field)}`
-
-  const bioWordCount = (formData.bio || '').trim().split(/\s+/).filter(Boolean).length
+  const bioCharCount = (formData.bio || '').length
 
   return (
-    <div className="font-sans">
-      {/* Info banner */}
-      <div className="bg-[#FDF6EC] border border-gold/20 rounded-xl px-5 py-4 mb-8 flex items-start gap-3">
-        <User size={18} className="text-gold shrink-0 mt-[1px]" />
-        <div>
-          <p className="text-[13px] font-bold text-navy m-0 mb-[3px]">Your professional identity</p>
-          <p className="text-xs text-slate-500 m-0">All fields marked * are required. Everything saves automatically.</p>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+      {/* SECTION: Personal Info */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Personal Info</div>
+        <div style={styles.row}>
+          <div>
+            <label style={styles.label}>First name<span style={styles.required}>*</span></label>
+            <input
+              type="text"
+              value={formData.firstName || ''}
+              placeholder="Sarah"
+              style={getInputStyle('firstName')}
+              onChange={e => handleChange('firstName', e.target.value)}
+              onFocus={() => setFocused('firstName')}
+              onBlur={e => handleBlur('firstName', e.target.value, true)}
+            />
+            {touched.firstName && errors.firstName && <div style={styles.errorText}>{errors.firstName}</div>}
+          </div>
+          <div>
+            <label style={styles.label}>Last name<span style={styles.required}>*</span></label>
+            <input
+              type="text"
+              value={formData.lastName || ''}
+              placeholder="Johnson"
+              style={getInputStyle('lastName')}
+              onChange={e => handleChange('lastName', e.target.value)}
+              onFocus={() => setFocused('lastName')}
+              onBlur={e => handleBlur('lastName', e.target.value, true)}
+            />
+            {touched.lastName && errors.lastName && <div style={styles.errorText}>{errors.lastName}</div>}
+          </div>
+        </div>
+        <div style={{ ...styles.row, marginTop: '16px' }}>
+          <div>
+            <label style={styles.label}>Preferred name</label>
+            <input
+              type="text"
+              value={formData.preferredName || ''}
+              placeholder="Sarah"
+              style={getInputStyle('preferredName')}
+              onChange={e => handleChange('preferredName', e.target.value)}
+              onFocus={() => setFocused('preferredName')}
+              onBlur={e => handleBlur('preferredName', e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={styles.label}>Job title<span style={styles.required}>*</span></label>
+            <input
+              type="text"
+              value={formData.jobTitle || ''}
+              placeholder="Personal Support Worker"
+              style={getInputStyle('jobTitle')}
+              onChange={e => handleChange('jobTitle', e.target.value)}
+              onFocus={() => setFocused('jobTitle')}
+              onBlur={e => handleBlur('jobTitle', e.target.value, true)}
+            />
+            {touched.jobTitle && errors.jobTitle && <div style={styles.errorText}>{errors.jobTitle}</div>}
+          </div>
+        </div>
+        <div style={{ ...styles.row, marginTop: '16px' }}>
+          <div>
+            <label style={styles.label}>Gender</label>
+            <select
+              value={formData.gender || ''}
+              style={getInputStyle('gender')}
+              onChange={e => handleChange('gender', e.target.value)}
+              onFocus={() => setFocused('gender')}
+              onBlur={e => handleBlur('gender', e.target.value)}
+            >
+              <option value="">Select gender</option>
+              {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={styles.label}>Date of birth<span style={styles.required}>*</span></label>
+            <input
+              type="date"
+              value={formData.dateOfBirth || ''}
+              style={getInputStyle('dateOfBirth')}
+              onChange={e => handleChange('dateOfBirth', e.target.value)}
+              onFocus={() => setFocused('dateOfBirth')}
+              onBlur={e => {
+                handleBlur('dateOfBirth', e.target.value, true)
+                if (e.target.value && !isOver18(e.target.value)) {
+                  setErrors(prev => ({ ...prev, dateOfBirth: 'You must be 18 or older' }))
+                }
+              }}
+            />
+            {touched.dateOfBirth && errors.dateOfBirth && <div style={styles.errorText}>{errors.dateOfBirth}</div>}
+          </div>
         </div>
       </div>
 
-      {/* Profile photo */}
-      <div className="mb-9">
-        <SectionHeader icon={<Camera size={16} className="text-gold" />} title="Profile photo" subtitle="Profiles with photos get 4× more views." />
-        <div className="flex items-center gap-5">
+      {/* SECTION: Photo */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Photo</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div
             onClick={handlePhotoClick}
-            className={[
-              'w-24 h-24 rounded-full flex items-center justify-center bg-slate-50 cursor-pointer overflow-hidden shrink-0',
-              photoPreview ? 'border-[3px] border-gold' : 'border-2 border-dashed border-slate-300',
-            ].join(' ')}
+            style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#F8FAFC',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              border: photoPreview ? '3px solid ' + COLORS.gold : '2px dashed #CBD5E1',
+            }}
           >
-            {photoPreview
-              ? <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
-              : <Upload size={24} className="text-slate-400" />
-            }
+            {photoPreview ? (
+              <img src={photoPreview} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ fontSize: '32px', color: '#94A3B8' }}>+</span>
+            )}
           </div>
           <div>
             <button
               type="button"
               onClick={handlePhotoClick}
-              className="block mb-1.5 px-4 py-2 rounded-[10px] text-xs font-bold bg-white border-[1.5px] border-slate-200 text-navy cursor-pointer"
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 500,
+                backgroundColor: 'white',
+                border: '1px solid #E2E8F0',
+                color: COLORS.navy,
+                cursor: 'pointer',
+                marginBottom: '4px',
+              }}
             >
               {photoPreview ? 'Change photo' : 'Upload photo'}
             </button>
-            <p className="text-[11px] text-slate-400 m-0">JPG or PNG · Square · At least 400×400px · Max 5MB</p>
-            {errors.photo && <FieldError message={errors.photo} />}
+            <div style={{ fontSize: '11px', color: '#94A3B8' }}>JPG or PNG · Max 5MB</div>
+            {errors.photo && <div style={styles.errorText}>{errors.photo}</div>}
           </div>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} className="hidden" />
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} style={{ display: 'none' }} />
         </div>
       </div>
 
-      {/* Name */}
-      <div className="mb-9">
-        <SectionHeader icon={<User size={16} className="text-gold" />} title="Your name" subtitle="Use your legal name as it appears on your ID." />
-        <div className="grid grid-cols-3 gap-4 mb-4">
+      {/* SECTION: Contact & Location */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Contact & Location</div>
+        <div style={styles.row}>
           <div>
-            <FieldLabel label="First name" required />
-            <input type="text" value={formData.firstName || ''} placeholder="Sarah" onChange={e => handleChange('firstName', e.target.value)} onBlur={e => handleBlur('firstName', e.target.value, true)} className={inputClass('firstName')} />
-            {touched.firstName && errors.firstName && <FieldError message={errors.firstName} />}
-          </div>
-          <div>
-            <FieldLabel label="Middle name" />
-            <input type="text" value={formData.middleName || ''} placeholder="Marie" onChange={e => handleChange('middleName', e.target.value)} className={inputClass('middleName')} />
-          </div>
-          <div>
-            <FieldLabel label="Last name" required />
-            <input type="text" value={formData.lastName || ''} placeholder="Johnson" onChange={e => handleChange('lastName', e.target.value)} onBlur={e => handleBlur('lastName', e.target.value, true)} className={inputClass('lastName')} />
-            {touched.lastName && errors.lastName && <FieldError message={errors.lastName} />}
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <FieldLabel label="Preferred name" hint="What you like to be called" />
-            <input type="text" value={formData.preferredName || ''} placeholder="Sarah" onChange={e => handleChange('preferredName', e.target.value)} className={inputClass('preferredName')} />
-          </div>
-          <div>
-            <FieldLabel label="Job title" hint="e.g. Personal Support Worker" />
-            <input type="text" value={formData.jobTitle || ''} placeholder="Personal Support Worker" onChange={e => handleChange('jobTitle', e.target.value)} className={inputClass('jobTitle')} />
-          </div>
-        </div>
-      </div>
-
-      {/* DOB + Gender */}
-      <div className="mb-9">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <FieldLabel label="Date of birth" required hint="Must be 18 or older" />
-            <input
-              type="date"
-              value={formData.dateOfBirth || ''}
-              onChange={e => handleChange('dateOfBirth', e.target.value)}
-              onBlur={e => {
-                handleBlur('dateOfBirth', e.target.value, true)
-                if (e.target.value && !isOver18(e.target.value))
-                  setErrors(prev => ({ ...prev, dateOfBirth: 'You must be 18 or older' }))
-              }}
-              className={inputClass('dateOfBirth')}
-            />
-            {touched.dateOfBirth && errors.dateOfBirth && <FieldError message={errors.dateOfBirth} />}
-          </div>
-          <div>
-            <FieldLabel label="Gender" required />
-            <select
-              value={formData.gender || ''}
-              onChange={e => handleChange('gender', e.target.value)}
-              onBlur={e => handleBlur('gender', e.target.value, true)}
-              className={`${inputClass('gender')} appearance-none`}
-            >
-              <option value="">Select gender</option>
-              {GENDER_OPTIONS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-            </select>
-            {touched.gender && errors.gender && <FieldError message={errors.gender} />}
-          </div>
-        </div>
-      </div>
-
-      {/* Contact */}
-      <div className="mb-9">
-        <SectionHeader icon={<Mail size={16} className="text-gold" />} title="Contact information" subtitle="Your phone is private." />
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <FieldLabel label="Phone number" required hint="SMS-capable" />
+            <label style={styles.label}>Phone<span style={styles.required}>*</span></label>
             <input
               type="tel"
               value={formData.phone || ''}
               placeholder="(555) 123-4567"
+              style={getInputStyle('phone')}
               onChange={e => handleChange('phone', formatPhone(e.target.value))}
-              onBlur={e => {
-                handleBlur('phone', e.target.value, true)
-                if (e.target.value && e.target.value.replace(/\D/g, '').length < 10)
-                  setErrors(prev => ({ ...prev, phone: 'Enter a valid 10-digit number' }))
-              }}
-              className={inputClass('phone')}
+              onFocus={() => setFocused('phone')}
+              onBlur={e => handleBlur('phone', e.target.value, true)}
             />
-            {touched.phone && errors.phone && <FieldError message={errors.phone} />}
+            {touched.phone && errors.phone && <div style={styles.errorText}>{errors.phone}</div>}
           </div>
           <div>
-            <FieldLabel label="Work authorisation" required />
-            <select
-              value={formData.workAuthorisation === true ? 'yes' : formData.workAuthorisation === false ? 'no' : ''}
-              onChange={e => handleChange('workAuthorisation', e.target.value === 'yes' ? true : e.target.value === 'no' ? false : undefined)}
-              onBlur={e => handleBlur('workAuthorisation', e.target.value, true)}
-              className={`${inputClass('workAuthorisation')} appearance-none`}
-            >
-              <option value="">Are you authorised to work?</option>
-              <option value="yes">Yes — I am legally authorised</option>
-              <option value="no">No — I need authorisation</option>
-            </select>
-            {touched.workAuthorisation && errors.workAuthorisation && <FieldError message={errors.workAuthorisation} />}
+            <label style={styles.label}>Province/State<span style={styles.required}>*</span></label>
+            <input
+              type="text"
+              value={formData.state || ''}
+              placeholder="TX"
+              style={getInputStyle('state')}
+              onChange={e => handleChange('state', e.target.value.toUpperCase())}
+              onFocus={() => setFocused('state')}
+              onBlur={e => handleBlur('state', e.target.value, true)}
+            />
+            {touched.state && errors.state && <div style={styles.errorText}>{errors.state}</div>}
           </div>
         </div>
-      </div>
-
-      {/* Location */}
-      <div className="mb-9">
-        <SectionHeader icon={<MapPin size={16} className="text-gold" />} title="Location" subtitle="ZIP code auto-fills city and state." />
-        <div className="grid gap-4" style={{ gridTemplateColumns: '140px 1fr 100px' }}>
+        <div style={{ ...styles.row, marginTop: '16px' }}>
           <div>
-            <FieldLabel label="ZIP code" required />
+            <label style={styles.label}>City<span style={styles.required}>*</span></label>
+            <input
+              type="text"
+              value={formData.city || ''}
+              placeholder="Frisco"
+              style={getInputStyle('city')}
+              onChange={e => handleChange('city', e.target.value)}
+              onFocus={() => setFocused('city')}
+              onBlur={e => handleBlur('city', e.target.value, true)}
+            />
+            {touched.city && errors.city && <div style={styles.errorText}>{errors.city}</div>}
+          </div>
+          <div>
+            <label style={styles.label}>Postal code<span style={styles.required}>*</span></label>
             <input
               type="text"
               value={formData.postalCode || ''}
               placeholder="75034"
               maxLength={10}
+              style={getInputStyle('postalCode')}
               onChange={e => handleChange('postalCode', e.target.value)}
+              onFocus={() => setFocused('postalCode')}
               onBlur={e => handleZipBlur(e.target.value)}
-              className={inputClass('postalCode')}
             />
-            {zipLooking && <p className="text-[11px] text-gold mt-1">Looking up...</p>}
-          </div>
-          <div>
-            <FieldLabel label="City" required />
-            <input type="text" value={formData.city || ''} placeholder="Frisco" onChange={e => handleChange('city', e.target.value)} onBlur={e => handleBlur('city', e.target.value, true)} className={inputClass('city')} />
-            {touched.city && errors.city && <FieldError message={errors.city} />}
-          </div>
-          <div>
-            <FieldLabel label="State" required />
-            <input type="text" value={formData.state || ''} placeholder="TX" maxLength={2} onChange={e => handleChange('state', e.target.value.toUpperCase())} onBlur={e => handleBlur('state', e.target.value, true)} className={inputClass('state')} />
-            {touched.state && errors.state && <FieldError message={errors.state} />}
+            {zipLooking && <div style={{ fontSize: '12px', color: COLORS.gold, marginTop: '4px' }}>Looking up...</div>}
+            {touched.postalCode && errors.postalCode && <div style={styles.errorText}>{errors.postalCode}</div>}
           </div>
         </div>
       </div>
 
-      {/* Languages */}
-      <motion.div
-        ref={languagesRef}
-        initial="hidden"
-        animate={languagesInView ? 'visible' : 'hidden'}
-        variants={fadeInUp}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-9"
-      >
-        <SectionHeader icon={null} title="Languages spoken" subtitle="Select all that apply. Then set your fluency level." />
-        <div className="flex flex-wrap gap-2 mb-4">
+      {/* SECTION: Bio */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Bio</div>
+        <label style={styles.label}>Professional bio<span style={styles.required}>*</span></label>
+        <textarea
+          value={formData.bio || ''}
+          placeholder="Tell agencies who you are..."
+          rows={4}
+          maxLength={500}
+          style={{ ...getInputStyle('bio'), resize: 'vertical', minHeight: '100px' }}
+          onChange={e => handleChange('bio', e.target.value)}
+          onFocus={() => setFocused('bio')}
+          onBlur={e => handleBlur('bio', e.target.value, true)}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+          <span style={{ fontSize: '12px', color: bioCharCount > 450 ? COLORS.red : '#94A3B8' }}>
+            {bioCharCount}/500 characters
+          </span>
+        </div>
+        {touched.bio && errors.bio && <div style={styles.errorText}>{errors.bio}</div>}
+      </div>
+
+      {/* SECTION: Languages */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Languages</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
           {LANGUAGES.map(lang => {
             const selected = (formData.languages || []).includes(lang)
             return (
@@ -348,12 +428,16 @@ export default function Step1Identity() {
                 key={lang}
                 type="button"
                 onClick={() => toggleLanguage(lang)}
-                className={[
-                  'px-[14px] py-[7px] rounded-full text-xs font-medium cursor-pointer border-2',
-                  selected
-                    ? 'border-gold bg-[#FDF6EC] text-amber-900'
-                    : 'border-slate-200 bg-white text-slate-500',
-                ].join(' ')}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '16px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: selected ? '2px solid ' + COLORS.gold : '2px solid #E2E8F0',
+                  backgroundColor: selected ? '#FDF6EC' : 'white',
+                  color: selected ? '#92400E' : '#64748B',
+                }}
               >
                 {lang}
               </button>
@@ -361,11 +445,11 @@ export default function Step1Identity() {
           })}
         </div>
         {(formData.languages || []).length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(formData.languages || []).map(lang => (
-              <div key={lang} className="flex items-center justify-between px-[14px] py-2.5 rounded-[10px] bg-slate-50 border border-slate-200">
-                <span className="text-[13px] font-semibold text-navy">{lang}</span>
-                <div className="flex gap-1.5">
+              <div key={lang} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <span style={{ fontSize: '13px', fontWeight: 500, color: COLORS.navy }}>{lang}</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
                   {FLUENCY_LEVELS.map(level => {
                     const active = (formData.languageFluency || {})[lang] === level
                     return (
@@ -373,12 +457,16 @@ export default function Step1Identity() {
                         key={level}
                         type="button"
                         onClick={() => setFluency(lang, level)}
-                        className={[
-                          'px-2.5 py-1 rounded-md text-[11px] cursor-pointer border-[1.5px]',
-                          active
-                            ? 'font-bold border-gold bg-[#FDF6EC] text-amber-900'
-                            : 'font-medium border-slate-200 bg-white text-slate-500',
-                        ].join(' ')}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          border: active ? '1.5px solid ' + COLORS.gold : '1.5px solid #E2E8F0',
+                          backgroundColor: active ? '#FDF6EC' : 'white',
+                          color: active ? '#92400E' : '#64748B',
+                          fontWeight: active ? 600 : 400,
+                        }}
                       >
                         {level}
                       </button>
@@ -389,65 +477,83 @@ export default function Step1Identity() {
             ))}
           </div>
         )}
-      </motion.div>
-
-      {/* Bio */}
-      <div className="mb-9">
-        <FieldLabel label="Professional bio" hint="150–300 words recommended." />
-        {!formData.bio && (
-          <button
-            onClick={handleGenerateBio}
-            className="bg-sky-50 text-sky-700 px-4 py-2.5 rounded-lg border border-sky-200 text-sm font-medium cursor-pointer mb-2.5"
-          >
-            ✨ Generate professional bio
-          </button>
-        )}
-        <textarea
-          value={formData.bio || ''}
-          placeholder="Tell agencies who you are..."
-          rows={5}
-          onChange={e => handleChange('bio', e.target.value)}
-          onBlur={e => handleBlur('bio', e.target.value)}
-          className={`${inputClass('bio')} resize-y leading-relaxed !py-[14px]`}
-        />
-        <div className="flex justify-between mt-[5px]">
-          <span className={`text-[11px] ${bioWordCount < 50 ? 'text-slate-400' : bioWordCount <= 300 ? 'text-green-600' : 'text-red-500'}`}>
-            {bioWordCount} words {bioWordCount < 50 && '— aim for at least 150'}
-          </span>
-        </div>
       </div>
 
-      {/* Emergency contact */}
-      <div className="mb-4">
+      {/* SECTION: Work Authorisation */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Work Authorisation</div>
+        <select
+          value={String(formData.workAuthorisation || '')}
+          style={getInputStyle('workAuthorisation')}
+          onChange={e => handleChange('workAuthorisation', e.target.value)}
+          onFocus={() => setFocused('workAuthorisation')}
+          onBlur={e => handleBlur('workAuthorisation', e.target.value, true)}
+        >
+          <option value="">Select authorization status</option>
+          {WORK_AUTH_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {touched.workAuthorisation && errors.workAuthorisation && <div style={styles.errorText}>{errors.workAuthorisation}</div>}
+      </div>
+
+      {/* SECTION: Emergency Contact (collapsible) */}
+      <div style={styles.section}>
         <button
           type="button"
           onClick={() => setEmergencyOpen(prev => !prev)}
-          className="flex items-center justify-between w-full px-4 py-3 rounded-[10px] border border-slate-200 bg-white cursor-pointer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            border: '1px solid #E2E8F0',
+            backgroundColor: 'white',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 500,
+            color: COLORS.navy,
+          }}
         >
-          <span className="text-[13px] font-semibold text-navy">
-            Emergency contact{' '}
-            <span className="text-[11px] font-normal text-slate-400 ml-2">(optional)</span>
-          </span>
-          {emergencyOpen ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+          <span>Emergency contact <span style={{ fontWeight: 400, color: '#94A3B8' }}>(optional)</span></span>
+          <span style={{ fontSize: '18px', color: '#64748B' }}>{emergencyOpen ? '−' : '+'}</span>
         </button>
         {emergencyOpen && (
-          <div className="px-5 py-5 border border-slate-200 border-t-0 rounded-b-[10px] bg-[#FAFAFA]">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+          <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderTop: 'none', borderRadius: '0 0 8px 8px', backgroundColor: '#FAFAFA' }}>
+            <div style={styles.row}>
               <div>
-                <FieldLabel label="Full name" />
-                <input type="text" value={(formData.emergencyContact as any)?.name || ''} placeholder="Jane Johnson" onChange={e => updateEmergency('name', e.target.value)} className={inputClass('emergencyName')} />
+                <label style={styles.label}>Name</label>
+                <input
+                  type="text"
+                  value={(formData.emergencyContact as any)?.name || ''}
+                  placeholder="Jane Johnson"
+                  style={getInputStyle('emergencyName')}
+                  onChange={e => updateEmergency('name', e.target.value)}
+                  onFocus={() => setFocused('emergencyName')}
+                  onBlur={e => handleBlur('emergencyName', e.target.value)}
+                />
               </div>
               <div>
-                <FieldLabel label="Phone number" />
-                <input type="tel" value={(formData.emergencyContact as any)?.phone || ''} placeholder="(555) 123-4567" onChange={e => updateEmergency('phone', formatPhone(e.target.value))} className={inputClass('emergencyPhone')} />
+                <label style={styles.label}>Phone</label>
+                <input
+                  type="tel"
+                  value={(formData.emergencyContact as any)?.phone || ''}
+                  placeholder="(555) 123-4567"
+                  style={getInputStyle('emergencyPhone')}
+                  onChange={e => updateEmergency('phone', formatPhone(e.target.value))}
+                  onFocus={() => setFocused('emergencyPhone')}
+                  onBlur={e => handleBlur('emergencyPhone', e.target.value)}
+                />
               </div>
             </div>
-            <div>
-              <FieldLabel label="Relationship" />
+            <div style={{ marginTop: '16px' }}>
+              <label style={styles.label}>Relationship</label>
               <select
                 value={(formData.emergencyContact as any)?.relationship || ''}
+                style={{ ...getInputStyle('emergencyRelationship'), maxWidth: '240px' }}
                 onChange={e => updateEmergency('relationship', e.target.value)}
-                className={`${inputClass('emergencyRelationship')} appearance-none max-w-[240px]`}
+                onFocus={() => setFocused('emergencyRelationship')}
+                onBlur={e => handleBlur('emergencyRelationship', e.target.value)}
               >
                 <option value="">Select relationship</option>
                 {EMERGENCY_RELATIONSHIPS.map(r => <option key={r} value={r}>{r}</option>)}
