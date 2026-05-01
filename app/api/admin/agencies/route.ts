@@ -1,11 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { Pool } from 'pg'
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-})
+import { pool } from '@/lib/db'
 
 // Admin Clerk user IDs — add your own Clerk user ID here
 const ADMIN_USER_IDS = [
