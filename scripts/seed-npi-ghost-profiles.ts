@@ -14,9 +14,13 @@ import { randomBytes } from 'crypto'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const DB_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://careified_user:Careified2024@187.124.227.63:5432/careified'
+const DB_URL = process.env.DATABASE_URL
+
+if (!DB_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is required')
+  console.error('Usage: DATABASE_URL=postgresql://... npx tsx scripts/seed-npi-ghost-profiles.ts')
+  process.exit(1)
+}
 
 // Home health / personal care taxonomies to seed
 const TAXONOMIES = [
