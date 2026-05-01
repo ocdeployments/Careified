@@ -2,6 +2,9 @@ import { pool } from '@/lib/db'
 import { getAuditLogs } from '@/lib/security/audit'
 import { Shield, Users, TrendingUp, Clock } from 'lucide-react'
 
+// Force dynamic rendering to avoid build-time DB queries
+export const dynamic = 'force-dynamic'
+
 async function getStats() {
   const [caregiverCount, agencyCount, recentLogs] = await Promise.all([
     pool.query('SELECT COUNT(*) as count FROM caregivers'),

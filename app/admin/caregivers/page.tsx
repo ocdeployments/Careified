@@ -1,3 +1,6 @@
+// Force dynamic rendering to avoid build-time DB queries
+export const dynamic = 'force-dynamic'
+
 import { pool } from '@/lib/db'
 import { Suspense } from 'react'
 import { Search, Filter, Edit, X, Check } from 'lucide-react'
