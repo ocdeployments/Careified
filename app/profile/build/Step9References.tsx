@@ -1,274 +1,438 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
-import { Plus, X, ShieldCheck, AlertCircle } from 'lucide-react'
 
-const FONT_SANS = "'Inter', sans-serif"
-const FONT_SERIF = "'Inter', sans-serif"
-
-type RefEntry = {
-  id: string
-  name: string
-  relationshipType: string
-  organisation: string
-  duration: string
-  contactMethod: string
-  email: string
-  phone: string
-  consentKnows: boolean
-  consentAgreed: boolean
-  consentUnderstands: boolean
+// Design system colors
+const COLORS = {
+  navy: '#0D1B3E',
+  gold: '#C9973A',
+  red: '#DC2626',
+  slate: '#64748B',
+  border: '#E2E8F0',
+  errorBg: '#FEF2F2',
 }
 
-const RELATIONSHIP_TYPES = [
-  'Former employer — agency',
-  'Former employer — private family',
-  'Current employer — agency',
-  'Current employer — private family',
-  'Direct supervisor',
-  'Training supervisor / instructor',
-  'Professional colleague',
-  'Former client (self)',
-  'Former client — family member',
-  'Former client — legal guardian / POA',
-  'Character reference — professional',
-  'Character reference — community',
+// Constants
+const RELATIONSHIP_OPTIONS = [
+  'Former Supervisor', 'Current Supervisor', 'Colleague',
+  'Former Client', 'Current Client', 'Client Family Member',
+  'Teacher/Instructor', 'Mentor', 'Volunteer Coordinator',
+  'Community Leader', 'Personal (non-family)', 'Other Professional'
 ]
 
-const DURATION_OPTIONS = [
-  'Less than 1 year',
-  '1–2 years',
-  '2–5 years',
-  '5+ years',
-]
+const YEARS_KNOWN = ['Less than 1 year', '1–2 years', '3–5 years', '5+ years']
 
-const CONTACT_METHODS = [
-  { value: 'email', label: 'Email only' },
-  { value: 'phone', label: 'Phone only' },
-  { value: 'either', label: 'Email or phone' },
-]
-
-const inputStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  borderRadius: '10px',
-  border: '1px solid #E2E8F0',
-  fontSize: '13px',
-  color: '#0D1B3E',
-  width: '100%',
-  boxSizing: 'border-box',
-  fontFamily: FONT_SANS,
+// Styles
+const styles = {
+  sectionHeader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: COLORS.slate,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '16px',
+  },
+  section: {
+    marginBottom: '32px',
+  },
+  referenceBlock: {
+    background: '#F8FAFC',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '12px',
+    padding: '20px',
+    marginBottom: '16px',
+    position: 'relative' as const,
+  },
+  blockBadge: {
+    position: 'absolute' as const,
+    top: '16px',
+    right: '16px',
+    background: '#E2E8F0',
+    borderRadius: '20px',
+    padding: '2px 10px',
+    fontSize: '12px',
+    color: COLORS.slate,
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '8px',
+    fontSize: '15px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  checkboxLabel: {
+    fontSize: '14px',
+    color: '#374151',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  consentBlock: {
+    background: '#F0FDF4',
+    border: '1px solid #BBF7D0',
+    borderRadius: '8px',
+    padding: '12px 16px',
+    marginTop: '12px',
+  },
+  warning: {
+    background: '#FEF3C7',
+    border: '1px solid #D97706',
+    color: '#92400E',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '13px',
+    marginTop: '8px',
+  },
+  clientNote: {
+    background: '#EFF6FF',
+    border: '1px solid #BFDBFE',
+    color: '#1E40AF',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '13px',
+    marginTop: '8px',
+  },
+  addButton: {
+    border: '2px dashed ' + COLORS.gold,
+    background: 'transparent',
+    color: COLORS.gold,
+    borderRadius: '8px',
+    padding: '12px',
+    width: '100%',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 600,
+  },
 }
 
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  appearance: 'none',
-  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
-  paddingRight: '36px',
+function generateId() {
+  return Math.random().toString(36).substring(2, 9)
+}
+
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 10)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return '(' + digits.slice(0, 3) + ') ' + digits.slice(3)
+  return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6)
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
 export default function Step9References() {
   const { formData } = useProfileForm()
-  const { saveField } = useProfileSave()
+  const { saveField, saveStep } = useProfileSave()
+  const [focused, setFocused] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [refs, setRefs] = useState<RefEntry[]>(() => {
-    const saved = formData.references as RefEntry[] | undefined
-    if (Array.isArray(saved) && saved.length > 0) return saved
-    return [{
-      id: String(Date.now()),
-      name: '', relationshipType: '', organisation: '',
-      duration: '', contactMethod: '', email: '', phone: '',
-      consentKnows: false, consentAgreed: false, consentUnderstands: false,
-    }]
+  const references = formData.references || []
+  const addLater = (formData as any).addReferencesLater || false
+
+  const getInputStyle = (field: string): React.CSSProperties => {
+    let s: React.CSSProperties = { ...styles.input }
+    if (focused === field) {
+      s = { ...s, borderColor: COLORS.gold, boxShadow: '0 0 0 3px rgba(201,151,58,0.15)' }
+    }
+    return s
+  }
+
+  const handleChange = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const handleBlur = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const addReference = () => {
+    if (references.length >= 6) return
+    const newRef = {
+      id: generateId(),
+      name: '',
+      relationshipType: '',
+      organisation: '',
+      duration: '',
+      contactMethod: '',
+      email: '',
+      phone: '',
+      consentKnows: false,
+      consentAgreed: false,
+      consentUnderstands: false,
+    }
+    saveField('references', [...references, newRef])
+  }
+
+  const updateReference = (index: number, field: string, value: any) => {
+    const updated = [...references]
+    updated[index] = { ...updated[index], [field]: value }
+    saveField('references', updated)
+  }
+
+  const removeReference = (index: number) => {
+    const updated = references.filter((_, i) => i !== index)
+    saveField('references', updated)
+  }
+
+  const handlePhoneBlur = (index: number, value: string) => {
+    const formatted = formatPhone(value)
+    updateReference(index, 'phone', formatted)
+  }
+
+  const handleEmailBlur = (index: number, value: string) => {
+    if (value && !isValidEmail(value)) {
+      setErrors(prev => ({ ...prev, [`email_${index}`]: 'Please enter a valid email' }))
+    } else {
+      setErrors(prev => {
+        const next = { ...prev }
+        delete next[`email_${index}`]
+        return next
+      })
+    }
+    updateReference(index, 'email', value)
+  }
+
+  const isClientReference = (relationship: string) => {
+    return relationship === 'Former Client' || relationship === 'Current Client'
+  }
+
+  const hasSupervisorReference = references.some((ref: any) => {
+    const rel = ref.relationshipType || ''
+    return rel.includes('Supervisor') || rel.includes('Employer')
   })
 
-  const [expandedRef, setExpandedRef] = useState<number | null>(0)
-
-  const addRef = () => {
-    if (refs.length >= 5) return
-    const newRef: RefEntry = {
-      id: String(Date.now()),
-      name: '', relationshipType: '', organisation: '', duration: '', contactMethod: '',
-      email: '', phone: '', consentKnows: false,
-      consentAgreed: false, consentUnderstands: false,
+  const validateReferences = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (references.length < 3 && !addLater) {
+      newErrors.minRefs = 'Minimum 3 references required'
     }
-    const updated = [...refs, newRef]
-    setRefs(updated)
-    setExpandedRef(updated.length - 1)
-    saveField('references', updated)
+    
+    if (references.length >= 3 && !hasSupervisorReference && !addLater) {
+      newErrors.supervisorRef = 'At least one reference must be a former or current supervisor/employer'
+    }
+
+    references.forEach((ref: any, i: number) => {
+      if (!ref.phone && !ref.email) {
+        newErrors[`contact_${i}`] = 'At least phone or email required'
+      }
+    })
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
-
-  const removeRef = (id: string) => {
-    const updated = refs.filter(r => r.id !== id)
-    setRefs(updated)
-    saveField('references', updated)
-  }
-
-  const updateRef = (id: string, field: keyof RefEntry, value: unknown) => {
-    const updated = refs.map(r => r.id === id ? { ...r, [field]: value } : r)
-    setRefs(updated)
-    saveField('references', updated)
-  }
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 10)
-    if (digits.length <= 3) return digits
-    if (digits.length <= 6) return `(${digits.slice(0,3)}) ${digits.slice(3)}`
-    return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`
-  }
-
-  const isClientReference = (type: string) => type.includes('client')
-
-  const allConsentsGiven = (ref: RefEntry) => ref.consentKnows && ref.consentAgreed && ref.consentUnderstands
 
   return (
-    <div style={{ fontFamily: FONT_SANS, display: 'flex', flexDirection: 'column', gap: 32 }}>
-      
-      {/* Intro note */}
-      <div style={{ padding: '14px 16px', borderRadius: 12, background: '#FDF6EC', border: '1px solid rgba(201,151,58,0.2)', display: 'flex', alignItems: 'start', gap: 10 }}>
-        <ShieldCheck size={16} color="#C9973A" style={{ flexShrink: 0, marginTop: 2 }} />
-        <p style={{ fontSize: 12, color: '#92400E', lineHeight: 1.6, margin: 0 }}>
-          We send an automated reference request email to each referee. References are structured and take about 3 minutes to complete. Contact details are kept private — agencies only see them after shortlisting you.
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+      {/* SECTION: References */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>References</div>
+        <p style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '16px' }}>
+          Minimum 3 references required. At least one must be a former supervisor or employer.
         </p>
-      </div>
 
-      {/* Reference cards */}
-      {refs.map((ref, idx) => {
-        const isOpen = expandedRef === idx
-        const hasName = !!ref.name
-        const allConsents = allConsentsGiven(ref)
+        {/* Add Later Option */}
+        <label style={{ ...styles.checkboxLabel, marginBottom: '16px' }}>
+          <input
+            type="checkbox"
+            checked={addLater || false}
+            onChange={e => handleChange('addReferencesLater', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: COLORS.navy }}>I'll add references later</span>
+        </label>
 
-        return (
-          <div key={ref.id} style={{ border: '1px solid #E2E8F0', borderRadius: 14, overflow: 'hidden' }}>
-            {/* Card header */}
-            <div onClick={() => setExpandedRef(isOpen ? null : idx)} style={{ padding: '14px 16px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: allConsents ? '#D1FAE5' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <ShieldCheck size={14} color={allConsents ? '#16A34A' : '#94A3B8'} />
+        {addLater && (
+          <div style={{ ...styles.clientNote, marginBottom: '16px' }}>
+            Your profile will show 'References Pending' until at least 3 are added
+          </div>
+        )}
+
+        {/* Reference Blocks */}
+        {!addLater && references.map((ref: any, index: number) => {
+          const showClientNote = isClientReference(ref.relationshipType)
+          
+          return (
+            <div key={ref.id} style={styles.referenceBlock}>
+              <div style={styles.blockBadge}>Reference {index + 1}</div>
+              <button
+                type="button"
+                onClick={() => removeReference(index)}
+                style={{ position: 'absolute', top: '16px', right: '100px', color: COLORS.red, fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none' }}
+              >
+                Remove
+              </button>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginTop: '8px' }}>
+                <div>
+                  <label style={styles.label}>First Name</label>
+                  <input
+                    type="text"
+                    value={ref.name?.split(' ')[0] || ''}
+                    onChange={e => {
+                      const last = ref.name?.split(' ').slice(1).join(' ') || ''
+                      updateReference(index, 'name', e.target.value + (last ? ' ' + last : ''))
+                    }}
+                    onBlur={e => handleBlur('references', references)}
+                    style={getInputStyle('firstName' + index)}
+                  />
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0D1B3E' }}>
-                    {hasName ? ref.name : `Reference ${idx + 1}`}
-                    {idx === 0 && <span style={{ fontSize: 10, fontWeight: 700, color: '#C9973A', marginLeft: 6 }}>(required)</span>}
-                  </div>
-                  {ref.relationshipType && <div style={{ fontSize: 11, color: '#64748B' }}>{ref.relationshipType}</div>}
+                  <label style={styles.label}>
+                    Last Name {showClientNote && '(shown as initial)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={ref.name?.split(' ').slice(1).join(' ') || ''}
+                    onChange={e => {
+                      const first = ref.name?.split(' ')[0] || ''
+                      updateReference(index, 'name', first + ' ' + e.target.value)
+                    }}
+                    onBlur={e => handleBlur('references', references)}
+                    style={getInputStyle('lastName' + index)}
+                  />
+                </div>
+                <div>
+                  <label style={styles.label}>Relationship to You</label>
+                  <select
+                    value={ref.relationshipType || ''}
+                    onChange={e => updateReference(index, 'relationshipType', e.target.value)}
+                    onBlur={e => handleBlur('references', references)}
+                    style={getInputStyle('rel' + index)}
+                  >
+                    <option value="">Select...</option>
+                    {RELATIONSHIP_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {refs.length > 1 && (
-                  <button type="button" onClick={e => { e.stopPropagation(); removeRef(ref.id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#EF4444', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <X size={14} />
-                  </button>
+
+              {showClientNote && (
+                <div style={styles.clientNote}>
+                  Client references show first name and last initial only
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginTop: '16px' }}>
+                <div>
+                  <label style={styles.label}>Company / Organization (optional)</label>
+                  <input
+                    type="text"
+                    value={ref.organisation || ''}
+                    onChange={e => updateReference(index, 'organisation', e.target.value)}
+                    onBlur={e => handleBlur('references', references)}
+                    style={getInputStyle('org' + index)}
+                  />
+                </div>
+                <div>
+                  <label style={styles.label}>Phone Number (optional)</label>
+                  <input
+                    type="tel"
+                    value={ref.phone || ''}
+                    onChange={e => updateReference(index, 'phone', e.target.value)}
+                    onBlur={e => handlePhoneBlur(index, e.target.value)}
+                    placeholder="(XXX) XXX-XXXX"
+                    style={getInputStyle('phone' + index)}
+                  />
+                </div>
+                <div>
+                  <label style={styles.label}>Email Address (optional)</label>
+                  <input
+                    type="email"
+                    value={ref.email || ''}
+                    onChange={e => updateReference(index, 'email', e.target.value)}
+                    onBlur={e => handleEmailBlur(index, e.target.value)}
+                    style={{ ...getInputStyle('email' + index), borderColor: errors[`email_${index}`] ? COLORS.red : undefined }}
+                  />
+                  {errors[`email_${index}`] && (
+                    <p style={{ fontSize: '12px', color: COLORS.red, marginTop: '4px' }}>{errors[`email_${index}`]}</p>
+                  )}
+                </div>
+              </div>
+
+              {errors[`contact_${index}`] && (
+                <p style={{ fontSize: '12px', color: COLORS.red, marginTop: '8px' }}>{errors[`contact_${index}`]}</p>
+              )}
+
+              <div style={{ marginTop: '16px' }}>
+                <label style={styles.label}>How long have you known this person?</label>
+                <select
+                  value={ref.duration || ''}
+                  onChange={e => updateReference(index, 'duration', e.target.value)}
+                  onBlur={e => handleBlur('references', references)}
+                  style={getInputStyle('duration' + index)}
+                >
+                  <option value="">Select...</option>
+                  {YEARS_KNOWN.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+
+              {/* Consent Block */}
+              <div style={styles.consentBlock}>
+                <label style={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={ref.consentAgreed || false}
+                    onChange={e => updateReference(index, 'consentAgreed', e.target.checked)}
+                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                  />
+                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I consent to this person being contacted for a reference check</span>
+                </label>
+                <label style={{ ...styles.checkboxLabel, marginTop: '8px' }}>
+                  <input
+                    type="checkbox"
+                    checked={ref.consentKnows || false}
+                    onChange={e => updateReference(index, 'consentKnows', e.target.checked)}
+                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                  />
+                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I confirm this person is aware they are listed as a reference</span>
+                </label>
+                <label style={{ ...styles.checkboxLabel, marginTop: '8px' }}>
+                  <input
+                    type="checkbox"
+                    checked={ref.consentUnderstands || false}
+                    onChange={e => updateReference(index, 'consentUnderstands', e.target.checked)}
+                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                  />
+                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I confirm this reference information is accurate and truthful</span>
+                </label>
+
+                {!ref.consentAgreed && (
+                  <div style={styles.warning}>
+                    References without contact consent will be marked as unverifiable
+                  </div>
                 )}
               </div>
             </div>
+          )
+        })}
 
-            {/* Expanded fields */}
-            {isOpen && (
-              <div style={{ padding: '20px 16px', background: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {/* Name */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Full name *</label>
-                  <input type="text" value={ref.name || ''} onChange={e => updateRef(ref.id, 'name', e.target.value)} placeholder="First and last name" maxLength={60} style={inputStyle} />
-                </div>
+        {/* Validation Errors */}
+        {errors.minRefs && (
+          <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.minRefs}</p>
+        )}
+        {errors.supervisorRef && (
+          <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.supervisorRef}</p>
+        )}
 
-                {/* Relationship type */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Relationship *</label>
-                  <select value={ref.relationshipType || ''} onChange={e => updateRef(ref.id, 'relationshipType', e.target.value)} style={selectStyle}>
-                    <option value="">Select relationship...</option>
-                    {RELATIONSHIP_TYPES.map(rt => <option key={rt} value={rt}>{rt}</option>)}
-                  </select>
-                </div>
-
-                {/* Client reference note */}
-                {isClientReference(ref.relationshipType) && (
-                  <div style={{ padding: 12, borderRadius: 10, background: '#EFF6FF', border: '1px solid rgba(30,58,138,0.2)' }}>
-                    <p style={{ fontSize: 11.5, color: '#1E3A8A', lineHeight: 1.6, margin: 0 }}>
-                      Client references are displayed as first name + last initial only. Admin reviews all client references before they appear on your profile.
-                    </p>
-                  </div>
-                )}
-
-                {/* Organisation */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Organisation / agency name *</label>
-                  <input type="text" value={ref.organisation || ''} onChange={e => updateRef(ref.id, 'organisation', e.target.value)} placeholder="e.g. Sunshine Home Care" maxLength={100} style={inputStyle} />
-                </div>
-
-                {/* Duration and contact method */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>How long known *</label>
-                    <select value={ref.duration || ''} onChange={e => updateRef(ref.id, 'duration', e.target.value)} style={selectStyle}>
-                      <option value="">Select...</option>
-                      {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Preferred contact *</label>
-                    <select value={ref.contactMethod || ''} onChange={e => updateRef(ref.id, 'contactMethod', e.target.value)} style={selectStyle}>
-                      <option value="">Select...</option>
-                      {CONTACT_METHODS.map(cm => <option key={cm.value} value={cm.value}>{cm.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Email — conditional */}
-                {(ref.contactMethod === 'email' || ref.contactMethod === 'either') && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Email address *</label>
-                    <input type="email" value={ref.email || ''} onChange={e => updateRef(ref.id, 'email', e.target.value)} placeholder="name@example.com" style={inputStyle} />
-                  </div>
-                )}
-
-                {/* Phone — conditional */}
-                {(ref.contactMethod === 'phone' || ref.contactMethod === 'either') && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Phone number *</label>
-                    <input type="tel" value={ref.phone || ''} onChange={e => updateRef(ref.id, 'phone', formatPhone(e.target.value))} placeholder="(XXX) XXX-XXXX" maxLength={14} style={inputStyle} />
-                  </div>
-                )}
-
-                {/* Consent section */}
-                <div style={{ marginTop: 8, paddingTop: 14, borderTop: '1px solid #E2E8F0' }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: '#0D1B3E', margin: '0 0 10px' }}>Before we contact this reference:</p>
-                  {[
-                    { field: 'consentKnows' as const, text: `${ref.name || 'This person'} knows I am listing them as a reference on Careified` },
-                    { field: 'consentAgreed' as const, text: 'They have agreed to be contacted by our platform for a structured reference request' },
-                    { field: 'consentUnderstands' as const, text: 'I understand that providing false consent may result in profile suspension' },
-                  ].map(consent => (
-                    <label key={consent.field} style={{ display: 'flex', alignItems: 'start', gap: 10, marginBottom: 8, cursor: 'pointer' }}>
-                      <input type="checkbox" checked={ref[consent.field] || false} onChange={e => updateRef(ref.id, consent.field, e.target.checked)} style={{ accentColor: '#C9973A', width: 14, height: 14, flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5 }}>{consent.text}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      })}
-
-      {/* Add reference button */}
-      {refs.length < 5 && (
-        <button type="button" onClick={addRef} style={{ width: '100%', padding: '12px 0', borderRadius: 12, border: '1px solid #C9973A', background: 'white', color: '#C9973A', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_SANS, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Plus size={16} />
-          Add another reference
-          <span style={{ fontSize: 11, fontWeight: 400, color: '#94A3B8' }}>({5 - refs.length} remaining)</span>
-        </button>
-      )}
-
-      {/* Validation */}
-      {refs.length === 0 && (
-        <div style={{ padding: '12px 16px', borderRadius: 10, background: '#FEF3C7', border: '1px solid #F59E0B', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <AlertCircle size={14} color="#D97706" />
-          <span style={{ fontSize: 12, color: '#92400E' }}>Add at least one reference to continue</span>
-        </div>
-      )}
+        {/* Add Button */}
+        {!addLater && references.length < 6 && (
+          <button type="button" onClick={addReference} style={styles.addButton}>
+            + Add Reference
+          </button>
+        )}
+      </div>
     </div>
   )
 }
