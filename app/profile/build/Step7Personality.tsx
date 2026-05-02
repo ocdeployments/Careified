@@ -1,20 +1,17 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 
-// Design system colors
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
   red: '#DC2626',
   slate: '#64748B',
   border: '#E2E8F0',
-  errorBg: '#FEF2F2',
 }
 
-// Scenario questions with scoring
 const SCENARIOS = [
   {
     id: 'patience',
@@ -110,7 +107,6 @@ const SMOKE_OPTIONS = ['Non-smoking only', 'Occasional smoke OK', 'Smoking house
 const NOISE_OPTIONS = ['Quiet environment preferred', 'Moderate noise OK', 'High activity OK']
 const PHYSICAL_OPTIONS = ['Light duties only', 'Moderate physical demands', 'Heavy lifting OK (50+ lbs)']
 
-// Styles
 const styles = {
   sectionHeader: {
     fontSize: '13px',
@@ -120,9 +116,7 @@ const styles = {
     letterSpacing: '0.08em',
     marginBottom: '16px',
   },
-  section: {
-    marginBottom: '32px',
-  },
+  section: { marginBottom: '32px' },
   scenarioCard: {
     background: 'white',
     border: '1px solid ' + COLORS.border,
@@ -137,6 +131,8 @@ const styles = {
     padding: '16px',
     cursor: 'pointer',
     marginBottom: '8px',
+    width: '100%',
+    textAlign: 'left' as const,
   },
   progressBar: {
     height: '4px',
@@ -168,6 +164,31 @@ const styles = {
     marginBottom: '6px',
     display: 'block',
   },
+  continueBtn: {
+    padding: '12px 24px',
+    background: COLORS.navy,
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: '14px',
+  },
+  continueBtnDisabled: {
+    padding: '12px 24px',
+    background: '#E2E8F0',
+    color: '#94A3B8',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'not-allowed',
+    fontWeight: 600,
+    fontSize: '14px',
+  },
+  warningText: {
+    fontSize: '12px',
+    color: COLORS.red,
+    marginTop: '8px',
+  },
 }
 
 type Step = 'scenarios' | 'style' | 'strengths' | 'environment' | 'philosophy'
@@ -177,7 +198,8 @@ export default function Step7Personality() {
   const { saveField } = useProfileSave()
   const [currentStep, setCurrentStep] = useState<Step>('scenarios')
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [scenarios, setScenarios] = useState<Record<string, any>>({})
+  const [scenarios, setScenarios] = useState<Record<string, { style: string; score: number }>>({})
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false)
 
   const personalityProfile = formData.personalityProfile || {}
   const savedScenarios = personalityProfile.scenarios || {}
@@ -186,88 +208,106 @@ export default function Step7Personality() {
   const savedEnvironment = personalityProfile.environment || {}
   const savedPhilosophy = personalityProfile.philosophy || {}
 
-  const handleScenarioAnswer = (scenarioId: string, option: any) => {
+  // Merge in-progress answers with saved
+  const allAnswers = { ...savedScenarios, ...scenarios }
+  const answeredCount = SCENARIOS.filter(s => allAnswers[s.id]).length
+  const allScenariosComplete = answeredCount === SCENARIOS.length
+
+  const handleScenarioAnswer = (scenarioId: string, option: { style: string; score: number }) => {
     const updated = { ...scenarios, [scenarioId]: { style: option.style, score: option.score } }
     setScenarios(updated)
-    saveField('personalityProfile', {
-      ...personalityProfile,
-      scenarios: updated
-    })
-    
+    setShowIncompleteWarning(false)
+    saveField('personalityProfile', { ...personalityProfile, scenarios: { ...savedScenarios, ...updated } })
+
     if (currentQuestion < SCENARIOS.length - 1) {
       setTimeout(() => setCurrentQuestion(currentQuestion + 1), 300)
-    } else {
-      setTimeout(() => setCurrentStep('style'), 300)
     }
   }
 
+  const handleAdvanceFromScenarios = () => {
+    if (!allScenariosComplete) {
+      setShowIncompleteWarning(true)
+      // Jump to first unanswered
+      const firstUnanswered = SCENARIOS.findIndex(s => !allAnswers[s.id])
+      if (firstUnanswered !== -1) setCurrentQuestion(firstUnanswered)
+      return
+    }
+    setCurrentStep('style')
+  }
+
   const handleStyleChange = (key: string, value: string) => {
-    const updated = { ...savedStyle, [key]: value }
-    saveField('personalityProfile', {
-      ...personalityProfile,
-      style: updated
-    })
+    saveField('personalityProfile', { ...personalityProfile, style: { ...savedStyle, [key]: value } })
   }
 
   const toggleStrength = (strength: string) => {
     if (savedStrengths.includes(strength)) {
-      saveField('personalityProfile', {
-        ...personalityProfile,
-        strengths: savedStrengths.filter((s: string) => s !== strength)
-      })
+      saveField('personalityProfile', { ...personalityProfile, strengths: savedStrengths.filter((s: string) => s !== strength) })
     } else if (savedStrengths.length < 5) {
-      saveField('personalityProfile', {
-        ...personalityProfile,
-        strengths: [...savedStrengths, strength]
-      })
+      saveField('personalityProfile', { ...personalityProfile, strengths: [...savedStrengths, strength] })
     }
   }
 
   const handleEnvironmentChange = (key: string, value: string) => {
-    saveField('personalityProfile', {
-      ...personalityProfile,
-      environment: { ...savedEnvironment, [key]: value }
-    })
+    saveField('personalityProfile', { ...personalityProfile, environment: { ...savedEnvironment, [key]: value } })
   }
 
   const handlePhilosophyChange = (key: string, value: string) => {
-    saveField('personalityProfile', {
-      ...personalityProfile,
-      philosophy: { ...savedPhilosophy, [key]: value }
-    })
+    saveField('personalityProfile', { ...personalityProfile, philosophy: { ...savedPhilosophy, [key]: value } })
   }
 
-  const progressPercent = ((currentQuestion + 1) / SCENARIOS.length) * 100
   const currentScenario = SCENARIOS[currentQuestion]
-  const selectedAnswer = scenarios[currentScenario?.id] || savedScenarios[currentScenario?.id]
+  const selectedAnswer = allAnswers[currentScenario?.id]
+  const progressPercent = (answeredCount / SCENARIOS.length) * 100
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
-      {/* PART 1: SCENARIO QUESTIONS */}
+
+      {/* PART 1: SCENARIOS */}
       {currentStep === 'scenarios' && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Working Style Assessment</div>
           <p style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '16px' }}>
             There are no right or wrong answers. Choose the response that feels most natural to you.
           </p>
-          
-          {/* Progress bar */}
+
           <div style={styles.progressBar}>
             <div style={{ height: '100%', background: COLORS.gold, width: progressPercent + '%', borderRadius: '2px', transition: 'width 0.3s' }} />
           </div>
           <p style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '16px' }}>
-            Question {currentQuestion + 1} of {SCENARIOS.length}
+            {answeredCount} of {SCENARIOS.length} answered
           </p>
 
-          {/* Scenario card */}
+          {/* Question navigation pills */}
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            {SCENARIOS.map((s, i) => {
+              const answered = !!allAnswers[s.id]
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setCurrentQuestion(i)}
+                  style={{
+                    width: '28px', height: '28px', borderRadius: '50%',
+                    border: currentQuestion === i ? '2px solid ' + COLORS.gold : '1px solid ' + COLORS.border,
+                    background: answered ? COLORS.gold : (currentQuestion === i ? '#FDF6EC' : 'white'),
+                    color: answered ? COLORS.navy : (currentQuestion === i ? COLORS.navy : COLORS.slate),
+                    fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  {i + 1}
+                </button>
+              )
+            })}
+          </div>
+
           <div style={styles.scenarioCard}>
             <p style={{ fontSize: '15px', fontWeight: 600, color: COLORS.navy, marginBottom: '20px' }}>
               {currentScenario?.question}
             </p>
-            
-            {currentScenario?.options.map((option: any) => (
-              <div
+            {currentScenario?.options.map((option) => (
+              <button
                 key={option.id}
+                type="button"
                 onClick={() => handleScenarioAnswer(currentScenario.id, option)}
                 style={{
                   ...styles.answerOption,
@@ -276,9 +316,22 @@ export default function Step7Personality() {
                 }}
               >
                 <span style={{ fontSize: '14px', color: COLORS.navy }}>{option.text}</span>
-              </div>
+              </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={handleAdvanceFromScenarios}
+            style={allScenariosComplete ? styles.continueBtn : styles.continueBtnDisabled}
+          >
+            Continue
+          </button>
+          {showIncompleteWarning && (
+            <p style={styles.warningText}>
+              Please answer all {SCENARIOS.length} questions before continuing. Unanswered questions are highlighted above.
+            </p>
+          )}
         </div>
       )}
 
@@ -286,81 +339,46 @@ export default function Step7Personality() {
       {currentStep === 'style' && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Working Style</div>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>I work best when...</label>
-            <select
-              value={savedStyle.autonomy || ''}
-              onChange={e => handleStyleChange('autonomy', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {AUTONOMY_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>My preferred work pace is...</label>
-            <select
-              value={savedStyle.pace || ''}
-              onChange={e => handleStyleChange('pace', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {PACE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
+          {[
+            { key: 'autonomy', label: 'I work best when...', options: AUTONOMY_OPTIONS },
+            { key: 'pace', label: 'My preferred work pace is...', options: PACE_OPTIONS },
+            { key: 'social_energy', label: 'When it comes to social interaction with clients...', options: SOCIAL_OPTIONS },
+            { key: 'conflict', label: 'When there is a disagreement with a family member or agency...', options: CONFLICT_OPTIONS },
+          ].map(({ key, label, options }) => (
+            <div key={key} style={{ marginBottom: '20px' }}>
+              <label style={styles.label}>{label}</label>
+              <select
+                value={savedStyle[key] || ''}
+                onChange={e => handleStyleChange(key, e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Select...</option>
+                {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </div>
+          ))}
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>When it comes to social interaction with clients...</label>
-            <select
-              value={savedStyle.social_energy || ''}
-              onChange={e => handleStyleChange('social_energy', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {SOCIAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>When there is a disagreement with a family member or agency...</label>
-            <select
-              value={savedStyle.conflict || ''}
-              onChange={e => handleStyleChange('conflict', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {CONFLICT_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setCurrentStep('strengths')}
-            style={{ padding: '12px 24px', background: COLORS.navy, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
-          >
+          <button type="button" onClick={() => setCurrentStep('strengths')} style={styles.continueBtn}>
             Continue
           </button>
         </div>
       )}
 
-      {/* PART 3: TOP STRENGTHS */}
+      {/* PART 3: STRENGTHS */}
       {currentStep === 'strengths' && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Top Strengths</div>
           <p style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '16px' }}>
             Select your top 5 strengths ({savedStrengths.length}/5 selected)
           </p>
-
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
             {STRENGTH_OPTIONS.map(strength => {
               const isSelected = savedStrengths.includes(strength)
               const isDisabled = !isSelected && savedStrengths.length >= 5
               return (
                 <button
-                  key={strength}
-                  type="button"
+                  key={strength} type="button"
                   onClick={() => toggleStrength(strength)}
                   disabled={isDisabled}
                   style={{
@@ -377,110 +395,65 @@ export default function Step7Personality() {
               )
             })}
           </div>
-
-          <button
-            type="button"
-            onClick={() => setCurrentStep('environment')}
-            style={{ padding: '12px 24px', background: COLORS.navy, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
-          >
+          <button type="button" onClick={() => setCurrentStep('environment')} style={styles.continueBtn}>
             Continue
           </button>
         </div>
       )}
 
-      {/* PART 4: WORK ENVIRONMENT */}
+      {/* PART 4: ENVIRONMENT */}
       {currentStep === 'environment' && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Work Environment</div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>Pets</label>
-            <select
-              value={savedEnvironment.pets || ''}
-              onChange={e => handleEnvironmentChange('pets', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {PET_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>Smoking</label>
-            <select
-              value={savedEnvironment.smoke || ''}
-              onChange={e => handleEnvironmentChange('smoke', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {SMOKE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>Noise level</label>
-            <select
-              value={savedEnvironment.noise || ''}
-              onChange={e => handleEnvironmentChange('noise', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {NOISE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>Physical demands</label>
-            <select
-              value={savedEnvironment.physical || ''}
-              onChange={e => handleEnvironmentChange('physical', e.target.value)}
-              style={styles.input}
-            >
-              <option value="">Select...</option>
-              {PHYSICAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setCurrentStep('philosophy')}
-            style={{ padding: '12px 24px', background: COLORS.navy, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
-          >
+          {[
+            { key: 'pets', label: 'Pets', options: PET_OPTIONS },
+            { key: 'smoke', label: 'Smoking', options: SMOKE_OPTIONS },
+            { key: 'noise', label: 'Noise level', options: NOISE_OPTIONS },
+            { key: 'physical', label: 'Physical demands', options: PHYSICAL_OPTIONS },
+          ].map(({ key, label, options }) => (
+            <div key={key} style={{ marginBottom: '20px' }}>
+              <label style={styles.label}>{label}</label>
+              <select
+                value={savedEnvironment[key] || ''}
+                onChange={e => handleEnvironmentChange(key, e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Select...</option>
+                {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </div>
+          ))}
+          <button type="button" onClick={() => setCurrentStep('philosophy')} style={styles.continueBtn}>
             Continue
           </button>
         </div>
       )}
 
-      {/* PART 5: CARE PHILOSOPHY */}
+      {/* PART 5: PHILOSOPHY */}
       {currentStep === 'philosophy' && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Care Philosophy (Optional)</div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>How would you describe your approach to caregiving?</label>
-            <textarea
-              value={savedPhilosophy.approach || ''}
-              onChange={e => handlePhilosophyChange('approach', e.target.value)}
-              maxLength={300}
-              rows={3}
-              style={{ ...styles.input, resize: 'vertical', minHeight: '100px' }}
-            />
-            <p style={{ fontSize: '11px', color: COLORS.slate, marginTop: '4px' }}>{(savedPhilosophy.approach || '').length}/300 characters</p>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={styles.label}>What drew you to caregiving?</label>
-            <textarea
-              value={savedPhilosophy.why || ''}
-              onChange={e => handlePhilosophyChange('why', e.target.value)}
-              maxLength={300}
-              rows={3}
-              style={{ ...styles.input, resize: 'vertical', minHeight: '100px' }}
-            />
-            <p style={{ fontSize: '11px', color: COLORS.slate, marginTop: '4px' }}>{(savedPhilosophy.why || '').length}/300 characters</p>
-          </div>
+          {[
+            { key: 'approach', label: 'How would you describe your approach to caregiving?' },
+            { key: 'why', label: 'What drew you to caregiving?' },
+          ].map(({ key, label }) => (
+            <div key={key} style={{ marginBottom: '20px' }}>
+              <label style={styles.label}>{label}</label>
+              <textarea
+                value={savedPhilosophy[key] || ''}
+                onChange={e => handlePhilosophyChange(key, e.target.value)}
+                maxLength={300}
+                rows={3}
+                style={{ ...styles.input, resize: 'vertical', minHeight: '100px' }}
+              />
+              <p style={{ fontSize: '11px', color: COLORS.slate, marginTop: '4px' }}>
+                {(savedPhilosophy[key] || '').length}/300
+              </p>
+            </div>
+          ))}
         </div>
       )}
+
     </div>
   )
 }
