@@ -5,241 +5,225 @@
 'use client'
 
 import {
- createContext, useContext, useState,
- useCallback, useEffect, ReactNode
+  createContext, useContext, useState,
+  useCallback, useEffect, ReactNode
 } from 'react'
 
-// ─── Full profile form data type ───────────────────────────────────────────
-
 export interface ProfileFormData {
- // Step 1 — Identity
- firstName?: string
- middleName?: string
- lastName?: string
- preferredName?: string
- jobTitle?: string
- dateOfBirth?: string
- gender?: string
- phone?: string
- email?: string
- street?: string
- city?: string
- state?: string
- postalCode?: string
- languages?: string[]
- languageFluency?: Record<string, string>
- workAuthorisation?: boolean
- emergencyContact?: {
- name?: string
- phone?: string
- relationship?: string
- }
- bio?: string
- photoUrl?: string
+  // Step 1 — Identity
+  firstName?: string
+  middleName?: string
+  lastName?: string
+  preferredName?: string
+  jobTitle?: string
+  dateOfBirth?: string
+  gender?: string
+  phone?: string
+  email?: string
+  street?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  languages?: string[]
+  languageFluency?: Record<string, string>
+  workAuthorisation?: boolean
+  emergencyContact?: {
+    name?: string
+    phone?: string
+    relationship?: string
+  }
+  bio?: string
+  photoUrl?: string
 
- // Step 2 — Services
- services?: string[]
- specializations?: string[]
- yearsExperience?: number
- skillRatings?: Record<string, string>
- clientTypes?: string[]
- unwillingTasks?: string[]
- dietaryCooking?: string[]
+  // Step 2 — Services
+  services?: string[]
+  specializations?: string[]
+  yearsExperience?: number
+  skillRatings?: Record<string, string>
+  clientTypes?: string[]
+  unwillingTasks?: string[]
+  dietaryCooking?: string[]
 
- // Step 3 — Availability
- availabilityStatus?: string
- availableFromDate?: string
- noticePeriod?: string
- weeklyGrid?: Record<string, string[]>
- minHoursPerWeek?: number
- maxHoursPerWeek?: number
- holidayAvailable?: boolean
- earliestStartDate?: string
- placementTypes?: string[]
- preferredAgeGroup?: string
- preferredSettings?: string[]
- hourlyRateMin?: number
- hourlyRateMax?: number
- employmentType?: string
+  // Step 3 — Availability
+  availabilityStatus?: string
+  availableFromDate?: string
+  noticePeriod?: string
+  weeklyGrid?: Record<string, string[]>
+  minHoursPerWeek?: number
+  maxHoursPerWeek?: number
+  holidayAvailable?: boolean
+  placementTypes?: string[]
+  preferredAgeGroup?: string
+  preferredSettings?: string[]
+  yearsInPreferredSettings?: number
+  hourlyRateMin?: number
+  hourlyRateMax?: number
+  employmentType?: string
+  openToUrgent?: boolean
 
- // Step 4 — Location
- serviceAreas?: string[]
- travelRadius?: number
- hasDriversLicense?: boolean
- hasVehicle?: boolean
- willingToTransport?: boolean
- willingClientVehicle?: boolean
- transitAccessible?: boolean
+  // Step 4 — Location
+  serviceAreas?: string[]
+  travelRadius?: number
+  hasDriversLicense?: boolean
+  driversLicenseClass?: string
+  hasVehicle?: boolean
+  willingToTransport?: boolean
+  willingClientVehicle?: boolean
+  transitAccessible?: boolean
 
- // Step 5 — Credentials
- credentials?: string[]
- education?: {
- level?: string
- institution?: string
- field?: string
- year?: string
- enrolled?: boolean
- enrolledProgram?: string
- }
- currentlyEnrolled?: boolean
+  // Step 5 — Credentials
+  credentials?: string[]
+  education?: {
+    level?: string
+    institution?: string
+    field?: string
+    year?: string
+    enrolled?: boolean
+    enrolledProgram?: string
+  }
+  currentlyEnrolled?: boolean
 
- // Step 6 — Compliance
- backgroundConsent?: boolean
- backgroundConsentDate?: string
- vulnerableSectorCheck?: boolean
- drivingRecordCheck?: boolean
- criminalDeclaration?: boolean
- criminalDeclarationDetail?: string
- bondedInsured?: boolean
- tbClearanceDate?: string
- declarationAccurate?: boolean
- declarationDate?: string
- immunisationRecords?: Record<string, boolean>
+  // Step 6 — Compliance
+  backgroundConsent?: boolean
+  backgroundConsentDate?: string
+  vulnerableSectorCheck?: boolean
+  vscDocumentName?: string
+  drivingRecordCheck?: boolean
+  criminalDeclaration?: boolean
+  criminalDeclarationDetail?: string
+  bondedInsured?: boolean
+  tbClearanceDate?: string
+  declarationAccurate?: boolean
+  declarationDate?: string
+  immunisationRecords?: Record<string, boolean>
+  uncomfortableSituations?: string
 
- // Step 7 — Personality
- personalityProfile?: Record<string, any>
- environment_comfort?: Record<string, 'yes' | 'no' | 'prefer_not'>
+  // Step 7 — Personality
+  personalityProfile?: Record<string, any>
+  environment_comfort?: Record<string, 'yes' | 'no' | 'prefer_not'>
 
- // Step 10 — Motivation
- motivation?: Record<string, string>
- client_preferences?: {
-   personality_types?: string[]
-   age_ranges?: string[]
-   care_style?: string
- }
+  // Step 8 — Work history
+  workHistory?: Array<{
+    id: string
+    organisation?: string
+    title?: string
+    employmentType?: string
+    startMonth?: string
+    startYear?: string
+    endMonth?: string
+    endYear?: string
+    current?: boolean
+    clientTypes?: string[]
+    duties?: string
+    reasonLeaving?: string
+    supervisorName?: string
+    supervisorContact?: string
+    canContact?: boolean
+  }>
+  volunteerExperience?: boolean
+  volunteerDescription?: string
+  familyCareExperience?: boolean
+  familyCareDescription?: string
+  professionalMemberships?: string[]
 
- // Step 8 — Work history
- workHistory?: Array<{
- id: string
- organisation?: string
- title?: string
- employmentType?: string
- startMonth?: string
- startYear?: string
- endMonth?: string
- endYear?: string
- current?: boolean
- clientTypes?: string[]
- duties?: string
- reasonLeaving?: string
- supervisorName?: string
- supervisorContact?: string
- canContact?: boolean
- }>
- volunteerExperience?: boolean
- volunteerDescription?: string
- familyCareExperience?: boolean
- familyCareDescription?: string
- professionalMemberships?: string[]
+  // Step 9 — References
+  references?: Array<{
+    id: string
+    name?: string
+    relationshipType?: string
+    organisation?: string
+    duration?: string
+    contactMethod?: string
+    email?: string
+    phone?: string
+    consentKnows?: boolean
+    consentAgreed?: boolean
+    consentUnderstands?: boolean
+  }>
 
- // Step 9 — References
- references?: Array<{
- id: string
- name?: string
- relationshipType?: string
- organisation?: string
- duration?: string
- contactMethod?: string
- email?: string
- phone?: string
- consentKnows?: boolean
- consentAgreed?: boolean
- consentUnderstands?: boolean
- }>
+  // Step 10 — Open questions
+  openQ1?: string
+  openQ2?: string
+  openQ3?: string
 
- // Step 10 — Open questions
- openQ1?: string
- openQ2?: string
- openQ3?: string
+  // Step 0 — Resume upload
+  resumeFileName?: string
+  resumeParsed?: boolean
 
- // Meta
- profileCompletionPct?: number
- profilePhase?: number
+  // Meta
+  profileCompletionPct?: number
+  profilePhase?: number
 }
-
-// ─── Context type ──────────────────────────────────────────────────────────
 
 interface ProfileFormContextType {
- formData: ProfileFormData
- updateField: (field: keyof ProfileFormData, value: any) => void
- updateFields: (fields: Partial<ProfileFormData>) => void
- isLoaded: boolean
- saveStatus: 'idle' | 'saving' | 'saved' | 'error'
+  formData: ProfileFormData
+  updateField: (field: keyof ProfileFormData, value: any) => void
+  updateFields: (fields: Partial<ProfileFormData>) => void
+  isLoaded: boolean
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error'
 }
 
-// ─── Context ───────────────────────────────────────────────────────────────
-
 const ProfileFormContext = createContext<ProfileFormContextType>({
- formData: {},
- updateField: () => {},
- updateFields: () => {},
- isLoaded: false,
- saveStatus: 'idle',
+  formData: {},
+  updateField: () => {},
+  updateFields: () => {},
+  isLoaded: false,
+  saveStatus: 'idle',
 })
-
-// ─── Storage key ───────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'careified_profile_form'
 
-// ─── Provider ──────────────────────────────────────────────────────────────
-
 export function ProfileFormProvider({ children }: { children: ReactNode }) {
- const [formData, setFormData] = useState<ProfileFormData>({})
- const [isLoaded, setIsLoaded] = useState(false)
- const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [formData, setFormData] = useState<ProfileFormData>({})
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [saveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
- // Load from localStorage on mount
- useEffect(() => {
- try {
- const stored = localStorage.getItem(STORAGE_KEY)
- if (stored) {
- const parsed = JSON.parse(stored)
- setFormData(parsed)
- }
- } catch (e) {
- console.error('Failed to load profile from localStorage:', e)
- }
- setIsLoaded(true)
- }, [])
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        setFormData(parsed)
+      }
+    } catch (e) {
+      console.error('Failed to load profile from localStorage:', e)
+    }
+    setIsLoaded(true)
+  }, [])
 
- // Write to localStorage whenever formData changes (debounced 300ms)
- useEffect(() => {
- if (!isLoaded) return
- const t = setTimeout(() => {
- try {
- localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
- } catch (e) {
- console.error('Failed to save profile to localStorage:', e)
- }
- }, 300)
- return () => clearTimeout(t)
- }, [formData, isLoaded])
+  useEffect(() => {
+    if (!isLoaded) return
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+      } catch (e) {
+        console.error('Failed to save profile to localStorage:', e)
+      }
+    }, 300)
+    return () => clearTimeout(t)
+  }, [formData, isLoaded])
 
- // Update a single field
- const updateField = useCallback((field: keyof ProfileFormData, value: any) => {
- setFormData(prev => ({ ...prev, [field]: value }))
- }, [])
+  const updateField = useCallback((field: keyof ProfileFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }, [])
 
- // Update multiple fields at once
- const updateFields = useCallback((fields: Partial<ProfileFormData>) => {
- setFormData(prev => ({ ...prev, ...fields }))
- }, [])
+  const updateFields = useCallback((fields: Partial<ProfileFormData>) => {
+    setFormData(prev => ({ ...prev, ...fields }))
+  }, [])
 
- return (
- <ProfileFormContext.Provider value={{
- formData,
- updateField,
- updateFields,
- isLoaded,
- saveStatus,
- }}>
- {children}
- </ProfileFormContext.Provider>
- )
+  return (
+    <ProfileFormContext.Provider value={{
+      formData,
+      updateField,
+      updateFields,
+      isLoaded,
+      saveStatus,
+    }}>
+      {children}
+    </ProfileFormContext.Provider>
+  )
 }
 
-// ─── Hook ──────────────────────────────────────────────────────────────────
-
 export function useProfileForm() {
- return useContext(ProfileFormContext)
+  return useContext(ProfileFormContext)
 }
