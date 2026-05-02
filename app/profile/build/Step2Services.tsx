@@ -1,533 +1,410 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { ChevronDown, ChevronUp, AlertCircle, Info } from 'lucide-react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 
-const FONT_SANS = "'Inter', sans-serif"
-const FONT_SERIF = "'Inter', sans-serif"
+// Design system colors
+const COLORS = {
+  navy: '#0D1B3E',
+  gold: '#C9973A',
+  red: '#DC2626',
+  slate: '#64748B',
+  border: '#E2E8F0',
+  errorBg: '#FEF2F2',
+}
 
-// Service categories - NOTE: Grocery shopping removed from Nutrition (lives in Household only)
-
-const SERVICE_CATEGORIES = [
- { id: 'personal', label: 'Personal Care', services: [
- 'Bathing and showering assistance', 'Dressing and grooming assistance',
- 'Oral hygiene and dental care', 'Hair care and styling', 'Nail care',
- 'Shaving assistance', 'Continence care and incontinence management',
- 'Skin care and moisturising', 'Personal hygiene support',
- ]},
- { id: 'mobility', label: 'Mobility and Physical Support', services: [
- 'Mobility assistance (walking, standing)', 'Transfer assistance (bed to chair)',
- 'Hoyer lift and mechanical lift operation', 'Wheelchair assistance',
- 'Walker and cane assistance', 'Fall prevention and safety monitoring',
- 'Range of motion exercises', 'Exercise assistance and encouragement',
- 'Escort to appointments',
- ]},
- { id: 'nutrition', label: 'Nutrition and Hydration', services: [
- 'Meal planning and preparation', 'Therapeutic diet meal prep',
- 'Feeding assistance', 'Hydration monitoring',
- 'Kitchen cleaning after meals', 'Special diet management',
- ]},
- { id: 'medication', label: 'Medication Support', services: [
- 'Medication reminders', 'Medication pickup from pharmacy',
- 'Medication organisation (pill boxes)',
- 'Medication administration (where permitted)', 'Monitoring for side effects',
- ]},
- { id: 'household', label: 'Household Support', services: [
- 'Light housekeeping', 'Laundry and folding', 'Linen changes',
- 'Dishwashing', 'Vacuuming and mopping', 'Bathroom cleaning',
- 'Grocery shopping', 'Errands and pickups',
- 'Mail and correspondence management', 'Pet care assistance',
- 'Banking and bill payment assistance',
- ]},
- { id: 'companionship', label: 'Companionship and Emotional Support', services: [
- 'Companionship and conversation', 'Reading aloud', 'Games and activities',
- 'Cognitive stimulation activities', 'Music and entertainment',
- 'Outdoor walks and fresh air', 'Community outing accompaniment',
- 'Hobby support and engagement', 'Video calling family assistance',
- ]},
- { id: 'dementia', label: 'Dementia and Memory Care', services: [
- 'Dementia care and support', "Alzheimer's care", 'Memory care activities',
- 'Sundowning management', 'Wandering supervision', 'Behavioural support',
- 'Behavioural redirection techniques', 'Reminiscence therapy activities',
- 'Safe environment monitoring',
- ]},
- { id: 'complex', label: 'Complex and Specialised Care', services: [
- 'Post-hospital recovery support', 'Post-surgical care assistance',
- 'Stroke recovery support', "Parkinson's care",
- 'Palliative and end-of-life support', 'Hospice support care',
- 'Respite care', 'Overnight care', 'Live-in care', '24-hour care',
- 'Paediatric care support', 'Disability support',
- 'Acquired brain injury support', 'Mental health support care',
- 'Bariatric care assistance',
- ]},
- { id: 'health', label: 'Health Monitoring', services: [
- 'Vital signs monitoring (non-clinical)', 'Blood glucose monitoring awareness',
- 'Oxygen equipment management', 'Wound care / post-surgical dressing',
- 'Catheter care', 'Ostomy care', 'Safety supervision',
- 'Emergency response awareness', 'Fall detection monitoring',
- ]},
- { id: 'transport', label: 'Transportation and Logistics', services: [
- 'Medical appointment transportation', 'Non-emergency medical transportation',
- 'Social outing transportation', 'Prescription pickup',
- ]},
- { id: 'technology', label: 'Technology Assistance', services: [
- 'Smartphone and tablet assistance', 'Video calling setup (FaceTime, Zoom)',
- 'Smart TV operation', 'Computer assistance',
- 'Medical alert device setup', 'Smart home device assistance',
- ]},
+// Constants per spec
+const CLIENT_TYPES = [
+  'Elderly/Seniors', 'Adults with Disabilities', 'Children with Special Needs',
+  'Post-surgical Recovery', 'Palliative/Hospice', 'Brain Injury',
+  'Acquired Disability', 'Mental Health Needs', 'Bariatric Care', 'Veterans'
 ]
 
-const SPECIALIZATIONS = [
- "Dementia / Alzheimer's", "Parkinson's disease", 'Memory care',
- 'Palliative / end of life', 'Post-hospital recovery', 'Stroke recovery',
- 'Mobility and transfer', 'Medication management', 'Complex personal care',
- 'Behavioural support', 'Diabetes management', 'Mental health support',
- 'Paediatric care', 'Acquired brain injury', 'Bariatric care',
- 'Hospice support', 'Wound care', 'Vital signs monitoring',
- 'Catheter and ostomy care', 'Behavioural redirection',
+const SERVICE_CATEGORIES = [
+  {
+    category: 'Personal Care',
+    services: ['Bathing & Grooming', 'Dressing Assistance', 'Toileting & Continence Care',
+      'Mobility Assistance', 'Transfer & Positioning', 'Feeding Assistance']
+  },
+  {
+    category: 'Health Support',
+    services: ['Medication Reminders', 'Vital Signs Monitoring', 'Wound Care Support',
+      'Post-operative Care', 'Catheter Care', 'Ostomy Care', 'Tube Feeding Support']
+  },
+  {
+    category: 'Cognitive & Emotional',
+    services: ['Dementia Care', "Alzheimer's Care", 'Companionship', 'Mental Health Support',
+      'Behaviour Support', 'Validation Therapy']
+  },
+  {
+    category: 'Household',
+    services: ['Light Housekeeping', 'Meal Preparation', 'Grocery Shopping', 'Laundry',
+      'Errands & Transportation', 'Pet Care']
+  },
+  {
+    category: 'Specialized',
+    services: ['Palliative Care', 'Respite Care', 'Overnight Care', 'Live-in Care',
+      'Paediatric Care', 'Brain Injury Rehabilitation Support']
+  }
 ]
 
 const SKILL_LEVELS = [
- { value: 'learning', label: 'Learning', color: '#94A3B8' },
- { value: 'competent', label: 'Competent', color: '#2563EB' },
- { value: 'experienced', label: 'Experienced', color: '#C9973A' },
- { value: 'specialist', label: 'Specialist', color: '#16A34A' },
-]
-
-const CLIENT_TYPES = [
- 'Elderly (65+)', 'Adults with disability', 'Paediatric / children',
- 'Post-surgical recovery', 'End-of-life / palliative', 'Mental health',
- 'Acquired brain injury', 'Dementia / memory care',
+  { value: 'learning', label: 'Learning' },
+  { value: 'competent', label: 'Competent' },
+  { value: 'experienced', label: 'Experienced' },
+  { value: 'specialist', label: 'Specialist' }
 ]
 
 const DIETARY_OPTIONS = [
- 'Halal', 'Kosher', 'Vegetarian', 'Vegan', 'Gluten-free',
- 'Diabetic diet', 'Low-sodium', 'Low-fat / cardiac', 'Renal diet',
- 'Pureed / soft foods', 'Culturally specific meals',
-]
-
-// Client preferences for matching
-const PERSONALITY_TYPES = [
- 'Quiet and reflective',
- 'Chatty and social',
- 'Strong-willed or stubborn',
- 'Gentle and easy-going',
- 'Anxious or fearful',
- 'Formerly professional (doctors, executives, etc.)',
- 'Creative or artistic',
- 'Religious or spiritual',
-]
-
-const AGE_RANGES = [
- { key: 'children', label: 'Children (under 18)' },
- { key: 'young_adults', label: 'Young adults (18–40)' },
- { key: 'adults', label: 'Adults (40–65)' },
- { key: 'seniors', label: 'Seniors (65–80)' },
- { key: 'elderly', label: 'Elderly (80+)' },
-]
-
-const CARE_STYLES = [
- { key: 'hands_on', label: 'Hands-on medical/physical care' },
- { key: 'companionship', label: 'Companionship-focused support' },
- { key: 'balanced', label: 'Balance of both' },
-]
-
-const YEARS_OPTIONS = [
- { value: 0, label: 'Less than 1 year' },
- { value: 1, label: '1–2 years' },
- { value: 3, label: '3–5 years' },
- { value: 5, label: '5–10 years' },
- { value: 10, label: '10–20 years' },
- { value: 20, label: '20+ years' },
+  'Diabetic-friendly', 'Low sodium', 'Pureed/soft foods', 'Halal', 'Kosher',
+  'Vegetarian', 'Vegan', 'Gluten-free', 'Allergen-aware', 'Cultural/ethnic cuisine',
+  'Tube feeding support'
 ]
 
 const UNWILLING_TASKS = [
- 'Ostomy care', 'Catheter care', 'Wound care / dressing changes',
- 'Heavy lifting (bariatric)', 'Aggressive / violent behaviour',
- 'Hoarding environments', 'Smoking environments',
- 'End-of-life / grief-heavy situations', 'Aggressive family members',
- 'High medical complexity', 'Multiple household members',
+  'Bathing opposite gender', 'Catheter care', 'Ostomy care',
+  'Wound care', 'Bowel care', 'Tube feeding', 'Heavy lifting (50+ lbs)',
+  'Driving clients', 'Smoking household', 'Pet households', 'Night shifts',
+  'Behaviour support'
 ]
 
+// Styles
+const styles = {
+  sectionHeader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: COLORS.slate,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '16px',
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '8px',
+    fontSize: '15px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  inputFocus: {
+    borderColor: COLORS.gold,
+    boxShadow: '0 0 0 3px rgba(201,151,58,0.15)',
+  },
+  inputError: {
+    border: '2px solid ' + COLORS.red,
+    backgroundColor: COLORS.errorBg,
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  required: {
+    color: COLORS.red,
+    marginLeft: '3px',
+  },
+  errorText: {
+    fontSize: '12px',
+    color: COLORS.red,
+    marginTop: '4px',
+  },
+  section: {
+    marginBottom: '32px',
+  },
+  categoryHeader: {
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#94A3B8',
+    textTransform: 'uppercase' as const,
+    marginTop: '16px',
+    marginBottom: '8px',
+  },
+  checkboxLabel: {
+    fontSize: '14px',
+    color: '#374151',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+}
+
 export default function Step2Services() {
- const { formData, updateField } = useProfileForm()
- const { saveField } = useProfileSave()
+  const { formData } = useProfileForm()
+  const { saveField } = useProfileSave()
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [focused, setFocused] = useState<string | null>(null)
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({})
 
- const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
- personal: true,
- })
+  const services = formData.services || []
+  const skillRatings = formData.skillRatings || {}
+  const clientTypes = formData.clientTypes || []
+  const dietaryCooking = formData.dietaryCooking || []
+  const unwillingTasks = formData.unwillingTasks || []
 
- const services = formData.services || []
- const specializations = formData.specializations || []
- const skillRatings = formData.skillRatings || {}
- const clientTypes = formData.clientTypes || []
- const unwillingTasks = formData.unwillingTasks || []
- const dietaryCooking = formData.dietaryCooking || []
- const yearsExperience = formData.yearsExperience
- const clientPrefs = formData.client_preferences || {
-   personality_types: [],
-   age_ranges: [],
-   care_style: null,
- }
+  const getInputStyle = (field: string) => {
+    let s = { ...styles.input }
+    if (focused === field) {
+      s = { ...s, ...styles.inputFocus }
+    }
+    if (touched[field] && errors[field]) {
+      s = { ...s, ...styles.inputError }
+    }
+    return s
+  }
 
- // Validation for client preferences
- const prefsValid =
-   (clientPrefs.personality_types?.length ?? 0) >= 2 &&
-   (clientPrefs.age_ranges?.length ?? 0) >= 1 &&
-   !!clientPrefs.care_style
+  const handleChange = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
 
- const togglePersonalityType = useCallback((type: string) => {
-   const current = clientPrefs.personality_types || []
-   const updated = current.includes(type)
-     ? current.filter(t => t !== type)
-     : current.length < 8 ? [...current, type] : current
-   updateField('client_preferences', { ...clientPrefs, personality_types: updated })
- }, [clientPrefs, updateField])
+  const handleBlur = useCallback((field: string, value: any, required?: boolean) => {
+    setTouched(prev => ({ ...prev, [field]: true }))
+    if (required && !value) {
+      setErrors(prev => ({ ...prev, [field]: 'This field is required' }))
+    } else {
+      setErrors(prev => { const n = { ...prev }; delete n[field]; return n })
+    }
+    saveField(field as any, value)
+  }, [saveField])
 
- const toggleAgeRange = useCallback((key: string) => {
-   const current = clientPrefs.age_ranges || []
-   const updated = current.includes(key)
-     ? current.filter(k => k !== key)
-     : [...current, key]
-   updateField('client_preferences', { ...clientPrefs, age_ranges: updated })
- }, [clientPrefs, updateField])
+  const toggleCategory = useCallback((id: string) => {
+    setOpenCategories(prev => ({ ...prev, [id]: !prev[id] }))
+  }, [])
 
- const setCareStyle = useCallback((key: string) => {
-   updateField('client_preferences', { ...clientPrefs, care_style: key })
- }, [clientPrefs, updateField])
+  const toggleService = useCallback((service: string) => {
+    const updated = services.includes(service)
+      ? services.filter(s => s !== service)
+      : [...services, service]
+    saveField('services', updated)
+    setTouched(prev => ({ ...prev, services: true }))
+    if (updated.length === 0) {
+      setErrors(prev => ({ ...prev, services: 'Select at least one service' }))
+    } else {
+      setErrors(prev => { const n = { ...prev }; delete n.services; return n })
+    }
+  }, [services, saveField])
 
- const toggleCategory = useCallback((id: string) => {
- setOpenCategories(prev => ({ ...prev, [id]: !prev[id] }))
- }, [])
+  const setSkillRating = useCallback((service: string, level: string) => {
+    saveField('skillRatings', { ...skillRatings, [service]: level })
+  }, [skillRatings, saveField])
 
- const toggleService = useCallback((service: string) => {
- const updated = services.includes(service)
- ? services.filter(s => s !== service)
- : [...services, service]
- saveField('services', updated)
- }, [services, saveField])
+  const toggleClientType = useCallback((type: string) => {
+    const updated = clientTypes.includes(type)
+      ? clientTypes.filter(t => t !== type)
+      : [...clientTypes, type]
+    saveField('clientTypes', updated)
+  }, [clientTypes, saveField])
 
- const toggleSpecialization = useCallback((spec: string) => {
- const updated = specializations.includes(spec)
- ? specializations.filter(s => s !== spec)
- : [...specializations, spec]
- saveField('specializations', updated)
+  const toggleDietary = useCallback((option: string) => {
+    const updated = dietaryCooking.includes(option)
+      ? dietaryCooking.filter(d => d !== option)
+      : [...dietaryCooking, option]
+    saveField('dietaryCooking', updated)
+  }, [dietaryCooking, saveField])
 
- if (specializations.includes(spec)) {
- const newRatings = { ...skillRatings }
- delete newRatings[spec]
- saveField('skillRatings', newRatings)
- }
- }, [specializations, skillRatings, saveField])
+  const toggleUnwilling = useCallback((task: string) => {
+    const updated = unwillingTasks.includes(task)
+      ? unwillingTasks.filter(t => t !== task)
+      : [...unwillingTasks, task]
+    saveField('unwillingTasks', updated)
+  }, [unwillingTasks, saveField])
 
- const setSkillRating = useCallback((spec: string, level: string) => {
- saveField('skillRatings', { ...skillRatings, [spec]: level })
- }, [skillRatings, saveField])
+  return (
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+      {/* SECTION: Experience Level */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Experience Level</div>
+        <label style={styles.label}>
+          Years of experience<span style={styles.required}>*</span>
+        </label>
+        <input
+          type="number"
+          min="0"
+          max="50"
+          value={formData.yearsExperience || ''}
+          placeholder="0"
+          style={getInputStyle('yearsExperience')}
+          onChange={e => handleChange('yearsExperience', parseInt(e.target.value) || 0)}
+          onFocus={() => setFocused('yearsExperience')}
+          onBlur={e => handleBlur('yearsExperience', e.target.value, true)}
+        />
+        {touched.yearsExperience && errors.yearsExperience && (
+          <div style={styles.errorText}>{errors.yearsExperience}</div>
+        )}
+      </div>
 
- const toggleClientType = useCallback((type: string) => {
- const updated = clientTypes.includes(type)
- ? clientTypes.filter(t => t !== type)
- : [...clientTypes, type]
- saveField('clientTypes', updated)
- }, [clientTypes, saveField])
+      {/* SECTION: Client Types */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Client Types</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {CLIENT_TYPES.map(type => {
+            const selected = clientTypes.includes(type)
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => toggleClientType(type)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: selected ? '2px solid ' + COLORS.navy : '2px solid ' + COLORS.border,
+                  backgroundColor: selected ? '#EFF6FF' : 'white',
+                  color: selected ? COLORS.navy : COLORS.slate,
+                }}
+              >
+                {type}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
- const toggleUnwilling = useCallback((task: string) => {
- const updated = unwillingTasks.includes(task)
- ? unwillingTasks.filter(t => t !== task)
- : [...unwillingTasks, task]
- saveField('unwillingTasks', updated)
- }, [unwillingTasks, saveField])
+      {/* SECTION: Services Offered */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Services Offered</div>
+        {SERVICE_CATEGORIES.map(cat => {
+          const catId = cat.category.toLowerCase().replace(/[^a-z]/g, '')
+          const isOpen = openCategories[catId]
+          const selectedInCat = cat.services.filter(s => services.includes(s)).length
 
- const toggleDietary = useCallback((option: string) => {
- const updated = dietaryCooking.includes(option)
- ? dietaryCooking.filter(d => d !== option)
- : [...dietaryCooking, option]
- saveField('dietaryCooking', updated)
- }, [dietaryCooking, saveField])
+          return (
+            <div key={cat.category} style={{ border: '1px solid ' + COLORS.border, borderRadius: '12px', overflow: 'hidden', marginBottom: '8px' }}>
+              <button
+                type="button"
+                onClick={() => toggleCategory(catId)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  backgroundColor: selectedInCat > 0 ? '#FAFDF7' : 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: COLORS.navy }}>{cat.category}</span>
+                  {selectedInCat > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#FDF6EC', color: '#92400E' }}>
+                      {selectedInCat}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '14px', color: COLORS.slate }}>{isOpen ? '−' : '+'}</span>
+              </button>
 
- return (
- <div style={{ fontFamily: FONT_SANS, display: 'flex', flexDirection: 'column', gap: '36px' }}>
+              {isOpen && (
+                <div style={{ padding: '12px', backgroundColor: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {cat.services.map(service => {
+                    const selected = services.includes(service)
+                    const currentRating = skillRatings[service]
+                    return (
+                      <div key={service} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: selected ? '#FDF6EC' : 'white', border: selected ? '1px solid ' + COLORS.gold : '1px solid transparent' }}>
+                        <label style={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleService(service)}
+                            style={{ accentColor: COLORS.gold, width: '14px', height: '14px' }}
+                          />
+                          <span style={{ fontSize: '13px', color: selected ? '#92400E' : COLORS.navy, fontWeight: selected ? 600 : 400 }}>
+                            {service}
+                          </span>
+                        </label>
+                        {selected && (
+                          <select
+                            value={currentRating || ''}
+                            onChange={e => setSkillRating(service, e.target.value)}
+                            style={{ width: '180px', marginLeft: '12px', fontSize: '13px', padding: '4px 8px', borderRadius: '6px', border: '1px solid ' + COLORS.border }}
+                          >
+                            <option value="">Rate skill</option>
+                            {SKILL_LEVELS.map(level => (
+                              <option key={level.value} value={level.value}>{level.label}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
+        {touched.services && errors.services && (
+          <div style={styles.errorText}>{errors.services}</div>
+        )}
+      </div>
 
- <div>
- <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0D1B3E', marginBottom: '10px' }}>
- Total years of caregiving experience *
- </label>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
- {YEARS_OPTIONS.map(opt => (
- <button key={opt.value} type="button" onClick={() => saveField('yearsExperience', opt.value)}
- style={{ padding: '8px 16px', borderRadius: '10px', fontSize: '12px', fontWeight: 600,
- border: yearsExperience === opt.value ? '2px solid #C9973A' : '2px solid #E2E8F0',
- background: yearsExperience === opt.value ? '#FDF6EC' : 'white',
- color: yearsExperience === opt.value ? '#92400E' : '#64748B',
- cursor: 'pointer', fontFamily: FONT_SANS }}>
- {opt.label}
- </button>
- ))}
- </div>
- </div>
+      {/* SECTION: Dietary & Nutrition Support */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Dietary & Nutrition Support</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {DIETARY_OPTIONS.map(option => {
+            const selected = dietaryCooking.includes(option)
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggleDietary(option)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: selected ? '2px solid ' + COLORS.gold : '2px solid ' + COLORS.border,
+                  backgroundColor: selected ? '#FDF6EC' : 'white',
+                  color: selected ? '#92400E' : COLORS.slate,
+                }}
+              >
+                {option}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
- <div>
- <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>
- Services you provide
- </h3>
- <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px' }}>
- Select all that apply. Click a category to expand it.
- {services.length > 0 && <span style={{ color: '#C9973A', fontWeight: 700, marginLeft: '8px' }}>{services.length} selected</span>}
- </p>
-
- <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
- {SERVICE_CATEGORIES.map(cat => {
- const selectedInCat = cat.services.filter(s => services.includes(s)).length
- const isOpen = !!openCategories[cat.id]
-
- return (
- <div key={cat.id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden' }}>
- <button type="button" onClick={() => toggleCategory(cat.id)}
- style={{ width: '100%', padding: '12px 16px', background: selectedInCat > 0 ? '#FAFDF7' : 'white',
- border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: FONT_SANS }}>
- <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
- <span style={{ fontSize: '13px', fontWeight: 700, color: '#0D1B3E' }}>{cat.label}</span>
- {selectedInCat > 0 && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#FDF6EC', color: '#92400E' }}>{selectedInCat} selected</span>}
- </div>
- {isOpen ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
- </button>
-
- {isOpen && (
- <div style={{ padding: '12px', background: '#F8FAFC', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '6px' }}>
- {cat.services.map(service => (
- <label key={service} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px', cursor: 'pointer',
- border: services.includes(service) ? '1px solid #C9973A' : '1px solid transparent',
- background: services.includes(service) ? '#FDF6EC' : 'white', transition: 'all 0.1s' }}>
- <input type="checkbox" checked={services.includes(service)} onChange={() => toggleService(service)}
- style={{ accentColor: '#C9973A', width: '14px', height: '14px', flexShrink: 0 }} />
- <span style={{ fontSize: '12px', color: services.includes(service) ? '#92400E' : '#0D1B3E', fontWeight: services.includes(service) ? 600 : 400 }}>{service}</span>
- </label>
- ))}
- </div>
- )}
- </div>
- )
- })}
- </div>
-
- {services.length === 0 && (
- <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: '#FEF3C7', marginTop: '10px' }}>
- <AlertCircle size={14} color="#D97706" />
- <span style={{ fontSize: '12px', color: '#92400E' }}>Select at least one service to continue</span>
- </div>
- )}
- </div>
-
- <div>
- <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>Clinical specialties</h3>
- <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 4px' }}>Areas where you have specific training or experience.</p>
- <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', background: '#EFF6FF', marginBottom: '16px' }}>
- <Info size={13} color="#2563EB" />
- <span style={{ fontSize: '11px', color: '#1E3A8A' }}>Be honest — agencies compare your claimed specialties against actual performance after placements.</span>
- </div>
-
- <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
- {SPECIALIZATIONS.map(spec => {
- const selected = specializations.includes(spec)
- const currentRating = skillRatings[spec]
-
- return (
- <div key={spec} style={{ border: selected ? '1px solid #C9973A' : '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', background: selected ? '#FDF6EC' : 'white', transition: 'all 0.15s' }}>
- <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px' }}>
- <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1 }}>
- <input type="checkbox" checked={selected} onChange={() => toggleSpecialization(spec)} style={{ accentColor: '#C9973A', width: '14px', height: '14px', flexShrink: 0 }} />
- <span style={{ fontSize: '13px', fontWeight: selected ? 600 : 400, color: selected ? '#92400E' : '#0D1B3E' }}>{spec}</span>
- </label>
-
- {selected && (
- <div style={{ display: 'flex', gap: '4px', marginLeft: '12px' }}>
- {SKILL_LEVELS.map(level => (
- <button key={level.value} type="button" onClick={() => setSkillRating(spec, level.value)}
- style={{ padding: '3px 9px', borderRadius: '6px', fontSize: '10px', fontWeight: 700,
- border: currentRating === level.value ? '1.5px solid ' + level.color : '1.5px solid #E2E8F0',
- background: currentRating === level.value ? level.color : 'white',
- color: currentRating === level.value ? 'white' : '#94A3B8', cursor: 'pointer', fontFamily: FONT_SANS, transition: 'all 0.1s' }}>
- {level.label}
- </button>
- ))}
- </div>
- )}
- </div>
- </div>
- )
- })}
- </div>
- </div>
-
- <div>
- <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>Client types you have experience with</h3>
- <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 14px' }}>Select all that apply.</p>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
- {CLIENT_TYPES.map(type => (
- <button key={type} type="button" onClick={() => toggleClientType(type)}
- style={{ padding: '8px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: 500,
- border: clientTypes.includes(type) ? '2px solid #1E3A8A' : '2px solid #E2E8F0',
- background: clientTypes.includes(type) ? '#EFF6FF' : 'white',
- color: clientTypes.includes(type) ? '#1E3A8A' : '#64748B', cursor: 'pointer', fontFamily: FONT_SANS }}>
- {type}
- </button>
- ))}
- </div>
- </div>
-
- <div>
- <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>Dietary accommodations you can provide</h3>
- <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 14px' }}>Which special diets or food preparations can you accommodate?</p>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
- {DIETARY_OPTIONS.map(option => (
- <button key={option} type="button" onClick={() => toggleDietary(option)}
- style={{ padding: '8px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: 500,
- border: dietaryCooking.includes(option) ? '2px solid #C9973A' : '2px solid #E2E8F0',
- background: dietaryCooking.includes(option) ? '#FDF6EC' : 'white',
- color: dietaryCooking.includes(option) ? '#92400E' : '#64748B', cursor: 'pointer', fontFamily: FONT_SANS }}>
- {option}
- </button>
- ))}
- </div>
- </div>
-
- {/* CLIENT PREFERENCES SECTION */}
- <div style={{ marginTop: '32px', padding: '24px', borderRadius: '16px', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
-   <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>Who you work best with</h3>
-   <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 20px' }}>This helps us match you with clients where you'll genuinely thrive.</p>
-   
-   {/* Personality types */}
-   <div style={{ marginBottom: '20px' }}>
-     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
-       What describes you? <span style={{ fontWeight: 400, color: '#94A3B8', marginLeft: '6px' }}>(select at least 2)</span>
-     </div>
-     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-       {PERSONALITY_TYPES.map(type => {
-         const selected = (clientPrefs.personality_types || []).includes(type)
-         return (
-           <button
-             key={type}
-             type="button"
-             onClick={() => togglePersonalityType(type)}
-             style={{
-               padding: '8px 14px',
-               borderRadius: '10px',
-               fontSize: '12px',
-               fontWeight: selected ? 700 : 400,
-               cursor: 'pointer',
-               border: selected ? '2px solid #C9973A' : '1px solid #E2E8F0',
-               background: selected ? '#FDF6EC' : 'white',
-               color: selected ? '#92400E' : '#64748B',
-               fontFamily: FONT_SANS,
-             }}
-           >
-             {type}
-           </button>
-         )
-       })}
-     </div>
-     {(clientPrefs.personality_types?.length ?? 0) < 2 && (
-       <div style={{ fontSize: '11px', color: '#DC2626', marginTop: '6px' }}>Select at least 2</div>
-     )}
-   </div>
-   
-   {/* Age ranges */}
-   <div style={{ marginBottom: '20px' }}>
-     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
-       Age groups you prefer working with <span style={{ fontWeight: 400, color: '#94A3B8', marginLeft: '6px' }}>(select at least 1)</span>
-     </div>
-     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-       {AGE_RANGES.map(age => {
-         const selected = (clientPrefs.age_ranges || []).includes(age.key)
-         return (
-           <button
-             key={age.key}
-             type="button"
-             onClick={() => toggleAgeRange(age.key)}
-             style={{
-               padding: '8px 14px',
-               borderRadius: '10px',
-               fontSize: '12px',
-               fontWeight: selected ? 700 : 400,
-               cursor: 'pointer',
-               border: selected ? '2px solid #1E3A8A' : '1px solid #E2E8F0',
-               background: selected ? '#EFF6FF' : 'white',
-               color: selected ? '#1E3A8A' : '#64748B',
-               fontFamily: FONT_SANS,
-             }}
-           >
-             {age.label}
-           </button>
-         )
-       })}
-     </div>
-     {(clientPrefs.age_ranges?.length ?? 0) < 1 && (
-       <div style={{ fontSize: '11px', color: '#DC2626', marginTop: '6px' }}>Select at least 1</div>
-     )}
-   </div>
-   
-   {/* Care style */}
-   <div style={{ marginBottom: '16px' }}>
-     <div style={{ fontSize: '12px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px' }}>
-       Your care style <span style={{ color: '#DC2626' }}>*</span>
-     </div>
-     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-       {CARE_STYLES.map(style => {
-         const selected = clientPrefs.care_style === style.key
-         return (
-           <button
-             key={style.key}
-             type="button"
-             onClick={() => setCareStyle(style.key)}
-             style={{
-               padding: '10px 16px',
-               borderRadius: '20px',
-               fontSize: '12px',
-               fontWeight: selected ? 700 : 400,
-               cursor: 'pointer',
-               border: selected ? '2px solid #C9973A' : '1px solid #1E3A8A',
-               background: selected ? '#C9973A' : 'white',
-               color: selected ? '#0D1B3E' : '#1E3A8A',
-               fontFamily: FONT_SANS,
-             }}
-           >
-             {style.label}
-           </button>
-         )
-       })}
-     </div>
-   </div>
-   
-   <div style={{ fontSize: '11px', fontWeight: 600, color: prefsValid ? '#16A34A' : '#C9973A' }}>
-     {prefsValid ? '✓ Client preferences complete' : 'Complete all 3 sections above to continue'}
-   </div>
- </div>
-
- <div>
- <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0D1B3E', margin: '0 0 4px', fontFamily: FONT_SERIF }}>
- Tasks you prefer not to perform <span style={{ fontSize: '11px', fontWeight: 400, color: '#94A3B8', marginLeft: '8px' }}>optional</span>
- </h3>
- <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', marginBottom: '14px' }}>
- <Info size={13} color="#64748B" style={{ marginTop: '1px', flexShrink: 0 }} />
- <p style={{ fontSize: '11px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
- This is used for matching — not elimination. Agencies with clients who need these tasks will simply match with caregivers who are comfortable. Honesty prevents bad placements for everyone.
- </p>
- </div>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
- {UNWILLING_TASKS.map(task => (
- <button key={task} type="button" onClick={() => toggleUnwilling(task)}
- style={{ padding: '7px 13px', borderRadius: '10px', fontSize: '12px', fontWeight: 500,
- border: unwillingTasks.includes(task) ? '2px solid #EF4444' : '2px solid #E2E8F0',
- background: unwillingTasks.includes(task) ? '#FEF2F2' : 'white',
- color: unwillingTasks.includes(task) ? '#DC2626' : '#64748B', cursor: 'pointer', fontFamily: FONT_SANS }}>
- {task}
- </button>
- ))}
- </div>
- </div>
-
- </div>
- )
+      {/* SECTION: Honesty Declaration - Unwilling Tasks */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Tasks you prefer not to perform</div>
+        <p style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '12px' }}>
+          Agencies value honesty — select tasks you prefer not to perform (optional)
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {UNWILLING_TASKS.map(task => {
+            const selected = unwillingTasks.includes(task)
+            return (
+              <button
+                key={task}
+                type="button"
+                onClick={() => toggleUnwilling(task)}
+                style={{
+                  padding: '7px 13px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: selected ? '2px solid ' + COLORS.red : '2px solid ' + COLORS.border,
+                  backgroundColor: selected ? '#FEF2F2' : 'white',
+                  color: selected ? COLORS.red : COLORS.slate,
+                }}
+              >
+                {task}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
 }
