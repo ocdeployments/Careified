@@ -1,369 +1,532 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
-import { Plus, X, ChevronDown, ChevronUp, Briefcase } from 'lucide-react'
 
-const FONT_SANS = "'Inter', sans-serif"
-const FONT_SERIF = "'Inter', sans-serif"
-
-type JobEntry = {
-  id?: string
-  organisation?: string
-  employmentType?: string
-  title?: string
-  startMonth?: string
-  startYear?: string
-  endMonth?: string
-  endYear?: string
-  current?: boolean
-  clientTypes?: string[]
-  duties?: string
-  reasonLeaving?: string
-  supervisorName?: string
-  supervisorContact?: string
-  canContact?: boolean
+// Design system colors
+const COLORS = {
+  navy: '#0D1B3E',
+  gold: '#C9973A',
+  red: '#DC2626',
+  slate: '#64748B',
+  border: '#E2E8F0',
+  errorBg: '#FEF2F2',
 }
 
-const ORG_TYPES = [
-  'Home care agency',
-  'Retirement / long-term care facility',
-  'Hospital',
-  'Hospice',
-  'Private family (direct hire)',
-  'Group home',
-  'Disability support organisation',
-  'Mental health facility',
-  'Paediatric care',
-  'Other',
+// Constants
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const YEARS = Array.from({ length: 50 }, (_, i) => String(2025 - i))
+
+const CLIENT_TYPES = [
+  'Elderly/Seniors', 'Adults with Disabilities', 'Children with Special Needs',
+  'Post-surgical', 'Palliative/Hospice', 'Brain Injury', 'Mental Health', 'Bariatric', 'Veterans'
 ]
 
-const CLIENT_TYPE_OPTIONS = [
-  'Elderly (65+)',
-  'Adults with disability',
-  'Dementia / memory care',
-  'Palliative / end-of-life',
-  'Post-surgical recovery',
-  'Mental health',
-  'Acquired brain injury',
-  'Paediatric / children',
+const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Casual/On-call', 'Contract', 'Agency placement']
+
+const REASON_LEAVING = [
+  'Contract ended', 'Better opportunity', 'Personal reasons',
+  'Client passed away', 'Relocated', 'Agency closure', 'Still employed here', 'Prefer not to say'
 ]
 
-const REASON_LEAVING_OPTIONS = [
-  'Contract ended',
-  'Sought better opportunity',
-  'Relocated',
-  'Personal / family reasons',
-  'Facility closed',
-  'Completed placement',
-  'Prefer not to say',
-]
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i))
-
-const MEMBERSHIP_OPTIONS = [
-  'Personal Support Network (PSN)',
-  'Canadian Nurses Association (CNA)',
-  'Registered Nurses Association of Ontario (RNAO)',
-  'American Nurses Association (ANA)',
-  'National Association for Home Care (NAHC)',
-  'Home Care Association of America (HCAOA)',
-  'Other professional association',
-]
-
-const inputStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  borderRadius: '10px',
-  border: '1px solid #E2E8F0',
-  fontSize: '13px',
-  color: '#0D1B3E',
-  width: '100%',
-  boxSizing: 'border-box',
-  fontFamily: FONT_SANS,
+// Styles
+const styles = {
+  sectionHeader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: COLORS.slate,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '16px',
+  },
+  section: {
+    marginBottom: '32px',
+  },
+  noticeBanner: {
+    background: '#F0F9FF',
+    border: '1px solid #BAE6FD',
+    borderRadius: '8px',
+    padding: '12px 16px',
+    fontSize: '13px',
+    color: '#0369A1',
+    marginBottom: '24px',
+  },
+  employerBlock: {
+    background: '#F8FAFC',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '12px',
+    padding: '20px',
+    marginBottom: '16px',
+    position: 'relative' as const,
+  },
+  blockBadge: {
+    position: 'absolute' as const,
+    top: '16px',
+    right: '16px',
+    background: '#E2E8F0',
+    borderRadius: '20px',
+    padding: '2px 10px',
+    fontSize: '12px',
+    color: COLORS.slate,
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '8px',
+    fontSize: '15px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  checkboxLabel: {
+    fontSize: '14px',
+    color: '#374151',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  addButton: {
+    border: '2px dashed ' + COLORS.gold,
+    background: 'transparent',
+    color: COLORS.gold,
+    borderRadius: '8px',
+    padding: '12px',
+    width: '100%',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 600,
+  },
+  tag: {
+    background: '#F1F5F9',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '20px',
+    padding: '4px 12px',
+    fontSize: '13px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    margin: '4px',
+  },
 }
 
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  appearance: 'none',
-  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
-  paddingRight: '36px',
+function generateId() {
+  return Math.random().toString(36).substring(2, 9)
 }
 
 export default function Step8WorkHistory() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
+  const [focused, setFocused] = useState<string | null>(null)
 
-  const [jobs, setJobs] = useState<JobEntry[]>(() => {
-    const saved = formData.workHistory as JobEntry[] | undefined
-    if (Array.isArray(saved) && saved.length > 0) return saved
-    return []
-  })
+  const workHistory = formData.workHistory || []
+  const volunteerExperience = formData.volunteerExperience
+  const volunteerDescription = formData.volunteerDescription
+  const familyCareExperience = formData.familyCareExperience
+  const familyCareDescription = formData.familyCareDescription
+  const professionalMemberships = formData.professionalMemberships || []
+  const [newMembership, setNewMembership] = useState('')
 
-  const [expandedJob, setExpandedJob] = useState<number | null>(jobs.length === 0 ? null : 0)
-
-  const addJob = () => {
-    const newJob: JobEntry = {
-      id: String(Date.now()),
-      organisation: '', employmentType: '', title: '',
-      startMonth: '', startYear: '', endMonth: '', endYear: '',
-      current: false, clientTypes: [], duties: '',
-      reasonLeaving: '', supervisorName: '',
-      supervisorContact: '', canContact: true,
+  const getInputStyle = (field: string): React.CSSProperties => {
+    let s: React.CSSProperties = { ...styles.input }
+    if (focused === field) {
+      s = { ...s, borderColor: COLORS.gold, boxShadow: '0 0 0 3px rgba(201,151,58,0.15)' }
     }
-    const updated = [...jobs, newJob]
-    setJobs(updated)
-    setExpandedJob(updated.length - 1)
+    return s
+  }
+
+  const handleChange = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const handleBlur = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const addEmployer = () => {
+    if (workHistory.length >= 5) return
+    const newEmployer = {
+      id: generateId(),
+      organisation: '',
+      title: '',
+      employmentType: '',
+      startMonth: '',
+      startYear: '',
+      endMonth: '',
+      endYear: '',
+      current: false,
+      clientTypes: [],
+      duties: '',
+      reasonLeaving: '',
+      supervisorName: '',
+      supervisorContact: '',
+      canContact: false,
+    }
+    saveField('workHistory', [...workHistory, newEmployer])
+  }
+
+  const updateEmployer = (index: number, field: string, value: any) => {
+    const updated = [...workHistory]
+    updated[index] = { ...updated[index], [field]: value }
     saveField('workHistory', updated)
   }
 
-  const removeJob = (id: string) => {
-    const updated = jobs.filter(j => j.id !== id)
-    setJobs(updated)
+  const removeEmployer = (index: number) => {
+    const updated = workHistory.filter((_, i) => i !== index)
     saveField('workHistory', updated)
   }
 
-  const updateJob = (id: string, field: keyof JobEntry, value: unknown) => {
-    const updated = jobs.map(j => j.id === id ? { ...j, [field]: value } : j)
-    setJobs(updated)
+  const toggleClientType = (index: number, type: string) => {
+    const updated = [...workHistory]
+    const currentTypes = updated[index].clientTypes || []
+    if (currentTypes.includes(type)) {
+      updated[index].clientTypes = currentTypes.filter(t => t !== type)
+    } else {
+      updated[index].clientTypes = [...currentTypes, type]
+    }
     saveField('workHistory', updated)
   }
 
-  const toggleClientType = (jobId: string, type: string) => {
-    const job = jobs.find(j => j.id === jobId)
-    if (!job) return
-    const currentTypes = job.clientTypes || []
-    const updated = currentTypes.includes(type)
-      ? currentTypes.filter(t => t !== type)
-      : [...currentTypes, type]
-    updateJob(jobId, 'clientTypes', updated)
+  const addMembership = () => {
+    if (!newMembership.trim()) return
+    if (!professionalMemberships.includes(newMembership.trim())) {
+      saveField('professionalMemberships', [...professionalMemberships, newMembership.trim()])
+    }
+    setNewMembership('')
+  }
+
+  const removeMembership = (member: string) => {
+    saveField('professionalMemberships', professionalMemberships.filter(m => m !== member))
   }
 
   return (
-    <div style={{ fontFamily: FONT_SANS, display: 'flex', flexDirection: 'column', gap: 32 }}>
-      
-      {/* Time estimate */}
-      <div style={{ padding: '12px 16px', borderRadius: 10, background: '#F8FAFC', border: '1px solid #E2E8F0', fontSize: 12, color: '#64748B', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Briefcase size={14} color="#94A3B8" />
-        This section takes about 10-15 minutes. Your progress saves automatically as you go.
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+      {/* Notice Banner */}
+      <div style={styles.noticeBanner}>
+        This step takes approximately 15 minutes. All progress saves automatically — you can continue later.
       </div>
 
-      {/* SECTION 1: EMPLOYMENT HISTORY */}
-      <div>
-        <h3 style={{ fontSize: 15, fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Employment history</h3>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 16px' }}>Add up to 5 previous or current employers. Most recent first.</p>
+      {/* PART 1: Employment History */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Previous Caregiving Positions</div>
+        
+        {workHistory.map((employer: any, index: number) => (
+          <div key={employer.id} style={styles.employerBlock}>
+            <div style={styles.blockBadge}>Position {index + 1}</div>
+            <button
+              type="button"
+              onClick={() => removeEmployer(index)}
+              style={{ position: 'absolute', top: '16px', right: '100px', color: COLORS.red, fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none' }}
+            >
+              Remove
+            </button>
 
-        {jobs.map((job, idx) => {
-          const isOpen = expandedJob === idx
-          const hasName = !!job.organisation
-
-          return (
-            <div key={job.id} style={{ border: '1px solid #E2E8F0', borderRadius: 14, overflow: 'hidden', marginBottom: 10 }}>
-              {/* Card header */}
-              <div onClick={() => setExpandedJob(isOpen ? null : idx)} style={{ padding: '14px 16px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Briefcase size={14} color="#94A3B8" />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0D1B3E' }}>{hasName ? job.organisation : 'New employer'}</div>
-                    {job.title && <div style={{ fontSize: 11, color: '#64748B' }}>{job.title}{job.startYear && ` - ${job.startYear}`}</div>}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {jobs.length > 1 && (
-                    <button type="button" onClick={e => { e.stopPropagation(); removeJob(job.id || '') }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#EF4444', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <X size={14} />
-                    </button>
-                  )}
-                  {isOpen ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
-                </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginTop: '8px' }}>
+              <div>
+                <label style={styles.label}>Employer / Organization</label>
+                <input
+                  type="text"
+                  value={employer.organisation || ''}
+                  onChange={e => updateEmployer(index, 'organisation', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('org' + index)}
+                />
               </div>
-
-              {/* Expanded fields */}
-              {isOpen && (
-                <div style={{ padding: '20px 16px', background: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {/* Org name + type */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Organisation name *</label>
-                      <input type="text" value={job.organisation || ''} onChange={e => updateJob(job.id || '', 'organisation', e.target.value)} placeholder="e.g. Sunshine Home Care" maxLength={100} style={inputStyle} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Organisation type *</label>
-                      <select value={job.employmentType || ''} onChange={e => updateJob(job.id || '', 'employmentType', e.target.value)} style={selectStyle}>
-                        <option value="">Select type...</option>
-                        {ORG_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Job title */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Your job title *</label>
-                    <input type="text" value={job.title || ''} onChange={e => updateJob(job.id || '', 'title', e.target.value)} placeholder="e.g. Personal Support Worker" maxLength={80} style={inputStyle} />
-                  </div>
-
-                  {/* Dates */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Dates of employment *</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, alignItems: 'center' }}>
-                      <select value={job.startMonth || ''} onChange={e => updateJob(job.id || '', 'startMonth', e.target.value)} style={selectStyle}>
-                        <option value="">Month</option>
-                        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                      <select value={job.startYear || ''} onChange={e => updateJob(job.id || '', 'startYear', e.target.value)} style={selectStyle}>
-                        <option value="">Year</option>
-                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                      </select>
-                      <select value={job.endMonth || ''} disabled={job.current} onChange={e => updateJob(job.id || '', 'endMonth', e.target.value)} style={{ ...selectStyle, opacity: job.current ? 0.4 : 1 }}>
-                        <option value="">Month</option>
-                        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                      <select value={job.endYear || ''} disabled={job.current} onChange={e => updateJob(job.id || '', 'endYear', e.target.value)} style={{ ...selectStyle, opacity: job.current ? 0.4 : 1 }}>
-                        <option value="">Year</option>
-                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                      </select>
-                    </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, cursor: 'pointer', fontSize: 12, color: '#64748B' }}>
-                      <input type="checkbox" checked={job.current || false} onChange={e => updateJob(job.id || '', 'current', e.target.checked)} style={{ accentColor: '#C9973A' }} />
-                      This is my current role
-                    </label>
-                  </div>
-
-                  {/* Client types */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 8 }}>Client types you worked with</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {CLIENT_TYPE_OPTIONS.map(type => {
-                        const selected = (job.clientTypes || []).includes(type)
-                        return (
-                          <button key={type} type="button" onClick={() => toggleClientType(job.id || '', type)} style={{
-                            padding: '6px 12px', borderRadius: 999, fontSize: 11, fontWeight: selected ? 700 : 400, cursor: 'pointer',
-                            border: selected ? '2px solid #C9973A' : '1px solid #E2E8F0',
-                            background: selected ? '#FDF6EC' : 'white',
-                            color: selected ? '#92400E' : '#64748B',
-                            fontFamily: FONT_SANS,
-                          }}>{type}</button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Duties */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Key duties and responsibilities</label>
-                    <textarea rows={3} maxLength={400} defaultValue={job.duties || ''} onBlur={e => updateJob(job.id || '', 'duties', e.target.value)} placeholder="Briefly describe your main responsibilities..." style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }} />
-                    <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4, textAlign: 'right' }}>{(job.duties || '').length} / 400</div>
-                  </div>
-
-                  {/* Reason for leaving */}
-                  {!job.current && (
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Reason for leaving</label>
-                      <select value={job.reasonLeaving || ''} onChange={e => updateJob(job.id || '', 'reasonLeaving', e.target.value)} style={selectStyle}>
-                        <option value="">Select...</option>
-                        {REASON_LEAVING_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Supervisor */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Supervisor name (optional)</label>
-                      <input type="text" defaultValue={job.supervisorName || ''} onBlur={e => updateJob(job.id || '', 'supervisorName', e.target.value)} placeholder="First and last name" maxLength={80} style={inputStyle} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0D1B3E', marginBottom: 6 }}>Supervisor contact (optional)</label>
-                      <input type="text" defaultValue={job.supervisorContact || ''} onBlur={e => updateJob(job.id || '', 'supervisorContact', e.target.value)} placeholder="Email or phone" maxLength={80} style={inputStyle} />
-                    </div>
-                  </div>
-
-                  {/* Can contact */}
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: '#64748B' }}>
-                    <input type="checkbox" checked={job.canContact || false} onChange={e => updateJob(job.id || '', 'canContact', e.target.checked)} style={{ accentColor: '#C9973A' }} />
-                    Agency may contact this supervisor as a reference
-                  </label>
-                </div>
-              )}
+              <div>
+                <label style={styles.label}>Your Job Title</label>
+                <input
+                  type="text"
+                  value={employer.title || ''}
+                  onChange={e => updateEmployer(index, 'title', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('title' + index)}
+                />
+              </div>
+              <div>
+                <label style={styles.label}>Employment Type</label>
+                <select
+                  value={employer.employmentType || ''}
+                  onChange={e => updateEmployer(index, 'employmentType', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('empType' + index)}
+                >
+                  <option value="">Select...</option>
+                  {EMPLOYMENT_TYPES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
             </div>
-          )
-        })}
 
-        {/* Add job button */}
-        {jobs.length < 5 && (
-          <button type="button" onClick={addJob} style={{ width: '100%', padding: '12px 0', borderRadius: 12, border: '1px solid #C9973A', background: 'white', color: '#C9973A', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_SANS, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <Plus size={16} />
-            Add employer
-            <span style={{ fontSize: 11, fontWeight: 400, color: '#94A3B8' }}>({5 - jobs.length} remaining)</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px', marginTop: '16px' }}>
+              <div>
+                <label style={styles.label}>Start Month</label>
+                <select
+                  value={employer.startMonth || ''}
+                  onChange={e => updateEmployer(index, 'startMonth', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('startM' + index)}
+                >
+                  <option value="">Select...</option>
+                  {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={styles.label}>Start Year</label>
+                <select
+                  value={employer.startYear || ''}
+                  onChange={e => updateEmployer(index, 'startYear', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('startY' + index)}
+                >
+                  <option value="">Select...</option>
+                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={styles.label}>End Month</label>
+                <select
+                  value={employer.endMonth || ''}
+                  onChange={e => updateEmployer(index, 'endMonth', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  disabled={employer.current}
+                  style={{ ...getInputStyle('endM' + index), opacity: employer.current ? 0.5 : 1 }}
+                >
+                  <option value="">Select...</option>
+                  {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={styles.label}>End Year</label>
+                <select
+                  value={employer.endYear || ''}
+                  onChange={e => updateEmployer(index, 'endYear', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  disabled={employer.current}
+                  style={{ ...getInputStyle('endY' + index), opacity: employer.current ? 0.5 : 1 }}
+                >
+                  <option value="">Select...</option>
+                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={employer.current || false}
+                  onChange={e => updateEmployer(index, 'current', e.target.checked)}
+                  style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                />
+                <span style={{ fontSize: '14px', color: COLORS.navy }}>I currently work here</span>
+              </label>
+            </div>
+
+            <div style={{ marginTop: '16px' }}>
+              <label style={styles.label}>Client types you worked with</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                {CLIENT_TYPES.map(type => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => toggleClientType(index, type)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '16px',
+                      fontSize: '12px',
+                      border: (employer.clientTypes || []).includes(type) ? '2px solid ' + COLORS.gold : '1px solid ' + COLORS.border,
+                      background: (employer.clientTypes || []).includes(type) ? '#FFFBF0' : 'white',
+                      color: (employer.clientTypes || []).includes(type) ? '#92400E' : COLORS.slate,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {(employer.clientTypes || []).includes(type) && '✓ '} {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '16px' }}>
+              <label style={styles.label}>Key responsibilities and duties</label>
+              <textarea
+                value={employer.duties || ''}
+                onChange={e => updateEmployer(index, 'duties', e.target.value)}
+                onBlur={e => handleBlur('workHistory', workHistory)}
+                maxLength={300}
+                rows={3}
+                style={{ ...getInputStyle('duties' + index), resize: 'vertical', minHeight: '80px' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginTop: '16px' }}>
+              <div>
+                <label style={styles.label}>Reason for leaving</label>
+                <select
+                  value={employer.reasonLeaving || ''}
+                  onChange={e => updateEmployer(index, 'reasonLeaving', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('reason' + index)}
+                >
+                  <option value="">Select...</option>
+                  {REASON_LEAVING.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={styles.label}>Supervisor name (for reference check)</label>
+                <input
+                  type="text"
+                  value={employer.supervisorName || ''}
+                  onChange={e => updateEmployer(index, 'supervisorName', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('supName' + index)}
+                />
+              </div>
+              <div>
+                <label style={styles.label}>Supervisor phone or email (optional)</label>
+                <input
+                  type="text"
+                  value={employer.supervisorContact || ''}
+                  onChange={e => updateEmployer(index, 'supervisorContact', e.target.value)}
+                  onBlur={e => handleBlur('workHistory', workHistory)}
+                  style={getInputStyle('supContact' + index)}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={employer.canContact || false}
+                  onChange={e => updateEmployer(index, 'canContact', e.target.checked)}
+                  style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                />
+                <span style={{ fontSize: '14px', color: COLORS.navy }}>Agency may contact this supervisor</span>
+              </label>
+            </div>
+          </div>
+        ))}
+
+        {workHistory.length < 5 && (
+          <button type="button" onClick={addEmployer} style={styles.addButton}>
+            + Add Position
           </button>
         )}
+      </div>
 
-        {jobs.length === 0 && (
-          <div style={{ padding: '24px', borderRadius: 12, border: '1px dashed #E2E8F0', textAlign: 'center', color: '#94A3B8', fontSize: 13, marginBottom: 12 }}>
-            No employment history added yet. Click below to add your first employer.
+      {/* PART 2: Volunteer Experience */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Volunteer Experience</div>
+        
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={volunteerExperience || false}
+            onChange={e => handleChange('volunteerExperience', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: COLORS.navy }}>I have volunteer caregiving experience</span>
+        </label>
+
+        {volunteerExperience && (
+          <div style={{ marginTop: '16px' }}>
+            <label style={styles.label}>Describe your volunteer caregiving experience</label>
+            <textarea
+              value={volunteerDescription || ''}
+              onChange={e => handleChange('volunteerDescription', e.target.value)}
+              onBlur={e => handleBlur('volunteerDescription', e.target.value)}
+              maxLength={400}
+              rows={4}
+              placeholder="Organization, role, duration, type of care provided..."
+              style={{ ...getInputStyle('volunteerDesc'), resize: 'vertical', minHeight: '100px' }}
+            />
           </div>
         )}
       </div>
 
-      {/* SECTION 2: VOLUNTEER EXPERIENCE */}
-      <div>
-        <h3 style={{ fontSize: 15, fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Volunteer experience</h3>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 12px' }}>Volunteering in care settings counts as real experience.</p>
+      {/* PART 3: Family Care Experience */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Family Care Experience</div>
+        
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={familyCareExperience || false}
+            onChange={e => handleChange('familyCareExperience', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: COLORS.navy }}>I have provided unpaid care for a family member</span>
+        </label>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: '#0D1B3E' }}>I have volunteer caregiving experience</span>
-          <div onClick={() => saveField('volunteerExperience', !formData.volunteerExperience)} style={{ width: 44, height: 24, borderRadius: 999, cursor: 'pointer', background: formData.volunteerExperience ? '#C9973A' : '#E2E8F0', position: 'relative', transition: 'background 0.2s ease', flexShrink: 0 }}>
-            <div style={{ position: 'absolute', top: 3, left: formData.volunteerExperience ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s ease' }} />
+        {familyCareExperience && (
+          <div style={{ marginTop: '16px' }}>
+            <label style={styles.label}>Describe your family caregiving experience</label>
+            <textarea
+              value={familyCareDescription || ''}
+              onChange={e => handleChange('familyCareDescription', e.target.value)}
+              onBlur={e => handleBlur('familyCareDescription', e.target.value)}
+              maxLength={400}
+              rows={4}
+              placeholder="Relationship, duration, type of care, what you learned..."
+              style={{ ...getInputStyle('familyDesc'), resize: 'vertical', minHeight: '100px' }}
+            />
           </div>
-        </div>
-
-        {formData.volunteerExperience && (
-          <textarea rows={3} maxLength={300} defaultValue={formData.volunteerDescription || ''} onBlur={e => saveField('volunteerDescription', e.target.value)} placeholder="Describe your volunteer experience briefly..." style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }} />
         )}
       </div>
 
-      {/* SECTION 3: FAMILY CARE EXPERIENCE */}
-      <div>
-        <h3 style={{ fontSize: 15, fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Family care experience</h3>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 12px' }}>Caring for a family member is valid caregiving experience.</p>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: '#0D1B3E' }}>I have cared for a family member</span>
-          <div onClick={() => saveField('familyCareExperience', !formData.familyCareExperience)} style={{ width: 44, height: 24, borderRadius: 999, cursor: 'pointer', background: formData.familyCareExperience ? '#C9973A' : '#E2E8F0', position: 'relative', transition: 'background 0.2s ease', flexShrink: 0 }}>
-            <div style={{ position: 'absolute', top: 3, left: formData.familyCareExperience ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', transition: 'left 0.2s ease' }} />
-          </div>
+      {/* PART 4: Professional Memberships */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Professional Memberships</div>
+        
+        <div style={{ marginBottom: '12px' }}>
+          {professionalMemberships.map(member => (
+            <span key={member} style={styles.tag}>
+              {member}
+              <button
+                type="button"
+                onClick={() => removeMembership(member)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.slate, fontSize: '16px', padding: '0 0 0 4px' }}
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
 
-        {formData.familyCareExperience && (
-          <textarea rows={3} maxLength={300} defaultValue={formData.familyCareDescription || ''} onBlur={e => saveField('familyCareDescription', e.target.value)} placeholder="Briefly describe who you cared for and for how long..." style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }} />
-        )}
-      </div>
-
-      {/* SECTION 4: PROFESSIONAL MEMBERSHIPS */}
-      <div>
-        <h3 style={{ fontSize: 15, fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px' }}>Professional memberships</h3>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 16px' }}>Optional. Select any professional associations you belong to.</p>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {MEMBERSHIP_OPTIONS.map(opt => {
-            const current = (formData.professionalMemberships || []) as string[]
-            const selected = current.includes(opt)
-            return (
-              <button key={opt} type="button" onClick={() => {
-                const updated = selected ? current.filter(m => m !== opt) : [...current, opt]
-                saveField('professionalMemberships', updated)
-              }} style={{ padding: '8px 14px', borderRadius: 999, fontSize: 12, fontWeight: selected ? 700 : 400, cursor: 'pointer', border: selected ? '2px solid #C9973A' : '1px solid #E2E8F0', background: selected ? '#FDF6EC' : 'white', color: selected ? '#92400E' : '#64748B', fontFamily: FONT_SANS }}>{opt}</button>
-            )
-          })}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            value={newMembership}
+            onChange={e => setNewMembership(e.target.value)}
+            placeholder="e.g. PSW Ontario Network, CNIA, NAHC..."
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addMembership() } }}
+            style={{ flex: 1, ...getInputStyle('newMember') }}
+          />
+          <button
+            type="button"
+            onClick={addMembership}
+            disabled={!newMembership.trim()}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: newMembership.trim() ? COLORS.navy : '#E2E8F0',
+              color: newMembership.trim() ? 'white' : '#94A3B8',
+              cursor: newMembership.trim() ? 'pointer' : 'not-allowed',
+              fontWeight: 600,
+            }}
+          >
+            Add
+          </button>
         </div>
       </div>
-
     </div>
   )
 }
