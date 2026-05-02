@@ -409,6 +409,7 @@ export default function Step1Identity() {
           onChange={e => handleChange('bio', e.target.value)}
           onFocus={() => setFocused('bio')}
           onBlur={e => handleBlur('bio', e.target.value, true)}
+          spellCheck={true}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
           <span style={{ fontSize: '12px', color: bioCharCount > 450 ? COLORS.red : '#94A3B8' }}>
