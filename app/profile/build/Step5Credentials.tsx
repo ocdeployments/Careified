@@ -5,7 +5,6 @@ import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { useLocale } from '@/lib/locale/useLocale'
 
-// Design system colors
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
@@ -15,7 +14,6 @@ const COLORS = {
   errorBg: '#FEF2F2',
 }
 
-// Credential options per locale
 const CREDENTIALS_BY_LOCALE = {
   CA: [
     { id: 'psw', label: 'PSW — Personal Support Worker' },
@@ -69,7 +67,6 @@ const NO_CERT_REASONS = [
   'Other reason',
 ]
 
-// Styles
 const styles = {
   sectionHeader: {
     fontSize: '15px',
@@ -120,7 +117,7 @@ const styles = {
 export default function Step5Credentials() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
-  const { locale, config } = useLocale()
+  const { locale } = useLocale()
   const [focused, setFocused] = useState<string | null>(null)
   const [hasNoCertReason, setHasNoCertReason] = useState(false)
 
@@ -128,6 +125,9 @@ export default function Step5Credentials() {
   const selectedCredential = (formData as any).primaryCredential || ''
   const certifications = (formData as any).certifications || []
   const noCertReason = (formData as any).noCertReason || ''
+
+  const isNoCredential = selectedCredential === 'no_credential'
+  const hasConflict = isNoCredential && certifications.length > 0
 
   const getInputStyle = (field: string): React.CSSProperties => {
     let s: React.CSSProperties = { ...styles.input }
@@ -137,16 +137,16 @@ export default function Step5Credentials() {
     return s
   }
 
-  const handleChange = useCallback((field: string, value: any) => {
-    saveField(field as any, value)
-  }, [saveField])
-
-  const handleBlur = useCallback((field: string, value: any) => {
+  const handleChange = useCallback((field: string, value: unknown) => {
     saveField(field as any, value)
   }, [saveField])
 
   const handleCredentialSelect = (credId: string) => {
     saveField('primaryCredential', credId)
+    // If selecting no_credential, clear certifications
+    if (credId === 'no_credential') {
+      saveField('certifications', [])
+    }
   }
 
   const addCertification = () => {
@@ -154,14 +154,14 @@ export default function Step5Credentials() {
     saveField('certifications', updated)
   }
 
-  const updateCertification = (index: number, field: string, value: any) => {
+  const updateCertification = (index: number, field: string, value: unknown) => {
     const updated = [...certifications]
     updated[index] = { ...updated[index], [field]: value }
     saveField('certifications', updated)
   }
 
   const removeCertification = (index: number) => {
-    const updated = certifications.filter((_: any, i: number) => i !== index)
+    const updated = certifications.filter((_: unknown, i: number) => i !== index)
     saveField('certifications', updated)
   }
 
@@ -171,13 +171,13 @@ export default function Step5Credentials() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
       {/* SECTION 1: PRIMARY CREDENTIAL */}
       <div style={styles.card}>
-        <div style={styles.sectionHeader}>1. Your Primary Credential ⭐</div>
+        <div style={styles.sectionHeader}>1. Your Primary Credential</div>
         <div style={styles.sectionSubheader}>
           What best describes your professional role? This determines what certifications you need.
         </div>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
           {credentials.map((cred) => (
             <button
@@ -191,21 +191,34 @@ export default function Step5Credentials() {
                 color: selectedCredential === cred.id ? '#92400E' : COLORS.navy,
               }}
             >
-              {selectedCredential === cred.id && '✓ '} {cred.label}
+              {selectedCredential === cred.id ? '✓ ' : ''}{cred.label}
             </button>
           ))}
         </div>
-
         {selectedCredential && (
           <p style={{ fontSize: '12px', color: COLORS.gold, marginTop: '12px' }}>
-            ✓ Selected: {credentials.find(c => c.id === selectedCredential)?.label}
+            Selected: {credentials.find(c => c.id === selectedCredential)?.label}
           </p>
         )}
       </div>
 
+      {/* CONFLICT WARNING */}
+      {hasConflict && (
+        <div style={{
+          padding: '14px 16px',
+          borderRadius: '10px',
+          background: '#FEF2F2',
+          border: '1px solid #FECACA',
+          fontSize: '13px',
+          color: COLORS.red,
+        }}>
+          You selected "No formal credential" but have certifications listed. Please remove your certifications or select a different primary credential.
+        </div>
+      )}
+
       {/* SECTION 2: SUPPORTING CERTIFICATIONS */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>2. Supporting Certifications 🏆</div>
+      <div style={{ ...styles.section, opacity: isNoCredential ? 0.4 : 1, pointerEvents: isNoCredential ? 'none' : 'auto' }}>
+        <div style={styles.sectionHeader}>2. Supporting Certifications</div>
         <div style={styles.sectionSubheader}>
           Add any additional certifications, training, or licenses you hold.
         </div>
@@ -234,14 +247,16 @@ export default function Step5Credentials() {
                   type="text"
                   value={cert.issuingBody || ''}
                   onChange={(e) => updateCertification(i, 'issuingBody', e.target.value)}
+                  onFocus={() => setFocused('certBody' + i)}
+                  onBlur={() => saveField('certifications', certifications)}
                   placeholder="e.g. American Red Cross"
                   style={getInputStyle('certBody' + i)}
                 />
               </div>
               <div>
-                <label style={styles.label}>Date</label>
+                <label style={styles.label}>Issue Date</label>
                 <input
-                  type="date"
+                  type="month"
                   value={cert.issueDate || ''}
                   onChange={(e) => updateCertification(i, 'issueDate', e.target.value)}
                   style={getInputStyle('certDate' + i)}
@@ -278,9 +293,7 @@ export default function Step5Credentials() {
             checked={hasNoCertReason}
             onChange={(e) => {
               setHasNoCertReason(e.target.checked)
-              if (!e.target.checked) {
-                handleNoCertReason('')
-              }
+              if (!e.target.checked) handleNoCertReason('')
             }}
             style={{ accentColor: COLORS.gold, width: '18px', height: '18px' }}
           />
@@ -307,13 +320,14 @@ export default function Step5Credentials() {
                     cursor: 'pointer',
                   }}
                 >
-                  {noCertReason === reason && '✓ '} {reason}
+                  {noCertReason === reason ? '✓ ' : ''}{reason}
                 </button>
               ))}
             </div>
           </div>
         )}
       </div>
+
     </div>
   )
 }
