@@ -27,6 +27,25 @@ const isPublicRoute = createRouteMatcher([
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
 export default clerkMiddleware(async (auth, request) => {
+  const url = request.nextUrl
+  const hostname = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  // Skip redirect in development or if already on subdomain
+  if (isProduction && !hostname.startsWith('ca.') && !hostname.startsWith('us.')) {
+    // Get country from Vercel geolocation
+    const country = request.headers.get('x-vercel-ip-country')
+
+    // Redirect based on country
+    if (country === 'CA') {
+      return NextResponse.redirect(new URL('https://ca.careified.com' + url.pathname + url.search))
+    } else {
+      // Non-Canada (including null/undefined) → US
+      return NextResponse.redirect(new URL('https://us.careified.com' + url.pathname + url.search))
+    }
+  }
+
+  // Continue with existing auth logic
   if (isPublicRoute(request)) return
 
   const { userId } = await auth()
