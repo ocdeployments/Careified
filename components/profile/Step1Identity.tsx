@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
+import { useLocale } from '@/lib/locale/useLocale'
 
 // Design system colors
 const COLORS = {
@@ -100,6 +101,7 @@ const styles = {
 export default function Step1Identity() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
+  const { locale, config } = useLocale()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [zipLooking, setZipLooking] = useState(false)
@@ -107,6 +109,10 @@ export default function Step1Identity() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(formData.photoUrl || null)
   const [focused, setFocused] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const provinceLabel = config?.provinceStateLabel || 'Province/State'
+  const postalPlaceholder = config?.postalCodePlaceholder || '75034'
+  const provinceOptions = config?.provinceStateOptions || []
 
   const getInputStyle = (field: string) => {
     let s = { ...styles.input }
@@ -270,12 +276,7 @@ export default function Step1Identity() {
               style={getInputStyle('dateOfBirth')}
               onChange={e => handleChange('dateOfBirth', e.target.value)}
               onFocus={() => setFocused('dateOfBirth')}
-              onBlur={e => {
-                handleBlur('dateOfBirth', e.target.value, true)
-                if (e.target.value && !isOver18(e.target.value)) {
-                  setErrors(prev => ({ ...prev, dateOfBirth: 'You must be 18 or older' }))
-                }
-              }}
+              onBlur={e => handleBlur('dateOfBirth', e.target.value, true)}
             />
             {touched.dateOfBirth && errors.dateOfBirth && <div style={styles.errorText}>{errors.dateOfBirth}</div>}
           </div>
@@ -493,6 +494,26 @@ export default function Step1Identity() {
           {WORK_AUTH_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
         {touched.workAuthorisation && errors.workAuthorisation && <div style={styles.errorText}>{errors.workAuthorisation}</div>}
+      </div>
+
+      {/* SECTION: Sponsorship */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Work Sponsorship</div>
+        <select
+          value={String((formData as any).sponsorshipNeeded || '')}
+          style={getInputStyle('sponsorshipNeeded')}
+          onChange={e => handleChange('sponsorshipNeeded', e.target.value)}
+          onFocus={() => setFocused('sponsorshipNeeded')}
+          onBlur={e => handleBlur('sponsorshipNeeded', e.target.value)}
+        >
+          <option value="">Select...</option>
+          <option value="No — I am fully authorised to work independently">No — I am fully authorised to work independently</option>
+          <option value="Yes — I may require sponsorship in the future">Yes — I may require sponsorship in the future</option>
+          <option value="Yes — I currently require sponsorship">Yes — I currently require sponsorship</option>
+        </select>
+        <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+          Will you now or in the future require sponsorship or support to work in {locale === 'CA' ? 'Canada' : 'the USA'}?
+        </p>
       </div>
 
       {/* SECTION: Emergency Contact (collapsible) */}
