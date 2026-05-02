@@ -29,6 +29,18 @@ export const localeConfig = {
     defaultTimezone: 'America/Toronto',
     distanceUnit: 'km',
     distanceOptions: ['5 km', '10 km', '20 km', '30 km', '50 km', '100 km+', 'No limit'],
+    uncomfortableSituations: [
+      'Homes with aggressive behaviour',
+      'Hoarding environments',
+      'Heavy tobacco smoke',
+      'Extreme clutter/unsanitary conditions',
+      'Homes with large dogs',
+      'Isolated rural locations',
+      'Conflict between family members',
+      'End-of-life/palliative settings',
+      'Homes with weapons present',
+      'No elevator (mobility aids)'
+    ],
   },
   US: {
     country: 'United States',
@@ -63,6 +75,18 @@ export const localeConfig = {
     defaultTimezone: 'America/Chicago',
     distanceUnit: 'miles',
     distanceOptions: ['5 miles', '10 miles', '20 miles', '30 miles', '50 miles', '100 miles+', 'No limit'],
+    uncomfortableSituations: [
+      'Homes with aggressive behaviour',
+      'Hoarding environments',
+      'Heavy tobacco smoke',
+      'Extreme clutter/unsanitary conditions',
+      'Homes with large dogs',
+      'Isolated rural locations',
+      'Conflict between family members',
+      'End-of-life/palliative settings',
+      'Homes with weapons present',
+      'No elevator (mobility aids)'
+    ],
   }
 } as const
 
