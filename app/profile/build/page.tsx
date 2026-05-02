@@ -42,9 +42,9 @@ const PROGRESS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 const TIERS = ['Incomplete', 'Incomplete', 'Basic', 'Location', 'Verified', 'Compliance', 'Professional', 'Work History', 'References', 'Open Q\'s']
 
 const MILESTONES: Record<number, { text: string; sub: string }> = {
- 3: { text: 'Profile goes live after step 3', sub: 'Agencies can find you once you complete Availability.' },
- 5: { text: 'Verified badge after step 5', sub: 'Complete through Compliance for verification.' },
- 7: { text: 'Professional tier after step 7', sub: 'Complete through Work History for Professional status.' },
+  3: { text: 'Complete all steps to maximise your match score', sub: 'Agencies can find you once you complete Availability.' },
+  5: { text: 'Complete all steps to maximise your match score', sub: 'Complete through Compliance for verification.' },
+  7: { text: 'Complete all steps to maximise your match score', sub: 'Complete through Work History for Professional status.' },
 }
 
 interface FormData {
@@ -130,11 +130,12 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  if (next >= 1 && next <= 10) router.push(`?step=${next}`)
  }
 
- const goToStep = (num: number) => {
- if (num >= currentStep) return
- setAnimDir('back')
- router.push(`?step=${num}`)
- }
+  const goToStep = (num: number) => {
+  // Allow backward navigation to any step <= currentStep
+  if (num > currentStep) return
+  setAnimDir(num < currentStep ? 'back' : 'forward')
+  router.push(`?step=${num}`)
+  }
 
  const renderStep = () => {
 // Temporary placeholder for unbuilt steps
