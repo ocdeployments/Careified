@@ -187,7 +187,14 @@ export default function Step2Services() {
     } else {
       setErrors(prev => { const n = { ...prev }; delete n.services; return n })
     }
-  }, [services, saveField])
+    // Check if any selected service is missing a skill rating
+    const missingRatings = updated.filter(s => !skillRatings[s])
+    if (missingRatings.length > 0) {
+      setErrors(prev => ({ ...prev, skillRatings: `Please rate your skill level for: ${missingRatings.join(', ')}` }))
+    } else {
+      setErrors(prev => { const n = { ...prev }; delete n.skillRatings; return n })
+    }
+  }, [services, saveField, skillRatings])
 
   const setSkillRating = useCallback((service: string, level: string) => {
     saveField('skillRatings', { ...skillRatings, [service]: level })
