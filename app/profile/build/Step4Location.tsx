@@ -1,41 +1,111 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
-import { MapPin, Car, Bus, AlertCircle } from 'lucide-react'
 
-const FONT_SANS = "'Inter', sans-serif"
-const FONT_SERIF = "'Inter', sans-serif"
+// Design system colors
+const COLORS = {
+  navy: '#0D1B3E',
+  gold: '#C9973A',
+  red: '#DC2626',
+  slate: '#64748B',
+  border: '#E2E8F0',
+  errorBg: '#FEF2F2',
+}
 
-const RADIUS_OPTIONS = [5, 10, 15, 20, 25, 30, 40, 50]
+// Constants per spec
+const TRAVEL_RADIUS_OPTIONS = [
+  { value: 5, label: '5 km' },
+  { value: 10, label: '10 km' },
+  { value: 20, label: '20 km' },
+  { value: 30, label: '30 km' },
+  { value: 50, label: '50 km' },
+  { value: 100, label: '100 km+' },
+  { value: 999, label: 'No limit' }
+]
 
-async function lookupZIP(zip: string): Promise<{city: string, state: string} | null> {
-  try {
-    const clean = zip.replace(/\D/g, '').slice(0, 5)
-    if (clean.length < 5) return null
-    const res = await fetch(`https://api.zippopotam.us/us/${clean}`)
-    if (!res.ok) return null
-    const data = await res.json()
-    if (data.places?.[0]) {
-      return {
-        city: data.places[0]['place name'],
-        state: data.places[0]['state abbreviation'],
-      }
-    }
-    return null
-  } catch { return null }
+const COMMON_AREAS = [
+  'Downtown', 'North York', 'Scarborough', 'Etobicoke', 'Mississauga',
+  'Brampton', 'Oakville', 'Markham', 'Richmond Hill', 'Vaughan',
+  'Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'
+]
+
+// Styles
+const styles = {
+  sectionHeader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: COLORS.slate,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '16px',
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid ' + COLORS.border,
+    borderRadius: '8px',
+    fontSize: '15px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  inputFocus: {
+    borderColor: COLORS.gold,
+    boxShadow: '0 0 0 3px rgba(201,151,58,0.15)',
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  helperText: {
+    fontSize: '12px',
+    color: '#94A3B8',
+    marginTop: '4px',
+  },
+  section: {
+    marginBottom: '32px',
+  },
+  checkboxLabel: {
+    fontSize: '14px',
+    color: '#374151',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  tag: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    background: '#F1F5F9',
+    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    padding: '4px 12px',
+    fontSize: '13px',
+    gap: '6px',
+    margin: '4px',
+  },
+  tagRemove: {
+    color: '#94A3B8',
+    cursor: 'pointer',
+    fontSize: '16px',
+    border: 'none',
+    background: 'none',
+    padding: '0',
+    lineHeight: 1,
+  },
 }
 
 export default function Step4Location() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
-  
-  const [lookingUp, setLookingUp] = useState(false)
+  const [focused, setFocused] = useState<string | null>(null)
+  const [customArea, setCustomArea] = useState('')
 
-  const serviceCity = formData.city || ''
-  const serviceState = formData.state || ''
-  const serviceZip = formData.postalCode || ''
+  const serviceAreas = formData.serviceAreas || []
   const travelRadius = formData.travelRadius
   const hasDriversLicense = formData.hasDriversLicense
   const hasVehicle = formData.hasVehicle
@@ -43,179 +113,247 @@ export default function Step4Location() {
   const willingClientVehicle = formData.willingClientVehicle
   const transitAccessible = formData.transitAccessible
 
-  const handleZipChange = async (zip: string) => {
-    saveField('postalCode', zip)
-    if (zip.replace(/\D/g, '').length >= 5) {
-      setLookingUp(true)
-      const result = await lookupZIP(zip)
-      if (result) {
-        saveField('city', result.city)
-        saveField('state', result.state)
-      }
-      setLookingUp(false)
+  const getInputStyle = (field: string) => {
+    let s = { ...styles.input }
+    if (focused === field) {
+      s = { ...s, ...styles.inputFocus }
+    }
+    return s
+  }
+
+  const handleChange = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const handleBlur = useCallback((field: string, value: any) => {
+    saveField(field as any, value)
+  }, [saveField])
+
+  const addServiceArea = (area: string) => {
+    if (!area.trim()) return
+    if (!serviceAreas.includes(area.trim())) {
+      saveField('serviceAreas', [...serviceAreas, area.trim()])
+    }
+    setCustomArea('')
+  }
+
+  const removeServiceArea = (area: string) => {
+    saveField('serviceAreas', serviceAreas.filter(a => a !== area))
+  }
+
+  const addSuggestedArea = (area: string) => {
+    if (!serviceAreas.includes(area)) {
+      saveField('serviceAreas', [...serviceAreas, area])
     }
   }
 
-  const renderToggle = (checked: boolean | undefined, onClick: () => void) => (
-    <div onClick={onClick} style={{
-      width: 44, height: 24, borderRadius: 999, cursor: 'pointer',
-      background: checked ? '#C9973A' : '#E2E8F0', position: 'relative', transition: 'all 0.2s ease'
-    }}>
-      <div style={{
-        width: 18, height: 18, borderRadius: '50%', background: 'white',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.2)', position: 'absolute', top: 3,
-        transform: checked ? 'translateX(22px)' : 'translateX(2px)', transition: 'all 0.2s ease',
-        marginLeft: 2
-      }} />
-    </div>
-  )
+  const cityFromStep1 = formData.city || ''
 
   return (
-    <div style={{ fontFamily: FONT_SANS, display: 'flex', flexDirection: 'column', gap: '32px' }}>
-
-      <div>
-        <h3 style={{ fontSize: '15px', fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px 0' }}>Service area</h3>
-        <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>Confirm the location you'll be serving from. This is used to show your profile to agencies searching in your area.</p>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+      {/* SECTION: Service Area */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Areas you are willing to work in</div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#0D1B3E', marginBottom: '6px' }}>ZIP / Postal {lookingUp && '...'}</label>
-            <input 
-              type="text" 
-              value={serviceZip} 
-              onChange={(e) => handleZipChange(e.target.value)}
-              onBlur={(e) => saveField('postalCode', e.target.value)}
-              placeholder="e.g. 75034"
-              maxLength={10}
-              style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px', color: '#0D1B3E', width: '100%', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#0D1B3E', marginBottom: '6px' }}>City</label>
-            <input 
-              type="text" 
-              value={serviceCity} 
-              onBlur={(e) => saveField('city', e.target.value)}
-              placeholder="e.g. Frisco"
-              style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px', color: '#0D1B3E', width: '100%', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#0D1B3E', marginBottom: '6px' }}>State</label>
-            <input 
-              type="text" 
-              value={serviceState} 
-              onBlur={(e) => saveField('state', e.target.value)}
-              placeholder="e.g. TX"
-              maxLength={3}
-              style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '13px', color: '#0D1B3E', width: '100%', boxSizing: 'border-box' }}
-            />
-          </div>
-        </div>
-        
-        <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '8px' }}>Your home address is private. Only your city and service radius are shown to agencies.</p>
-      </div>
-
-      <div>
-        <h3 style={{ fontSize: '15px', fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px 0' }}>How far will you travel?</h3>
-        
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {RADIUS_OPTIONS.map(r => (
-            <button 
-              key={r} 
-              type="button" 
-              onClick={() => saveField('travelRadius', r)}
-              style={{
-                padding: '10px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 600,
-                border: travelRadius === r ? '2px solid #C9973A' : '1px solid #E2E8F0',
-                background: travelRadius === r ? '#FDF6EC' : 'white',
-                color: travelRadius === r ? '#92400E' : '#64748B',
-                cursor: 'pointer',
-                fontFamily: FONT_SANS
-              }}
-            >
-              {r} mi
-            </button>
-          ))}
-        </div>
-
-        {serviceCity && (
-          <div style={{
-            marginTop: '16px',
-            padding: '14px 18px',
-            background: '#F8FAFC',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}>
-            <MapPin size={16} color="#C9973A" />
-            <span style={{ fontSize: '12px', color: '#64748B' }}>
-              Serving within <strong style={{ color: '#0D1B3E' }}>{travelRadius || 15} miles</strong> of <strong style={{ color: '#0D1B3E' }}>{serviceCity}{serviceState ? `, ${serviceState}` : ''}</strong>
-            </span>
+        {/* Show current areas as tags */}
+        {serviceAreas.length > 0 && (
+          <div style={{ marginBottom: '12px' }}>
+            {serviceAreas.map(area => (
+              <span key={area} style={styles.tag}>
+                {area}
+                <button type="button" onClick={() => removeServiceArea(area)} style={styles.tagRemove}>
+                  ×
+                </button>
+              </span>
+            ))}
           </div>
         )}
-      </div>
 
-      <div>
-        <h3 style={{ fontSize: '15px', fontWeight: 800, fontFamily: FONT_SERIF, color: '#0D1B3E', margin: '0 0 4px 0' }}>Driving and transport</h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Car size={18} color="#64748B" />
-              <span style={{ fontSize: '13px', color: '#0D1B3E' }}>I have a valid driver's licence</span>
+        {/* Suggestion buttons based on city from Step 1 */}
+        {cityFromStep1 && !serviceAreas.includes(cityFromStep1) && (
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '6px' }}>
+              Based on your city:
             </div>
-            {renderToggle(hasDriversLicense, () => saveField('hasDriversLicense', !hasDriversLicense))}
+            <button
+              type="button"
+              onClick={() => addSuggestedArea(cityFromStep1)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '16px',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                border: '1px solid ' + COLORS.gold,
+                backgroundColor: '#FDF6EC',
+                color: '#92400E',
+              }}
+            >
+              + Add {cityFromStep1}
+            </button>
           </div>
+        )}
 
-          {hasDriversLicense && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Car size={18} color="#64748B" />
-                  <span style={{ fontSize: '13px', color: '#0D1B3E' }}>I have my own vehicle</span>
-                </div>
-                {renderToggle(hasVehicle, () => saveField('hasVehicle', !hasVehicle))}
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Car size={18} color="#64748B" />
-                  <span style={{ fontSize: '13px', color: '#0D1B3E' }}>I am willing to drive clients to appointments</span>
-                </div>
-                {renderToggle(willingToTransport, () => saveField('willingToTransport', !willingToTransport))}
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Car size={18} color="#64748B" />
-                  <span style={{ fontSize: '13px', color: '#0D1B3E' }}>I am willing to use the client's vehicle</span>
-                </div>
-                {renderToggle(willingClientVehicle, () => saveField('willingClientVehicle', !willingClientVehicle))}
-              </div>
-            </>
-          )}
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Bus size={18} color="#64748B" />
-              <span style={{ fontSize: '13px', color: '#0D1B3E' }}>I can travel by public transit to clients</span>
-            </div>
-            {renderToggle(transitAccessible, () => saveField('transitAccessible', !transitAccessible))}
+        {/* Common areas */}
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '6px' }}>
+            Popular areas:
           </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {COMMON_AREAS.filter(a => !serviceAreas.includes(a)).map(area => (
+              <button
+                key={area}
+                type="button"
+                onClick={() => addSuggestedArea(area)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  border: '1px solid ' + COLORS.border,
+                  backgroundColor: 'white',
+                  color: COLORS.slate,
+                }}
+              >
+                + {area}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Custom area input */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1 }}>
+            <input
+              type="text"
+              value={customArea}
+              placeholder="Add custom area..."
+              style={getInputStyle('customArea')}
+              onChange={e => setCustomArea(e.target.value)}
+              onFocus={() => setFocused('customArea')}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addServiceArea(customArea)
+                }
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => addServiceArea(customArea)}
+            disabled={!customArea.trim()}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: customArea.trim() ? 'pointer' : 'not-allowed',
+              border: 'none',
+              backgroundColor: customArea.trim() ? COLORS.navy : '#E2E8F0',
+              color: customArea.trim() ? 'white' : '#94A3B8',
+            }}
+          >
+            Add
+          </button>
         </div>
       </div>
 
-      {!serviceCity && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: '#FEF3C7' }}>
-          <AlertCircle size={14} color="#D97706" />
-          <span style={{ fontSize: '12px', color: '#92400E' }}>Add your service city so agencies know where you work</span>
+      {/* SECTION: Travel */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Maximum travel distance from home</div>
+        <select
+          value={travelRadius || ''}
+          style={getInputStyle('travelRadius')}
+          onChange={e => handleChange('travelRadius', parseInt(e.target.value) || 0)}
+          onFocus={() => setFocused('travelRadius')}
+          onBlur={e => handleBlur('travelRadius', e.target.value)}
+        >
+          <option value="">Select travel radius</option>
+          {TRAVEL_RADIUS_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <div style={styles.helperText}>
+          Agencies filter by this — be accurate
         </div>
-      )}
+      </div>
+
+      {/* SECTION: Driving & Vehicle */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Driving & Vehicle</div>
+        
+        <label style={{ ...styles.checkboxLabel, marginBottom: '12px' }}>
+          <input
+            type="checkbox"
+            checked={hasDriversLicense || false}
+            onChange={e => handleChange('hasDriversLicense', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#374151' }}>I have a valid driver's licence</span>
+        </label>
+
+        {/* Conditional: drivers_license_class */}
+        {hasDriversLicense && (
+          <div style={{ marginLeft: '24px', marginBottom: '16px' }}>
+            <label style={styles.label}>Licence class</label>
+            <input
+              type="text"
+              value={(formData as any).driversLicenseClass || ''}
+              placeholder="e.g. G, G2, Class 5"
+              style={getInputStyle('driversLicenseClass')}
+              onChange={e => handleChange('driversLicenseClass', e.target.value)}
+              onFocus={() => setFocused('driversLicenseClass')}
+              onBlur={e => handleBlur('driversLicenseClass', e.target.value)}
+            />
+          </div>
+        )}
+
+        <label style={{ ...styles.checkboxLabel, marginBottom: '12px' }}>
+          <input
+            type="checkbox"
+            checked={hasVehicle || false}
+            onChange={e => handleChange('hasVehicle', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#374151' }}>I have a personal vehicle</span>
+        </label>
+
+        <label style={{ ...styles.checkboxLabel, marginBottom: '12px' }}>
+          <input
+            type="checkbox"
+            checked={willingToTransport || false}
+            onChange={e => handleChange('willingToTransport', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#374151' }}>Willing to drive clients to appointments</span>
+        </label>
+
+        <label style={{ ...styles.checkboxLabel, marginBottom: '12px' }}>
+          <input
+            type="checkbox"
+            checked={willingClientVehicle || false}
+            onChange={e => handleChange('willingClientVehicle', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#374151' }}>Willing to use client's vehicle</span>
+        </label>
+      </div>
+
+      {/* SECTION: Transit */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Transit</div>
+        
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={transitAccessible || false}
+            onChange={e => handleChange('transitAccessible', e.target.checked)}
+            style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#374151' }}>I can reliably commute by public transit</span>
+        </label>
+      </div>
     </div>
   )
 }
