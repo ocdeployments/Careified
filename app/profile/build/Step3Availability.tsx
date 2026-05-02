@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 
-// Design system colors
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
@@ -14,7 +13,6 @@ const COLORS = {
   errorBg: '#FEF2F2',
 }
 
-// Constants per spec
 const AVAILABILITY_STATUSES = [
   { value: 'available_now', label: 'Available Now' },
   { value: 'available_soon', label: 'Available Soon (within 2 weeks)' },
@@ -63,12 +61,11 @@ const CARE_SETTINGS = [
   'Long-term care', 'Hospital', 'Group home', 'Day program'
 ]
 
-// Styles
 const styles = {
   sectionHeader: {
     fontSize: '13px',
     fontWeight: 600,
-    color: COLORS.slate,
+    color: '#64748B',
     textTransform: 'uppercase' as const,
     letterSpacing: '0.08em',
     marginBottom: '16px',
@@ -76,19 +73,19 @@ const styles = {
   input: {
     width: '100%',
     padding: '10px 14px',
-    border: '1px solid ' + COLORS.border,
+    border: '1px solid #E2E8F0',
     borderRadius: '8px',
     fontSize: '15px',
     outline: 'none',
     boxSizing: 'border-box' as const,
   },
   inputFocus: {
-    borderColor: COLORS.gold,
+    borderColor: '#C9973A',
     boxShadow: '0 0 0 3px rgba(201,151,58,0.15)',
   },
   inputError: {
-    border: '2px solid ' + COLORS.red,
-    backgroundColor: COLORS.errorBg,
+    border: '2px solid #DC2626',
+    backgroundColor: '#FEF2F2',
   },
   label: {
     fontSize: '14px',
@@ -97,13 +94,9 @@ const styles = {
     marginBottom: '6px',
     display: 'block',
   },
-  required: {
-    color: COLORS.red,
-    marginLeft: '3px',
-  },
   errorText: {
     fontSize: '12px',
-    color: COLORS.red,
+    color: '#DC2626',
     marginTop: '4px',
   },
   section: {
@@ -128,15 +121,12 @@ export default function Step3Availability() {
   const hourlyRateMax = formData.hourlyRateMax
   const preferredAgeGroup = formData.preferredAgeGroup
   const preferredSettings = formData.preferredSettings || []
+  const yearsInPreferredSettings = (formData as any).yearsInPreferredSettings
 
   const getInputStyle = (field: string) => {
     let s = { ...styles.input }
-    if (focused === field) {
-      s = { ...s, ...styles.inputFocus }
-    }
-    if (touched[field] && errors[field]) {
-      s = { ...s, ...styles.inputError }
-    }
+    if (focused === field) s = { ...s, ...styles.inputFocus }
+    if (touched[field] && errors[field]) s = { ...s, ...styles.inputError }
     return s
   }
 
@@ -178,11 +168,7 @@ export default function Step3Availability() {
     const shouldSelect = !DAYS.some(day => isGridCellActive(day, shift))
     DAYS.forEach(day => {
       const key = `${day}_${shift}`
-      if (shouldSelect) {
-        updated[key] = [shift]
-      } else {
-        delete updated[key]
-      }
+      if (shouldSelect) { updated[key] = [shift] } else { delete updated[key] }
     })
     saveField('weeklyGrid', updated)
   }
@@ -192,25 +178,21 @@ export default function Step3Availability() {
     const shouldSelect = !SHIFTS.some(s => isGridCellActive(day, s.key))
     SHIFTS.forEach(shift => {
       const key = `${day}_${shift.key}`
-      if (shouldSelect) {
-        updated[key] = [shift.key]
-      } else {
-        delete updated[key]
-      }
+      if (shouldSelect) { updated[key] = [shift.key] } else { delete updated[key] }
     })
     saveField('weeklyGrid', updated)
   }
 
   const togglePlacement = (type: string) => {
     const updated = placementTypes.includes(type)
-      ? placementTypes.filter(t => t !== type)
+      ? placementTypes.filter((t: string) => t !== type)
       : [...placementTypes, type]
     saveField('placementTypes', updated)
   }
 
   const toggleSettings = (setting: string) => {
     const updated = preferredSettings.includes(setting)
-      ? preferredSettings.filter(s => s !== setting)
+      ? preferredSettings.filter((s: string) => s !== setting)
       : [...preferredSettings, setting]
     saveField('preferredSettings', updated)
   }
@@ -232,8 +214,8 @@ export default function Step3Availability() {
   }
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
-      {/* SECTION: Availability Status */}
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#0D1B3E' }}>
+
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Availability Status</div>
         <select
@@ -253,7 +235,6 @@ export default function Step3Availability() {
         )}
       </div>
 
-      {/* SECTION: Weekly Availability Grid */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Weekly Availability Grid</div>
         <div style={{ overflowX: 'auto' }}>
@@ -282,13 +263,18 @@ export default function Step3Availability() {
                     const isActive = isGridCellActive(day, shift.key)
                     return (
                       <td key={day + '_' + shift.key} style={{ padding: '4px', textAlign: 'center' }}>
-                        <button type="button" onClick={() => toggleGridCell(day, shift.key)}
+                        <button
+                          type="button"
+                          onClick={() => toggleGridCell(day, shift.key)}
                           style={{
-                            width: 40, height: 40, borderRadius: '8px', border: isActive ? 'none' : '1px solid ' + COLORS.border,
-                            background: isActive ? COLORS.gold : 'white',
-                            color: isActive ? COLORS.navy : '#94A3B8', fontWeight: isActive ? 800 : 400, cursor: 'pointer',
-                            fontSize: '16px',
-                          }}>
+                            width: 40, height: 40, borderRadius: '8px',
+                            border: isActive ? 'none' : '1px solid #E2E8F0',
+                            background: isActive ? '#C9973A' : 'white',
+                            color: isActive ? '#0D1B3E' : '#94A3B8',
+                            fontWeight: isActive ? 800 : 400,
+                            cursor: 'pointer', fontSize: '16px',
+                          }}
+                        >
                           {isActive ? '✓' : ''}
                         </button>
                       </td>
@@ -301,16 +287,13 @@ export default function Step3Availability() {
         </div>
       </div>
 
-      {/* SECTION: Hours & Placement */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Hours & Placement</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={styles.label}>Min hours/week</label>
             <input
-              type="number"
-              min="1"
-              max="80"
+              type="number" min="1" max="80"
               value={minHours || ''}
               placeholder="1"
               style={getInputStyle('minHoursPerWeek')}
@@ -322,9 +305,7 @@ export default function Step3Availability() {
           <div>
             <label style={styles.label}>Max hours/week</label>
             <input
-              type="number"
-              min="1"
-              max="80"
+              type="number" min="1" max="80"
               value={maxHours || ''}
               placeholder="80"
               style={getInputStyle('maxHoursPerWeek')}
@@ -361,18 +342,14 @@ export default function Step3Availability() {
               const selected = placementTypes.includes(type)
               return (
                 <button
-                  key={type}
-                  type="button"
+                  key={type} type="button"
                   onClick={() => togglePlacement(type)}
                   style={{
-                    padding: '8px 14px',
-                    borderRadius: '10px',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    border: selected ? '2px solid ' + COLORS.navy : '1px solid ' + COLORS.border,
+                    padding: '8px 14px', borderRadius: '10px',
+                    fontSize: '12px', fontWeight: 500, cursor: 'pointer',
+                    border: selected ? '2px solid #0D1B3E' : '1px solid #E2E8F0',
                     backgroundColor: selected ? '#EFF6FF' : 'white',
-                    color: selected ? COLORS.navy : COLORS.slate,
+                    color: selected ? '#0D1B3E' : '#64748B',
                   }}
                 >
                   {type}
@@ -386,27 +363,9 @@ export default function Step3Availability() {
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <input
               type="checkbox"
-              checked={(formData as any).willingLiveIn || false}
-              onChange={e => handleChange('willingLiveIn', e.target.checked)}
-              style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
-            />
-            <span style={{ fontSize: '14px', color: '#374151' }}>Willing to do live-in placements</span>
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={(formData as any).willingOvernight || false}
-              onChange={e => handleChange('willingOvernight', e.target.checked)}
-              style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
-            />
-            <span style={{ fontSize: '14px', color: '#374151' }}>Willing to do overnight shifts</span>
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
               checked={(formData as any).openToUrgent || false}
               onChange={e => handleChange('openToUrgent', e.target.checked)}
-              style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+              style={{ accentColor: '#C9973A', width: '16px', height: '16px' }}
             />
             <span style={{ fontSize: '14px', color: '#374151' }}>Available for urgent/emergency placements</span>
           </label>
@@ -415,47 +374,29 @@ export default function Step3Availability() {
               type="checkbox"
               checked={formData.holidayAvailable || false}
               onChange={e => handleChange('holidayAvailable', e.target.checked)}
-              style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+              style={{ accentColor: '#C9973A', width: '16px', height: '16px' }}
             />
             <span style={{ fontSize: '14px', color: '#374151' }}>Available on holidays</span>
           </label>
         </div>
       </div>
 
-      {/* SECTION: Start Date & Notice */}
       <div style={styles.section}>
-        <div style={styles.sectionHeader}>Start Date & Notice</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={styles.label}>Earliest start date</label>
-            <input
-              type="date"
-              value={formData.earliestStartDate || ''}
-              style={getInputStyle('earliestStartDate')}
-              onChange={e => handleChange('earliestStartDate', e.target.value)}
-              onFocus={() => setFocused('earliestStartDate')}
-              onBlur={e => handleBlur('earliestStartDate', e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={styles.label}>Notice period</label>
-            <select
-              value={formData.noticePeriod || ''}
-              style={getInputStyle('noticePeriod')}
-              onChange={e => handleChange('noticePeriod', e.target.value)}
-              onFocus={() => setFocused('noticePeriod')}
-              onBlur={e => handleBlur('noticePeriod', e.target.value)}
-            >
-              <option value="">Select notice period</option>
-              {NOTICE_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <div style={styles.sectionHeader}>Notice Period</div>
+        <select
+          value={formData.noticePeriod || ''}
+          style={getInputStyle('noticePeriod')}
+          onChange={e => handleChange('noticePeriod', e.target.value)}
+          onFocus={() => setFocused('noticePeriod')}
+          onBlur={e => handleBlur('noticePeriod', e.target.value)}
+        >
+          <option value="">Select notice period</option>
+          {NOTICE_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
-      {/* SECTION: Client Preferences */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Client Preferences</div>
         <div>
@@ -473,25 +414,22 @@ export default function Step3Availability() {
             ))}
           </select>
         </div>
+
         <div style={{ marginTop: '16px' }}>
-          <label style={styles.label}>Preferred settings</label>
+          <label style={styles.label}>Preferred care settings</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
             {CARE_SETTINGS.map(setting => {
               const selected = preferredSettings.includes(setting)
               return (
                 <button
-                  key={setting}
-                  type="button"
+                  key={setting} type="button"
                   onClick={() => toggleSettings(setting)}
                   style={{
-                    padding: '8px 14px',
-                    borderRadius: '10px',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    border: selected ? '2px solid ' + COLORS.gold : '1px solid ' + COLORS.border,
+                    padding: '8px 14px', borderRadius: '10px',
+                    fontSize: '12px', fontWeight: 500, cursor: 'pointer',
+                    border: selected ? '2px solid #C9973A' : '1px solid #E2E8F0',
                     backgroundColor: selected ? '#FDF6EC' : 'white',
-                    color: selected ? '#92400E' : COLORS.slate,
+                    color: selected ? '#92400E' : '#64748B',
                   }}
                 >
                   {setting}
@@ -500,18 +438,28 @@ export default function Step3Availability() {
             })}
           </div>
         </div>
+
+        <div style={{ marginTop: '16px' }}>
+          <label style={styles.label}>Years of experience in preferred settings</label>
+          <input
+            type="number" min="0" max="50"
+            value={yearsInPreferredSettings || ''}
+            placeholder="e.g. 5"
+            style={getInputStyle('yearsInPreferredSettings')}
+            onChange={e => handleChange('yearsInPreferredSettings', parseInt(e.target.value) || 0)}
+            onFocus={() => setFocused('yearsInPreferredSettings')}
+            onBlur={e => handleBlur('yearsInPreferredSettings', e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* SECTION: Rate */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Hourly Rate Range (CAD/USD)</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={styles.label}>Minimum desired rate</label>
             <input
-              type="number"
-              min="15"
-              max="200"
+              type="number" min="15" max="200"
               value={hourlyRate || ''}
               placeholder="25"
               style={getInputStyle('hourlyRateMin')}
@@ -523,9 +471,7 @@ export default function Step3Availability() {
           <div>
             <label style={styles.label}>Maximum desired rate</label>
             <input
-              type="number"
-              min="15"
-              max="200"
+              type="number" min="15" max="200"
               value={hourlyRateMax || ''}
               placeholder="50"
               style={getInputStyle('hourlyRateMax')}
@@ -539,6 +485,7 @@ export default function Step3Availability() {
           </div>
         </div>
       </div>
+
     </div>
   )
 }
