@@ -168,15 +168,25 @@ export default function Step1Identity() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) { setErrors(prev => ({ ...prev, photo: 'Please upload an image file' })); return }
-    if (file.size > 5 * 1024 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo must be under 5MB' })); return }
-    const reader = new FileReader()
-    reader.onload = (ev) => { 
-      const dataUrl = ev.target?.result as string
-      setPhotoPreview(dataUrl)
-      saveField('photoUrl', dataUrl)
-      // TODO: POST to /api/profile/upload-photo (route does not exist yet)
+    if (file.size < 10 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo too small — please use a clear headshot' })); return }
+    if (file.size > 5 * 1024 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo too large — maximum 5MB' })); return }
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      if (img.width < 200 || img.height < 200) {
+        setErrors(prev => ({ ...prev, photo: 'Photo too small — minimum 200x200 pixels' }))
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string
+        setPhotoPreview(dataUrl)
+        saveField('photoUrl', dataUrl)
+      }
+      reader.readAsDataURL(file)
     }
-    reader.readAsDataURL(file)
+    img.src = objectUrl
   }
 
   const toggleLanguage = useCallback((lang: string) => {
