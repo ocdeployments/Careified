@@ -5,7 +5,6 @@ import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { useLocale } from '@/lib/locale/useLocale'
 
-// Design system colors
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
@@ -15,7 +14,6 @@ const COLORS = {
   errorBg: '#FEF2F2',
 }
 
-// Immunisation options per spec
 const IMMUNISATIONS = [
   { key: 'covid', label: 'COVID-19' },
   { key: 'influenza', label: 'Influenza (annual)' },
@@ -26,7 +24,6 @@ const IMMUNISATIONS = [
   { key: 'varicella', label: 'Varicella (Chickenpox)' },
 ]
 
-// Styles
 const styles = {
   sectionHeader: {
     fontSize: '13px',
@@ -35,12 +32,6 @@ const styles = {
     textTransform: 'uppercase' as const,
     letterSpacing: '0.08em',
     marginBottom: '16px',
-  },
-  sectionSubheader: {
-    fontSize: '15px',
-    fontWeight: 800,
-    color: COLORS.navy,
-    marginBottom: '4px',
   },
   section: {
     marginBottom: '32px',
@@ -51,13 +42,6 @@ const styles = {
     borderRadius: '8px',
     padding: '16px',
     marginBottom: '12px',
-  },
-  declarationBlock: {
-    background: '#FEF9EC',
-    border: '1px solid COLORS.gold',
-    borderRadius: '8px',
-    padding: '16px',
-    marginTop: '24px',
   },
   input: {
     width: '100%',
@@ -95,7 +79,8 @@ export default function Step6Compliance() {
   const { saveField } = useProfileSave()
   const { locale, config } = useLocale()
   const [focused, setFocused] = useState<string | null>(null)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [uncomfortableLocal, setUncomfortableLocal] = useState<string>((formData as any).uncomfortableSituations || '')
+  const [vscFileName, setVscFileName] = useState<string>('')
 
   const backgroundConsent = formData.backgroundConsent
   const vulnerableSectorCheck = formData.vulnerableSectorCheck
@@ -108,7 +93,6 @@ export default function Step6Compliance() {
   const declarationAccurate = formData.declarationAccurate
   const declarationDate = formData.declarationDate
   const hasDriversLicense = formData.hasDriversLicense
-  const uncomfortableSituations = (formData as any).uncomfortableSituations || ''
 
   const getInputStyle = (field: string): React.CSSProperties => {
     let s: React.CSSProperties = { ...styles.input }
@@ -118,43 +102,50 @@ export default function Step6Compliance() {
     return s
   }
 
-  const handleChange = useCallback((field: string, value: any) => {
+  const handleChange = useCallback((field: string, value: unknown) => {
     saveField(field as any, value)
   }, [saveField])
 
-  const handleBlur = useCallback((field: string, value: any) => {
+  const handleBlur = useCallback((field: string, value: unknown) => {
     saveField(field as any, value)
   }, [saveField])
 
   const toggleBackgroundConsent = () => {
     const newValue = !backgroundConsent
     saveField('backgroundConsent', newValue)
-    if (newValue) {
-      saveField('backgroundConsentDate', new Date().toISOString().split('T')[0])
-    }
+    if (newValue) saveField('backgroundConsentDate', new Date().toISOString().split('T')[0])
   }
 
   const toggleDeclaration = () => {
     const newValue = !declarationAccurate
     saveField('declarationAccurate', newValue)
-    if (newValue) {
-      saveField('declarationDate', new Date().toISOString().split('T')[0])
-    }
+    if (newValue) saveField('declarationDate', new Date().toISOString().split('T')[0])
   }
 
   const toggleImmunisation = (key: string) => {
     saveField('immunisationRecords', { ...immunisationRecords, [key]: !immunisationRecords[key] })
   }
 
+  const handleVscUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setVscFileName(file.name)
+    saveField('vscDocumentName' as any, file.name)
+  }
+
   const sectionLabel = locale === 'CA' ? 'Vulnerable Sector Screen' : 'Criminal Background Declaration'
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
+
       {/* SECTION: Background Check Consent */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Background Check Consent</div>
-        
-        <div style={{ ...styles.consentBlock, border: backgroundConsent === false ? '2px solid ' + COLORS.red : '1px solid ' + COLORS.border, background: backgroundConsent === false ? COLORS.errorBg : '#F8FAFC' }}>
+        <div style={{
+          ...styles.consentBlock,
+          border: backgroundConsent === false ? '2px solid ' + COLORS.red : '1px solid ' + COLORS.border,
+          background: backgroundConsent === false ? COLORS.errorBg : '#F8FAFC',
+        }}>
           <label style={styles.checkboxLabel}>
             <input
               type="checkbox"
@@ -172,10 +163,10 @@ export default function Step6Compliance() {
         </div>
       </div>
 
-      {/* SECTION: Vulnerable Sector / Criminal History */}
+      {/* SECTION: VSC / Criminal History */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>{sectionLabel}</div>
-        
+
         <div style={styles.consentBlock}>
           <label style={styles.checkboxLabel}>
             <input
@@ -185,12 +176,37 @@ export default function Step6Compliance() {
               style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
             />
             <span style={{ fontSize: '14px', color: COLORS.navy }}>
-              {locale === 'CA' 
+              {locale === 'CA'
                 ? 'I have a current Vulnerable Sector Check (within 3 years)'
-                : 'I have completed a state/federal background check'
-              }
+                : 'I have completed a state/federal background check'}
             </span>
           </label>
+
+          {/* VSC Upload — shown when checked */}
+          {vulnerableSectorCheck && (
+            <div style={{ marginTop: '12px', marginLeft: '24px' }}>
+              <label style={styles.label}>
+                Upload your {locale === 'CA' ? 'VSC document' : 'background check document'} (PDF or image)
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleVscUpload}
+                style={{
+                  display: 'block',
+                  fontSize: '13px',
+                  color: COLORS.slate,
+                  marginBottom: '4px',
+                }}
+              />
+              {vscFileName && (
+                <p style={{ fontSize: '12px', color: '#16A34A', marginTop: '4px' }}>
+                  {vscFileName} attached
+                </p>
+              )}
+              <p style={styles.helperText}>Document is stored securely and shared only with agencies you apply to.</p>
+            </div>
+          )}
         </div>
 
         <div style={styles.consentBlock}>
@@ -207,12 +223,12 @@ export default function Step6Compliance() {
           </label>
         </div>
 
-        {/* Conditional: show detail when criminalDeclaration is UNCHECKED */}
         {!criminalDeclaration && (
           <div style={{ marginTop: '12px', marginLeft: '24px' }}>
             <label style={styles.label}>Please provide details (this does not automatically disqualify you)</label>
             <textarea
               value={criminalDeclarationDetail || ''}
+              onChange={e => handleChange('criminalDeclarationDetail', e.target.value)}
               onBlur={e => handleBlur('criminalDeclarationDetail', e.target.value)}
               placeholder="Describe the nature and circumstances..."
               maxLength={500}
@@ -227,7 +243,6 @@ export default function Step6Compliance() {
       {hasDriversLicense && (
         <div style={styles.section}>
           <div style={styles.sectionHeader}>Driving Record</div>
-          
           <div style={styles.consentBlock}>
             <label style={styles.checkboxLabel}>
               <input
@@ -236,9 +251,7 @@ export default function Step6Compliance() {
                 onChange={() => handleChange('drivingRecordCheck', !drivingRecordCheck)}
                 style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
               />
-              <span style={{ fontSize: '14px', color: COLORS.navy }}>
-                I consent to a driving record check
-              </span>
+              <span style={{ fontSize: '14px', color: COLORS.navy }}>I consent to a driving record check</span>
             </label>
           </div>
         </div>
@@ -247,12 +260,13 @@ export default function Step6Compliance() {
       {/* SECTION: Health & Safety */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Health & Safety</div>
-        
+
         <div style={{ marginBottom: '20px' }}>
-          <label style={styles.label}>TB Clearance Date (if applicable)</label>
+          <label style={styles.label}>TB clearance date (if applicable)</label>
           <input
-            type="date"
+            type="month"
             value={tbClearanceDate || ''}
+            onFocus={() => setFocused('tbClearanceDate')}
             onBlur={e => handleBlur('tbClearanceDate', e.target.value)}
             style={{ ...getInputStyle('tbClearanceDate'), width: 'auto' }}
           />
@@ -262,7 +276,7 @@ export default function Step6Compliance() {
         <div>
           <label style={{ ...styles.label, marginBottom: '12px' }}>Immunisation records</label>
           {IMMUNISATIONS.map(imm => (
-            <div key={imm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F1F5F9' }}>
+            <div key={imm.key} style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #F1F5F9' }}>
               <label style={styles.checkboxLabel}>
                 <input
                   type="checkbox"
@@ -292,11 +306,14 @@ export default function Step6Compliance() {
       {/* SECTION: Work Environment Comfort */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Work Environment Comfort</div>
-        
-        <label style={styles.label}>Are there any work environments or situations you would not be comfortable entering? (optional)</label>
+        <label style={styles.label}>
+          Are there any work environments or situations you would not be comfortable entering? (optional)
+        </label>
         <textarea
-          value={uncomfortableSituations}
+          value={uncomfortableLocal}
+          onChange={e => setUncomfortableLocal(e.target.value)}
           onBlur={e => handleBlur('uncomfortableSituations', e.target.value)}
+          onFocus={() => setFocused('uncomfortableSituations')}
           placeholder="Examples: homes with certain hazards, specific behavioural challenges, etc."
           maxLength={500}
           rows={3}
@@ -305,14 +322,20 @@ export default function Step6Compliance() {
         <p style={styles.helperText}>This helps agencies match you appropriately.</p>
       </div>
 
-      {/* SECTION: Declaration of Accuracy */}
-      <div style={styles.declarationBlock}>
-        <div style={styles.sectionSubheader}>Declaration of Accuracy</div>
-        
+      {/* SECTION: Declaration */}
+      <div style={{
+        background: '#FDF9EC',
+        border: '1px solid ' + COLORS.gold,
+        borderRadius: '8px',
+        padding: '16px',
+        marginTop: '24px',
+      }}>
+        <div style={{ fontSize: '15px', fontWeight: 800, color: COLORS.navy, marginBottom: '8px' }}>
+          Declaration of Accuracy
+        </div>
         <p style={{ fontSize: '12px', color: COLORS.slate, lineHeight: 1.7, marginBottom: '16px' }}>
-          I declare that all information provided in this profile is true, accurate and complete to the best of my knowledge.
+          {config.complianceDeclaration}
         </p>
-
         <label style={{ ...styles.checkboxLabel, marginBottom: '12px' }}>
           <input
             type="checkbox"
@@ -324,13 +347,13 @@ export default function Step6Compliance() {
             I confirm the above declaration is true and accurate
           </span>
         </label>
-
         {declarationAccurate && (
           <p style={{ fontSize: '12px', color: '#16A34A', marginTop: '8px' }}>
-            Declaration signed {declarationDate || 'today'}
+            Declaration signed {declarationDate || new Date().toLocaleDateString()}
           </p>
         )}
       </div>
+
     </div>
   )
 }
