@@ -38,6 +38,19 @@ async function getReferences(caregiverId: string) {
  } catch { return [] }
 }
 
+async function getVerifiedReferences(caregiverId: string) {
+  try {
+    const result = await pool.query(
+      `SELECT reference_name, relationship, would_rehire, reliability_rating, professionalism_rating, comment, years_known, completed_at
+       FROM reference_verification_requests
+       WHERE caregiver_id = $1 AND status = 'completed'
+       ORDER BY completed_at DESC`,
+      [caregiverId]
+    )
+    return result.rows
+  } catch { return [] }
+}
+
 async function getAttributes(caregiverId: string) {
  try {
  const result = await pool.query(
@@ -139,6 +152,39 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  </Accordion.Content>
  </Accordion.Item>
  
+ {/* Verified Reference Badges */}
+ {verifiedReferences.length > 0 && (
+   <Section title="Verified References">
+     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+       {verifiedReferences.map((vr: any, i: number) => (
+         <div key={i} style={{ padding: '14px 16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px' }}>
+           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+               <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', fontWeight: 700 }}>✓</div>
+               <div>
+                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#0D1B3E' }}>{vr.reference_name}</div>
+                 <div style={{ fontSize: '12px', color: '#64748B', textTransform: 'capitalize' }}>{(vr.relationship || '').replace(/_/g, ' ')}</div>
+               </div>
+             </div>
+             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+               {vr.would_rehire === 'yes' && (
+                 <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: '#DCFCE7', color: '#16A34A' }}>Would rehire</span>
+               )}
+               {vr.would_rehire === 'yes_reservations' && (
+                 <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: '#FEF9C3', color: '#D97706' }}>Would rehire with reservations</span>
+               )}
+               <span style={{ fontSize: '11px', color: '#64748B' }}>Reliability: {vr.reliability_rating}/5</span>
+             </div>
+           </div>
+           {vr.comment && (
+             <p style={{ fontSize: '13px', color: '#475569', marginTop: '10px', lineHeight: 1.6, fontStyle: 'italic' }}>"{vr.comment}"</p>
+           )}
+         </div>
+       ))}
+     </div>
+   </Section>
+ )}
+
  {/* References Accordion */}
  {references.length > 0 && (
  <Accordion.Item value="references" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}>
