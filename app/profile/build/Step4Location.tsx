@@ -91,7 +91,8 @@ const styles = {
 export default function Step4Location() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
-  const locale = (process.env.NEXT_PUBLIC_LOCALE || 'CA') as 'CA' | 'US'
+  const localeRaw = process.env.NEXT_PUBLIC_LOCALE
+  const locale: 'CA' | 'US' = (localeRaw === 'US' ? 'US' : 'CA')
   const config = getLocaleConfig(locale)
   const TRAVEL_RADIUS_OPTIONS = config.distanceOptions.map((label: string, i: number) => ({
     label,
