@@ -25,6 +25,12 @@ function AuthButton() {
         >
           Data rights
         </Link>
+        <Link
+          href="/settings/communications"
+          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+        >
+          Communications
+        </Link>
         <UserButton
           appearance={{
             elements: {
