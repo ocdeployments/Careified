@@ -114,7 +114,7 @@ export default function SitemapPage() {
                 {section.pages.map((page, i) => (
                   
                     key={page.path}
-                    href={page.path.includes('[') ? '#' : page.path}
+                    href={'#'}
                     style={{
                       display: 'block',
                       padding: '14px 20px',
