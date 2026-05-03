@@ -86,6 +86,16 @@ export interface ProfileFormData {
   }
   currentlyEnrolled?: boolean
 
+  // Step 6 — Red flag self-disclosure
+  rfTerminated?: string
+  rfTerminatedDetail?: string
+  rfComplaint?: string
+  rfComplaintDetail?: string
+  rfPhysicalLimitation?: string
+  rfPhysicalDetail?: string
+  rfBackground?: string
+  rfBackgroundDetail?: string
+
   // Step 6 — Compliance
   backgroundConsent?: boolean
   backgroundConsentDate?: string
