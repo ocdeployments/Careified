@@ -14,9 +14,9 @@ async function getAgencyId(clerkUserId: string): Promise<string | null> {
 }
 
 // PHI fields (encrypted). Everything else is stored in plaintext.
-const PHI_STRING_FIELDS = ['client_first_name', 'primary_condition', 'mobility_level']
-const PHI_BOOLEAN_FIELDS = ['medications_complex']
-const PHI_JSON_FIELDS = ['secondary_conditions']
+const PHI_STRING_FIELDS: string[] = []
+const PHI_BOOLEAN_FIELDS: string[] = []
+const PHI_JSON_FIELDS: string[] = []
 
 const NON_PHI_FIELDS = [
   'client_age', 'services_needed', 'care_intensity', 'placement_type',
