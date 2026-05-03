@@ -33,11 +33,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'missing_need' }, { status: 400 })
   }
 
+  // Check if need is essentially empty (browse mode — no filters set)
+  function isEmptyNeed(n: typeof need): boolean {
+    return !n.language_required && !n.gender_preference && !n.placement_type &&
+           !n.state && !n.hourly_rate_max && !n.primary_condition
+  }
+
   const caregivers = await loadAllApprovedCaregivers(pool)
 
   const ranked = caregivers
     .map(cg => ({ caregiver: cg, result: computeMatchScore(cg, need) }))
-    .filter(r => true) // gates temporarily disabled for browse mode
+    .filter(r => isEmptyNeed(need) || r.result.gates_passed)
     .filter(r => (r.result.alignment_score ?? 0) >= minScore)
     .sort((a, b) => (b.result.alignment_score ?? 0) - (a.result.alignment_score ?? 0))
     .slice(0, limit)
