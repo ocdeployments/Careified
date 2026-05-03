@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -19,26 +19,22 @@ const BUILT = [
 ]
 
 const PENDING = [
-  { priority: 'HIGH', label: 'NEXT_PUBLIC_LOCALE=CA', desc: 'Add to Vercel env vars NOW — Step 4 crashes without it', done: false },
-  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing to all users', done: false },
-  { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder — every marketing page, step descriptions, consent language', done: false },
-  { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'Silent failures on invalid fields, no inline errors, no scroll-to-first-error', done: false },
-  { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false — security risk', done: false },
-  { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent/legal text needs legal review before launch', done: false },
-  { priority: 'MED', label: 'Admin panel Phase 1', desc: 'Content editor, analytics, feature flags', done: false },
-  { priority: 'MED', label: 'LiveProfilePreview', desc: 'Ghost to live animation in builder right panel — must build with Romy', done: false },
-  { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types', done: false },
-  { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent + campaign from profiles', done: false },
-  { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions', done: false },
-  { priority: 'MED', label: 'Rating system', desc: 'Post-placement ratings, trust score, honesty scoring', done: false },
-  { priority: 'MED', label: 'Family portal Phase 1', desc: '8 features: schedule, shift tracker, care notes, caregiver card, wellness, billing — PWA', done: false },
-  { priority: 'LOW', label: 'US Vercel deployment', desc: 'Second project NEXT_PUBLIC_LOCALE=US', done: false },
-  { priority: 'LOW', label: 'Apple Developer account', desc: '$99/yr — for Wallet passes', done: false },
-  { priority: 'LOW', label: 'Phone OTP via Clerk', desc: '', done: false },
-  { priority: 'LOW', label: 'Map for travel radius', desc: 'Leaflet in Step 4', done: false },
-  { priority: 'LOW', label: 'Upload photo API', desc: 'Caregiver photo storage', done: false },
-  { priority: 'LOW', label: 'Background check — Checkr', desc: 'Deferred Year 1', done: false },
-  { priority: 'LOW', label: 'E&O / Cyber / Liability insurance', desc: 'Required before real users', done: false },
+  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
+  { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
+  { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'Silent failures on invalid fields' },
+  { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false' },
+  { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
+  { priority: 'MED', label: 'LiveProfilePreview', desc: 'Ghost to live animation in builder' },
+  { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
+  { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
+  { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions' },
+  { priority: 'MED', label: 'Rating system', desc: 'Post-placement ratings, trust score' },
+  { priority: 'MED', label: 'Family portal Phase 1', desc: '8 features, PWA' },
+  { priority: 'LOW', label: 'US Vercel deployment', desc: 'Second project NEXT_PUBLIC_LOCALE=US' },
+  { priority: 'LOW', label: 'Apple Developer account', desc: '$99/yr for Wallet passes' },
+  { priority: 'LOW', label: 'Phone OTP via Clerk', desc: '' },
+  { priority: 'LOW', label: 'Map for travel radius', desc: 'Leaflet in Step 4' },
+  { priority: 'LOW', label: 'E&O / Cyber / Liability insurance', desc: 'Required before real users' },
 ]
 
 const VAPI = [
@@ -46,73 +42,76 @@ const VAPI = [
   { type: 'reference_calls', label: 'Reference calls', status: 'PENDING', note: 'Session B' },
   { type: 'past_employer_calls', label: 'Past employer calls', status: 'PENDING', note: 'Session C' },
   { type: 'current_employer_calls', label: 'Current employer calls', status: 'DROPPED', note: 'Too high legal risk' },
-  { type: 'regulatory_calls', label: 'Regulatory/licensing calls', status: 'PENDING', note: 'Session D' },
+  { type: 'regulatory_calls', label: 'Regulatory calls', status: 'PENDING', note: 'Session D' },
   { type: 'match_time_calls', label: 'Match opportunity calls', status: 'PENDING', note: 'Session D' },
 ]
 
-const ENV = [
-  { key: 'DATABASE_URL', status: 'SET' },
-  { key: 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', status: 'DEV KEYS' },
-  { key: 'CLERK_SECRET_KEY', status: 'DEV KEYS' },
-  { key: 'NEXT_PUBLIC_LOCALE', status: 'MISSING FROM VERCEL' },
-  { key: 'OPENROUTER_API_KEY', status: 'SET' },
-  { key: 'PHI_ENCRYPTION_KEY', status: 'SET' },
-  { key: 'VAPI_API_KEY', status: 'SET' },
-  { key: 'VAPI_ASSISTANT_ID', status: 'SET' },
-  { key: 'ADMIN_CLERK_USER_ID', status: 'SET' },
-]
+type LiveData = {
+  db: { caregivers: number; agencies: number; clients: number; verifiedRefs: number; tables: string[] }
+  env: { key: string; set: boolean; isProd: boolean | null }[]
+  git: { commit: string; message: string; branch: string }
+  timestamp: string
+}
 
 export default function StatusPage() {
-  const [tab, setTab] = useState<'built'|'pending'|'vapi'|'env'>('pending')
+  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'>('pending')
+  const [live, setLive] = useState<LiveData | null>(null)
+  const [liveLoading, setLiveLoading] = useState(false)
+
+  useEffect(() => {
+    setLiveLoading(true)
+    fetch('/api/admin/status')
+      .then(r => r.json())
+      .then(d => { setLive(d); setLiveLoading(false) })
+      .catch(() => setLiveLoading(false))
+  }, [])
 
   const tabs = [
-    { id: 'pending', label: 'Pending & Blockers' },
+    { id: 'pending', label: 'Pending' },
     { id: 'built', label: 'Built & Live' },
     { id: 'vapi', label: 'AIRecruit Agents' },
-    { id: 'env', label: 'Env Vars' },
+    { id: 'live', label: 'Live Data' },
   ] as const
 
-  const priorityColor = (p: string) =>
+  const pc = (p: string) =>
     p === 'HIGH' ? { bg: '#FEF2F2', color: '#DC2626', border: '#FECACA' } :
     p === 'MED'  ? { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' } :
                    { bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0' }
 
-  const statusColor = (s: string) =>
-    s === 'LIVE'    ? '#16A34A' :
-    s === 'DROPPED' ? '#DC2626' : '#D97706'
-
-  const envColor = (s: string) =>
-    s === 'SET' ? '#16A34A' :
-    s.includes('MISSING') ? '#DC2626' : '#D97706'
+  const sc = (s: string) =>
+    s === 'LIVE' ? '#16A34A' : s === 'DROPPED' ? '#DC2626' : '#D97706'
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: S, padding: '32px 24px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 32, color: N, margin: '0 0 4px' }}>
-            Careified Build Status
-          </h1>
-          <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>
-            Last updated: May 3 2026 · Safe revert: 41c6b31 · <a href="https://careified.vercel.app" style={{ color: G }}>careified.vercel.app</a>
-          </p>
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: 32, color: N, margin: '0 0 4px' }}>Careified Build Status</h1>
+          {live && (
+            <p style={{ fontSize: 12, color: '#64748B', margin: 0 }}>
+              Commit <code style={{ background: '#F1F5F9', padding: '1px 6px', borderRadius: 4 }}>{live.git.commit}</code>
+              {live.git.message && <> · {live.git.message}</>}
+              {' · '}{new Date(live.timestamp).toLocaleString()}
+            </p>
+          )}
         </div>
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
-          {[
-            { label: 'Features built', value: BUILT.reduce((a, b) => a + b.items.length, 0) + '+' },
-            { label: 'Pages live', value: '34' },
-            { label: 'DB tables', value: '14' },
-            { label: 'Pending items', value: PENDING.filter(p => !p.done).length },
-          ].map(s => (
-            <div key={s.label} style={{ background: 'white', borderRadius: 12, padding: '16px 20px', border: '1px solid #E2E8F0' }}>
-              <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 28, color: N }}>{s.value}</div>
-              <div style={{ fontSize: 12, color: '#64748B' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
+        {/* Live stats */}
+        {live && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+            {[
+              { label: 'Approved caregivers', value: live.db.caregivers },
+              { label: 'Agencies', value: live.db.agencies },
+              { label: 'Clients', value: live.db.clients },
+              { label: 'Verified references', value: live.db.verifiedRefs },
+            ].map(s => (
+              <div key={s.label} style={{ background: 'white', borderRadius: 12, padding: '16px 20px', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 28, color: N }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: '#64748B' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 20 }}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -124,16 +123,13 @@ export default function StatusPage() {
           ))}
         </div>
 
-        {/* Pending tab */}
         {tab === 'pending' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {PENDING.map((p, i) => {
-              const c = priorityColor(p.priority)
+              const c = pc(p.priority)
               return (
-                <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: c.bg, color: c.color, border: `1px solid ${c.border}`, flexShrink: 0, marginTop: 2 }}>
-                    {p.priority}
-                  </span>
+                <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 12 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: c.bg, color: c.color, border: `1px solid ${c.border}`, flexShrink: 0, marginTop: 2, height: 'fit-content' }}>{p.priority}</span>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: N }}>{p.label}</div>
                     {p.desc && <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>{p.desc}</div>}
@@ -144,16 +140,14 @@ export default function StatusPage() {
           </div>
         )}
 
-        {/* Built tab */}
         {tab === 'built' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {BUILT.map(cat => (
               <div key={cat.cat} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: G, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>{cat.cat}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: G, textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 12 }}>{cat.cat}</div>
                 {cat.items.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#374151', marginBottom: 6 }}>
-                    <span style={{ color: '#16A34A', flexShrink: 0, marginTop: 1 }}>✓</span>
-                    {item}
+                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 13, color: '#374151', marginBottom: 6 }}>
+                    <span style={{ color: '#16A34A', flexShrink: 0 }}>✓</span>{item}
                   </div>
                 ))}
               </div>
@@ -161,11 +155,10 @@ export default function StatusPage() {
           </div>
         )}
 
-        {/* Vapi tab */}
         {tab === 'vapi' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ background: '#FDF6EC', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#92400E', marginBottom: 8 }}>
-              Vapi assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead · Each use case = separate assistant with unique prompt/persona · All gated by consent before firing
+              Vapi assistant: fdd84833-80ef-4c50-8391-2d7b38e56ead · Each use case = separate assistant · All gated by consent
             </div>
             {VAPI.map((v, i) => (
               <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -173,23 +166,40 @@ export default function StatusPage() {
                   <div style={{ fontSize: 14, fontWeight: 700, color: N }}>{v.label}</div>
                   <div style={{ fontSize: 12, color: '#64748B' }}>{v.type} · {v.note}</div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: v.status === 'LIVE' ? '#F0FDF4' : v.status === 'DROPPED' ? '#FEF2F2' : '#FFFBEB', color: statusColor(v.status), border: `1px solid ${v.status === 'LIVE' ? '#BBF7D0' : v.status === 'DROPPED' ? '#FECACA' : '#FDE68A'}` }}>
-                  {v.status}
-                </span>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, color: sc(v.status), background: v.status === 'LIVE' ? '#F0FDF4' : v.status === 'DROPPED' ? '#FEF2F2' : '#FFFBEB', border: `1px solid ${v.status === 'LIVE' ? '#BBF7D0' : v.status === 'DROPPED' ? '#FECACA' : '#FDE68A'}` }}>{v.status}</span>
               </div>
             ))}
           </div>
         )}
 
-        {/* Env tab */}
-        {tab === 'env' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ENV.map((e, i) => (
-              <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <code style={{ fontSize: 13, color: N, fontFamily: 'monospace' }}>{e.key}</code>
-                <span style={{ fontSize: 11, fontWeight: 700, color: envColor(e.status) }}>{e.status}</span>
+        {tab === 'live' && (
+          <div>
+            {liveLoading && <p style={{ color: '#64748B' }}>Loading live data...</p>}
+            {live && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 12 }}>DB Tables ({live.db.tables.length})</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {live.db.tables.map(t => (
+                      <span key={t} style={{ fontSize: 11, fontFamily: 'monospace', padding: '3px 8px', background: '#F1F5F9', borderRadius: 6, color: N }}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 12 }}>Environment Variables</div>
+                  {live.env.map(e => (
+                    <div key={e.key} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F1F5F9' }}>
+                      <code style={{ fontSize: 12, color: N }}>{e.key}</code>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {e.isProd === false && <span style={{ fontSize: 10, color: '#D97706', fontWeight: 700 }}>DEV KEYS</span>}
+                        {e.isProd === true && <span style={{ fontSize: 10, color: '#16A34A', fontWeight: 700 }}>PROD KEYS</span>}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: e.set ? '#16A34A' : '#DC2626' }}>{e.set ? 'SET' : 'MISSING'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
