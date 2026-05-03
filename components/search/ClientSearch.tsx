@@ -174,6 +174,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
                   onChange={e => setFilters(prev => ({ ...prev, sortBy: e.target.value as any, page: 1 }))}
                   className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white text-navy focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
                 >
+                  <option value="all">Show all caregivers</option>
                   <option value="score">Alignment score</option>
                   <option value="experience">Experience</option>
                   <option value="recent">Recently active</option>
