@@ -69,6 +69,7 @@ const panels = {
     links: [
       { href: '/profile/build',    label: 'Build your profile',    desc: 'Free — takes 10 minutes'      },
       { href: '/opportunities',    label: 'Browse opportunities',  desc: 'See open placements'          },
+      { href: '/profile/demo',     label: 'Profile demo',          desc: 'See what agencies see'        },
       { href: '/for-caregivers',   label: 'For Caregivers',       desc: 'See the caregiver journey'    },
     ],
     cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
@@ -80,6 +81,7 @@ const panels = {
     links: [
       { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
       { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
+      { href: '/agency/clients',   label: 'My clients',        desc: 'Manage client placements'       },
       { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
     ],
     cta: { href: '/agency/signup', label: 'Start as an agency' },
