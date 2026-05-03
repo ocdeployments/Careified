@@ -19,6 +19,7 @@ import Step8WorkHistory from './Step8WorkHistory'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
+import CommunicationConsents from '@/components/profile/CommunicationConsents'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 import GhostProfileModal from '@/components/profile/GhostProfileModal'
 
@@ -145,7 +146,18 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  </div>
 )
 
- switch (currentStep) {
+ // Step 0 — consent gate (shown before builder if not yet consented)
+  if (currentStep === 0) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#F7F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', maxWidth: '640px', width: '100%', border: '1px solid #E2E8F0' }}>
+          <CommunicationConsents mode="signup" onSubmit={() => router.push('/profile/build?step=1')} />
+        </div>
+      </div>
+    )
+  }
+
+  switch (currentStep) {
  case 1: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step1Identity /></motion.div></AnimatePresence>
  case 2: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step2Services /></motion.div></AnimatePresence>
  case 3: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step3Availability /></motion.div></AnimatePresence>
