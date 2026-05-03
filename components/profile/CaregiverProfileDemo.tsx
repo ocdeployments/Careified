@@ -612,10 +612,8 @@ export default function CaregiverProfileDemo() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
                 <Meta icon={<MapPin size={13} />}>{caregiver.city}, {caregiver.state}</Meta>
                 <Meta icon={<Briefcase size={13} />}>{caregiver.yearsExperience} yrs experience</Meta>
-                <Meta icon={<Globe size={13} />}>
-                  {caregiver.languages.map(l => `${l.name} (${l.level.toLowerCase()})`).join(' · ')}
-                </Meta>
-                <Meta icon={<Award size={13} />}>${caregiver.rateMin}–${caregiver.rateMax}/hr</Meta>
+                <Meta icon={<Clock size={13} />}>Avg placement: 14 months</Meta>
+                <Meta icon={<Award size={13} />}>Available immediately</Meta>
               </div>
 
               {/* Chips */}
@@ -633,9 +631,7 @@ export default function CaregiverProfileDemo() {
                 {caregiver.willingLiveIn && (
                   <HeroChip color={C.livein} bg={C.liveinBg} icon={<User size={11} />} label="Live-in capable" />
                 )}
-                {caregiver.hasVehicle && (
-                  <HeroChip color="rgba(255,255,255,0.7)" bg="rgba(255,255,255,0.08)" icon={<Car size={11} />} label="Has vehicle" />
-                )}
+
               </div>
             </div>
           </div>
@@ -1081,10 +1077,25 @@ export default function CaregiverProfileDemo() {
             {/* Side facts */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
+              <Stat label="Languages" value="English (native) · Portuguese (fluent)" />
               <Stat label="Hourly rate" value={`$${caregiver.rateMin}–$${caregiver.rateMax}/hr`} />
               <Stat label="Travel radius" value={`${travelRadius} km from ${caregiver.city}`} />
               <Stat label="Vehicle" value="Yes — Class G license" />
               <Stat label="Drives clients" value="Yes — willing in own vehicle" />
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px', marginTop: 4 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Rate breakdown</div>
+                {[
+                  { label: 'Regular', rate: '$24–$28/hr' },
+                  { label: 'Overnight', rate: '$32/hr' },
+                  { label: 'Live-in', rate: '$220/day' },
+                  { label: 'Holiday', rate: '$36/hr' },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#0D1B3E', marginBottom: 4 }}>
+                    <span style={{ color: '#64748B' }}>{r.label}</span>
+                    <span style={{ fontWeight: 700 }}>{r.rate}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
