@@ -33,7 +33,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'missing_need' }, { status: 400 })
   }
 
-  const caregivers = await loadAllApprovedCaregivers(pool)
+  let caregivers
+  try {
+    caregivers = await loadAllApprovedCaregivers(pool)
+  } catch (err) {
+    console.error('loadAllApprovedCaregivers failed:', err)
+    return NextResponse.json({ error: 'db_load_failed', detail: String(err) }, { status: 500 })
+  }
 
   const ranked = caregivers
     .map(cg => {
