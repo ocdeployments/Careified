@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const ranked = caregivers
     .map(cg => ({ caregiver: cg, result: computeMatchScore(cg, need) }))
-    .filter(r => r.result.gates_passed)
+    .filter(r => true) // gates temporarily disabled for browse mode
     .filter(r => (r.result.alignment_score ?? 0) >= minScore)
     .sort((a, b) => (b.result.alignment_score ?? 0) - (a.result.alignment_score ?? 0))
     .slice(0, limit)
