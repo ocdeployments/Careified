@@ -66,6 +66,7 @@ type MatchRow = {
   }
   // deprecated aliases for backcompat
   match?: any
+  gap_analysis?: Array<{ category: string; text: string; priority: string }>
 }
 
 export default function ClientDetailPage() {
@@ -386,6 +387,29 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
       {dimensions && (
         <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 4 }}>
           <DimensionBreakdown dimensions={dimensions as any} />
+        </div>
+      )}
+
+      {row.gap_analysis && row.gap_analysis.length > 0 && (
+        <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+            Verify in your call
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {row.gap_analysis.map((g, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, flexShrink: 0, marginTop: 1,
+                  background: g.priority === 'high' ? '#FEF2F2' : '#FEF9C3',
+                  color: g.priority === 'high' ? '#DC2626' : '#D97706',
+                  border: g.priority === 'high' ? '1px solid #FECACA' : '1px solid #FDE68A',
+                }}>
+                  {g.priority === 'high' ? 'High' : 'Check'}
+                </span>
+                <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.5 }}>{g.text}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
