@@ -6,6 +6,7 @@ const ADMIN_NAV = [
   { href: '/admin', label: 'Dashboard', icon: Shield },
   { href: '/admin/caregivers', label: 'Caregivers', icon: Users },
   { href: '/admin/status', label: 'Build Status', icon: Shield },
+  { href: '/admin/sitemap', label: 'Site Map', icon: Shield },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
