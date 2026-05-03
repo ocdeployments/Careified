@@ -354,7 +354,7 @@ export default function Step6Compliance() {
             detailState: rfPhysicalDetail, setDetailState: setRfPhysicalDetail, detailField: 'rfPhysicalDetail',
           },
           {
-            question: 'Anything in your background a vulnerable client's family should know about?',
+            question: "Anything in your background a vulnerable client's family should know about?",
             state: rfBackground, setState: setRfBackground, field: 'rfBackground',
             detailState: rfBackgroundDetail, setDetailState: setRfBackgroundDetail, detailField: 'rfBackgroundDetail',
           },
@@ -381,7 +381,7 @@ export default function Step6Compliance() {
                     color: state === val ? (val === 'yes' ? '#DC2626' : '#16A34A') : '#64748B',
                   }}
                 >
-                  {val === 'yes' ? 'Yes — I'd like to explain' : 'No'}
+                  {val === 'yes' ? "Yes — I'd like to explain" : 'No'}
                 </button>
               ))}
             </div>
