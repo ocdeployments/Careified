@@ -46,11 +46,11 @@ const SCENARIOS = [
     ]
   },
   {
-    id: 'emotional_regulation',
-    question: "A family member snaps at you unfairly during a stressful moment. How do you respond?",
+    id: 'emergency_response',
+    question: "You are alone with a client who suddenly becomes unresponsive. What is your first action?",
     options: [
-      { id: 'A', text: "I stay calm in the moment and continue — it doesn't linger with me", style: 'absorbs', score: 4.0 },
-      { id: 'B', text: "I stay professional in the moment but need time to process after", style: 'processes', score: 3.0 }
+      { id: 'A', text: "Call 911 immediately — every second counts", style: 'protocol_first', score: 4.0 },
+      { id: 'B', text: "Try to rouse them first, then call if they don't respond", style: 'assess_first', score: 3.0 }
     ]
   },
   {
@@ -62,11 +62,11 @@ const SCENARIOS = [
     ]
   },
   {
-    id: 'resilience',
-    question: "A client you've cared for passes away. How do you typically respond?",
+    id: 'observation',
+    question: "You notice a client seems more withdrawn than usual and hasn't finished meals for two days. What do you do?",
     options: [
-      { id: 'A', text: "I form deep bonds — I may stay in touch with the family afterward", style: 'relational', score: 4.0 },
-      { id: 'B', text: "I process the loss and consciously close that chapter professionally", style: 'boundaried', score: 3.0 }
+      { id: 'A', text: "I document it and report to the agency or family the same day", style: 'proactive', score: 4.0 },
+      { id: 'B', text: "I monitor for another day to see if it continues before acting", style: 'observant', score: 3.0 }
     ]
   }
 ]
