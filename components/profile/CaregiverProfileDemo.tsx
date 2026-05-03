@@ -85,6 +85,11 @@ const caregiver = {
   openToUrgent: true,
   willingLiveIn: true,
   hasVehicle: true,
+  avgTenureMonths: 14,
+  availableFrom: 'Immediately',
+  rateOvernight: 32,
+  rateLiveIn: 220,
+  rateHoliday: 36,
   languages: [
     { name: 'English', level: 'Native' },
     { name: 'Portuguese', level: 'Fluent' },
@@ -719,6 +724,61 @@ export default function CaregiverProfileDemo() {
         }}
       >
         {/* 2. VERIFICATION STATUS */}
+        {/* SUMMARY BANNER */}
+        <div style={{ background: '#0D1B3E', borderRadius: 12, padding: '14px 20px', marginBottom: 0 }}>
+          <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#F5F0E8', lineHeight: 1.5 }}>
+            8-year PSW with verified dementia and palliative depth &mdash; 3 confirmed references, current VSC, available immediately. Average placement tenure: 14 months.
+          </p>
+        </div>
+        {/* 2. DISCLOSURE — moved to top for agency triage */}
+        <Section title="Disclosure">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {redFlags.map((r, i) => {
+              const isYes = r.answer === 'Yes'
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    background: isYes ? '#FEF2F2' : C.successBg,
+                    border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
+                    borderRadius: 10,
+                  }}
+                >
+                  <div style={{ fontSize: 13, color: C.fg1 }}>
+                    {r.question}
+                    {isYes && r.explanation && (
+                      <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
+                    )}
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      padding: '4px 12px',
+                      borderRadius: 999,
+                      background: isYes ? '#DC2626' : C.success,
+                      color: 'white',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
+                    {r.answer}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </Section>
+
+        {/* 3. VERIFICATION STATUS */}
         <Section title="Verification status">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 240px', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -773,90 +833,6 @@ export default function CaregiverProfileDemo() {
                 Weighted across system, document, reference, and self-reported claims. Careified does not assess
                 quality — only the strength of evidence behind each claim.
               </p>
-            </div>
-          </div>
-        </Section>
-
-        {/* 3. SCORECARD SUMMARY */}
-        <Section title="Hiring scorecard">
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 28 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {scorecard.map((s, i) => (
-                <div key={i}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'baseline',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontSize: 13, fontWeight: 700, color: C.fg1 }}>{s.label}</span>
-                    <span style={{ fontFamily: SERIF, fontSize: 18, color: C.fg1 }}>{s.pct}%</span>
-                  </div>
-                  <Bar pct={s.pct} />
-                  <div style={{ fontSize: 12, color: C.fg3, lineHeight: 1.55, marginTop: 6 }}>{s.reason}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div
-                style={{
-                  background: C.navy,
-                  borderRadius: 14,
-                  padding: 16,
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                <Eyebrow>
-                  <span style={{ color: C.gold }}>Why this caregiver stands out</span>
-                </Eyebrow>
-                <p
-                  style={{
-                    fontFamily: SERIF,
-                    fontStyle: 'italic',
-                    fontSize: 14,
-                    lineHeight: 1.55,
-                    color: '#F5F0E8',
-                    margin: '8px 0 0',
-                  }}
-                >
-                  {aiSummary}
-                </p>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 10 }}>
-                  Generated from profile evidence — not an endorsement.
-                </div>
-              </div>
-              <div
-                style={{
-                  background: C.bgSubtle,
-                  border: `1px solid ${C.borderSoft}`,
-                  borderRadius: 12,
-                  padding: 14,
-                }}
-              >
-                <Eyebrow>What to verify in your call</Eyebrow>
-                <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {verifyInCall.map((v, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        gap: 8,
-                        alignItems: 'flex-start',
-                        fontSize: 12,
-                        color: C.fg3,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      <span style={{ color: C.gold, fontWeight: 700, lineHeight: 1.5 }}>—</span>
-                      <span>{v}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </div>
         </Section>
@@ -1031,7 +1007,195 @@ export default function CaregiverProfileDemo() {
           </div>
         </Section>
 
-        {/* 6. WORKING STYLE */}
+        {/* 6. AVAILABILITY & LOGISTICS */}
+        <Section title="Availability & logistics">
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 24 }}>
+            {/* Weekly grid */}
+            <div>
+              <Eyebrow>Weekly availability</Eyebrow>
+              <div
+                style={{
+                  marginTop: 10,
+                  display: 'grid',
+                  gridTemplateColumns: '90px repeat(7, 1fr)',
+                  gap: 4,
+                }}
+              >
+                <div />
+                {days.map(d => (
+                  <div
+                    key={d}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      color: C.fg4,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    {d}
+                  </div>
+                ))}
+                {blocks.map((b, bi) => (
+                  <ReactFragmentRow key={b}>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: C.fg3,
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingRight: 6,
+                      }}
+                    >
+                      {b}
+                    </div>
+                    {weeklyGrid[bi].map((cell, ci) => (
+                      <div
+                        key={ci}
+                        title={`${b} — ${days[ci]} — ${cell === 2 ? 'Preferred' : cell === 1 ? 'Available' : 'Unavailable'}`}
+                        style={{
+                          aspectRatio: '1.4 / 1',
+                          borderRadius: 6,
+                          border: `1px solid ${C.borderSoft}`,
+                          background:
+                            cell === 2
+                              ? 'linear-gradient(135deg, #C9973A, #E8B86D)'
+                              : cell === 1
+                              ? C.goldTint
+                              : C.bgSubtle,
+                        }}
+                      />
+                    ))}
+                  </ReactFragmentRow>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 14, marginTop: 12, flexWrap: 'wrap' }}>
+                <Legend swatch="linear-gradient(135deg, #C9973A, #E8B86D)" label="Preferred" />
+                <Legend swatch={C.goldTint} label="Available" border />
+                <Legend swatch={C.bgSubtle} label="Unavailable" border />
+              </div>
+            </div>
+
+            {/* Side facts */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
+              <Stat label="Hourly rate" value={`$${caregiver.rateMin}–$${caregiver.rateMax}/hr`} />
+              <Stat label="Travel radius" value={`${travelRadius} km from ${caregiver.city}`} />
+              <Stat label="Vehicle" value="Yes — Class G license" />
+              <Stat label="Drives clients" value="Yes — willing in own vehicle" />
+            </div>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <Eyebrow>Service areas</Eyebrow>
+            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {serviceAreas.map((a, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: 12,
+                    padding: '5px 12px',
+                    borderRadius: 999,
+                    border: `1px solid rgba(201,151,58,0.40)`,
+                    color: C.fg1,
+                    background: 'transparent',
+                    fontWeight: 500,
+                  }}
+                >
+                  {a}
+                </span>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* 7. HIRING SCORECARD */}
+        <Section title="Hiring scorecard">
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {scorecard.map((s, i) => (
+                <div key={i}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline',
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span style={{ fontSize: 13, fontWeight: 700, color: C.fg1 }}>{s.label}</span>
+                    <span style={{ fontFamily: SERIF, fontSize: 18, color: C.fg1 }}>{s.pct}%</span>
+                  </div>
+                  <Bar pct={s.pct} />
+                  <div style={{ fontSize: 12, color: C.fg3, lineHeight: 1.55, marginTop: 6 }}>{s.reason}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div
+                style={{
+                  background: C.navy,
+                  borderRadius: 14,
+                  padding: 16,
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <Eyebrow>
+                  <span style={{ color: C.gold }}>Why this caregiver stands out</span>
+                </Eyebrow>
+                <p
+                  style={{
+                    fontFamily: SERIF,
+                    fontStyle: 'italic',
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#F5F0E8',
+                    margin: '8px 0 0',
+                  }}
+                >
+                  {aiSummary}
+                </p>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 10 }}>
+                  Generated from profile evidence — not an endorsement.
+                </div>
+              </div>
+              <div
+                style={{
+                  background: C.bgSubtle,
+                  border: `1px solid ${C.borderSoft}`,
+                  borderRadius: 12,
+                  padding: 14,
+                }}
+              >
+                <Eyebrow>What to verify in your call</Eyebrow>
+                <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {verifyInCall.map((v, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'flex-start',
+                        fontSize: 12,
+                        color: C.fg3,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <span style={{ color: C.gold, fontWeight: 700, lineHeight: 1.5 }}>—</span>
+                      <span>{v}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* 8. WORKING STYLE */}
         <Section title="Working style">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
             <div>
@@ -1120,7 +1284,7 @@ export default function CaregiverProfileDemo() {
           </div>
         </Section>
 
-        {/* 7. WORK HISTORY (accordion) */}
+        {/* 9. WORK HISTORY */}
         <Section title="Work history">
           <button
             type="button"
@@ -1225,7 +1389,7 @@ export default function CaregiverProfileDemo() {
           )}
         </Section>
 
-        {/* 8. CREDENTIALS & COMPLIANCE */}
+        {/* 10. CREDENTIALS & COMPLIANCE */}
         <Section title="Credentials & compliance">
           <button
             type="button"
@@ -1349,158 +1513,6 @@ export default function CaregiverProfileDemo() {
               </div>
             </div>
           )}
-        </Section>
-
-        {/* 9. AVAILABILITY & LOGISTICS */}
-        <Section title="Availability & logistics">
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 24 }}>
-            {/* Weekly grid */}
-            <div>
-              <Eyebrow>Weekly availability</Eyebrow>
-              <div
-                style={{
-                  marginTop: 10,
-                  display: 'grid',
-                  gridTemplateColumns: '90px repeat(7, 1fr)',
-                  gap: 4,
-                }}
-              >
-                <div />
-                {days.map(d => (
-                  <div
-                    key={d}
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      textAlign: 'center',
-                      color: C.fg4,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    {d}
-                  </div>
-                ))}
-                {blocks.map((b, bi) => (
-                  <ReactFragmentRow key={b}>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: C.fg3,
-                        display: 'flex',
-                        alignItems: 'center',
-                        paddingRight: 6,
-                      }}
-                    >
-                      {b}
-                    </div>
-                    {weeklyGrid[bi].map((cell, ci) => (
-                      <div
-                        key={ci}
-                        title={`${b} — ${days[ci]} — ${cell === 2 ? 'Preferred' : cell === 1 ? 'Available' : 'Unavailable'}`}
-                        style={{
-                          aspectRatio: '1.4 / 1',
-                          borderRadius: 6,
-                          border: `1px solid ${C.borderSoft}`,
-                          background:
-                            cell === 2
-                              ? 'linear-gradient(135deg, #C9973A, #E8B86D)'
-                              : cell === 1
-                              ? C.goldTint
-                              : C.bgSubtle,
-                        }}
-                      />
-                    ))}
-                  </ReactFragmentRow>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 14, marginTop: 12, flexWrap: 'wrap' }}>
-                <Legend swatch="linear-gradient(135deg, #C9973A, #E8B86D)" label="Preferred" />
-                <Legend swatch={C.goldTint} label="Available" border />
-                <Legend swatch={C.bgSubtle} label="Unavailable" border />
-              </div>
-            </div>
-
-            {/* Side facts */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
-              <Stat label="Hourly rate" value={`$${caregiver.rateMin}–$${caregiver.rateMax}/hr`} />
-              <Stat label="Travel radius" value={`${travelRadius} km from ${caregiver.city}`} />
-              <Stat label="Vehicle" value="Yes — Class G license" />
-              <Stat label="Drives clients" value="Yes — willing in own vehicle" />
-            </div>
-          </div>
-
-          <div style={{ marginTop: 18 }}>
-            <Eyebrow>Service areas</Eyebrow>
-            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {serviceAreas.map((a, i) => (
-                <span
-                  key={i}
-                  style={{
-                    fontSize: 12,
-                    padding: '5px 12px',
-                    borderRadius: 999,
-                    border: `1px solid rgba(201,151,58,0.40)`,
-                    color: C.fg1,
-                    background: 'transparent',
-                    fontWeight: 500,
-                  }}
-                >
-                  {a}
-                </span>
-              ))}
-            </div>
-          </div>
-        </Section>
-
-        {/* 10. RED FLAG DISCLOSURE */}
-        <Section title="Disclosure">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {redFlags.map((r, i) => {
-              const isYes = r.answer === 'Yes'
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    gap: 12,
-                    alignItems: 'center',
-                    padding: '12px 14px',
-                    background: isYes ? '#FEF2F2' : C.successBg,
-                    border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
-                    borderRadius: 10,
-                  }}
-                >
-                  <div style={{ fontSize: 13, color: C.fg1 }}>
-                    {r.question}
-                    {isYes && r.explanation && (
-                      <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
-                    )}
-                  </div>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      padding: '4px 12px',
-                      borderRadius: 999,
-                      background: isYes ? '#DC2626' : C.success,
-                      color: 'white',
-                      letterSpacing: '0.02em',
-                    }}
-                  >
-                    {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
-                    {r.answer}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
         </Section>
 
         {/* 11. OPEN QUESTIONS */}
