@@ -446,14 +446,89 @@ function Stars({ n }: { n: number }) {
 // Component
 // ──────────────────────────────────────────────────────────────────────────────
 
-export default function CaregiverProfileDemo() {
+
+export interface CaregiverProfileProps {
+  // Identity
+  firstName: string
+  lastName: string
+  preferredName?: string
+  jobTitle?: string
+  credential?: string
+  city?: string
+  state?: string
+  yearsExperience?: number
+  photoUrl?: string
+  availabilityStatus?: string
+  hourlyRateMin?: number
+  hourlyRateMax?: number
+  openToUrgent?: boolean
+  willingLiveIn?: boolean
+  hasVehicle?: boolean
+  languages?: string[]
+  languageFluency?: Record<string, string>
+  bio?: string
+  profileCompletion?: number
+  aggregateScore?: number
+  ratingCount?: number
+  // Clinical
+  services?: string[]
+  specializations?: string[]
+  diagnosisExperience?: Record<string, string>
+  adlsPerformed?: Record<string, string>
+  specializedTechniques?: string[]
+  // Availability
+  weeklyGrid?: Record<string, boolean>
+  minHoursPerWeek?: number
+  maxHoursPerWeek?: number
+  serviceAreas?: string[]
+  travelRadius?: number
+  hasDriversLicense?: boolean
+  willingToTransport?: boolean
+  // Compliance
+  vulnerableSectorCheck?: boolean
+  bondedInsured?: boolean
+  immunisationRecords?: Record<string, boolean>
+  declarationDate?: string
+  criminalDeclaration?: boolean
+  // Red flags
+  rfTerminated?: string
+  rfComplaint?: string
+  rfPhysicalLimitation?: string
+  rfBackground?: string
+  // Personality
+  personalityProfile?: Record<string, any>
+  // Work history
+  workHistory?: Array<Record<string, any>>
+  // References (verified)
+  verifiedReferences?: Array<{
+    reference_name: string
+    relationship: string
+    would_rehire: string
+    reliability_rating: number
+    professionalism_rating: number
+    comment?: string
+    completed_at: string
+  }>
+  // Certifications
+  certifications?: Array<Record<string, any>>
+  // Open questions
+  openQ1?: string
+  openQ2?: string
+  openQ3?: string
+}
+
+export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
+  // Merge real data with demo fallbacks
+  const dm = props
+
+
   const [openWorkHistory, setOpenWorkHistory] = useState(true)
   const [openRoles, setOpenRoles] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false })
   const [openCredentials, setOpenCredentials] = useState(true)
   const [openOpenQs, setOpenOpenQs] = useState(true)
 
   const initials = `${caregiver.firstName[0]}${caregiver.lastName[0]}`
-  const fullName = `${caregiver.firstName} ${caregiver.lastName}`
+  const fullName = `${dm.firstName || caregiver.firstName} ${dm.lastName || caregiver.lastName}`
 
   return (
     <div
@@ -605,13 +680,13 @@ export default function CaregiverProfileDemo() {
                   margin: '4px 0 12px',
                 }}
               >
-                {caregiver.credential} — {caregiver.jobTitle}
+                {dm.credential || caregiver.credential} — {dm.jobTitle || caregiver.jobTitle}
               </div>
 
               {/* Meta row */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
-                <Meta icon={<MapPin size={13} />}>{caregiver.city}, {caregiver.state}</Meta>
-                <Meta icon={<Briefcase size={13} />}>{caregiver.yearsExperience} yrs experience</Meta>
+                <Meta icon={<MapPin size={13} />}>{dm.city || caregiver.city}, {dm.state || caregiver.state}</Meta>
+                <Meta icon={<Briefcase size={13} />}>{dm.yearsExperience ?? caregiver.yearsExperience} yrs experience</Meta>
                 <Meta icon={<Clock size={13} />}>Avg placement: 14 months</Meta>
                 <Meta icon={<Award size={13} />}>Available immediately</Meta>
               </div>
@@ -622,7 +697,7 @@ export default function CaregiverProfileDemo() {
                   color={C.success}
                   bg={'rgba(22,163,74,0.18)'}
                   icon={<Clock size={11} />}
-                  label={caregiver.availability}
+                  label={dm.availabilityStatus === 'available_now' ? 'Available now' : dm.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' : caregiver.availability}
                   dot
                 />
                 {caregiver.openToUrgent && (
@@ -665,7 +740,7 @@ export default function CaregiverProfileDemo() {
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>/ 5</span>
               </div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>
-                {caregiver.reviewCount} verified reviews · Profile {caregiver.profileCompletion}% complete
+                {dm.ratingCount || caregiver.reviewCount} verified reviews · Profile {dm.profileCompletion || caregiver.profileCompletion}% complete
               </div>
             </div>
 
@@ -1078,8 +1153,8 @@ export default function CaregiverProfileDemo() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
               <Stat label="Languages" value="English (native) · Portuguese (fluent)" />
-              <Stat label="Hourly rate" value={`$${caregiver.rateMin}–$${caregiver.rateMax}/hr`} />
-              <Stat label="Travel radius" value={`${travelRadius} km from ${caregiver.city}`} />
+              <Stat label="Hourly rate" value={`$${dm.hourlyRateMin || caregiver.rateMin}–$${dm.hourlyRateMax || caregiver.rateMax}/hr`} />
+              <Stat label="Travel radius" value={`${travelRadius} km from ${dm.city || caregiver.city}`} />
               <Stat label="Vehicle" value="Yes — Class G license" />
               <Stat label="Drives clients" value="Yes — willing in own vehicle" />
               <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px', marginTop: 4 }}>
