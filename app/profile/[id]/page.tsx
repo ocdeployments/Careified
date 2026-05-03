@@ -68,6 +68,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
  if (!caregiver) notFound()
  const certifications = await getCertifications((await params).id)
  const references = await getReferences((await params).id)
+ const verifiedReferences = await getVerifiedReferences((await params).id)
  const attributes = await getAttributes((await params).id)
 
  const displayName = caregiver.preferred_name ? `${caregiver.preferred_name} ${caregiver.last_name}` : `${caregiver.first_name} ${caregiver.last_name}`
