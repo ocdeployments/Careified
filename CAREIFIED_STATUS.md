@@ -214,3 +214,28 @@ app/api/match/rank/route.ts — search/matching API
 app/agency/clients/[id]/page.tsx — client detail + match analysis
 
 Last updated: May 3 2026 | Safe revert: 41c6b31
+
+
+---
+
+## AIRECRUIT — MULTI-AGENT VAPI PLAN
+
+Six distinct Vapi agent use cases (one assistant per use case):
+
+| Use Case | Consent Type | Status | Notes |
+|----------|-------------|--------|-------|
+| Candidate screening | recruit_calls | BUILT (Phases 1-6) | Outbound to candidates |
+| Reference calls | reference_calls | PENDING Session B | AI calls listed references |
+| Past employer calls | past_employer_calls | PENDING Session C | Verify work history |
+| Current employer calls | current_employer_calls | DROPPED | Too high legal risk |
+| Regulatory/licensing calls | regulatory_calls | PENDING | Verify credentials with bodies |
+| Match opportunity calls | match_time_calls | PENDING | Notify caregiver of new match |
+
+Each use case = separate Vapi assistant with different prompt/persona.
+Consent is per-type — caregiver opts in/out individually.
+All gated by lib/airecruit/consent-gate.ts before any call fires.
+
+AIRecruit Sessions pending:
+- Session B: Consent flow for all types
+- Session C: Profile analysis + campaign from profiles + reference agent
+- Session D: SMS, retry logic, cron, bulk actions, employer agent
