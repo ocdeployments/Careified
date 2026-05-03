@@ -36,7 +36,8 @@ export async function loadCaregiverForMatchingV2(
   const base = rows[0] as CaregiverForMatching
 
   // Load attributes
-  const attrMap = await getAttributeMap(pool, caregiverId)
+  let attrMap: Record<string, any> = {}
+  try { attrMap = await getAttributeMap(pool, caregiverId) } catch { /* table may not exist */ }
 
   const provenance: Record<string, { source: string; tier: AttributeTier; confidence: number }> = {}
 
