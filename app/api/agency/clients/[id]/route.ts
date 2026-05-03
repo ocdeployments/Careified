@@ -37,13 +37,13 @@ export async function GET(
 
   const client = {
     id: r.id,
-    client_first_name: decryptPHI(r.client_first_name_encrypted),
+    client_first_name: decryptPHI(r.client_first_name),
     client_age: r.client_age,
-    primary_condition: decryptPHI(r.primary_condition_encrypted),
-    secondary_conditions: decryptPHIJson<string[]>(r.secondary_conditions_encrypted) ?? [],
-    mobility_level: decryptPHI(r.mobility_level_encrypted),
+    primary_condition: decryptPHI(r.primary_condition),
+    secondary_conditions: decryptPHIJson<string[]>(r.secondary_conditions) ?? [],
+    mobility_level: decryptPHI(r.mobility_level),
     medications_complex: (() => {
-      const v = decryptPHI(r.medications_complex_encrypted)
+      const v = decryptPHI(r.medications_complex)
       return v === 'true' ? true : v === 'false' ? false : null
     })(),
     services_needed: r.services_needed,

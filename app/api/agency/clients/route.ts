@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
   const { rows } = await pool.query(
     `SELECT
       id,
-      client_first_name_encrypted,
+      client_first_name,
       client_age,
-      primary_condition_encrypted,
+      primary_condition,
       placement_type, city, state, language_required,
       status, created_at, matched_caregiver_id
     FROM client_needs
@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
 
   const clients = rows.map(r => ({
     id: r.id,
-    client_first_name: decryptPHI(r.client_first_name_encrypted),
+    client_first_name: r.client_first_name,
     client_age: r.client_age,
-    primary_condition: decryptPHI(r.primary_condition_encrypted),
+    primary_condition: r.primary_condition,
     placement_type: r.placement_type,
     city: r.city,
     state: r.state,
