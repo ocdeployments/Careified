@@ -12,13 +12,7 @@ const COLORS = {
   border: '#E2E8F0',
 }
 
-const locale = (process.env.NEXT_PUBLIC_LOCALE || 'CA') as 'CA' | 'US'
-const config = getLocaleConfig(locale)
-
-const TRAVEL_RADIUS_OPTIONS = config.distanceOptions.map((label, i) => ({
-  label,
-  value: [5, 10, 20, 30, 50, 100, 999][i]
-}))
+// Config resolved inside component to avoid SSR prerender issues
 
 const COMMON_AREAS = [
   'Downtown', 'North York', 'Scarborough', 'Etobicoke', 'Mississauga',
@@ -97,6 +91,12 @@ const styles = {
 export default function Step4Location() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
+  const locale = (process.env.NEXT_PUBLIC_LOCALE || 'CA') as 'CA' | 'US'
+  const config = getLocaleConfig(locale)
+  const TRAVEL_RADIUS_OPTIONS = config.distanceOptions.map((label: string, i: number) => ({
+    label,
+    value: [5, 10, 20, 30, 50, 100, 999][i]
+  }))
   const [focused, setFocused] = useState<string | null>(null)
   const [customArea, setCustomArea] = useState('')
 
