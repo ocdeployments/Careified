@@ -1,3 +1,4 @@
+import { checkCallAllowed } from './consent-gate'
 const VAPI_API_KEY = process.env.VAPI_API_KEY!
 const VAPI_ASSISTANT_ID = process.env.VAPI_ASSISTANT_ID!
 const VAPI_PHONE_NUMBER_ID = process.env.VAPI_PHONE_NUMBER_ID!
@@ -7,6 +8,7 @@ export interface VapiCallParams {
   phoneNumber: string
   campaignId: string
   callId: string
+  caregiverId?: string
   candidateFirstName?: string
   candidateLastName?: string
   candidateNotes?: string
@@ -125,6 +127,19 @@ Call ID: ${callId}`
   const firstMessage = candidateFullName
     ? `Hello, may I please speak with ${candidateFullName}?`
     : `Hello! My name is Alex. I am an AI recruiting assistant calling on behalf of ${callerAgency} through the Care-ih-fied platform. I am reaching out about a ${roleTitle} opportunity${locationText}. Do you have a moment?`
+
+  // Consent gate — block call if caregiver has not consented
+  if (params.caregiverId) {
+    const gate = await checkCallAllowed({
+      caregiverId: params.caregiverId,
+      consentType: 'recruit_calls',
+      targetPhone: params.phoneNumber,
+      callPurpose: 'AIRecruit outbound recruiting call',
+    })
+    if (!gate.allowed) {
+      return { success: false, error: gate.reason || 'Consent not granted' }
+    }
+  }
 
   try {
     const response = await fetch(`${VAPI_BASE_URL}/call`, {
