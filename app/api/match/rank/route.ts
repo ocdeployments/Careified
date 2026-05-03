@@ -36,7 +36,15 @@ export async function POST(req: NextRequest) {
   const caregivers = await loadAllApprovedCaregivers(pool)
 
   const ranked = caregivers
-    .map(cg => ({ caregiver: cg, result: computeMatchScore(cg, need) }))
+    .map(cg => {
+      try {
+        return { caregiver: cg, result: computeMatchScore(cg, need) }
+      } catch (err) {
+        console.error('computeMatchScore failed for', cg.id, err)
+        return null
+      }
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null)
     .filter(r => {
       const emptyNeed = !need.language_required && !need.gender_preference &&
         !need.placement_type && !need.state && !need.hourly_rate_max
