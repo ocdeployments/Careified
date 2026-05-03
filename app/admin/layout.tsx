@@ -5,6 +5,7 @@ import { Users, Shield, Settings } from 'lucide-react'
 const ADMIN_NAV = [
   { href: '/admin', label: 'Dashboard', icon: Shield },
   { href: '/admin/caregivers', label: 'Caregivers', icon: Users },
+  { href: '/admin/status', label: 'Build Status', icon: Shield },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
