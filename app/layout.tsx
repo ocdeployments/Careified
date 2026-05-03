@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }}>
           <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-              © {new Date().getFullYear()} Careified. All rights reserved.
+              © 2026 Careified. All rights reserved.
             </div>
             <div style={{ display: 'flex', gap: '24px' }}>
               <a href="/privacy" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Privacy Policy</a>
