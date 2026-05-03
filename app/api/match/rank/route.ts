@@ -9,6 +9,7 @@ import {
   ALIGNMENT_DISCLAIMER,
 } from '@/lib/matching'
 import type { MatchNeed } from '@/lib/matching'
+import { generateGapAnalysis } from '@/lib/matching/gap-analysis'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
       overall_confidence: r.result.overall_confidence,
       alignment: r.result,
       match: r.result, // deprecated alias for UI backcompat
+      gap_analysis: generateGapAnalysis(r.caregiver as any, need as any),
     })),
   })
 }
