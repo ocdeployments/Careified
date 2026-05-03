@@ -80,6 +80,14 @@ export default function Step6Compliance() {
   const { locale, config } = useLocale()
   const [focused, setFocused] = useState<string | null>(null)
   const [uncomfortableLocal, setUncomfortableLocal] = useState<string>((formData as any).uncomfortableSituations || '')
+  const [rfTerminated, setRfTerminated] = useState<string>((formData as any).rfTerminated || '')
+  const [rfTerminatedDetail, setRfTerminatedDetail] = useState<string>((formData as any).rfTerminatedDetail || '')
+  const [rfComplaint, setRfComplaint] = useState<string>((formData as any).rfComplaint || '')
+  const [rfComplaintDetail, setRfComplaintDetail] = useState<string>((formData as any).rfComplaintDetail || '')
+  const [rfPhysicalLimitation, setRfPhysicalLimitation] = useState<string>((formData as any).rfPhysicalLimitation || '')
+  const [rfPhysicalDetail, setRfPhysicalDetail] = useState<string>((formData as any).rfPhysicalDetail || '')
+  const [rfBackground, setRfBackground] = useState<string>((formData as any).rfBackground || '')
+  const [rfBackgroundDetail, setRfBackgroundDetail] = useState<string>((formData as any).rfBackgroundDetail || '')
   const [vscFileName, setVscFileName] = useState<string>('')
 
   const backgroundConsent = formData.backgroundConsent
@@ -320,6 +328,76 @@ export default function Step6Compliance() {
           style={{ ...getInputStyle('uncomfortableSituations'), resize: 'vertical', minHeight: '100px' }}
         />
         <p style={styles.helperText}>This helps agencies match you appropriately.</p>
+      </div>
+
+      {/* SECTION: Red Flag Self-Disclosure */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>Honesty Declaration</div>
+        <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px', lineHeight: 1.5 }}>
+          Agencies ask these questions in every screening call. Answering honestly here saves time and builds trust. Your answers are visible to agencies only after you apply to a placement.
+        </p>
+
+        {[
+          {
+            question: 'Have you ever left or been let go from a role due to attendance, conduct, or safety concerns?',
+            state: rfTerminated, setState: setRfTerminated, field: 'rfTerminated',
+            detailState: rfTerminatedDetail, setDetailState: setRfTerminatedDetail, detailField: 'rfTerminatedDetail',
+          },
+          {
+            question: 'Have you ever received a formal complaint or disciplinary action in a caregiving role?',
+            state: rfComplaint, setState: setRfComplaint, field: 'rfComplaint',
+            detailState: rfComplaintDetail, setDetailState: setRfComplaintDetail, detailField: 'rfComplaintDetail',
+          },
+          {
+            question: 'Do you have any physical limitations that could affect safe care delivery?',
+            state: rfPhysicalLimitation, setState: setRfPhysicalLimitation, field: 'rfPhysicalLimitation',
+            detailState: rfPhysicalDetail, setDetailState: setRfPhysicalDetail, detailField: 'rfPhysicalDetail',
+          },
+          {
+            question: 'Anything in your background a vulnerable client's family should know about?',
+            state: rfBackground, setState: setRfBackground, field: 'rfBackground',
+            detailState: rfBackgroundDetail, setDetailState: setRfBackgroundDetail, detailField: 'rfBackgroundDetail',
+          },
+        ].map(({ question, state, setState, field, detailState, setDetailState, detailField }) => (
+          <div key={field} style={{ marginBottom: '16px', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', background: state === 'yes' ? '#FEF2F2' : '#F8FAFC' }}>
+            <p style={{ fontSize: '14px', fontWeight: 500, color: '#0D1B3E', marginBottom: '10px' }}>{question}</p>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: state === 'yes' ? '12px' : '0' }}>
+              {['no', 'yes'].map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => {
+                    setState(val)
+                    saveField(field as any, val)
+                    if (val === 'no') {
+                      setDetailState('')
+                      saveField(detailField as any, '')
+                    }
+                  }}
+                  style={{
+                    padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                    border: state === val ? '2px solid ' + (val === 'yes' ? '#DC2626' : '#16A34A') : '1px solid #E2E8F0',
+                    background: state === val ? (val === 'yes' ? '#FEF2F2' : '#F0FDF4') : 'white',
+                    color: state === val ? (val === 'yes' ? '#DC2626' : '#16A34A') : '#64748B',
+                  }}
+                >
+                  {val === 'yes' ? 'Yes — I'd like to explain' : 'No'}
+                </button>
+              ))}
+            </div>
+            {state === 'yes' && (
+              <textarea
+                value={detailState}
+                onChange={e => setDetailState(e.target.value)}
+                onBlur={e => saveField(detailField as any, e.target.value)}
+                placeholder="Please provide context — this does not automatically disqualify you..."
+                maxLength={300}
+                rows={3}
+                style={{ width: '100%', padding: '10px 14px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box', outline: 'none' }}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
       {/* SECTION: Declaration */}
