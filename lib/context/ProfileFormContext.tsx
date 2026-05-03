@@ -43,6 +43,9 @@ export interface ProfileFormData {
   clientTypes?: string[]
   unwillingTasks?: string[]
   dietaryCooking?: string[]
+  diagnosisExperience?: Record<string, string>
+  adlsPerformed?: Record<string, string>
+  specializedTechniques?: string[]
 
   // Step 3 — Availability
   availabilityStatus?: string
