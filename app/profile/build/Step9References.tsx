@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 
-// Design system colors
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
@@ -14,7 +13,6 @@ const COLORS = {
   errorBg: '#FEF2F2',
 }
 
-// Constants
 const RELATIONSHIP_OPTIONS = [
   'Former Supervisor', 'Current Supervisor', 'Colleague',
   'Former Client', 'Current Client', 'Client Family Member',
@@ -22,9 +20,23 @@ const RELATIONSHIP_OPTIONS = [
   'Community Leader', 'Personal (non-family)', 'Other Professional'
 ]
 
+const RELATIONSHIP_MAP: Record<string, string> = {
+  'Former Supervisor': 'direct_supervisor',
+  'Current Supervisor': 'direct_supervisor',
+  'Colleague': 'colleague',
+  'Former Client': 'client_family',
+  'Current Client': 'client_family',
+  'Client Family Member': 'client_family',
+  'Teacher/Instructor': 'other',
+  'Mentor': 'other',
+  'Volunteer Coordinator': 'agency_coordinator',
+  'Community Leader': 'other',
+  'Personal (non-family)': 'other',
+  'Other Professional': 'other',
+}
+
 const YEARS_KNOWN = ['Less than 1 year', '1–2 years', '3–5 years', '5+ years']
 
-// Styles
 const styles = {
   sectionHeader: {
     fontSize: '13px',
@@ -34,9 +46,7 @@ const styles = {
     letterSpacing: '0.08em',
     marginBottom: '16px',
   },
-  section: {
-    marginBottom: '32px',
-  },
+  section: { marginBottom: '32px' },
   referenceBlock: {
     background: '#F8FAFC',
     border: '1px solid ' + COLORS.border,
@@ -44,16 +54,6 @@ const styles = {
     padding: '20px',
     marginBottom: '16px',
     position: 'relative' as const,
-  },
-  blockBadge: {
-    position: 'absolute' as const,
-    top: '16px',
-    right: '16px',
-    background: '#E2E8F0',
-    borderRadius: '20px',
-    padding: '2px 10px',
-    fontSize: '12px',
-    color: COLORS.slate,
   },
   input: {
     width: '100%',
@@ -134,9 +134,12 @@ function isValidEmail(email: string): boolean {
 
 export default function Step9References() {
   const { formData } = useProfileForm()
-  const { saveField, saveStep } = useProfileSave()
+  const { saveField } = useProfileSave()
   const [focused, setFocused] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [inviteStatus, setInviteStatus] = useState<Record<number, 'idle' | 'sending' | 'sent' | 'error'>>({})
+  const [inviteUrls, setInviteUrls] = useState<Record<number, string>>({})
+  const [copied, setCopied] = useState<Record<number, boolean>>({})
 
   const references = formData.references || []
   const addLater = (formData as any).addReferencesLater || false
@@ -149,101 +152,91 @@ export default function Step9References() {
     return s
   }
 
-  const handleChange = useCallback((field: string, value: any) => {
+  const handleChange = useCallback((field: string, value: unknown) => {
     saveField(field as any, value)
   }, [saveField])
 
-  const handleBlur = useCallback((field: string, value: any) => {
+  const handleBlur = useCallback((field: string, value: unknown) => {
     saveField(field as any, value)
   }, [saveField])
 
   const addReference = () => {
     if (references.length >= 6) return
-    const newRef = {
-      id: generateId(),
-      name: '',
-      relationshipType: '',
-      organisation: '',
-      duration: '',
-      contactMethod: '',
-      email: '',
-      phone: '',
-      consentKnows: false,
-      consentAgreed: false,
-      consentUnderstands: false,
-    }
-    saveField('references', [...references, newRef])
+    saveField('references', [...references, {
+      id: generateId(), name: '', relationshipType: '', organisation: '',
+      duration: '', contactMethod: '', email: '', phone: '',
+      consentKnows: false, consentAgreed: false, consentUnderstands: false,
+    }])
   }
 
-  const updateReference = (index: number, field: string, value: any) => {
+  const updateReference = (index: number, field: string, value: unknown) => {
     const updated = [...references]
     updated[index] = { ...updated[index], [field]: value }
     saveField('references', updated)
   }
 
   const removeReference = (index: number) => {
-    const updated = references.filter((_, i) => i !== index)
-    saveField('references', updated)
+    saveField('references', references.filter((_: unknown, i: number) => i !== index))
   }
 
   const handlePhoneBlur = (index: number, value: string) => {
-    const formatted = formatPhone(value)
-    updateReference(index, 'phone', formatted)
+    updateReference(index, 'phone', formatPhone(value))
   }
 
   const handleEmailBlur = (index: number, value: string) => {
     if (value && !isValidEmail(value)) {
       setErrors(prev => ({ ...prev, [`email_${index}`]: 'Please enter a valid email' }))
     } else {
-      setErrors(prev => {
-        const next = { ...prev }
-        delete next[`email_${index}`]
-        return next
-      })
+      setErrors(prev => { const n = { ...prev }; delete n[`email_${index}`]; return n })
     }
     updateReference(index, 'email', value)
   }
 
-  const isClientReference = (relationship: string) => {
-    return relationship === 'Former Client' || relationship === 'Current Client'
+  const sendVerificationInvite = async (index: number, ref: any) => {
+    if (!ref.name || (!ref.email && !ref.phone)) return
+    setInviteStatus(prev => ({ ...prev, [index]: 'sending' }))
+    try {
+      const res = await fetch('/api/references/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          referenceName: ref.name,
+          referenceEmail: ref.email || null,
+          referencePhone: ref.phone || null,
+          relationship: RELATIONSHIP_MAP[ref.relationshipType] || 'other',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setInviteStatus(prev => ({ ...prev, [index]: 'sent' }))
+      setInviteUrls(prev => ({ ...prev, [index]: data.responseUrl }))
+    } catch {
+      setInviteStatus(prev => ({ ...prev, [index]: 'error' }))
+    }
   }
 
-  const hasSupervisorReference = references.some((ref: any) => {
-    const rel = ref.relationshipType || ''
-    return rel.includes('Supervisor') || rel.includes('Employer')
-  })
-
-  const validateReferences = () => {
-    const newErrors: Record<string, string> = {}
-    
-    if (references.length < 3 && !addLater) {
-      newErrors.minRefs = 'Minimum 3 references required'
-    }
-    
-    if (references.length >= 3 && !hasSupervisorReference && !addLater) {
-      newErrors.supervisorRef = 'At least one reference must be a former or current supervisor/employer'
-    }
-
-    references.forEach((ref: any, i: number) => {
-      if (!ref.phone && !ref.email) {
-        newErrors[`contact_${i}`] = 'At least phone or email required'
-      }
-    })
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const copyLink = (index: number) => {
+    navigator.clipboard.writeText(inviteUrls[index])
+    setCopied(prev => ({ ...prev, [index]: true }))
+    setTimeout(() => setCopied(prev => ({ ...prev, [index]: false })), 2000)
   }
+
+  const isClientReference = (relationship: string) =>
+    relationship === 'Former Client' || relationship === 'Current Client'
+
+  const hasSupervisorReference = references.some((ref: any) =>
+    (ref.relationshipType || '').includes('Supervisor') || (ref.relationshipType || '').includes('Employer')
+  )
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
-      {/* SECTION: References */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>References</div>
         <p style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '16px' }}>
           Minimum 3 references required. At least one must be a former supervisor or employer.
+          Send each reference a verification link — completed responses appear as verified badges on your profile.
         </p>
 
-        {/* Add Later Option */}
         <label style={{ ...styles.checkboxLabel, marginBottom: '16px' }}>
           <input
             type="checkbox"
@@ -255,27 +248,28 @@ export default function Step9References() {
         </label>
 
         {addLater && (
-          <div style={{ ...styles.clientNote, marginBottom: '16px' }}>
-            Your profile will show 'References Pending' until at least 3 are added
-          </div>
+          <div style={styles.clientNote}>Your profile will show 'References Pending' until at least 3 are added</div>
         )}
 
-        {/* Reference Blocks */}
         {!addLater && references.map((ref: any, index: number) => {
-          const showClientNote = isClientReference(ref.relationshipType)
-          
+          const status = inviteStatus[index] || 'idle'
+          const url = inviteUrls[index]
+          const canInvite = ref.name && (ref.email || ref.phone) && ref.consentAgreed
+
           return (
             <div key={ref.id} style={styles.referenceBlock}>
-              <div style={styles.blockBadge}>Reference {index + 1}</div>
-              <button
-                type="button"
-                onClick={() => removeReference(index)}
-                style={{ position: 'absolute', top: '16px', right: '100px', color: COLORS.red, fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none' }}
-              >
-                Remove
-              </button>
+              {/* Header row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: COLORS.navy }}>Reference {index + 1}</span>
+                <button
+                  type="button" onClick={() => removeReference(index)}
+                  style={{ color: COLORS.red, fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none' }}
+                >
+                  Remove
+                </button>
+              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={styles.label}>First Name</label>
                   <input
@@ -285,14 +279,13 @@ export default function Step9References() {
                       const last = ref.name?.split(' ').slice(1).join(' ') || ''
                       updateReference(index, 'name', e.target.value + (last ? ' ' + last : ''))
                     }}
-                    onBlur={e => handleBlur('references', references)}
+                    onFocus={() => setFocused('firstName' + index)}
+                    onBlur={() => handleBlur('references', references)}
                     style={getInputStyle('firstName' + index)}
                   />
                 </div>
                 <div>
-                  <label style={styles.label}>
-                    Last Name {showClientNote && '(shown as initial)'}
-                  </label>
+                  <label style={styles.label}>Last Name {isClientReference(ref.relationshipType) && '(shown as initial)'}</label>
                   <input
                     type="text"
                     value={ref.name?.split(' ').slice(1).join(' ') || ''}
@@ -300,16 +293,17 @@ export default function Step9References() {
                       const first = ref.name?.split(' ')[0] || ''
                       updateReference(index, 'name', first + ' ' + e.target.value)
                     }}
-                    onBlur={e => handleBlur('references', references)}
+                    onFocus={() => setFocused('lastName' + index)}
+                    onBlur={() => handleBlur('references', references)}
                     style={getInputStyle('lastName' + index)}
                   />
                 </div>
                 <div>
-                  <label style={styles.label}>Relationship to You</label>
+                  <label style={styles.label}>Relationship</label>
                   <select
                     value={ref.relationshipType || ''}
                     onChange={e => updateReference(index, 'relationshipType', e.target.value)}
-                    onBlur={e => handleBlur('references', references)}
+                    onBlur={() => handleBlur('references', references)}
                     style={getInputStyle('rel' + index)}
                   >
                     <option value="">Select...</option>
@@ -318,40 +312,38 @@ export default function Step9References() {
                 </div>
               </div>
 
-              {showClientNote && (
-                <div style={styles.clientNote}>
-                  Client references show first name and last initial only
-                </div>
+              {isClientReference(ref.relationshipType) && (
+                <div style={styles.clientNote}>Client references show first name and last initial only</div>
               )}
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginTop: '16px' }}>
                 <div>
-                  <label style={styles.label}>Company / Organization (optional)</label>
+                  <label style={styles.label}>Organization (optional)</label>
                   <input
-                    type="text"
-                    value={ref.organisation || ''}
+                    type="text" value={ref.organisation || ''}
                     onChange={e => updateReference(index, 'organisation', e.target.value)}
-                    onBlur={e => handleBlur('references', references)}
+                    onFocus={() => setFocused('org' + index)}
+                    onBlur={() => handleBlur('references', references)}
                     style={getInputStyle('org' + index)}
                   />
                 </div>
                 <div>
-                  <label style={styles.label}>Phone Number (optional)</label>
+                  <label style={styles.label}>Phone (optional)</label>
                   <input
-                    type="tel"
-                    value={ref.phone || ''}
+                    type="tel" value={ref.phone || ''}
                     onChange={e => updateReference(index, 'phone', e.target.value)}
+                    onFocus={() => setFocused('phone' + index)}
                     onBlur={e => handlePhoneBlur(index, e.target.value)}
                     placeholder="(XXX) XXX-XXXX"
                     style={getInputStyle('phone' + index)}
                   />
                 </div>
                 <div>
-                  <label style={styles.label}>Email Address (optional)</label>
+                  <label style={styles.label}>Email (optional)</label>
                   <input
-                    type="email"
-                    value={ref.email || ''}
+                    type="email" value={ref.email || ''}
                     onChange={e => updateReference(index, 'email', e.target.value)}
+                    onFocus={() => setFocused('email' + index)}
                     onBlur={e => handleEmailBlur(index, e.target.value)}
                     style={{ ...getInputStyle('email' + index), borderColor: errors[`email_${index}`] ? COLORS.red : undefined }}
                   />
@@ -361,16 +353,12 @@ export default function Step9References() {
                 </div>
               </div>
 
-              {errors[`contact_${index}`] && (
-                <p style={{ fontSize: '12px', color: COLORS.red, marginTop: '8px' }}>{errors[`contact_${index}`]}</p>
-              )}
-
               <div style={{ marginTop: '16px' }}>
                 <label style={styles.label}>How long have you known this person?</label>
                 <select
                   value={ref.duration || ''}
                   onChange={e => updateReference(index, 'duration', e.target.value)}
-                  onBlur={e => handleBlur('references', references)}
+                  onBlur={() => handleBlur('references', references)}
                   style={getInputStyle('duration' + index)}
                 >
                   <option value="">Select...</option>
@@ -378,55 +366,114 @@ export default function Step9References() {
                 </select>
               </div>
 
-              {/* Consent Block */}
+              {/* Consent block */}
               <div style={styles.consentBlock}>
-                <label style={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={ref.consentAgreed || false}
-                    onChange={e => updateReference(index, 'consentAgreed', e.target.checked)}
-                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
-                  />
-                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I consent to this person being contacted for a reference check</span>
-                </label>
-                <label style={{ ...styles.checkboxLabel, marginTop: '8px' }}>
-                  <input
-                    type="checkbox"
-                    checked={ref.consentKnows || false}
-                    onChange={e => updateReference(index, 'consentKnows', e.target.checked)}
-                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
-                  />
-                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I confirm this person is aware they are listed as a reference</span>
-                </label>
-                <label style={{ ...styles.checkboxLabel, marginTop: '8px' }}>
-                  <input
-                    type="checkbox"
-                    checked={ref.consentUnderstands || false}
-                    onChange={e => updateReference(index, 'consentUnderstands', e.target.checked)}
-                    style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
-                  />
-                  <span style={{ fontSize: '13px', color: COLORS.navy }}>I confirm this reference information is accurate and truthful</span>
-                </label>
-
+                {[
+                  { field: 'consentAgreed', text: 'I consent to this person being contacted for a reference check' },
+                  { field: 'consentKnows', text: 'I confirm this person is aware they are listed as a reference' },
+                  { field: 'consentUnderstands', text: 'I confirm this reference information is accurate and truthful' },
+                ].map(({ field, text }) => (
+                  <label key={field} style={{ ...styles.checkboxLabel, marginBottom: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={ref[field] || false}
+                      onChange={e => updateReference(index, field, e.target.checked)}
+                      style={{ accentColor: COLORS.gold, width: '16px', height: '16px' }}
+                    />
+                    <span style={{ fontSize: '13px', color: COLORS.navy }}>{text}</span>
+                  </label>
+                ))}
                 {!ref.consentAgreed && (
-                  <div style={styles.warning}>
-                    References without contact consent will be marked as unverifiable
+                  <div style={styles.warning}>References without contact consent will be marked as unverifiable</div>
+                )}
+              </div>
+
+              {/* Verification invite section */}
+              <div style={{ marginTop: '16px', padding: '14px', borderRadius: '10px', background: status === 'sent' ? '#F0FDF4' : '#FAFAFA', border: '1px solid ' + (status === 'sent' ? '#BBF7D0' : COLORS.border) }}>
+                {status === 'idle' && (
+                  <div>
+                    <p style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '10px' }}>
+                      Send {ref.name ? ref.name.split(' ')[0] : 'this reference'} a verification link — they fill out a 4-minute form and it appears as a verified badge on your profile.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => sendVerificationInvite(index, ref)}
+                      disabled={!canInvite}
+                      style={{
+                        padding: '9px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                        border: 'none', cursor: canInvite ? 'pointer' : 'not-allowed',
+                        background: canInvite ? COLORS.navy : '#E2E8F0',
+                        color: canInvite ? 'white' : '#94A3B8',
+                      }}
+                    >
+                      Send verification link
+                    </button>
+                    {!canInvite && (
+                      <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+                        Add name, email or phone, and tick consent first
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {status === 'sending' && (
+                  <p style={{ fontSize: '13px', color: COLORS.slate }}>Generating link...</p>
+                )}
+
+                {status === 'sent' && url && (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#16A34A' }}>Verification link ready</span>
+                    </div>
+                    <p style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '10px' }}>
+                      Share this link with {ref.name ? ref.name.split(' ')[0] : 'your reference'} via email, text, or copy it below.
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        readOnly value={url}
+                        style={{ flex: 1, padding: '8px 12px', border: '1px solid ' + COLORS.border, borderRadius: '8px', fontSize: '12px', background: 'white', color: COLORS.slate }}
+                      />
+                      <button
+                        type="button" onClick={() => copyLink(index)}
+                        style={{
+                          padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+                          border: 'none', cursor: 'pointer',
+                          background: copied[index] ? '#16A34A' : COLORS.navy,
+                          color: 'white',
+                        }}
+                      >
+                        {copied[index] ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '8px' }}>
+                      Once they submit, a verified badge appears on your profile automatically.
+                    </p>
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div>
+                    <p style={{ fontSize: '13px', color: COLORS.red, marginBottom: '8px' }}>Failed to generate link. Please try again.</p>
+                    <button
+                      type="button" onClick={() => setInviteStatus(prev => ({ ...prev, [index]: 'idle' }))}
+                      style={{ fontSize: '12px', color: COLORS.navy, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Try again
+                    </button>
                   </div>
                 )}
               </div>
+
+              {errors[`contact_${index}`] && (
+                <p style={{ fontSize: '12px', color: COLORS.red, marginTop: '8px' }}>{errors[`contact_${index}`]}</p>
+              )}
             </div>
           )
         })}
 
-        {/* Validation Errors */}
-        {errors.minRefs && (
-          <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.minRefs}</p>
-        )}
-        {errors.supervisorRef && (
-          <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.supervisorRef}</p>
-        )}
+        {errors.minRefs && <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.minRefs}</p>}
+        {errors.supervisorRef && <p style={{ fontSize: '13px', color: COLORS.red, marginTop: '8px' }}>{errors.supervisorRef}</p>}
 
-        {/* Add Button */}
         {!addLater && references.length < 6 && (
           <button type="button" onClick={addReference} style={styles.addButton}>
             + Add Reference
