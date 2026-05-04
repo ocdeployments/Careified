@@ -309,3 +309,47 @@ Inbound receptionist (future Vapi session):
 
 PAYMENTS_ENABLED=false until Stripe account + pricing confirmed
 Launch currency: CAD first, USD second (both must be built)
+
+---
+
+## PROMOTIONS & CAMPAIGNS (admin session)
+
+Pages:
+- /admin/promotions — create/manage promo codes and campaigns
+- Applied at Stripe checkout as coupons
+
+Promo types:
+- Percentage discount (e.g. 20% off first 3 months)
+- Fixed amount (e.g. $50 off)
+- Free months (e.g. 2 months free on annual)
+- Module unlock (e.g. free AIRecruit for 30 days)
+
+Campaign types:
+- Signup promo (new agencies)
+- Loyalty discount (agencies 12+ months)
+- Referral reward (agency refers another agency)
+- Seasonal (Black Friday, New Year etc.)
+
+DB table: promo_codes (id, code, type, value, module_target, max_redemptions, redemptions_count, expires_at, active, created_at)
+DB table: promo_redemptions (id, promo_code_id, agency_id, applied_at, discount_amount)
+
+---
+
+## DEMO ENVIRONMENT (dedicated session)
+
+Goal: Let agencies try Careified before signing up — no login required
+
+Pages:
+- /demo — landing with "Try the platform" CTA
+- /demo/dashboard — agency dashboard with pre-loaded data
+- /demo/search — search with 15 demo caregivers
+- /demo/clients — 5 demo clients with match results
+- /demo/clients/[id] — match analysis with gap list
+- /demo/airecruit — AIRecruit campaign demo (no real calls)
+
+Demo data: same 15 caregivers + 5 clients already in DB
+Demo banner: "You are in demo mode — no real data · Sign up to get started"
+CTA on every page: "Start your free 30-day trial →"
+Session-based (no DB writes in demo mode)
+Guided tour option: step-by-step walkthrough of key features
+
