@@ -40,6 +40,7 @@ const SECTIONS = [
     { path: '/agency/airecruit/new', desc: 'New campaign' },
     { path: '/agency/airecruit/[id]', desc: 'Campaign and calls' },
     { path: '/agency/airecruit/[id]/[call]', desc: 'Call transcript' },
+    { path: '/agency/dashboard', desc: 'Action-first home page' },
     { path: '/agency/signup', desc: 'Agency registration' },
     { path: '/agency/pending-approval', desc: 'Waiting screen' },
   ]},
