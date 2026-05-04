@@ -3,12 +3,15 @@
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
-import { UserButton, useAuth } from '@clerk/nextjs'
+import { UserButton, useAuth, useUser } from '@clerk/nextjs'
 import BrandLogo from '../BrandLogo'
 
 // ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
   const { isLoaded, userId } = useAuth()
+  const { user } = useUser()
+  const userRole = user?.publicMetadata?.role as string | undefined
+
   if (!isLoaded) return null
   if (userId) {
     return (
@@ -90,6 +93,7 @@ const panels = {
       { href: '/agency/clients',   label: 'My clients',        desc: 'Manage client placements'       },
       { href: '/agency/settings',  label: 'Agency settings',   desc: 'Branding, areas, compliance'    },
       { href: '/agency/billing',   label: 'Billing',           desc: 'Plan, modules, trial'           },
+      { href: '/agency/sitemap',   label: 'Site Map',          desc: 'All agency pages'               },
       { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
     ],
     cta: { href: '/agency/signup', label: 'Start as an agency' },
@@ -110,6 +114,10 @@ type PanelKey = keyof typeof panels
 
 // ── Main Navbar ───────────────────────────────────────────────────────────────
 export default function Navbar() {
+  const { user } = useUser()
+  const userRole = user?.publicMetadata?.role as string | undefined
+  const isAgency = userRole === 'agency'
+
   const [activePanel, setActivePanel] = useState<PanelKey | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -246,7 +254,9 @@ export default function Navbar() {
             </div>
             {/* Links */}
             <div className="col-span-2 grid grid-cols-2 gap-3">
-              {panels[activePanel].links.map(link => (
+              {panels[activePanel].links
+                .filter(link => link.href !== '/agency/sitemap' || isAgency)
+                .map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -281,7 +291,9 @@ export default function Navbar() {
               </button>
               {activePanel === key && (
                 <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
-                  {panels[key].links.map(link => (
+                  {panels[key].links
+                    .filter(link => link.href !== '/agency/sitemap' || isAgency)
+                    .map(link => (
                     <Link
                       key={link.href}
                       href={link.href}
