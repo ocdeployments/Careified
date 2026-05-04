@@ -1,16 +1,16 @@
 # CLAUDE.md — Careified
 
 Read this file completely at the start of every session.
-Last updated: April 2026 — Session 10C
+Last updated: May 4, 2026 — Session Complete
 
 ## 1. Project Identity
 
-**Product:** Careified  
-**Repository:** https://github.com/ocdeployments/Careified (private)  
-**Live URL:** https://careified.vercel.app  
-**Local path:** /data/careified  
-**Geography:** Texas-first (Frisco/McKinney). Canada & US expansion.  
-**Core moat:** Two-sided verified reputation system.  
+**Product:** Careified
+**Repository:** https://github.com/ocdeployments/Careified (private)
+**Live URL:** https://careified.vercel.app
+**Local path:** /Users/owner/careified
+**Geography:** Canada-first (Ontario focus), US expansion planned.
+**Core moat:** Two-sided verified reputation system.
 
 Platform serves ALL care backgrounds — never medical-only framing.
 
@@ -18,7 +18,7 @@ Platform serves ALL care backgrounds — never medical-only framing.
 |----------|------|---------------|
 | Agency | Primary buyer — pays | Search, profiles, shortlist, client management |
 | Caregiver | Supply side — always free | Profile builder, ID card, badges |
-| Family | Read-only portal (Session 14) | Schedule, caregiver card, notifications |
+| Family | Read-only portal (future) | Schedule, caregiver card, notifications |
 
 ## 2. Architect Role
 
@@ -51,6 +51,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 | DB Driver | pg (raw Pool) | ^8.20 |
 | Database | Render PostgreSQL | — |
 | Icons | lucide-react | latest |
+| Animation | Framer Motion | — |
 
 - **Tailwind v4:** globals.css must use `@import "tailwindcss"`
 - **Inline styles preferred** over Tailwind (v4 production issues)
@@ -147,14 +148,27 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 |------|--------|
 | lib/context/ProfileFormContext.tsx | ✅ Global form state |
 | lib/hooks/useProfileSave.ts | ✅ Three-layer save |
+| lib/demo.ts | ✅ Demo mode constants |
 | components/profile/ProfilePreviewCard.tsx | ✅ Live preview panel |
+| components/profile/LiveProfilePreview.tsx | ✅ DONE (May 4) |
+| components/profile/TravelRadiusMap.tsx | ✅ DONE (May 4) - Leaflet |
 | components/profile/IDCardReveal.tsx | ✅ Credential ceremony |
-| components/profile/Step1Identity.tsx | ✅ Session 10B (DONE) |
-| app/profile/build/Step2Services.tsx | ✅ Session 10C (DONE) |
-| app/profile/build/Step3Availability.tsx | ⚠️ Session 10D |
-| app/profile/build/Step4Certifications.tsx | ⚠️ Session 10F |
-| app/profile/build/Step5References.tsx | ⚠️ Session 10J |
-| app/profile/build/Step6Review.tsx | ✅ Wired to IDCardReveal |
+| app/profile/build/Step0ResumeUpload.tsx | ✅ Session 10A |
+| app/profile/build/Step1Identity.tsx | ✅ |
+| app/profile/build/Step2Services.tsx | ✅ |
+| app/profile/build/Step3Availability.tsx | ✅ |
+| app/profile/build/Step4Location.tsx | ✅ + Leaflet map |
+| app/profile/build/Step5Credentials.tsx | ✅ |
+| app/profile/build/Step6Compliance.tsx | ✅ |
+| app/profile/build/Step7Personality.tsx | ✅ |
+| app/profile/build/Step8WorkHistory.tsx | ✅ |
+| app/profile/build/Step9References.tsx | ✅ |
+| app/profile/build/Step10OpenQuestions.tsx | ✅ |
+| app/demo/page.tsx | ✅ Demo landing |
+| app/demo/dashboard/page.tsx | ✅ |
+| app/demo/search/page.tsx | ✅ |
+| app/demo/clients/page.tsx | ✅ |
+| app/demo/clients/[id]/page.tsx | ✅ |
 
 ## 9. Deployment
 
@@ -183,7 +197,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 ## 12. Session Start Checklist
 
 ```bash
-cd /data/careified
+cd /Users/owner/careified
 git status
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
@@ -192,8 +206,18 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 npx tsc --noEmit 2>&1 | head -5
 ```
 
-## Last updated: April 2026 — Session 10C
+## Last updated: May 4, 2026 — Session Complete
 
-Read MASTER_CONTEXT.md alongside this file for full project state.  
-Read CLIENT_INTAKE.md for client intake and matching spec.  
-Read RATING_SYSTEM.md for reputation and scoring spec.
+### Demo Environment
+- `/demo` — Landing page with feature tour
+- `/demo/dashboard` — Agency dashboard with demo data
+- `/demo/search` — Caregiver search with filters
+- `/demo/clients` — Client list (5 demo clients)
+- `/demo/clients/[id]` — Client detail with match results
+
+### Travel Radius Map
+- Leaflet + OpenStreetMap in Step 4 (Location)
+- Draggable marker, circle overlay, radius selector
+
+Read CAREIFIED_STATUS.md for full build tracker, pending items, and roadmap.
+Read HANDOFF.md for project handoff context.
