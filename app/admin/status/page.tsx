@@ -42,7 +42,7 @@ const PENDING = [
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
   { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions' },
-  { priority: 'MED', label: 'Rating system', desc: 'Post-placement ratings, trust score' },
+  { priority: 'MED', label: 'Rating system', desc: 'FIXED May 4 2026 - CTS engine built (DB, calculate.ts, APIs)' },
   { priority: 'MED', label: 'Family portal Phase 1', desc: '8 features, PWA' },
   { priority: 'LOW', label: 'US Vercel deployment', desc: 'Second project NEXT_PUBLIC_LOCALE=US' },
   { priority: 'LOW', label: 'Apple Developer account', desc: '$99/yr for Wallet passes' },
