@@ -42,6 +42,7 @@ const SECTIONS = [
     { path: '/agency/airecruit/[id]/[call]', desc: 'Call transcript' },
     { path: '/agency/dashboard', desc: 'Action-first home page' },
     { path: '/agency/settings', desc: 'Branding, areas, team, compliance' },
+    { path: '/agency/billing', desc: 'Plan, modules, trial status' },
     { path: '/agency/signup', desc: 'Agency registration' },
     { path: '/agency/pending-approval', desc: 'Waiting screen' },
   ]},

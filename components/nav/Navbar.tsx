@@ -83,6 +83,7 @@ const panels = {
       { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
       { href: '/agency/clients',   label: 'My clients',        desc: 'Manage client placements'       },
       { href: '/agency/settings',  label: 'Agency settings',   desc: 'Branding, areas, compliance'    },
+      { href: '/agency/billing',   label: 'Billing',           desc: 'Plan, modules, trial'           },
       { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
     ],
     cta: { href: '/agency/signup', label: 'Start as an agency' },
