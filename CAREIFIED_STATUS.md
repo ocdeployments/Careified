@@ -239,3 +239,23 @@ AIRecruit Sessions pending:
 - Session B: Consent flow for all types
 - Session C: Profile analysis + campaign from profiles + reference agent
 - Session D: SMS, retry logic, cron, bulk actions, employer agent
+
+---
+
+## US EXPANSION CHECKLIST (deferred — CA first)
+
+When ready to launch US deployment:
+- [ ] Agency signup form: add US states alongside CA provinces
+- [ ] Step 4 Location: already locale-aware (distanceOptions, licenseClasses)
+- [ ] Step 6 Compliance: VSC (CA) vs Background Check (US) — already locale-aware
+- [ ] Demo caregivers: add TX/FL/NY seeded caregivers
+- [ ] Demo clients: add US cities
+- [ ] Service areas: US metro areas
+- [ ] Postal code validation: US 5-digit vs CA alphanumeric
+- [ ] Phone format: same (+1) but UI label differs
+- [ ] Privacy law label: PIPEDA (CA) vs HIPAA (US)
+- [ ] Background check label: VSC (CA) vs FBI/state check (US)
+- [ ] AIRecruit compliance: CRTC (CA) vs TCPA (US) — already built
+- [ ] Second Vercel project: NEXT_PUBLIC_LOCALE=US
+- [ ] Geo-redirect: proxy.ts already built, needs US domain
+
