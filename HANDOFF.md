@@ -163,7 +163,7 @@ Consent types:
 10. Family portal Phase 1
 11. AIRecruit Sessions B, C, D
 12. Upload photo API
-13. Map for travel radius (Leaflet)
+13. ~~Map for travel radius (Leaflet)~~ ✅ DONE (May 4 2026)
 
 ### Infrastructure
 14. US Vercel deployment
