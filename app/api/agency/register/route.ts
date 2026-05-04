@@ -26,24 +26,42 @@ export async function POST(req: NextRequest) {
     // Insert into agencies table with pending status
     const result = await pool.query(
       `INSERT INTO agencies (
-        name, business_type, license_number,
+        name, display_name, business_type, license_number,
         contact_first_name, contact_last_name, contact_email, contact_phone,
         street, city, state, postal_code,
+        brand_color, tagline, website_url,
+        service_areas, care_types, coordinator_count,
+        recruitment_methods, current_tools,
+        business_registration, insurance_carrier, insurance_policy,
+        background_check_provider,
         status, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', NOW(), NOW())
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'pending',NOW(),NOW())
       RETURNING id`,
       [
-        agencyName,
-        businessType || null,
-        licenseNumber || null,
-        contactFirstName,
-        contactLastName,
-        contactEmail,
-        contactPhone,
-        streetAddress,
-        city,
-        state,
-        postalCode,
+        body.agencyName,
+        body.displayName || body.agencyName,
+        body.businessType || null,
+        body.licenseNumber || null,
+        body.contactFirstName,
+        body.contactLastName,
+        body.contactEmail,
+        body.contactPhone,
+        body.streetAddress || null,
+        body.city,
+        body.state || body.province,
+        body.postalCode || null,
+        body.brandColor || '#0D1B3E',
+        body.tagline || null,
+        body.websiteUrl || null,
+        body.serviceAreas || [],
+        body.careTypes || [],
+        body.coordinatorCount || null,
+        body.recruitmentMethods || [],
+        body.currentTools || [],
+        body.businessRegistration || null,
+        body.insuranceCarrier || null,
+        body.insurancePolicy || null,
+        body.backgroundCheckProvider || null,
       ]
     )
 
