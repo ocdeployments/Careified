@@ -40,6 +40,28 @@ async function getCertifications(caregiverId: string) {
   } catch { return [] }
 }
 
+async function getPlacementRatings(caregiverId: string) {
+  try {
+    const result = await pool.query(
+      `SELECT
+        COUNT(*) as review_count,
+        AVG(would_re_engage::int) * 100 as rehire_rate,
+        AVG(punctuality) as avg_punctuality,
+        AVG(reliability) as avg_reliability,
+        AVG(warmth) as avg_warmth,
+        AVG(dignity) as avg_dignity,
+        AVG(patience) as avg_patience,
+        AVG(personal_hygiene) as avg_hygiene,
+        AVG(specialty_match) as avg_skills,
+        AVG(comms_agency) as avg_comms
+      FROM placement_reviews
+      WHERE caregiver_id = $1 AND status IN ('approved', 'pending')`,
+      [caregiverId]
+    )
+    return result.rows[0] || null
+  } catch { return null }
+}
+
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
   const caregiver = await getCaregiver(id)
@@ -47,6 +69,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
 
   const verifiedReferences = await getVerifiedReferences(id)
   const certifications = await getCertifications(id)
+  const ratings = await getPlacementRatings(id)
 
   // Map DB snake_case to component props
   const personality = caregiver.personality_profile || {}
@@ -102,6 +125,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       openQ1={caregiver.open_q1}
       openQ2={caregiver.open_q2}
       openQ3={caregiver.open_q3}
+      placementRatings={ratings}
     />
   )
 }
