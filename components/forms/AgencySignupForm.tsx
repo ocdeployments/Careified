@@ -2,401 +2,443 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, CheckCircle, ChevronRight } from 'lucide-react'
+import { CheckCircle, ChevronRight, ChevronLeft, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
+const N = '#0D1B3E'
+const G = '#C9973A'
+const S = "'DM Sans', sans-serif"
+
+const CA_PROVINCES = [
+  'Alberta','British Columbia','Manitoba','New Brunswick',
+  'Newfoundland and Labrador','Nova Scotia','Ontario',
+  'Prince Edward Island','Quebec','Saskatchewan',
+  'Northwest Territories','Nunavut','Yukon'
+]
+
+const BUSINESS_TYPES = [
+  'Home Health Agency','Staffing Agency','Registry',
+  'Private Duty Agency','Hospice Agency','Other'
+]
+
+const CARE_TYPES = [
+  'Home care','Live-in care','Palliative/Hospice','Dementia care',
+  'Pediatric care','Acquired disability','Mental health support',
+  'Post-surgical recovery','Respite care','Overnight care'
+]
+
+const RECRUITMENT_METHODS = [
+  'Indeed','LinkedIn','Word of mouth','Agency networks',
+  'School partnerships','Other job boards','Careified (new)'
+]
+
+const CURRENT_TOOLS = [
+  'AlayaCare','ClearCare','WellSky','HHAeXchange',
+  'Hireology','Google Sheets','Paper-based','Other'
+]
+
+const CA_CITIES = [
+  'Toronto','Vancouver','Montreal','Calgary','Edmonton',
+  'Ottawa','Mississauga','Brampton','Hamilton','London',
+  'Markham','Vaughan','Kitchener','Windsor','Richmond Hill',
+  'Oakville','Burlington','Saskatoon','Regina','Halifax'
+]
+
+const inputStyle = {
+  width: '100%', padding: '11px 14px', borderRadius: 10,
+  border: '1.5px solid #E2E8F0', fontSize: 14, color: N,
+  outline: 'none', boxSizing: 'border-box' as const, fontFamily: S,
+  background: 'white',
+}
+
+const labelStyle = {
+  display: 'block' as const, fontSize: 13, fontWeight: 500,
+  color: N, marginBottom: 6,
+}
+
 interface FormData {
+  // Step 1 — Identity
   agencyName: string
+  displayName: string
   businessType: string
-  licenseNumber: string
+  tagline: string
+  websiteUrl: string
+  brandColor: string
+  // Step 2 — Operations
   contactFirstName: string
   contactLastName: string
   contactEmail: string
   contactPhone: string
   streetAddress: string
   city: string
-  state: string
+  province: string
   postalCode: string
+  serviceAreas: string[]
+  careTypes: string[]
+  // Step 3 — Team
+  coordinatorCount: string
+  recruitmentMethods: string[]
+  currentTools: string[]
+  // Step 4 — Compliance
+  businessRegistration: string
+  licenseNumber: string
+  insuranceCarrier: string
+  insurancePolicy: string
+  backgroundCheckProvider: string
   acceptedTerms: boolean
+  acceptedEmployer: boolean
 }
 
-interface FormErrors {
-  agencyName?: string
-  contactFirstName?: string
-  contactLastName?: string
-  contactEmail?: string
-  contactPhone?: string
-  streetAddress?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  acceptedTerms?: string
+const EMPTY: FormData = {
+  agencyName: '', displayName: '', businessType: '', tagline: '',
+  websiteUrl: '', brandColor: '#0D1B3E',
+  contactFirstName: '', contactLastName: '', contactEmail: '',
+  contactPhone: '', streetAddress: '', city: '', province: '',
+  postalCode: '', serviceAreas: [], careTypes: [],
+  coordinatorCount: '', recruitmentMethods: [], currentTools: [],
+  businessRegistration: '', licenseNumber: '', insuranceCarrier: '',
+  insurancePolicy: '', backgroundCheckProvider: '',
+  acceptedTerms: false, acceptedEmployer: false,
 }
 
-const US_STATES = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
-  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
-  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
-  'VA','WA','WV','WI','WY',
-]
+function toggle(arr: string[], val: string) {
+  return arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
+}
 
-const BUSINESS_TYPES = [
-  'Home Health Agency',
-  'Staffing Agency',
-  'Registry',
-  'Private Duty Agency',
-  'Hospice Agency',
-  'Other',
-]
+function Chip({ label, active, onClick, color = G }: { label: string; active: boolean; onClick: () => void; color?: string }) {
+  return (
+    <button type="button" onClick={onClick} style={{
+      padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 500,
+      cursor: 'pointer', fontFamily: S,
+      border: active ? `2px solid ${color}` : '1.5px solid #E2E8F0',
+      background: active ? '#FDF6EC' : 'white',
+      color: active ? '#92400E' : '#64748B',
+    }}>{label}</button>
+  )
+}
+
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <label style={labelStyle}>{label}{required && <span style={{ color: '#EF4444', marginLeft: 3 }}>*</span>}</label>
+      {children}
+      {error && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{error}</p>}
+    </div>
+  )
+}
 
 export function AgencySignupForm() {
   const router = useRouter()
-  const [serverError, setServerError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [formData, setFormData] = useState<FormData>({
-    agencyName: '',
-    businessType: '',
-    licenseNumber: '',
-    contactFirstName: '',
-    contactLastName: '',
-    contactEmail: '',
-    contactPhone: '',
-    streetAddress: '',
-    city: '',
-    state: 'TX',
-    postalCode: '',
-    acceptedTerms: false,
-  })
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [step, setStep] = useState(1)
+  const [form, setForm] = useState<FormData>(EMPTY)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [submitting, setSubmitting] = useState(false)
 
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 10)
-    if (digits.length <= 3) return digits
-    if (digits.length <= 6) return `(${digits.slice(0,3)}) ${digits.slice(3)}`
-    return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`
+  function set<K extends keyof FormData>(key: K, val: FormData[K]) {
+    setForm(f => ({ ...f, [key]: val }))
+    if (errors[key]) setErrors(e => { const n = {...e}; delete n[key]; return n })
   }
 
-  const validate = (data: FormData): FormErrors => {
-    const e: FormErrors = {}
-    if (!data.agencyName.trim()) e.agencyName = 'Agency name is required'
-    if (!data.contactFirstName.trim()) e.contactFirstName = 'First name is required'
-    if (!data.contactLastName.trim()) e.contactLastName = 'Last name is required'
-    if (!data.contactEmail.trim()) e.contactEmail = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) e.contactEmail = 'Invalid email address'
-    if (!data.contactPhone.trim()) e.contactPhone = 'Phone is required'
-    else if (data.contactPhone.replace(/\D/g,'').length < 10) e.contactPhone = 'Enter a valid 10-digit phone'
-    if (!data.streetAddress.trim()) e.streetAddress = 'Street address is required'
-    if (!data.city.trim()) e.city = 'City is required'
-    if (!data.state) e.state = 'State is required'
-    if (!data.postalCode.trim()) e.postalCode = 'ZIP code is required'
-    else if (!/^\d{5}(-\d{4})?$/.test(data.postalCode)) e.postalCode = 'Invalid ZIP code'
-    if (!data.acceptedTerms) e.acceptedTerms = 'You must accept the terms'
-    return e
-  }
-
-  const handleChange = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (touched[field]) {
-      const newErrors = validate({ ...formData, [field]: value })
-      setErrors(prev => ({ ...prev, [field]: newErrors[field as keyof FormErrors] }))
+  function validate(s: number): boolean {
+    const e: Record<string, string> = {}
+    if (s === 1) {
+      if (!form.agencyName.trim()) e.agencyName = 'Agency name is required'
+      if (!form.businessType) e.businessType = 'Business type is required'
     }
+    if (s === 2) {
+      if (!form.contactFirstName.trim()) e.contactFirstName = 'Required'
+      if (!form.contactLastName.trim()) e.contactLastName = 'Required'
+      if (!form.contactEmail.trim()) e.contactEmail = 'Required'
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) e.contactEmail = 'Invalid email'
+      if (!form.contactPhone.trim()) e.contactPhone = 'Required'
+      if (!form.city.trim()) e.city = 'Required'
+      if (!form.province) e.province = 'Required'
+      if (form.serviceAreas.length === 0) e.serviceAreas = 'Select at least one service area'
+      if (form.careTypes.length === 0) e.careTypes = 'Select at least one care type'
+    }
+    if (s === 4) {
+      if (!form.acceptedTerms) e.acceptedTerms = 'Required'
+      if (!form.acceptedEmployer) e.acceptedEmployer = 'Required'
+    }
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
-  const handleBlur = (field: string) => {
-    setTouched(prev => ({ ...prev, [field]: true }))
-    const newErrors = validate(formData)
-    setErrors(prev => ({ ...prev, [field]: newErrors[field as keyof FormErrors] }))
+  function next() {
+    if (validate(step)) setStep(s => Math.min(s + 1, 4))
   }
+  function back() { setStep(s => Math.max(s - 1, 1)) }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const allTouched = Object.keys(formData).reduce((acc, k) => ({ ...acc, [k]: true }), {})
-    setTouched(allTouched)
-    const validationErrors = validate(formData)
-    setErrors(validationErrors)
-    if (Object.keys(validationErrors).length > 0) return
-
-    setIsSubmitting(true)
-    setServerError('')
+  async function handleSubmit() {
+    if (!validate(4)) return
+    setSubmitting(true)
     try {
       const res = await fetch('/api/agency/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          agencyName: form.agencyName,
+          displayName: form.displayName || form.agencyName,
+          businessType: form.businessType,
+          tagline: form.tagline,
+          websiteUrl: form.websiteUrl,
+          brandColor: form.brandColor,
+          contactFirstName: form.contactFirstName,
+          contactLastName: form.contactLastName,
+          contactEmail: form.contactEmail,
+          contactPhone: form.contactPhone,
+          streetAddress: form.streetAddress,
+          city: form.city,
+          state: form.province,
+          postalCode: form.postalCode,
+          serviceAreas: form.serviceAreas,
+          careTypes: form.careTypes,
+          coordinatorCount: form.coordinatorCount ? parseInt(form.coordinatorCount) : null,
+          recruitmentMethods: form.recruitmentMethods,
+          currentTools: form.currentTools,
+          businessRegistration: form.businessRegistration,
+          licenseNumber: form.licenseNumber,
+          insuranceCarrier: form.insuranceCarrier,
+          insurancePolicy: form.insurancePolicy,
+          backgroundCheckProvider: form.backgroundCheckProvider,
+        }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Registration failed')
-      setSubmitted(true)
-      toast.success('Application submitted! We\'ll review it within 1–2 business days.')
-      setTimeout(() => router.push('/agency/pending-approval'), 1500)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong'
-      setServerError(msg)
-      toast.error(msg)
+      if (!res.ok) throw new Error('Registration failed')
+      toast.success('Application submitted! We will review and notify you within 24 hours.')
+      router.push('/agency/pending-approval')
+    } catch {
+      toast.error('Something went wrong. Please try again.')
     } finally {
-      setIsSubmitting(false)
+      setSubmitting(false)
     }
   }
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-10">
-        <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-green-600" />
-          </div>
-          <h1 className="font-serif text-2xl text-navy mb-2">Application submitted!</h1>
-          <p className="text-sm text-slate-500">Redirecting to your status page…</p>
-        </div>
-      </div>
-    )
-  }
+  const STEPS = [
+    { num: 1, label: 'Identity' },
+    { num: 2, label: 'Operations' },
+    { num: 3, label: 'Your team' },
+    { num: 4, label: 'Compliance' },
+  ]
 
   return (
-    <div className="min-h-screen bg-cream py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: S, padding: '40px 24px' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto' }}>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl md:text-4xl font-normal text-navy tracking-tight mb-2">
-            Register your agency
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: N, margin: '0 0 8px' }}>
+            Join Careified as an Agency
           </h1>
-          <p className="text-sm text-slate-500">
-            Join Careified to access verified caregiver profiles and AI-powered matching.
+          <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>
+            Takes 5 minutes. We review applications within 24 hours.
           </p>
         </div>
 
-        {/* Server error */}
-        {serverError && (
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 mb-6">
-            <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{serverError}</p>
-          </div>
-        )}
+        {/* Step indicators */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
+          {STEPS.map(s => (
+            <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700,
+                background: step >= s.num ? N : '#E2E8F0',
+                color: step >= s.num ? 'white' : '#94A3B8',
+              }}>
+                {step > s.num ? '✓' : s.num}
+              </div>
+              <span style={{ fontSize: 12, color: step >= s.num ? N : '#94A3B8', fontWeight: step === s.num ? 700 : 400 }}>
+                {s.label}
+              </span>
+              {s.num < 4 && <div style={{ width: 24, height: 1, background: '#E2E8F0' }} />}
+            </div>
+          ))}
+        </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        {/* Form card */}
+        <div style={{ background: 'white', borderRadius: 16, border: '1px solid #E2E8F0', padding: 32 }}>
 
-          {/* Agency info */}
-          <FormSection title="Agency Information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field
-                label="Agency name"
-                required
-                error={touched.agencyName ? errors.agencyName : undefined}
-              >
-                <input
-                  type="text"
-                  value={formData.agencyName}
-                  onChange={e => handleChange('agencyName', e.target.value)}
-                  onBlur={() => handleBlur('agencyName')}
-                  placeholder="Sunrise Home Care"
-                  className={inputCls(touched.agencyName && !!errors.agencyName)}
-                />
+          {/* STEP 1 — Identity */}
+          {step === 1 && (
+            <div>
+              <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 24px' }}>Tell us about your agency</h2>
+              <Field label="Legal agency name" required error={errors.agencyName}>
+                <input style={inputStyle} value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="ABC Home Care Inc." />
               </Field>
-              <Field label="Business type">
-                <select
-                  value={formData.businessType}
-                  onChange={e => handleChange('businessType', e.target.value)}
-                  className={inputCls(false)}
-                >
-                  <option value="">Select type</option>
+              <Field label="Display name (shown to caregivers)" error={errors.displayName}>
+                <input style={inputStyle} value={form.displayName} onChange={e => set('displayName', e.target.value)} placeholder="Same as legal name if blank" />
+              </Field>
+              <Field label="Agency type" required error={errors.businessType}>
+                <select style={inputStyle} value={form.businessType} onChange={e => set('businessType', e.target.value)}>
+                  <option value="">Select...</option>
                   {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </Field>
-              <Field label="License number" className="md:col-span-2">
-                <input
-                  type="text"
-                  value={formData.licenseNumber}
-                  onChange={e => handleChange('licenseNumber', e.target.value)}
-                  placeholder="Optional"
-                  className={inputCls(false)}
-                />
+              <Field label="Tagline (one sentence shown to caregivers)" error={errors.tagline}>
+                <input style={inputStyle} value={form.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Caring for seniors across the GTA since 2010" />
+              </Field>
+              <Field label="Website URL" error={errors.websiteUrl}>
+                <input style={inputStyle} value={form.websiteUrl} onChange={e => set('websiteUrl', e.target.value)} placeholder="https://youragency.ca" />
+              </Field>
+              <Field label="Brand colour (used in your communications)">
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <input type="color" value={form.brandColor} onChange={e => set('brandColor', e.target.value)}
+                    style={{ width: 44, height: 44, borderRadius: 8, border: '1.5px solid #E2E8F0', cursor: 'pointer', padding: 2 }} />
+                  <input style={{ ...inputStyle, flex: 1 }} value={form.brandColor} onChange={e => set('brandColor', e.target.value)} placeholder="#0D1B3E" />
+                </div>
               </Field>
             </div>
-          </FormSection>
+          )}
 
-          {/* Contact info */}
-          <FormSection title="Primary Contact">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="First name" required error={touched.contactFirstName ? errors.contactFirstName : undefined}>
-                <input
-                  type="text"
-                  value={formData.contactFirstName}
-                  onChange={e => handleChange('contactFirstName', e.target.value)}
-                  onBlur={() => handleBlur('contactFirstName')}
-                  className={inputCls(touched.contactFirstName && !!errors.contactFirstName)}
-                />
+          {/* STEP 2 — Operations */}
+          {step === 2 && (
+            <div>
+              <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 24px' }}>Operations & contact</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Field label="First name" required error={errors.contactFirstName}>
+                  <input style={inputStyle} value={form.contactFirstName} onChange={e => set('contactFirstName', e.target.value)} />
+                </Field>
+                <Field label="Last name" required error={errors.contactLastName}>
+                  <input style={inputStyle} value={form.contactLastName} onChange={e => set('contactLastName', e.target.value)} />
+                </Field>
+              </div>
+              <Field label="Contact email" required error={errors.contactEmail}>
+                <input style={inputStyle} type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} />
               </Field>
-              <Field label="Last name" required error={touched.contactLastName ? errors.contactLastName : undefined}>
-                <input
-                  type="text"
-                  value={formData.contactLastName}
-                  onChange={e => handleChange('contactLastName', e.target.value)}
-                  onBlur={() => handleBlur('contactLastName')}
-                  className={inputCls(touched.contactLastName && !!errors.contactLastName)}
-                />
+              <Field label="Contact phone" required error={errors.contactPhone}>
+                <input style={inputStyle} type="tel" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} placeholder="(416) 555-0100" />
               </Field>
-              <Field label="Email" required error={touched.contactEmail ? errors.contactEmail : undefined}>
-                <input
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={e => handleChange('contactEmail', e.target.value)}
-                  onBlur={() => handleBlur('contactEmail')}
-                  className={inputCls(touched.contactEmail && !!errors.contactEmail)}
-                />
+              <Field label="Street address">
+                <input style={inputStyle} value={form.streetAddress} onChange={e => set('streetAddress', e.target.value)} />
               </Field>
-              <Field label="Phone" required error={touched.contactPhone ? errors.contactPhone : undefined}>
-                <input
-                  type="tel"
-                  value={formData.contactPhone}
-                  onChange={e => handleChange('contactPhone', formatPhone(e.target.value))}
-                  onBlur={() => handleBlur('contactPhone')}
-                  placeholder="(555) 000-0000"
-                  className={inputCls(touched.contactPhone && !!errors.contactPhone)}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
+                <Field label="City" required error={errors.city}>
+                  <input style={inputStyle} value={form.city} onChange={e => set('city', e.target.value)} />
+                </Field>
+                <Field label="Province" required error={errors.province}>
+                  <select style={inputStyle} value={form.province} onChange={e => set('province', e.target.value)}>
+                    <option value="">Select...</option>
+                    {CA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </Field>
+                <Field label="Postal code">
+                  <input style={inputStyle} value={form.postalCode} onChange={e => set('postalCode', e.target.value)} placeholder="M5V 2T6" />
+                </Field>
+              </div>
+              <Field label="Service areas — cities you place caregivers in" required error={errors.serviceAreas}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {CA_CITIES.map(c => (
+                    <Chip key={c} label={c} active={form.serviceAreas.includes(c)} onClick={() => set('serviceAreas', toggle(form.serviceAreas, c))} />
+                  ))}
+                </div>
+              </Field>
+              <Field label="Care types your agency offers" required error={errors.careTypes}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {CARE_TYPES.map(t => (
+                    <Chip key={t} label={t} active={form.careTypes.includes(t)} onClick={() => set('careTypes', toggle(form.careTypes, t))} />
+                  ))}
+                </div>
               </Field>
             </div>
-          </FormSection>
+          )}
 
-          {/* Address */}
-          <FormSection title="Business Address">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Street address" required error={touched.streetAddress ? errors.streetAddress : undefined} className="md:col-span-2">
-                <input
-                  type="text"
-                  value={formData.streetAddress}
-                  onChange={e => handleChange('streetAddress', e.target.value)}
-                  onBlur={() => handleBlur('streetAddress')}
-                  className={inputCls(touched.streetAddress && !!errors.streetAddress)}
-                />
-              </Field>
-              <Field label="City" required error={touched.city ? errors.city : undefined}>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={e => handleChange('city', e.target.value)}
-                  onBlur={() => handleBlur('city')}
-                  className={inputCls(touched.city && !!errors.city)}
-                />
-              </Field>
-              <Field label="State" required error={touched.state ? errors.state : undefined}>
-                <select
-                  value={formData.state}
-                  onChange={e => handleChange('state', e.target.value)}
-                  onBlur={() => handleBlur('state')}
-                  className={inputCls(touched.state && !!errors.state)}
-                >
-                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+          {/* STEP 3 — Team */}
+          {step === 3 && (
+            <div>
+              <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 8px' }}>Your team & tools</h2>
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 24px' }}>This helps us tailor the platform to your workflow. All optional.</p>
+              <Field label="Number of care coordinators">
+                <select style={inputStyle} value={form.coordinatorCount} onChange={e => set('coordinatorCount', e.target.value)}>
+                  <option value="">Select...</option>
+                  {['1','2-3','4-5','6-10','10+'].map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </Field>
-              <Field label="ZIP code" required error={touched.postalCode ? errors.postalCode : undefined}>
-                <input
-                  type="text"
-                  value={formData.postalCode}
-                  onChange={e => handleChange('postalCode', e.target.value)}
-                  onBlur={() => handleBlur('postalCode')}
-                  maxLength={10}
-                  className={inputCls(touched.postalCode && !!errors.postalCode)}
-                />
+              <Field label="How do you currently recruit caregivers?">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {RECRUITMENT_METHODS.map(m => (
+                    <Chip key={m} label={m} active={form.recruitmentMethods.includes(m)} onClick={() => set('recruitmentMethods', toggle(form.recruitmentMethods, m))} />
+                  ))}
+                </div>
+              </Field>
+              <Field label="Scheduling or ATS software you currently use">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {CURRENT_TOOLS.map(t => (
+                    <Chip key={t} label={t} active={form.currentTools.includes(t)} onClick={() => set('currentTools', toggle(form.currentTools, t))} />
+                  ))}
+                </div>
               </Field>
             </div>
-          </FormSection>
+          )}
 
-          {/* Terms */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-5">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.acceptedTerms}
-                onChange={e => handleChange('acceptedTerms', e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-gold focus:ring-gold mt-0.5 flex-shrink-0"
-              />
-              <span className="text-sm text-slate-600 leading-relaxed">
-                I agree to the{' '}
-                <a href="/terms" target="_blank" className="text-navy underline hover:text-gold transition-colors">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" target="_blank" className="text-navy underline hover:text-gold transition-colors">
-                  Privacy Policy
-                </a>
-                . I confirm that I am authorized to register this agency.
-              </span>
-            </label>
-            {touched.acceptedTerms && errors.acceptedTerms && (
-              <p className="text-xs text-red-500 mt-2 ml-7">{errors.acceptedTerms}</p>
+          {/* STEP 4 — Compliance */}
+          {step === 4 && (
+            <div>
+              <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 8px' }}>Compliance & acknowledgment</h2>
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 24px' }}>Steps 3-4 can be completed after approval from your agency settings.</p>
+              <Field label="Business registration number">
+                <input style={inputStyle} value={form.businessRegistration} onChange={e => set('businessRegistration', e.target.value)} placeholder="Ontario Business #123456789" />
+              </Field>
+              <Field label="Professional license number (if applicable)">
+                <input style={inputStyle} value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} />
+              </Field>
+              <Field label="Liability insurance carrier">
+                <input style={inputStyle} value={form.insuranceCarrier} onChange={e => set('insuranceCarrier', e.target.value)} placeholder="e.g. Intact Insurance" />
+              </Field>
+              <Field label="Insurance policy number">
+                <input style={inputStyle} value={form.insurancePolicy} onChange={e => set('insurancePolicy', e.target.value)} />
+              </Field>
+              <Field label="Background check provider you use">
+                <input style={inputStyle} value={form.backgroundCheckProvider} onChange={e => set('backgroundCheckProvider', e.target.value)} placeholder="e.g. Certn, Sterling, in-house" />
+              </Field>
+
+              <div style={{ background: '#F7F4F0', borderRadius: 12, padding: 20, marginTop: 8 }}>
+                <label style={{ display: 'flex', gap: 12, cursor: 'pointer', marginBottom: 16, alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={form.acceptedTerms} onChange={e => set('acceptedTerms', e.target.checked)} style={{ marginTop: 3, accentColor: G, width: 16, height: 16 }} />
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: N, marginBottom: 3 }}>Platform acknowledgment <span style={{ color: '#EF4444' }}>*</span></div>
+                    <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.6 }}>
+                      I acknowledge that Careified organizes and displays caregiver information. Careified does NOT recommend, vouch for, or employ any caregiver. All hiring decisions are solely my responsibility.
+                    </div>
+                  </div>
+                </label>
+                {errors.acceptedTerms && <p style={{ fontSize: 12, color: '#DC2626', margin: '-8px 0 8px 28px' }}>{errors.acceptedTerms}</p>}
+
+                <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={form.acceptedEmployer} onChange={e => set('acceptedEmployer', e.target.checked)} style={{ marginTop: 3, accentColor: G, width: 16, height: 16 }} />
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: N, marginBottom: 3 }}>Employer responsibility <span style={{ color: '#EF4444' }}>*</span></div>
+                    <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.6 }}>
+                      I confirm that my agency is the employer or engaging party for any caregiver placed through Careified, and we are solely responsible for compliance, insurance, supervision, and applicable employment law.
+                    </div>
+                  </div>
+                </label>
+                {errors.acceptedEmployer && <p style={{ fontSize: 12, color: '#DC2626', margin: '-8px 0 0 28px' }}>{errors.acceptedEmployer}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: '1px solid #F1F5F9' }}>
+            {step > 1 ? (
+              <button onClick={back} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '11px 20px', borderRadius: 10, border: '1.5px solid #E2E8F0', background: 'white', color: N, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: S }}>
+                <ChevronLeft size={16} /> Back
+              </button>
+            ) : <div />}
+            {step < 4 ? (
+              <button onClick={next} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '11px 24px', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${G}, #E8B86D)`, color: N, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: S }}>
+                Continue <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={submitting} style={{ padding: '11px 28px', borderRadius: 10, border: 'none', background: submitting ? '#E2E8F0' : `linear-gradient(135deg, ${G}, #E8B86D)`, color: submitting ? '#94A3B8' : N, fontSize: 14, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: S }}>
+                {submitting ? 'Submitting...' : 'Submit application'}
+              </button>
             )}
           </div>
+        </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={[
-              'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition-all',
-              'focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none',
-              isSubmitting
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-gradient-to-br from-gold to-gold-warm text-navy hover:opacity-90 cursor-pointer',
-            ].join(' ')}
-          >
-            {isSubmitting ? 'Submitting…' : (
-              <>Submit Application <ChevronRight size={16} /></>
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function inputCls(hasError: boolean) {
-  return [
-    'w-full px-3 py-2.5 rounded-xl border text-sm text-navy placeholder-slate-400 bg-white',
-    'focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none transition-colors',
-    hasError ? 'border-red-300 bg-red-50' : 'border-slate-200 hover:border-slate-300',
-  ].join(' ')
-}
-
-function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-5">
-      <h2 className="text-sm font-bold text-navy mb-4">{title}</h2>
-      {children}
-    </div>
-  )
-}
-
-function Field({
-  label,
-  required,
-  error,
-  children,
-  className = '',
-}: {
-  label: string
-  required?: boolean
-  error?: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <div className={className}>
-      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-        {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
-      </label>
-      {children}
-      {error && (
-        <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
-          <AlertCircle size={11} />
-          {error}
+        <p style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 16 }}>
+          Already have an account? <a href="/sign-in" style={{ color: G }}>Sign in</a>
         </p>
-      )}
+      </div>
     </div>
   )
 }
