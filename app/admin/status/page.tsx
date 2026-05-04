@@ -7,7 +7,7 @@ const S = 'system-ui, sans-serif'
 
 const BUILT = [
   { cat: 'Auth', items: ['Clerk auth agency + caregiver', 'Role-locked signup', 'Agency approval flow', 'Admin console', 'Audit logging'] },
-  { cat: 'Profile Builder', items: ['Step 0 consent + resume upload (LLM)', 'Step 1 Identity', 'Step 2 Services + diagnoses + ADLs', 'Step 3 Availability grid', 'Step 4 Location + travel radius', 'Step 5 Credentials', 'Step 6 Compliance + red flags', 'Step 7 Personality (7 scenarios)', 'Step 8 Work history', 'Step 9 References + verification invites', 'Step 10 Open questions', 'ProfileFormContext + useProfileSave (3-layer)'] },
+  { cat: 'Profile Builder', items: ['Step 0 consent + resume upload (LLM)', 'Step 1 Identity', 'Step 2 Services + diagnoses + ADLs', 'Step 3 Availability grid', 'Step 4 Location + travel radius + Leaflet map', 'Step 5 Credentials', 'Step 6 Compliance + red flags', 'Step 7 Personality (7 scenarios)', 'Step 8 Work history', 'Step 9 References + verification invites', 'Step 10 Open questions', 'ProfileFormContext + useProfileSave (3-layer)', 'LiveProfilePreview ghost-to-live'] },
   { cat: 'Profile Page', items: ['Agency-facing scorecard design', 'Verification tier framework (Tier 1-4)', 'Hiring scorecard (5 dimensions)', 'Verified reference badges', 'Red flag disclosure', 'Working style (behavioural)', 'Non-recommender disclaimer', '/profile/demo with Maria Santos'] },
   { cat: 'Search & Match', items: ['20+ filter parameters', '15 demo caregivers', 'Match ranking API', 'Alignment score + confidence weighting', 'Browse mode (show all)', 'Shortlist'] },
   { cat: 'Client Intake', items: ['Client list /agency/clients', 'Intake form (8 sections)', 'Client detail + ranked matches', 'Gap analysis engine (verify-in-call)', '5 demo clients seeded'] },
@@ -15,7 +15,8 @@ const BUILT = [
   { cat: 'Reference Verification', items: ['Invite API + token URLs', 'Public reference form /reference/[token]', 'Verified badges on profile'] },
   { cat: 'AIRecruit', items: ['Phases 1-6 complete', 'Vapi integration + webhook', 'Scoring via OpenRouter', 'TCPA/CRTC compliance', 'Campaign UI + dashboard'] },
   { cat: 'ID System', items: ['Format CRF-[COUNTRY]-[STATE]-[YEAR]-[5CHAR]', '/id/[caregiverId] + /verify/[slug]', 'Apple Wallet structure', 'Google Wallet JWT'] },
-  { cat: 'Navigation', items: ['3-panel dropdown navbar', 'Footer with Privacy/Terms/Contact', 'My clients + Profile demo links'] },
+  { cat: 'Demo Environment', items: ['/demo landing page', '/demo/dashboard', '/demo/search', '/demo/clients list', '/demo/clients/[id] detail', 'Demo banner + navigation', 'Try Demo link in navbar'] },
+  { cat: 'Navigation', items: ['3-panel dropdown navbar', 'Footer with Privacy/Terms/Contact', 'My clients + Profile demo links', 'Try Demo link'] },
 ]
 
 const PENDING = [
@@ -39,6 +40,8 @@ const PENDING = [
   { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
   // Features
   { priority: 'MED', label: 'LiveProfilePreview', desc: 'FIXED May 4 2026 - ghost-to-live transition in builder' },
+  { priority: 'MED', label: 'Demo environment', desc: 'FIXED May 4 2026 - /demo/* pages with demo data' },
+  { priority: 'MED', label: 'Map for travel radius', desc: 'FIXED May 4 2026 - Leaflet + OpenStreetMap in Step 4' },
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
   { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions' },
@@ -47,7 +50,6 @@ const PENDING = [
   { priority: 'LOW', label: 'US Vercel deployment', desc: 'Second project NEXT_PUBLIC_LOCALE=US' },
   { priority: 'LOW', label: 'Apple Developer account', desc: '$99/yr for Wallet passes' },
   { priority: 'LOW', label: 'Phone OTP via Clerk', desc: '' },
-  { priority: 'LOW', label: 'Map for travel radius', desc: 'Leaflet in Step 4' },
   { priority: 'LOW', label: 'E&O / Cyber / Liability insurance', desc: 'Required before real users' },
 ]
 
