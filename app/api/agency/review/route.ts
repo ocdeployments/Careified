@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
+import { notifyReviewSubmitted } from '@/lib/notifications'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -196,6 +197,25 @@ export async function POST(req: NextRequest) {
     }
   } catch (e) {
     console.error('Failed to trigger score recalculation or badge computation:', e)
+  }
+
+  // Send notification to caregiver
+  try {
+    const { rows: caregiverRows } = await pool.query(
+      'SELECT email, first_name FROM caregivers WHERE id = $1',
+      [caregiverId]
+    )
+    const { rows: agencyRows } = await pool.query(
+      'SELECT name FROM agencies WHERE id = $1',
+      [agency.id]
+    )
+    if (caregiverRows.length > 0) {
+      const caregiver = caregiverRows[0]
+      const agencyName = agencyRows[0]?.name || 'An agency'
+      await notifyReviewSubmitted(caregiver.email, caregiver.first_name, agencyName)
+    }
+  } catch (e) {
+    console.error('Failed to send notification:', e)
   }
 
   return NextResponse.json({ id: reviewId, adminFlagged }, { status: 201 })
