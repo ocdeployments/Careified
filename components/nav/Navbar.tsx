@@ -82,6 +82,7 @@ const panels = {
       { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
       { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
       { href: '/agency/clients',   label: 'My clients',        desc: 'Manage client placements'       },
+      { href: '/agency/settings',  label: 'Agency settings',   desc: 'Branding, areas, compliance'    },
       { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
     ],
     cta: { href: '/agency/signup', label: 'Start as an agency' },
