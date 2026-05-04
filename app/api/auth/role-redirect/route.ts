@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       if (rows.length === 0 || rows[0].status !== 'approved') {
         return NextResponse.redirect(new URL('/agency/pending-approval', req.url))
       }
-      return NextResponse.redirect(new URL('/agency/search', req.url))
+      return NextResponse.redirect(new URL('/agency/dashboard', req.url))
     }
 
     if (role === 'caregiver') {
