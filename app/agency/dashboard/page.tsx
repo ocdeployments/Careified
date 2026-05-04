@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { pool } from '@/lib/db'
 import Link from 'next/link'
 import CommandBar from '@/components/agency/CommandBar'
+import ProfileNudge from '@/components/agency/ProfileNudge'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -143,6 +144,9 @@ export default async function AgencyDashboard() {
 
         </div>
       </div>
+
+      {/* Profile completion + billing nudge */}
+      <ProfileNudge />
     </div>
   )
 }
