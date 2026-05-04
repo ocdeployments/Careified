@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { pool } from '@/lib/db'
 import Link from 'next/link'
+import CommandBar from '@/components/agency/CommandBar'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -62,6 +63,14 @@ export default async function AgencyDashboard() {
               </Link>
             </div>
           )}
+
+          {/* Command bar */}
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 8px' }}>
+              Tell me what you need — I will find the right caregiver
+            </p>
+            <CommandBar />
+          </div>
 
           {/* Quick actions */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
