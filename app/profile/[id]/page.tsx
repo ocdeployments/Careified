@@ -62,6 +62,19 @@ async function getPlacementRatings(caregiverId: string) {
   } catch { return null }
 }
 
+async function getBadges(caregiverId: string) {
+  try {
+    const result = await pool.query(
+      `SELECT badges FROM caregivers WHERE id = $1`,
+      [caregiverId]
+    )
+    if (result.rows[0]?.badges) {
+      return result.rows[0].badges as Array<{ id: string; label: string; description: string; earned_at: string }>
+    }
+    return []
+  } catch { return [] }
+}
+
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
   const caregiver = await getCaregiver(id)
@@ -70,6 +83,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   const verifiedReferences = await getVerifiedReferences(id)
   const certifications = await getCertifications(id)
   const ratings = await getPlacementRatings(id)
+  const badges = await getBadges(id)
 
   // Map DB snake_case to component props
   const personality = caregiver.personality_profile || {}
@@ -126,6 +140,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       openQ2={caregiver.open_q2}
       openQ3={caregiver.open_q3}
       placementRatings={ratings}
+      badges={badges}
     />
   )
 }

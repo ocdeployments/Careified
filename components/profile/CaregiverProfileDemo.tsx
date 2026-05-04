@@ -539,6 +539,12 @@ export interface CaregiverProfileProps {
     avg_skills: number
     avg_comms: number
   }
+  badges?: Array<{
+    id: string
+    label: string
+    description: string
+    earned_at: string
+  }>
 }
 
 export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
@@ -961,6 +967,31 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 <RatingDim label="Skills" value={dm.placementRatings.avg_skills} />
                 <RatingDim label="Communication" value={dm.placementRatings.avg_comms} />
               </div>
+            </div>
+          </Section>
+        )}
+
+        {/* 6. BADGES */}
+        {dm.badges && dm.badges.length > 0 && (
+          <Section title="Badges">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {dm.badges.map((badge) => (
+                <div
+                  key={badge.id}
+                  title={badge.description}
+                  style={{
+                    background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                    color: C.navy,
+                    padding: '8px 16px',
+                    borderRadius: 20,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'help',
+                  }}
+                >
+                  {badge.label}
+                </div>
+              ))}
             </div>
           </Section>
         )}
