@@ -259,3 +259,53 @@ When ready to launch US deployment:
 - [ ] Second Vercel project: NEXT_PUBLIC_LOCALE=US
 - [ ] Geo-redirect: proxy.ts already built, needs US domain
 
+
+---
+
+## TICKETING SYSTEM (dedicated session)
+
+DB tables needed:
+- support_tickets (id, ticket_number CRF-TKT-XXXX, submitter_id, submitter_type, agency_id, caregiver_id, type, priority, status, subject, description, admin_notes, assigned_to, sla_due_at, created_at)
+- ticket_messages (id, ticket_id, sender_id, sender_type, message, internal, created_at)
+
+Ticket types: billing, verification, platform, data_rights, dispute, feature, general
+Lifecycle: open > assigned > in_progress > pending_user > resolved > closed
+
+Pages to build:
+- /support — public submission form
+- /agency/support — pre-filled agency form
+- /caregiver/support — pre-filled caregiver form
+- /admin/tickets — queue with filters, assign, SLA tracking
+- /admin/tickets/[id] — detail + message thread + internal notes
+
+Integrations:
+- /settings/data-rights auto-creates data_rights ticket (legal requirement — PIPEDA 30-day SLA)
+- AIRecruit call failures auto-create platform ticket
+- Payment failures auto-create billing ticket
+- Expiring credentials auto-create verification ticket
+
+Ticket number format: CRF-TKT-0001
+
+---
+
+## MODULE-BASED PRICING (placeholder — Stripe session pending)
+
+Modules:
+- core: Dashboard, search, match, shortlist, client intake — $XX/mo (required)
+- intelligence: AI command bar, gap analysis, match scoring — +$XX/mo
+- airecruit: Outbound screening + reference calls — +$XX/mo + $0.12/min
+- receptionist: Inbound AI call handler — +$XX/mo + $0.12/min
+- family_portal: Client-facing portal — +$XX/mo per client
+- white_label: Agency branding, custom domain — +$XX/mo
+- enterprise: API access, custom integrations — custom
+
+DB field: agencies.modules_enabled TEXT[]
+
+Inbound receptionist (future Vapi session):
+- Agency gets dedicated Vapi number
+- AI answers as [Agency Name]
+- Routes: new inquiry > intake, existing client > schedule, sick call > logs absence + alerts coordinator
+- Transfers to human only when needed
+
+PAYMENTS_ENABLED=false until Stripe account + pricing confirmed
+Launch currency: CAD first, USD second (both must be built)
