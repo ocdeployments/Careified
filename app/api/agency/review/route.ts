@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
 
   const reviewId = insertRes.rows[0].id
 
-  // Trigger score recalculation
+  // Trigger score recalculation and badge computation
   try {
     await fetch(`${req.nextUrl.origin}/api/caregiver/score/event`, {
       method: 'POST',
@@ -150,8 +150,52 @@ export async function POST(req: NextRequest) {
         },
       }),
     })
+
+    // Compute and save badges
+    const { computeBadges } = await import('@/lib/caregiver-trust-score/badges')
+    const { rows: allReviews } = await pool.query(
+      `SELECT id, agency_id, caregiver_id, client_id, engagement_start, engagement_end,
+              would_re_engage, warmth, dignity, client_hygiene, emotional_presence,
+              specialty_match, cultural_sensitivity, initiative, status, created_at
+       FROM placement_reviews
+       WHERE caregiver_id = $1 AND status IN ('pending', 'approved', 'disputed')`,
+      [caregiverId]
+    )
+    const { rows: caregiverData } = await pool.query(
+      'SELECT specializations, years_experience, aggregate_score, personality_profile FROM caregivers WHERE id = $1',
+      [caregiverId]
+    )
+
+    if (caregiverData.length > 0) {
+      const c = caregiverData[0]
+      const reviews = allReviews.map(r => ({
+        ...r,
+        engagement_start: r.engagement_start?.toISOString(),
+        engagement_end: r.engagement_end?.toISOString(),
+        created_at: r.created_at?.toISOString(),
+      }))
+      const personalityProfile = (c.personality_profile || {}) as Record<string, unknown>
+      const badges = computeBadges(
+        reviews,
+        c.specializations || [],
+        c.years_experience || 0,
+        parseFloat(c.aggregate_score) || 0,
+        {
+          status: personalityProfile.honesty_score_status as string | undefined,
+          badge_earned: personalityProfile.honesty_badge as string | undefined,
+        }
+      )
+
+      // Save badges to caregiver record
+      if (badges.length > 0) {
+        await pool.query(
+          'UPDATE caregivers SET badges = $1 WHERE id = $2',
+          [JSON.stringify(badges), caregiverId]
+        )
+      }
+    }
   } catch (e) {
-    console.error('Failed to trigger score recalculation:', e)
+    console.error('Failed to trigger score recalculation or badge computation:', e)
   }
 
   return NextResponse.json({ id: reviewId, adminFlagged }, { status: 201 })
