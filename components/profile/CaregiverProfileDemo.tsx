@@ -426,6 +426,17 @@ function Bar({ pct, height = 8, gold = false }: { pct: number; height?: number; 
   )
 }
 
+function RatingDim({ label, value }: { label: string; value: number | null }) {
+  const val = value || 0
+  const color = val >= 4 ? C.successDeep : val >= 3 ? C.gold : val >= 2 ? '#EA580C' : '#DC2626'
+  return (
+    <div style={{ background: C.bgSubtle, borderRadius: 10, padding: 12, textAlign: 'center' }}>
+      <div style={{ fontSize: 20, fontWeight: 700, color }}>{val.toFixed(1)}</div>
+      <div style={{ fontSize: 10, color: C.fg4, marginTop: 2 }}>{label}</div>
+    </div>
+  )
+}
+
 function Stars({ n }: { n: number }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
@@ -515,6 +526,19 @@ export interface CaregiverProfileProps {
   openQ1?: string
   openQ2?: string
   openQ3?: string
+  // Placement ratings
+  placementRatings?: {
+    review_count: string
+    rehire_rate: number
+    avg_punctuality: number
+    avg_reliability: number
+    avg_warmth: number
+    avg_dignity: number
+    avg_patience: number
+    avg_hygiene: number
+    avg_skills: number
+    avg_comms: number
+  }
 }
 
 export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
@@ -907,6 +931,39 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             </div>
           </div>
         </Section>
+
+        {/* 5. AGENCY RATINGS (from placement reviews) */}
+        {dm.placementRatings && parseInt(dm.placementRatings.review_count || '0') > 0 && (
+          <Section title="Agency ratings">
+            <div style={{ display: 'grid', gap: 16 }}>
+              {/* Rehire rate */}
+              <div style={{ background: C.bgSubtle, borderRadius: 12, padding: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>Re-hire rate</span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: C.gold }}>
+                    {Math.round(dm.placementRatings.rehire_rate)}%
+                  </span>
+                </div>
+                <Bar pct={dm.placementRatings.rehire_rate} height={8} gold />
+                <div style={{ fontSize: 11, color: C.fg4, marginTop: 8 }}>
+                  Based on {dm.placementRatings.review_count} placement{dm.placementRatings.review_count !== '1' ? 's' : ''}
+                </div>
+              </div>
+
+              {/* Rating dimensions grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                <RatingDim label="Punctuality" value={dm.placementRatings.avg_punctuality} />
+                <RatingDim label="Reliability" value={dm.placementRatings.avg_reliability} />
+                <RatingDim label="Warmth" value={dm.placementRatings.avg_warmth} />
+                <RatingDim label="Dignity" value={dm.placementRatings.avg_dignity} />
+                <RatingDim label="Patience" value={dm.placementRatings.avg_patience} />
+                <RatingDim label="Hygiene" value={dm.placementRatings.avg_hygiene} />
+                <RatingDim label="Skills" value={dm.placementRatings.avg_skills} />
+                <RatingDim label="Communication" value={dm.placementRatings.avg_comms} />
+              </div>
+            </div>
+          </Section>
+        )}
 
         {/* 4. CLINICAL EXPERIENCE */}
         <Section title="Clinical experience">
