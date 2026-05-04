@@ -38,7 +38,7 @@ const PENDING = [
   { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false' },
   { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
   // Features
-  { priority: 'MED', label: 'LiveProfilePreview', desc: 'Ghost to live animation in builder' },
+  { priority: 'MED', label: 'LiveProfilePreview', desc: 'FIXED May 4 2026 - ghost-to-live transition in builder' },
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
   { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions' },
