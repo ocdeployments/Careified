@@ -151,8 +151,10 @@ export function AgencySignupForm() {
       if (!form.contactEmail.trim()) e.contactEmail = 'Required'
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) e.contactEmail = 'Invalid email'
       if (!form.contactPhone.trim()) e.contactPhone = 'Required'
+      if (!form.streetAddress.trim()) e.streetAddress = 'Required'
       if (!form.city.trim()) e.city = 'Required'
       if (!form.province) e.province = 'Required'
+      if (!form.postalCode.trim()) e.postalCode = 'Required'
       if (form.serviceAreas.length === 0) e.serviceAreas = 'Select at least one service area'
       if (form.careTypes.length === 0) e.careTypes = 'Select at least one care type'
     }
@@ -172,6 +174,7 @@ export function AgencySignupForm() {
   async function handleSubmit() {
     if (!validate(4)) return
     setSubmitting(true)
+    setErrors({})
     try {
       const res = await fetch('/api/agency/register', {
         method: 'POST',
@@ -203,11 +206,20 @@ export function AgencySignupForm() {
           backgroundCheckProvider: form.backgroundCheckProvider,
         }),
       })
-      if (!res.ok) throw new Error('Registration failed')
+      const data = await res.json()
+      if (!res.ok) {
+        if (data.errors) {
+          setErrors(data.errors)
+          toast.error('Please fix the errors below')
+        } else {
+          throw new Error(data.error || 'Registration failed')
+        }
+        return
+      }
       toast.success('Application submitted! We will review and notify you within 24 hours.')
       router.push('/agency/pending-approval')
-    } catch {
-      toast.error('Something went wrong. Please try again.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -307,7 +319,7 @@ export function AgencySignupForm() {
               <Field label="Contact phone" required error={errors.contactPhone}>
                 <input style={inputStyle} type="tel" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} placeholder="(416) 555-0100" />
               </Field>
-              <Field label="Street address">
+              <Field label="Street address" required error={errors.streetAddress}>
                 <input style={inputStyle} value={form.streetAddress} onChange={e => set('streetAddress', e.target.value)} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
@@ -320,7 +332,7 @@ export function AgencySignupForm() {
                     {CA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </Field>
-                <Field label="Postal code">
+                <Field label="Postal code" required error={errors.postalCode}>
                   <input style={inputStyle} value={form.postalCode} onChange={e => set('postalCode', e.target.value)} placeholder="M5V 2T6" />
                 </Field>
               </div>

@@ -4,8 +4,53 @@ import { pool } from '@/lib/db'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    const errors: Record<string, string> = {}
+
+    // Validate required fields (matching client validation)
+    if (!body.agencyName?.trim()) {
+      errors.agencyName = 'Agency name is required'
+    }
+    if (!body.businessType) {
+      errors.businessType = 'Business type is required'
+    }
+    if (!body.contactFirstName?.trim()) {
+      errors.contactFirstName = 'First name is required'
+    }
+    if (!body.contactLastName?.trim()) {
+      errors.contactLastName = 'Last name is required'
+    }
+    if (!body.contactEmail?.trim()) {
+      errors.contactEmail = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.contactEmail)) {
+      errors.contactEmail = 'Invalid email format'
+    }
+    if (!body.contactPhone?.trim()) {
+      errors.contactPhone = 'Phone is required'
+    }
+    if (!body.city?.trim()) {
+      errors.city = 'City is required'
+    }
+    if (!body.state && !body.province) {
+      errors.province = 'Province is required'
+    }
+    if (!body.streetAddress?.trim()) {
+      errors.streetAddress = 'Street address is required'
+    }
+    if (!body.postalCode?.trim()) {
+      errors.postalCode = 'Postal code is required'
+    }
+    if (!body.serviceAreas || body.serviceAreas.length === 0) {
+      errors.serviceAreas = 'Select at least one service area'
+    }
+    if (!body.careTypes || body.careTypes.length === 0) {
+      errors.careTypes = 'Select at least one care type'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return NextResponse.json({ errors }, { status: 400 })
+    }
+
     const {
-      agencyName,
       businessType,
       licenseNumber,
       contactFirstName,
@@ -17,11 +62,6 @@ export async function POST(req: NextRequest) {
       state,
       postalCode,
     } = body
-
-    // Validate required fields
-    if (!agencyName || !contactFirstName || !contactLastName || !contactEmail || !contactPhone || !streetAddress || !city || !state || !postalCode) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
-    }
 
     // Insert into agencies table with pending status
     const result = await pool.query(
