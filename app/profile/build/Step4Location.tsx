@@ -4,6 +4,13 @@ import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { getLocaleConfig } from '@/lib/locale/config'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for Leaflet (no SSR)
+const TravelRadiusMap = dynamic(
+  () => import('@/components/profile/TravelRadiusMap').then(mod => mod.TravelRadiusMap),
+  { ssr: false, loading: () => <div style={{ height: '300px', backgroundColor: '#F1F5F9', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>Loading map...</div> }
+)
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -249,6 +256,16 @@ export default function Step4Location() {
           ))}
         </select>
         <div style={styles.helperText}>Agencies filter by this — be accurate</div>
+
+        {/* Map visualization */}
+        {cityFromStep1 && (
+          <div style={{ marginTop: '20px' }}>
+            <div style={{ fontSize: '12px', color: COLORS.slate, marginBottom: '8px' }}>
+              Visualize your travel radius from {cityFromStep1}:
+            </div>
+            <TravelRadiusMap city={cityFromStep1} initialRadius={travelRadius || 20} />
+          </div>
+        )}
       </div>
 
       {/* SECTION: Driving & Vehicle */}
