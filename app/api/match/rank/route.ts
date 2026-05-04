@@ -34,13 +34,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'missing_need' }, { status: 400 })
   }
 
+  // Get agency service areas to filter caregiver pool
+  let agencyServiceAreas: string[] = []
+  try {
+    const agencyRow = await pool.query(
+      'SELECT service_areas, provinces FROM agencies WHERE clerk_user_id = $1',
+      [userId]
+    )
+    if (agencyRow.rows[0]?.service_areas?.length) {
+      agencyServiceAreas = agencyRow.rows[0].service_areas
+    }
+  } catch { /* no restriction if lookup fails */ }
+
   let caregivers
   try {
-    caregivers = await loadAllApprovedCaregivers(pool)
+    const allCaregivers = await loadAllApprovedCaregivers(pool)
+    // Filter by agency service areas if set
+    caregivers = agencyServiceAreas.length > 0
+      ? allCaregivers.filter(cg => {
+          if (!cg.city && !cg.state) return true // include if no location set
+          return agencyServiceAreas.some(area =>
+            cg.city?.toLowerCase().includes(area.toLowerCase()) ||
+            area.toLowerCase().includes(cg.city?.toLowerCase() || '')
+          )
+        })
+      : allCaregivers
   } catch (err) {
     console.error('loadAllApprovedCaregivers failed:', err)
     return NextResponse.json({ error: 'db_load_failed', detail: String(err) }, { status: 500 })
   }
+
 
   const ranked = caregivers
     .map(cg => {
