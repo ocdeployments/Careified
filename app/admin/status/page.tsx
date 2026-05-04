@@ -27,10 +27,10 @@ const PENDING = [
   { priority: 'HIGH', label: 'Reference tokens not UUID', desc: 'Sequential tokens predictable - use gen_random_uuid()' },
   { priority: 'HIGH', label: 'No rate limiting', desc: 'APIs vulnerable to abuse - add rate limiting' },
   { priority: 'HIGH', label: 'XSS in admin/caregivers', desc: 'dangerouslySetInnerHTML line 217 - remove' },
-  // Routing - Broken Links
-  { priority: 'HIGH', label: 'Broken link: /settings', desc: 'No index page - create or redirect' },
-  { priority: 'HIGH', label: 'Broken link: /agency/support', desc: 'Support page not built - create or link' },
-  { priority: 'HIGH', label: 'Broken link: /profile/start', desc: 'Should be /profile/build in for-caregivers' },
+  // Routing - Broken Links (FIXED May 4 2026)
+  { priority: 'HIGH', label: 'Broken link: /settings', desc: 'FIXED - redirect to /settings/communications' },
+  { priority: 'HIGH', label: 'Broken link: /agency/support', desc: 'FIXED - support page created' },
+  { priority: 'HIGH', label: 'Broken link: /profile/start', desc: 'FIXED - changed to /profile/build' },
   // UX / Copy
   { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'FIXED May 4 2026' },
   { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
@@ -261,14 +261,14 @@ export default function StatusPage() {
 
             {/* Broken Links */}
             <div>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#64748B', marginBottom: 12 }}>Broken Links (3)</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#16A34A', marginBottom: 12 }}>Broken Links (0) — ALL FIXED</h3>
               {[
-                { link: '/settings', reason: 'No index page exists' },
-                { link: '/agency/support', reason: 'Support page not built' },
-                { link: '/profile/start', reason: 'Should be /profile/build' },
+                { link: '/settings', reason: 'FIXED — redirects to /settings/communications' },
+                { link: '/agency/support', reason: 'FIXED — support page created' },
+                { link: '/profile/start', reason: 'FIXED — changed to /profile/build' },
               ].map((link, i) => (
-                <div key={i} style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', gap: 16 }}>
-                  <code style={{ fontSize: 13, color: '#DC2626', fontWeight: 600 }}>{link.link}</code>
+                <div key={i} style={{ background: '#F0FDF4', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', gap: 16 }}>
+                  <code style={{ fontSize: 13, color: '#16A34A', fontWeight: 600 }}>{link.link}</code>
                   <span style={{ fontSize: 13, color: '#64748B' }}>{link.reason}</span>
                 </div>
               ))}

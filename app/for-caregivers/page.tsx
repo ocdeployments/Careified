@@ -172,7 +172,7 @@ export default function ForCaregiversPage() {
 
           {/* CTA Button */}
           <Link 
-            href="/profile/start"
+            href="/profile/build"
             style={{ 
               display: 'inline-block',
               padding: '14px 32px',
@@ -594,7 +594,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link 
-            href="/profile/start"
+            href="/profile/build"
             style={{ 
               display: 'inline-block',
               padding: '16px 40px',
