@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 3 2026
-# Safe revert: 41c6b31
+# Last updated: May 4 2026
+# Safe revert: 960aca6
 
 ## LIVE
 careified.vercel.app | Repo: ocdeployments/Careified (main)
@@ -96,6 +96,63 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - LiveProfilePreview: component exists but not built (must build with Romy)
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
+- Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
+
+---
+
+## SECURITY AUDIT FINDINGS (May 4 2026)
+
+### Critical Issues
+| Issue | File | Fix |
+|-------|------|-----|
+| Admin pages completely unprotected | `app/admin/*` | Add Clerk auth + ADMIN_CLERK_USER_ID check |
+| No webhook signature verification | `app/api/airecruit/webhook/route.ts` | Add HMAC validation for Vapi webhooks |
+| SQL injection risk in lib/db.ts | `lib/db.ts` lines 56-68 | Validate keys against column allowlist |
+
+### High Priority
+| Issue | File | Fix |
+|-------|------|-----|
+| Reference tokens not UUID | `app/api/references/invite/route.ts` | Use gen_random_uuid() |
+| No rate limiting | All API routes | Add rate limiting middleware |
+| XSS: dangerouslySetInnerHTML | `app/admin/caregivers/page.tsx` line 217 | Remove or sanitize |
+
+### Medium Priority
+| Issue | File | Fix |
+|-------|------|-----|
+| 404 leaks existence of protected pages | `/agency/*` when not agency | Return 403 instead |
+| Tier parameter accepts user input | `lib/attributes/index.ts` | Ensure only admin can set tiers |
+| Missing SSL on Render DB | `lib/db.ts` | Set rejectUnauthorized: true in prod |
+
+---
+
+## LINK & ROUTING AUDIT (May 4 2026)
+
+### Broken Links (404)
+| Broken Link | Found In |
+|-------------|----------|
+| `/settings` | `app/settings/communications/page.tsx` - no index page exists |
+| `/agency/support` | `app/agency/billing/page.tsx` - support page not built |
+| `/profile/start` | `app/for-caregivers/page.tsx` - should be `/profile/build` |
+
+### Orphan Pages (Not in nav)
+| Page | Notes |
+|------|-------|
+| `/admin/status` | Has API, linked from admin/agencies |
+| `/admin/sitemap` | Has API, linked from admin/agencies |
+| `/agency/dashboard` | Redirect target for approved agencies, not in navbar |
+| `/agency/airecruit` | Only accessible via dashboard |
+| `/id/[caregiverId]` | For wallet/QR, intentionally not linked |
+| `/verify/[slug]` | For public verification, not linked |
+
+### Authorization Leaks (Should be 403, not 404)
+| Page | Current | Should Be |
+|------|---------|-----------|
+| `/admin/*` | No auth - data exposed! | 403 Forbidden |
+| `/agency/*` (not agency role) | 404 | 403 Forbidden |
+
+### User Journey Dead Ends
+- **Agency signup**: After submit lands on `/agency/pending-approval` - no way to check status
+- **Caregiver profile builder**: No explicit "complete" state - user navigates blindly
 
 ---
 
@@ -105,11 +162,12 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 1. NEXT_PUBLIC_LOCALE=CA — add to Vercel env vars NOW
 2. Redeploy Vercel after adding env vars
 3. Copy session — ALL page text is placeholder
-4. UX debt — agency signup silent failures, no inline errors
-5. Clerk production upgrade (pk_test_ > pk_live_)
-6. SSL cert for Render DB (currently rejectUnauthorized: false)
-7. Lawyer review of lib/legal/text.ts
-8. E&O / Cyber / General Liability insurance
+4. ~~UX debt — agency signup silent failures~~ ✅ FIXED May 4 2026
+5. ~~Admin pages unprotected~~ ❌ CRITICAL - add auth
+6. Clerk production upgrade (pk_test_ > pk_live_)
+7. SSL cert for Render DB (currently rejectUnauthorized: false)
+8. Lawyer review of lib/legal/text.ts
+9. E&O / Cyber / General Liability insurance
 
 ### Infrastructure
 9. US Vercel deployment (second project, NEXT_PUBLIC_LOCALE=US)
@@ -175,6 +233,18 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - [ ] UX debt fixes
 - [ ] Admin panel built
 - [ ] Incident response runbook
+
+---
+
+## PRIORITY ACTION PLAN (Quick Wins)
+
+| # | Action | Impact | Est. Effort |
+|---|--------|--------|-------------|
+| 1 | **Add auth to /admin/* pages** | CRITICAL security fix - prevents data leak | 1 file |
+| 2 | **Fix broken links** (/settings, /agency/support, /profile/start) | User journey fixes | 30 min |
+| 3 | **Verify AIRecruit webhook signatures** | Prevent fake call data | 1 hr |
+| 4 | **Add rate limiting to registration/reference APIs** | Prevent abuse | 2 hr |
+| 5 | **Use UUIDs for reference tokens** | Token predictability fix | 30 min |
 
 ---
 

@@ -19,11 +19,25 @@ const BUILT = [
 ]
 
 const PENDING = [
-  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
+  // Security - Critical
+  { priority: 'CRITICAL', label: 'Admin pages unprotected', desc: '/admin/* exposes ALL data - add Clerk auth immediately' },
+  { priority: 'CRITICAL', label: 'Webhook no signature verification', desc: 'AIRecruit webhook accepts fake data - add HMAC' },
+  { priority: 'CRITICAL', label: 'SQL injection risk lib/db.ts', desc: 'Column names not validated - validate against allowlist' },
+  // Security - High
+  { priority: 'HIGH', label: 'Reference tokens not UUID', desc: 'Sequential tokens predictable - use gen_random_uuid()' },
+  { priority: 'HIGH', label: 'No rate limiting', desc: 'APIs vulnerable to abuse - add rate limiting' },
+  { priority: 'HIGH', label: 'XSS in admin/caregivers', desc: 'dangerouslySetInnerHTML line 217 - remove' },
+  // Routing - Broken Links
+  { priority: 'HIGH', label: 'Broken link: /settings', desc: 'No index page - create or redirect' },
+  { priority: 'HIGH', label: 'Broken link: /agency/support', desc: 'Support page not built - create or link' },
+  { priority: 'HIGH', label: 'Broken link: /profile/start', desc: 'Should be /profile/build in for-caregivers' },
+  // UX / Copy
+  { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'FIXED May 4 2026' },
   { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
-  { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'Silent failures on invalid fields' },
+  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
   { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false' },
   { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
+  // Features
   { priority: 'MED', label: 'LiveProfilePreview', desc: 'Ghost to live animation in builder' },
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
@@ -46,6 +60,16 @@ const VAPI = [
   { type: 'match_time_calls', label: 'Match opportunity calls', status: 'PENDING', note: 'Session D' },
 ]
 
+const SECURITY = {
+  lastAudit: 'May 4 2026',
+  criticalIssues: 3,
+  highIssues: 6,
+  mediumIssues: 3,
+  brokenLinks: 3,
+  status: 'FAIL',
+  currentPriority: 'Add auth to /admin/* pages',
+}
+
 type LiveData = {
   db: { caregivers: number; agencies: number; clients: number; verifiedRefs: number; tables: string[] }
   env: { key: string; set: boolean; isProd: boolean | null }[]
@@ -54,7 +78,7 @@ type LiveData = {
 }
 
 export default function StatusPage() {
-  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'>('pending')
+  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'>('pending')
   const [live, setLive] = useState<LiveData | null>(null)
   const [liveLoading, setLiveLoading] = useState(false)
 
@@ -69,11 +93,13 @@ export default function StatusPage() {
   const tabs = [
     { id: 'pending', label: 'Pending' },
     { id: 'built', label: 'Built & Live' },
+    { id: 'security', label: 'Security Audit' },
     { id: 'vapi', label: 'AIRecruit Agents' },
     { id: 'live', label: 'Live Data' },
   ] as const
 
   const pc = (p: string) =>
+    p === 'CRITICAL' ? { bg: '#7F1D1D', color: '#FFFFFF', border: '#991B1B' } :
     p === 'HIGH' ? { bg: '#FEF2F2', color: '#DC2626', border: '#FECACA' } :
     p === 'MED'  ? { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' } :
                    { bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0' }
@@ -169,6 +195,84 @@ export default function StatusPage() {
                 <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, color: sc(v.status), background: v.status === 'LIVE' ? '#F0FDF4' : v.status === 'DROPPED' ? '#FEF2F2' : '#FFFBEB', border: `1px solid ${v.status === 'LIVE' ? '#BBF7D0' : v.status === 'DROPPED' ? '#FECACA' : '#FDE68A'}` }}>{v.status}</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {tab === 'security' && (
+          <div>
+            {/* Security Status Header */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+              <div style={{ background: 'white', borderRadius: 12, padding: '16px 20px', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: 11, color: '#64748B', marginBottom: 4 }}>Last Audit</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: N }}>{SECURITY.lastAudit}</div>
+              </div>
+              <div style={{ background: '#FEF2F2', borderRadius: 12, padding: '16px 20px', border: '1px solid #FECACA' }}>
+                <div style={{ fontSize: 11, color: '#DC2626', marginBottom: 4 }}>Critical</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#DC2626' }}>{SECURITY.criticalIssues}</div>
+              </div>
+              <div style={{ background: '#FFFBEB', borderRadius: 12, padding: '16px 20px', border: '1px solid #FDE68A' }}>
+                <div style={{ fontSize: 11, color: '#D97706', marginBottom: 4 }}>High</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#D97706' }}>{SECURITY.highIssues}</div>
+              </div>
+              <div style={{ background: SECURITY.status === 'PASS' ? '#F0FDF4' : '#FEF2F2', borderRadius: 12, padding: '16px 20px', border: `1px solid ${SECURITY.status === 'PASS' ? '#BBF7D0' : '#FECACA'}` }}>
+                <div style={{ fontSize: 11, color: SECURITY.status === 'PASS' ? '#16A34A' : '#DC2626', marginBottom: 4 }}>Security Status</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: SECURITY.status === 'PASS' ? '#16A34A' : '#DC2626' }}>{SECURITY.status}</div>
+              </div>
+            </div>
+
+            {/* Current Priority */}
+            <div style={{ background: '#7F1D1D', borderRadius: 12, padding: '16px 20px', marginBottom: 20, color: 'white' }}>
+              <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 4 }}>CURRENT PRIORITY ACTION</div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>{SECURITY.currentPriority}</div>
+            </div>
+
+            {/* Critical Issues */}
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#DC2626', marginBottom: 12 }}>Critical Issues (3)</h3>
+              {[
+                { label: 'Admin pages completely unprotected', file: 'app/admin/*' },
+                { label: 'No webhook signature verification', file: 'app/api/airecruit/webhook/route.ts' },
+                { label: 'SQL injection risk in lib/db.ts', file: 'lib/db.ts lines 56-68' },
+              ].map((issue, i) => (
+                <div key={i} style={{ background: 'white', border: '1px solid #FECACA', borderRadius: 8, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, color: N }}>{issue.label}</span>
+                  <code style={{ fontSize: 11, color: '#64748B' }}>{issue.file}</code>
+                </div>
+              ))}
+            </div>
+
+            {/* High Issues */}
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#D97706', marginBottom: 12 }}>High Priority (6)</h3>
+              {[
+                { label: 'Reference tokens not UUID', file: 'app/api/references/invite' },
+                { label: 'No rate limiting', file: 'All API routes' },
+                { label: 'XSS: dangerouslySetInnerHTML', file: 'app/admin/caregivers/page.tsx:217' },
+                { label: 'Broken link: /settings', file: 'settings/communications/page.tsx' },
+                { label: 'Broken link: /agency/support', file: 'agency/billing/page.tsx' },
+                { label: 'Broken link: /profile/start', file: 'for-caregivers/page.tsx' },
+              ].map((issue, i) => (
+                <div key={i} style={{ background: 'white', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, color: N }}>{issue.label}</span>
+                  <code style={{ fontSize: 11, color: '#64748B' }}>{issue.file}</code>
+                </div>
+              ))}
+            </div>
+
+            {/* Broken Links */}
+            <div>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#64748B', marginBottom: 12 }}>Broken Links (3)</h3>
+              {[
+                { link: '/settings', reason: 'No index page exists' },
+                { link: '/agency/support', reason: 'Support page not built' },
+                { link: '/profile/start', reason: 'Should be /profile/build' },
+              ].map((link, i) => (
+                <div key={i} style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', gap: 16 }}>
+                  <code style={{ fontSize: 13, color: '#DC2626', fontWeight: 600 }}>{link.link}</code>
+                  <span style={{ fontSize: 13, color: '#64748B' }}>{link.reason}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
