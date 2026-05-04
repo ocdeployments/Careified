@@ -34,6 +34,7 @@ type ClientNeed = {
   mobility_level: string | null
   medications_complex: boolean | null
   status: string
+  matched_caregiver_id: string | null
 }
 
 type MatchRow = {
@@ -165,23 +166,44 @@ export default function ClientDetailPage() {
               .filter(Boolean).join(' · ')}
           </p>
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 10,
-            border: '1.5px solid #FCA5A5',
-            background: 'white',
-            color: '#DC2626',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-            fontFamily: FONT_SANS,
-          }}
-        >
-          {deleting ? 'Deleting…' : 'Delete client'}
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          {client.matched_caregiver_id && (
+            <Link
+              href={`/agency/clients/${params.id}/review`}
+              style={{
+                padding: '10px 20px',
+                borderRadius: 10,
+                border: '1.5px solid #C9973A',
+                background: 'white',
+                color: '#C9973A',
+                fontSize: 13,
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer',
+                fontFamily: FONT_SANS,
+              }}
+            >
+              Submit Placement Review
+            </Link>
+          )}
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 10,
+              border: '1.5px solid #FCA5A5',
+              background: 'white',
+              color: '#DC2626',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              fontFamily: FONT_SANS,
+            }}
+          >
+            {deleting ? 'Deleting…' : 'Delete client'}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24 }}>
