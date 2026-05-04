@@ -235,6 +235,15 @@ export default function ProfileStrengthPage() {
  </div>
  </div>
  )}
+
+ {/* Trust Score Panel */}
+ <TrustScorePanel />
+
+ {/* Badges Panel */}
+ <BadgesPanel />
+
+ {/* Dispute Panel */}
+ <DisputePanel />
  </div>
  )
 }
@@ -307,4 +316,260 @@ function GapRow({ gap }: { gap: { label: string; action: string; impact: 'high'|
  </span>
  </div>
  )
+}
+
+// ========== NEW SECTIONS: Trust Score, Badges, Disputes ==========
+
+type TrustScoreData = {
+  reliability: number
+  referenceQuality: number
+  clinicalCredibility: number
+  tenureSignal: number
+  professionalism: number
+  totalScore: number
+  tier: string
+  shiftCount: number
+  eligibleForDisplay: boolean
+  message?: string
+}
+
+type Badge = {
+  id: string
+  label: string
+  description: string
+  earned_at: string
+}
+
+type DisputeReview = {
+  id: string
+  agency_name: string
+  engagement_start: string
+  engagement_end: string
+  status: string
+  dispute_deadline: string
+}
+
+function TrustScorePanel() {
+  const [score, setScore] = useState<TrustScoreData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/caregiver/score')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setScore(d); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div style={panelStyle}>
+        <h2 style={sectionTitle}>Trust Score</h2>
+        <div style={{ color: '#64748B', fontSize: 13 }}>Loading...</div>
+      </div>
+    )
+  }
+
+  if (!score || !score.eligibleForDisplay) {
+    return (
+      <div style={panelStyle}>
+        <h2 style={sectionTitle}>Trust Score</h2>
+        <p style={{ color: '#64748B', fontSize: 13, marginBottom: 12 }}>
+          Score updates after each agency placement review
+        </p>
+        <div style={{ background: '#F7F4F0', padding: 16, borderRadius: 10, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: '#64748B' }}>
+            {score?.message || 'Complete placements to earn your trust score'}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const tierColor = score.tier === 'platinum' ? '#0D1B3E' :
+    score.tier === 'gold' ? '#C9973A' :
+    score.tier === 'silver' ? '#94A3B8' : '#DC2626'
+
+  const dimensions = [
+    { label: 'Reliability', value: score.reliability },
+    { label: 'References', value: score.referenceQuality },
+    { label: 'Clinical', value: score.clinicalCredibility },
+    { label: 'Tenure', value: score.tenureSignal },
+    { label: 'Professionalism', value: score.professionalism },
+  ]
+
+  return (
+    <div style={panelStyle}>
+      <h2 style={sectionTitle}>Trust Score</h2>
+      <p style={{ color: '#64748B', fontSize: 13, marginBottom: 16 }}>
+        Score updates after each agency placement review
+      </p>
+
+      <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 48, fontWeight: 700, color: tierColor, fontFamily: FONT_SERIF }}>
+            {score.totalScore}
+          </div>
+          <div style={{ fontSize: 12, color: tierColor, textTransform: 'uppercase', fontWeight: 600 }}>
+            {score.tier}
+          </div>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          {dimensions.map(d => (
+            <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: '#64748B', width: 70 }}>{d.label}</span>
+              <div style={{ flex: 1, height: 6, background: '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: `${d.value}%`, height: '100%', background: '#C9973A', borderRadius: 3 }} />
+              </div>
+              <span style={{ fontSize: 11, color: '#0D1B3E', fontWeight: 600, width: 24 }}>{d.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ fontSize: 11, color: '#94A3B8' }}>
+        Based on {score.shiftCount} verified placements
+      </div>
+    </div>
+  )
+}
+
+function BadgesPanel() {
+  const [badges, setBadges] = useState<Badge[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/caregiver/badges')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setBadges(d?.badges || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div style={panelStyle}>
+        <h2 style={sectionTitle}>Badges</h2>
+        <div style={{ color: '#64748B', fontSize: 13 }}>Loading...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={panelStyle}>
+      <h2 style={sectionTitle}>Badges</h2>
+      <p style={{ color: '#64748B', fontSize: 13, marginBottom: 16 }}>
+        Earn badges through positive agency placements
+      </p>
+
+      {badges.length === 0 ? (
+        <div style={{ background: '#F7F4F0', padding: 16, borderRadius: 10, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: '#64748B' }}>
+            No badges yet — badges are earned through agency placements
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {badges.map(badge => (
+            <div
+              key={badge.id}
+              title={badge.description}
+              style={{
+                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                color: '#0D1B3E',
+                padding: '6px 14px',
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'help',
+              }}
+            >
+              {badge.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DisputePanel() {
+  const [disputes, setDisputes] = useState<DisputeReview[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/caregiver/disputes')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setDisputes(d?.disputes || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div style={panelStyle}>
+        <h2 style={sectionTitle}>Open Disputes</h2>
+        <div style={{ color: '#64748B', fontSize: 13 }}>Loading...</div>
+      </div>
+    )
+  }
+
+  if (disputes.length === 0) {
+    return null // Don't show panel if no disputes
+  }
+
+  return (
+    <div style={panelStyle}>
+      <h2 style={sectionTitle}>Open Disputes</h2>
+      <p style={{ color: '#64748B', fontSize: 13, marginBottom: 16 }}>
+        Reviews within the 14-day dispute window
+      </p>
+
+      <div style={{ display: 'grid', gap: 10 }}>
+        {disputes.map(d => (
+          <div key={d.id} style={{ background: '#F7F4F0', padding: 14, borderRadius: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#0D1B3E' }}>{d.agency_name}</span>
+              <span style={{ fontSize: 11, color: '#DC2626', fontWeight: 600 }}>{d.status}</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#64748B', marginBottom: 8 }}>
+              {d.engagement_start?.slice(0, 10)} — {d.engagement_end?.slice(0, 10)}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 10 }}>
+              Dispute deadline: {d.dispute_deadline?.slice(0, 10)}
+            </div>
+            <a
+              href={`/profile/dispute/${d.id}`}
+              style={{
+                display: 'inline-block',
+                padding: '6px 12px',
+                background: 'white',
+                border: '1px solid #C9973A',
+                borderRadius: 8,
+                color: '#C9973A',
+                fontSize: 11,
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Dispute this review
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const panelStyle: React.CSSProperties = {
+  background: 'white',
+  border: '1px solid #E2E8F0',
+  borderRadius: 16,
+  padding: 24,
+  marginBottom: 24,
+}
+
+const sectionTitle: React.CSSProperties = {
+  fontFamily: FONT_SERIF,
+  fontSize: 18,
+  color: '#0D1B3E',
+  margin: '0 0 4px 0',
 }
