@@ -79,6 +79,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {`(function(c,l,a,r,i,t,y){c[i]=c[i]||function(){(c[i].q=c[i].q||[]).push(arguments)};t=l.createElement(a);y=l.getElementsByTagName(a)[0];t.async=1;t.src=r;y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");`}
           </Script>
         )}
+        {process.env.NEXT_PUBLIC_YBUG_ID && (
+          <Script id="ybug-init" strategy="afterInteractive">
+            {`window.ybug_settings = {"id": "${process.env.NEXT_PUBLIC_YBUG_ID}"};(function(d,s){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.ybug.io.js';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);})(document);`}
+          </Script>
+        )}
       </body>
     </html>
   )
