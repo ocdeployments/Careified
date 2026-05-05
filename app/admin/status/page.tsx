@@ -79,10 +79,26 @@ type LiveData = {
   timestamp: string
 }
 
+type QAData = {
+  report: {
+    id: number
+    audit_date: string
+    audit_by: string
+    total_passing: number
+    total_failing: number
+    total_warnings: number
+    issues: any[]
+  }
+  history: any[]
+}
+
 export default function StatusPage() {
-  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'|'audit'>('pending')
+  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'|'audit'|'qa'>('pending')
   const [live, setLive] = useState<LiveData | null>(null)
   const [liveLoading, setLiveLoading] = useState(false)
+  const [qaData, setQaData] = useState<QAData | null>(null)
+  const [qaLoading, setQaLoading] = useState(false)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ critical: true, high: true })
 
   useEffect(() => {
     setLiveLoading(true)
@@ -92,11 +108,38 @@ export default function StatusPage() {
       .catch(() => setLiveLoading(false))
   }, [])
 
+  useEffect(() => {
+    if (tab === 'qa') {
+      setQaLoading(true)
+      fetch('/api/qa/report')
+        .then(r => r.json())
+        .then(d => { setQaData(d); setQaLoading(false) })
+        .catch(() => setQaLoading(false))
+    }
+  }, [tab])
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
+  const markFixed = async (issueId: number) => {
+    await fetch('/api/qa/report', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ issue_id: issueId, status: 'fixed' }),
+    })
+    // Refresh QA data
+    fetch('/api/qa/report')
+      .then(r => r.json())
+      .then(d => setQaData(d))
+  }
+
   const tabs = [
     { id: 'pending', label: 'Pending' },
     { id: 'built', label: 'Built & Live' },
     { id: 'security', label: 'Security Audit' },
     { id: 'audit', label: 'Architecture Audit' },
+    { id: 'qa', label: 'QA Report' },
     { id: 'vapi', label: 'AIRecruit Agents' },
     { id: 'live', label: 'Live Data' },
   ] as const
@@ -260,6 +303,132 @@ export default function StatusPage() {
                 <li>Shortlist was already linked (confirmed)</li>
               </ul>
             </div>
+          </div>
+        )}
+
+        {tab === 'qa' && (
+          <div>
+            {qaLoading && <p style={{ color: '#64748B' }}>Loading QA data...</p>}
+            {qaData && (
+              <>
+                {/* Header */}
+                <div style={{ background: 'white', borderRadius: 16, padding: '24px', border: '1px solid #E2E8F0', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: '#64748B', marginBottom: 4 }}>Last Audit</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: N }}>{new Date(qaData.report.audit_date).toLocaleString()}</div>
+                      <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>By: {qaData.report.audit_by}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ background: '#F0FDF4', padding: '8px 16px', borderRadius: 8, textAlign: 'center' }}>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A' }}>{qaData.report.total_passing}</div>
+                        <div style={{ fontSize: 11, color: '#16A34A' }}>Passing</div>
+                      </div>
+                      <div style={{ background: '#FEF2F2', padding: '8px 16px', borderRadius: 8, textAlign: 'center' }}>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: '#DC2626' }}>{qaData.report.total_failing}</div>
+                        <div style={{ fontSize: 11, color: '#DC2626' }}>Failing</div>
+                      </div>
+                      <div style={{ background: '#FFFBEB', padding: '8px 16px', borderRadius: 8, textAlign: 'center' }}>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706' }}>{qaData.report.total_warnings}</div>
+                        <div style={{ fontSize: 11, color: '#D97706' }}>Warnings</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Group issues by severity */}
+                {['critical', 'high', 'medium', 'warning', 'passing'].map(severity => {
+                  const issues = qaData.report.issues.filter((i: any) => i.severity === severity)
+                  if (issues.length === 0) return null
+                  const isOpen = severity !== 'passing'
+                  const borderColor = severity === 'critical' ? '#DC2626' : severity === 'high' ? '#F97316' : severity === 'medium' ? '#D97706' : severity === 'warning' ? '#64748B' : '#16A34A'
+                  return (
+                    <div key={severity} style={{ marginBottom: 16 }}>
+                      <button
+                        onClick={() => toggleSection(severity)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '12px 16px',
+                          background: 'white',
+                          border: `2px solid ${borderColor}`,
+                          borderRadius: 12,
+                          cursor: 'pointer',
+                          marginBottom: expandedSections[severity] !== false ? 8 : 0,
+                        }}
+                      >
+                        <span style={{ fontSize: 14, fontWeight: 700, color: borderColor, textTransform: 'uppercase' }}>
+                          {severity} ({issues.length})
+                        </span>
+                        <span style={{ fontSize: 12, color: '#64748B' }}>{expandedSections[severity] !== false ? '▼' : '▶'}</span>
+                      </button>
+                      {expandedSections[severity] !== false && issues.map((issue: any) => (
+                        <div key={issue.id} style={{
+                          background: 'white',
+                          border: `1px solid #E2E8F0`,
+                          borderLeft: `4px solid ${borderColor}`,
+                          borderRadius: 8,
+                          padding: '12px 16px',
+                          marginBottom: 8,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 13, color: N, fontWeight: 500 }}>{issue.description}</div>
+                            <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>{issue.page_affected} · {issue.category}</div>
+                          </div>
+                          {issue.status === 'open' && isOpen && (
+                            <button
+                              onClick={() => markFixed(issue.id)}
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: 11,
+                                fontWeight: 600,
+                                background: '#F0FDF4',
+                                color: '#16A34A',
+                                border: '1px solid #BBF7D0',
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Mark Fixed
+                            </button>
+                          )}
+                          {issue.status === 'fixed' && (
+                            <span style={{ fontSize: 11, fontWeight: 600, color: '#16A34A', background: '#F0FDF4', padding: '4px 8px', borderRadius: 4 }}>
+                              Fixed
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+
+                {/* History */}
+                <div style={{ marginTop: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 12 }}>History</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {qaData.history.map((h, i) => (
+                      <div key={h.id} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: N }}>{new Date(h.audit_date).toLocaleDateString()}</div>
+                          <div style={{ fontSize: 11, color: '#64748B' }}>By: {h.audit_by}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, fontSize: 12 }}>
+                          <span style={{ color: '#16A34A' }}>+{h.total_passing}</span>
+                          <span style={{ color: '#DC2626' }}>-{h.total_failing}</span>
+                          <span style={{ color: '#D97706' }}>~{h.total_warnings}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
