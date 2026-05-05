@@ -43,6 +43,11 @@ All set in Vercel dashboard + .env.local:
 - `/admin/status` — Live data from API, DB counts, env var check, git commit
 - `/admin/sitemap` — All pages by access level
 
+### Demo Environment Fix (May 4, 2026)
+- `/demo/search` — Fixed 401 error by adding `isDemo` prop to ClientSearch component
+- Component now uses 5 mock caregivers with client-side filtering instead of API call
+- Mock caregivers: Maria Santos, James Wilson, Priya Patel, Robert Chen, Grace Nkomo
+
 ### Agency Features
 - `/agency/dashboard` — Action-first home, AI command bar
 - `/agency/settings` — Live edit identity, operations, team, compliance
@@ -159,6 +164,7 @@ Consent types:
 ### Features Queued
 7. Ticketing system
 8. ~~Demo environment (/demo/*)~~ ✅ DONE (May 4 2026)
+   - Fixed /demo/search to use mock data (bypasses auth requirement)
 9. Rating system (post-placement)
 10. Family portal Phase 1
 11. AIRecruit Sessions B, C, D

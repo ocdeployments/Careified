@@ -56,10 +56,12 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Agency Search & Match
 - /agency/search — 20+ filters, 15 demo caregivers
-- Match ranking API (/api/match/rank POST)
+- Match ranking API (/api/match/rank POST) — requires Clerk auth
 - Alignment score, dimension breakdown, confidence weighting
 - Browse mode (empty need = show all), Show all option in sort
 - Agency shortlist (/agency/shortlist)
+- **DEMO MODE FIX (May 4 2026):** ClientSearch component now accepts `isDemo` prop for demo routes
+- Demo search (/demo/search) uses 5 mock caregivers with client-side filtering
 
 ### Client Intake & Match Analysis
 - /agency/clients — client list
@@ -283,7 +285,7 @@ app/profile/build/page.tsx — profile builder shell
 app/api/match/rank/route.ts — search/matching API
 app/agency/clients/[id]/page.tsx — client detail + match analysis
 
-Last updated: May 3 2026 | Safe revert: 41c6b31
+Last updated: May 4 2026 | Safe revert: 960aca6
 
 
 ---
@@ -412,14 +414,16 @@ Goal: Let agencies try Careified before signing up — no login required
 Pages:
 - /demo — landing with "Try the platform" CTA
 - /demo/dashboard — agency dashboard with pre-loaded data
-- /demo/search — search with 15 demo caregivers
+- /demo/search — search with 5 mock caregivers (client-side filtering) ✅ FIXED May 4 2026
 - /demo/clients — 5 demo clients with match results
 - /demo/clients/[id] — match analysis with gap list
 - /demo/airecruit — AIRecruit campaign demo (no real calls)
 
-Demo data: same 15 caregivers + 5 clients already in DB
+Demo data: Same 15 caregivers + 5 clients in DB (production). Demo search uses in-component mock data.
 Demo banner: "You are in demo mode — no real data · Sign up to get started"
 CTA on every page: "Start your free 30-day trial →"
 Session-based (no DB writes in demo mode)
 Guided tour option: step-by-step walkthrough of key features
+
+**BUG FIX (May 4 2026):** /demo/search was calling /api/match/rank which requires auth. Fixed by adding `isDemo` prop to ClientSearch component with 5 mock caregivers.
 
