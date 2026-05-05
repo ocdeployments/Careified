@@ -223,9 +223,11 @@ npx tsc --noEmit 2>&1 | head -5
 ### Demo Environment
 - `/demo` — Landing page with feature tour
 - `/demo/dashboard` — Agency dashboard with demo data
-- `/demo/search` — Caregiver search with filters
+- `/demo/search` — Caregiver search with filters (5 mock caregivers, client-side filtering)
 - `/demo/clients` — Client list (5 demo clients)
 - `/demo/clients/[id]` — Client detail with match results
+
+**Note:** ClientSearch component accepts `isDemo` prop. When true, uses in-component mock data instead of calling /api/match/rank (which requires Clerk auth).
 
 ### Travel Radius Map
 - Leaflet + OpenStreetMap in Step 4 (Location)

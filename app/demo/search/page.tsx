@@ -18,7 +18,7 @@ const DEFAULT_FILTERS: SearchFilters = {
 export default function DemoSearchPage() {
   return (
     <div>
-      <ClientSearch initialFilters={DEFAULT_FILTERS} />
+      <ClientSearch initialFilters={DEFAULT_FILTERS} isDemo={true} />
     </div>
   )
 }

@@ -1,17 +1,157 @@
 'use client'
 
-import { useState, useEffect, useCallback, useDeferredValue } from 'react'
+import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { SearchFilters, SearchResponse, CaregiverSearchResult } from '@/lib/types/search'
 import { FilterPanel } from '@/components/search/FilterPanel'
 import { SearchResults } from '@/components/search/SearchResults'
 import { AlignmentDisclaimerBanner } from '@/components/matching/AlignmentBadge'
 import { X } from 'lucide-react'
 
+// Demo/mock data for /demo/* routes
+const DEMO_CAREGIVERS: CaregiverSearchResult[] = [
+  {
+    id: 'demo-1',
+    firstName: 'Maria',
+    lastName: 'Santos',
+    credentials: ['CNA', 'HHA'],
+    specialties: ['Dementia / Alzheimer\'s', 'Post-hospital recovery', 'Medication management'],
+    languages: ['Spanish', 'English'],
+    yearsExperience: 8,
+    clientsServedCount: 24,
+    score: 94,
+    alignment_score: 94,
+    overall_confidence: 0.92,
+    hasReferences: true,
+    hasBackgroundCheck: true,
+    city: 'Toronto',
+    state: 'Ontario',
+    availabilityStatus: 'available_now',
+    availabilityLabel: 'Available now',
+    placementTypes: ['Permanent placement', 'Respite care'],
+    willingLiveIn: true,
+    hasVehicle: true,
+    openToUrgent: true,
+    employmentType: 'full-time',
+    certificationCount: 3,
+    profileCompletionPct: 98,
+    hourlyRate: 32,
+  },
+  {
+    id: 'demo-2',
+    firstName: 'James',
+    lastName: 'Wilson',
+    credentials: ['RN'],
+    specialties: ['Complex personal care', 'Wound care', 'Vital signs monitoring'],
+    languages: ['English'],
+    yearsExperience: 12,
+    clientsServedCount: 45,
+    score: 89,
+    alignment_score: 89,
+    overall_confidence: 0.87,
+    hasReferences: true,
+    hasBackgroundCheck: true,
+    city: 'Mississauga',
+    state: 'Ontario',
+    availabilityStatus: 'available_now',
+    availabilityLabel: 'Available now',
+    placementTypes: ['Permanent placement', 'Overnight care'],
+    willingLiveIn: false,
+    hasVehicle: true,
+    openToUrgent: false,
+    employmentType: 'full-time',
+    certificationCount: 5,
+    profileCompletionPct: 100,
+    hourlyRate: 45,
+  },
+  {
+    id: 'demo-3',
+    firstName: 'Priya',
+    lastName: 'Patel',
+    credentials: ['PSW'],
+    specialties: ['Palliative / end of life', 'Mobility and transfer', 'Behavioural support'],
+    languages: ['English', 'Gujarati', 'Hindi'],
+    yearsExperience: 5,
+    clientsServedCount: 18,
+    score: 86,
+    alignment_score: 86,
+    overall_confidence: 0.84,
+    hasReferences: true,
+    hasBackgroundCheck: true,
+    city: 'Brampton',
+    state: 'Ontario',
+    availabilityStatus: 'available_soon',
+    availabilityLabel: 'Available in 2 weeks',
+    placementTypes: ['Permanent placement', 'Part-time'],
+    willingLiveIn: true,
+    hasVehicle: true,
+    openToUrgent: true,
+    employmentType: 'part-time',
+    certificationCount: 2,
+    profileCompletionPct: 92,
+    hourlyRate: 28,
+  },
+  {
+    id: 'demo-4',
+    firstName: 'Robert',
+    lastName: 'Chen',
+    credentials: ['CNA'],
+    specialties: ['Stroke recovery', 'Diabetes management', 'Mental health support'],
+    languages: ['English', 'Cantonese', 'Mandarin'],
+    yearsExperience: 6,
+    clientsServedCount: 15,
+    score: 82,
+    alignment_score: 82,
+    overall_confidence: 0.79,
+    hasReferences: true,
+    hasBackgroundCheck: true,
+    city: 'Scarborough',
+    state: 'Ontario',
+    availabilityStatus: 'available_now',
+    availabilityLabel: 'Available now',
+    placementTypes: ['Permanent placement', 'Weekend specialist'],
+    willingLiveIn: false,
+    hasVehicle: false,
+    openToUrgent: false,
+    employmentType: 'full-time',
+    certificationCount: 2,
+    profileCompletionPct: 88,
+    hourlyRate: 30,
+  },
+  {
+    id: 'demo-5',
+    firstName: 'Grace',
+    lastName: 'Nkomo',
+    credentials: ['HHA', 'CNA'],
+    specialties: ['Paediatric care', 'Acquired brain injury', 'Behavioural redirection'],
+    languages: ['English', 'French'],
+    yearsExperience: 9,
+    clientsServedCount: 31,
+    score: 78,
+    alignment_score: 78,
+    overall_confidence: 0.75,
+    hasReferences: true,
+    hasBackgroundCheck: true,
+    city: 'Ottawa',
+    state: 'Ontario',
+    availabilityStatus: 'open_to_offers',
+    availabilityLabel: 'Open to offers',
+    placementTypes: ['Casual / relief shifts', 'Respite care'],
+    willingLiveIn: true,
+    hasVehicle: true,
+    openToUrgent: true,
+    employmentType: 'casual',
+    certificationCount: 4,
+    profileCompletionPct: 95,
+    hourlyRate: 29,
+  },
+]
+
 interface ClientSearchProps {
   initialFilters: SearchFilters
+  isDemo?: boolean
 }
 
-export function ClientSearch({ initialFilters }: ClientSearchProps) {
+export function ClientSearch({ initialFilters, isDemo = false }: ClientSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -22,9 +162,76 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
   // Debounce: defer filter changes by 300ms before firing search
   const deferredFilters = useDeferredValue(filters)
 
+  // Filter demo caregivers based on search filters
+  const filteredDemoResults = useMemo(() => {
+    let results = [...DEMO_CAREGIVERS]
+
+    // Filter by state
+    if (filters.state) {
+      results = results.filter(cg => cg.state === filters.state)
+    }
+
+    // Filter by specialties
+    if (filters.specialties?.length) {
+      results = results.filter(cg =>
+        filters.specialties!.some(s => cg.specialties.includes(s))
+      )
+    }
+
+    // Filter by credentials
+    if (filters.credentials?.length) {
+      results = results.filter(cg =>
+        filters.credentials!.some(c => cg.credentials.includes(c))
+      )
+    }
+
+    // Filter by placement types
+    if (filters.placementTypes?.length) {
+      results = results.filter(cg =>
+        filters.placementTypes!.some(p => cg.placementTypes.includes(p))
+      )
+    }
+
+    // Filter by languages
+    if (filters.languages?.length) {
+      results = results.filter(cg =>
+        filters.languages!.some(l => cg.languages.includes(l))
+      )
+    }
+
+    // Sort results
+    switch (filters.sortBy) {
+      case 'experience':
+        results.sort((a, b) => b.yearsExperience - a.yearsExperience)
+        break
+      case 'score':
+      default:
+        results.sort((a, b) => (b.score || 0) - (a.score || 0))
+    }
+
+    return results
+  }, [filters])
+
   const executeSearch = useCallback(async (f: SearchFilters) => {
     setLoading(true)
     setError(null)
+
+    // Use demo data for demo mode
+    if (isDemo) {
+      await new Promise(resolve => setTimeout(resolve, 300)) // Simulate network delay
+      setSearchResponse({
+        results: filteredDemoResults,
+        totalCount: filteredDemoResults.length,
+        page: f.page || 1,
+        totalPages: 1,
+        filters: f,
+      })
+      setExcludedCount(0)
+      setDisclaimer('Demo data only. Sign up to see real caregiver matches.')
+      setLoading(false)
+      return
+    }
+
     try {
       const need = {
         city: f.city,
@@ -78,7 +285,7 @@ export function ClientSearch({ initialFilters }: ClientSearchProps) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [isDemo, filteredDemoResults])
 
   // Fire search when deferred filters change (300ms debounce via useDeferredValue)
   useEffect(() => {
