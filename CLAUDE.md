@@ -9,7 +9,7 @@ Last updated: May 5, 2026 — Phase 1 Complete
 **Repository:** https://github.com/ocdeployments/Careified (private)
 **Live URL:** https://careified.vercel.app
 **Local path:** /Users/owner/careified
-**Geography:** Canada-first (Ontario focus), US expansion planned.
+**Geography:** Canada-first (Ontario focus), US expansion planned. Texas mentioned only in AIRecruit Vapi config history.
 **Core moat:** Two-sided verified reputation system.
 
 Platform serves ALL care backgrounds — never medical-only framing.
@@ -38,6 +38,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 - Write multi-file prompts (one file per commit always)
 - Accept "it looks correct" without verification
 - Paste API keys in chat
+- Use str_replace or write_file for full rewrites (always use bash heredoc)
 
 ## 3. Actual Tech Stack
 
@@ -63,6 +64,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 
 - `.env.local` (DATABASE_URL + Clerk keys)
 - `middleware.ts` (Clerk auth — already configured with public routes)
+- `lib/airecruit/vapi.ts` (edit from Mac terminal only using bash heredoc)
 
 ## 4. Database Rules
 
@@ -78,7 +80,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 
 ```bash
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
-node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
+node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
 ```
 
 ## 5. Workflow Rules — CRITICAL
@@ -108,6 +110,13 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 - Never use `any` in TypeScript unless absolutely necessary.
 - Inline styles preferred over Tailwind.
 - lucide-react for all icons. **No emojis anywhere.**
+- **File Rewrite Rule:** When rewriting existing files, ALWAYS use bash heredoc:
+  ```bash
+  cat > filepath << 'EOF'
+  ...content...
+  EOF
+  ```
+  Never use str_replace or write_file for full rewrites. This has caused multiple debugging sessions.
 
 ## 7. Design System
 
@@ -121,7 +130,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 **NO green as primary colour. No emojis anywhere.**
 
-**Typography:** DM Serif Display (headlines) + DM Sans (body)
+**Typography:** DM Serif Display (headlines) + DM Sans (body). Inter is legacy — being phased out.
 
 **Cards:** white, borderRadius 16px, border 1px solid #E2E8F0
 
@@ -225,6 +234,49 @@ npx tsc --noEmit 2>&1 | head -5
 - Run: `find . -name "*.tsx" -not -path "*/.*" -not -path "*/.next/*" > all_pages.txt`
 - Compare file list against `/admin/sitemap` for orphan detection
 - Audit tab in `/admin/status` tracks orphan pages and fixes
+
+## 14. AIRecruit — Vapi Configuration
+
+### Current Vapi Setup
+- **Assistant ID:** fdd84833-80ef-4c50-8391-2d7b38e56ead
+- **Assistant name:** AIRecruit Screener
+- **Phone Number ID:** efd1fdc0-6795-4d5f-a399-b95367bd88ff
+- **Phone number:** +1 (518) 617-4826 (US Twilio)
+- **Type:** Outbound, warm leads, empathetic + friendly
+- **Voice:** ElevenLabs via Vapi TTS
+- **Model:** openai/gpt-4o with system prompt override
+- **Canadian calls:** Supported via same US Twilio number
+
+### Consent Types
+- `recruit_calls`: ✅ BUILT
+- `reference_calls`: PENDING (Session B)
+- `past_employer_calls`: PENDING (Session C)
+- `current_employer_calls`: DROPPED (legal risk)
+- `regulatory_calls`: PENDING
+- `match_time_calls`: PENDING
+
+### Compliance
+- CRTC (Canada): 9am-9:30pm weekdays, 10am-6pm weekends
+- TCPA (US/Texas): 8am-9pm local time
+- Calling hours enforced in lib/airecruit/calling-hours.ts
+- Suppression list checked before every call
+- Permission gate in every call — candidate must say yes
+
+### AIRecruit Sessions Roadmap
+
+**COMPLETE:**
+- Session A: Core recruitment calls (Phases 1-6)
+
+**PENDING:**
+- **Session B:** Consent flow for all consent types
+- **Session C:** Profile analysis + campaign from profiles + reference agent
+- **Session D:** SMS, retry logic, cron, bulk actions, employer agent
+
+### Scoring Engine
+- OpenRouter API with minimax/minimax-m2.5
+- Runs async after webhook receives transcript
+- Outputs: overallScore, recommendation, summary, questionScores, flags, confidence
+- Recommendation values: advance, review, pass
 
 ## Last updated: May 5, 2026 — Phase 1 Complete
 
