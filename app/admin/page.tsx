@@ -187,6 +187,20 @@ export default async function AdminDashboard() {
         {[
           { label: 'Agency management', desc: 'Approve, edit, modules', href: '/admin/agencies' },
           { label: 'Caregiver management', desc: 'Profiles, verification', href: '/admin/caregivers' },
+          { label: 'Badge management', desc: 'Award, remove badges', href: '/admin/badges' },
+          { label: 'Review management', desc: 'Placement reviews', href: '/admin/reviews' },
+        ].map(l => (
+          <Link key={l.href} href={l.href} style={{ background: 'white', borderRadius: 12, padding: '16px 18px', border: '1px solid #E2E8F0', textDecoration: 'none' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: N, marginBottom: 3 }}>{l.label}</div>
+            <div style={{ fontSize: 11, color: '#94A3B8' }}>{l.desc}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick links row 2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 12 }}>
+        {[
+          { label: 'Reference verification', desc: 'Manage references', href: '/admin/references' },
           { label: 'Build status', desc: 'Features, env vars, DB', href: '/admin/status' },
           { label: 'Site map', desc: 'All 36 pages', href: '/admin/sitemap' },
         ].map(l => (
