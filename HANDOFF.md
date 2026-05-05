@@ -1,5 +1,5 @@
 # Careified — Project Handoff Document
-Generated: May 4, 2026 (Updated)
+Generated: May 5, 2026 (Phase 1 Complete)
 
 ## 1. Project Overview
 Careified is a professional caregiving platform connecting caregivers with agencies and families.
@@ -206,5 +206,49 @@ npx tsc --noEmit 2>&1 | head -20
 - Tests: `tests/e2e/navigation.spec.ts` — 4 passing tests
 - Status page now has "Architecture Audit" tab
 
-## 12. Safe Revert Point
+## 12. QA Tracking System (May 5 2026)
+
+### Database Tables
+- `qa_reports` — Stores audit reports (date, by, passing/failing/warnings counts)
+- `qa_issues` — Stores individual issues (severity, category, description, page, status)
+
+### API Routes
+- POST `/api/qa/report` — Create new report with issues
+- GET `/api/qa/report` — Fetch latest report + issues + history
+- PATCH `/api/qa/report` — Mark issue as fixed
+
+### Admin Tab
+- `/admin/status` → "QA Report" tab with:
+  - Header: audit date, passing/failing/warnings counts
+  - Collapsible sections by severity
+  - Mark Fixed buttons
+  - History timeline
+
+### Seed Script
+- `scripts/seed-qa-report.ts` — Seeds initial 25 issues
+- Run: `npx tsx scripts/seed-qa-report.ts`
+
+## 13. Security (May 5 2026)
+
+### Middleware
+- `middleware.ts` — Clerk auth with public routes whitelist
+- `app/admin/layout.tsx` — ADMIN_CLERK_USER_ID enforcement
+- `app/agency/layout.tsx` — Login + approved agency check
+
+### Protected Routes
+- `/admin/*` — Requires ADMIN_CLERK_USER_ID match
+- `/agency/*` — Requires login + approved agency status
+- `/demo/*` — Open (public)
+
+## 14. Phase 1 Complete (May 5 2026)
+
+| Session | Description | Status |
+|---------|-------------|--------|
+| 1 | QA System | DONE |
+| 2 | Security (middleware + auth) | DONE |
+| 3 | Onboarding (Step 0 default) | DONE |
+| 4 | For Agencies Page rebuild | DONE |
+| 5 | Demo Gate | Already open |
+
+## 15. Safe Revert Point
 git reset --hard 960aca6
