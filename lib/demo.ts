@@ -116,3 +116,57 @@ export const DEMO_BANNER = {
   cta: 'Sign up to get started',
   ctaLink: '/sign-up?role=agency',
 };
+
+// Demo placement reviews for Maria Santos
+export const DEMO_REVIEWS = [
+  {
+    id: 'demo-review-001',
+    agency_name: 'CareFirst Home Care',
+    engagement_start: '2025-06-01',
+    engagement_end: '2025-08-31',
+    punctuality: 5,
+    reliability: 5,
+    professional_conduct: 5,
+    warmth: 4,
+    dignity: 5,
+    patience: 4,
+    personal_hygiene: 5,
+    specialty_match: 4,
+    comms_agency: 5,
+    would_re_engage: true,
+    created_at: '2025-09-01',
+  },
+  {
+    id: 'demo-review-002',
+    agency_name: 'ComfortCare Services',
+    engagement_start: '2025-03-15',
+    engagement_end: '2025-05-30',
+    punctuality: 4,
+    reliability: 5,
+    professional_conduct: 5,
+    warmth: 5,
+    dignity: 5,
+    patience: 5,
+    personal_hygiene: 5,
+    specialty_match: 5,
+    comms_agency: 4,
+    would_re_engage: true,
+    created_at: '2025-06-01',
+  },
+];
+
+// Demo badges for Maria Santos
+export const DEMO_BADGES = [
+  {
+    id: 'consistently_reliable',
+    label: 'Consistently Reliable',
+    description: 'Would be re-hired by 5+ agencies across multiple placements',
+    earned_at: '2025-09-15',
+  },
+  {
+    id: 'exceptionally_caring',
+    label: 'Exceptionally Caring',
+    description: 'Rated 4.5+ average on dignity and warmth across 3+ reviews',
+    earned_at: '2025-09-15',
+  },
+];
