@@ -201,10 +201,22 @@ cd /Users/owner/careified
 git status
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
-echo $DATABASE_URL
-node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
+node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
 npx tsc --noEmit 2>&1 | head -5
 ```
+
+## 13. Testing & Quality Assurance
+
+### Playwright MCP
+- **MCP Server:** `@playwright/mcp` (configured in `~/.claude/settings.json`)
+- **Tests:** `tests/e2e/` — Playwright E2E tests
+- **Run tests:** `npx playwright test tests/e2e/navigation.spec.ts`
+- **Browser install:** `npx playwright install chromium`
+
+### Architecture Audit (QE Agent Role)
+- Run: `find . -name "*.tsx" -not -path "*/.*" -not -path "*/.next/*" > all_pages.txt`
+- Compare file list against `/admin/sitemap` for orphan detection
+- Audit tab in `/admin/status` tracks orphan pages and fixes
 
 ## Last updated: May 4, 2026 — Session Complete
 
