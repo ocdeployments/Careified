@@ -82,7 +82,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const [isClient, setIsClient] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
- const step = searchParams.get('step') || '1'
+ const step = searchParams.get('step') || '0'
  const currentStep = parseInt(step)
  const progress = PROGRESS[currentStep - 1]
  const tier = TIERS[currentStep - 1]
