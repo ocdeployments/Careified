@@ -80,7 +80,7 @@ type LiveData = {
 }
 
 export default function StatusPage() {
-  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'>('pending')
+  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'|'audit'>('pending')
   const [live, setLive] = useState<LiveData | null>(null)
   const [liveLoading, setLiveLoading] = useState(false)
 
@@ -96,9 +96,28 @@ export default function StatusPage() {
     { id: 'pending', label: 'Pending' },
     { id: 'built', label: 'Built & Live' },
     { id: 'security', label: 'Security Audit' },
+    { id: 'audit', label: 'Architecture Audit' },
     { id: 'vapi', label: 'AIRecruit Agents' },
     { id: 'live', label: 'Live Data' },
   ] as const
+
+  // Architecture Audit - May 4 2026
+  const ORPHAN_PAGES = [
+    { path: '/admin/badges', risk: 'HIGH', reason: 'Admin feature, unreachable' },
+    { path: '/admin/references', risk: 'HIGH', reason: 'Admin feature, unreachable' },
+    { path: '/admin/reviews', risk: 'HIGH', reason: 'Admin feature, unreachable' },
+    { path: '/agency/settings', risk: 'MEDIUM', reason: 'No nav link from dashboard' },
+    { path: '/agency/shortlist', risk: 'LOW', reason: 'Linked in dashboard (fixed)' },
+    { path: '/agency/sitemap', risk: 'LOW', reason: 'Internal tool' },
+    { path: '/agency/pending-approval', risk: 'LOW', reason: 'Redirect-only (expected)' },
+  ]
+
+  const PUBLIC_UNLINKED = [
+    { path: '/for-agencies', reason: 'Marketing page' },
+    { path: '/for-caregivers', reason: 'Marketing page' },
+    { path: '/for-families', reason: 'Marketing page' },
+    { path: '/opportunities', reason: 'Job feed' },
+  ]
 
   const pc = (p: string) =>
     p === 'CRITICAL' ? { bg: '#7F1D1D', color: '#FFFFFF', border: '#991B1B' } :
@@ -197,6 +216,50 @@ export default function StatusPage() {
                 <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, color: sc(v.status), background: v.status === 'LIVE' ? '#F0FDF4' : v.status === 'DROPPED' ? '#FEF2F2' : '#FFFBEB', border: `1px solid ${v.status === 'LIVE' ? '#BBF7D0' : v.status === 'DROPPED' ? '#FECACA' : '#FDE68A'}` }}>{v.status}</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {tab === 'audit' && (
+          <div>
+            <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0369A1', marginBottom: 4 }}>Architecture Audit — May 4 2026</div>
+              <div style={{ fontSize: 13, color: '#0C4A6E' }}>Total pages: 53 | Orphan pages: {ORPHAN_PAGES.length} | Public unlinked: {PUBLIC_UNLINKED.length}</div>
+            </div>
+
+            {/* Orphan Pages */}
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 12 }}>Orphan Pages (No Navigation Link)</h3>
+              {ORPHAN_PAGES.map((p, i) => (
+                <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <code style={{ fontSize: 13, color: N, fontWeight: 600 }}>{p.path}</code>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: p.risk === 'HIGH' ? '#FEF2F2' : p.risk === 'MEDIUM' ? '#FFFBEB' : '#F8FAFC', color: p.risk === 'HIGH' ? '#DC2626' : p.risk === 'MEDIUM' ? '#D97706' : '#64748B' }}>{p.risk}</span>
+                    <span style={{ fontSize: 12, color: '#64748B' }}>{p.reason}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Public Unlinked */}
+            <div>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 12 }}>Public Pages Without Nav Links</h3>
+              {PUBLIC_UNLINKED.map((p, i) => (
+                <div key={i} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                  <code style={{ fontSize: 13, color: N }}>{p.path}</code>
+                  <span style={{ fontSize: 12, color: '#64748B' }}>{p.reason}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Fixes Applied */}
+            <div style={{ marginTop: 20, padding: '16px 20px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#16A34A', marginBottom: 8 }}>Fixes Applied</div>
+              <ul style={{ fontSize: 13, color: '#166534', margin: 0, paddingLeft: 20 }}>
+                <li>Added /admin/badges, /admin/reviews, /admin/references to admin dashboard quick links</li>
+                <li>Added /agency/settings, /agency/billing to agency dashboard quick actions</li>
+                <li>Shortlist was already linked (confirmed)</li>
+              </ul>
+            </div>
           </div>
         )}
 
