@@ -1,7 +1,7 @@
 # CLAUDE.md — Careified
 
 Read this file completely at the start of every session.
-Last updated: May 4, 2026 — Session Complete
+Last updated: May 5, 2026 — Phase 1 Complete
 
 ## 1. Project Identity
 
@@ -57,11 +57,12 @@ I am CareNet Architect. I design and prompt. The agent builds.
 - **Inline styles preferred** over Tailwind (v4 production issues)
 - **Prisma:** camelCase model fields map to snake_case DB columns
 - **pg Pool:** NEVER in middleware.ts (Edge Runtime incompatible)
+- **Middleware:** Uses Clerk auth with public routes whitelist
 
 ### DO NOT TOUCH
 
 - `.env.local` (DATABASE_URL + Clerk keys)
-- `middleware.ts` (Clerk auth — already correct)
+- `middleware.ts` (Clerk auth — already configured with public routes)
 
 ## 4. Database Rules
 
@@ -213,12 +214,19 @@ npx tsc --noEmit 2>&1 | head -5
 - **Run tests:** `npx playwright test tests/e2e/navigation.spec.ts`
 - **Browser install:** `npx playwright install chromium`
 
+### QA Tracking System (May 5 2026)
+- **Database tables:** `qa_reports`, `qa_issues` (created via SQL)
+- **API:** `/api/qa/report` — POST (create report), GET (fetch latest + history), PATCH (mark fixed)
+- **Admin tab:** `/admin/status` → "QA Report" tab with collapsible sections, Mark Fixed buttons
+- **Seed script:** `scripts/seed-qa-report.ts` — seed initial audit issues
+- **Run seed:** `npx tsx scripts/seed-qa-report.ts`
+
 ### Architecture Audit (QE Agent Role)
 - Run: `find . -name "*.tsx" -not -path "*/.*" -not -path "*/.next/*" > all_pages.txt`
 - Compare file list against `/admin/sitemap` for orphan detection
 - Audit tab in `/admin/status` tracks orphan pages and fixes
 
-## Last updated: May 4, 2026 — Session Complete
+## Last updated: May 5, 2026 — Phase 1 Complete
 
 ### Demo Environment
 - `/demo` — Landing page with feature tour
