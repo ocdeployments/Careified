@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   const { id, token } = result.rows[0]
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://careified.vercel.app'
-  return NextResponse.json({ id, token, responseUrl: `${appUrl}/reference/${token}` })
+  return NextResponse.json({ id, token, referenceId: id, responseUrl: `${appUrl}/reference/${token}` })
 }
 
 export async function GET() {
