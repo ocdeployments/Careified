@@ -3,6 +3,7 @@ import { DM_Serif_Display, DM_Sans } from 'next/font/google'
 import Navbar from '@/components/nav/Navbar'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
+import Script from 'next/script'
 
 const dmSerif = DM_Serif_Display({
   subsets: ['latin'],
@@ -73,6 +74,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
           }}
         />
+        {process.env.NEXT_PUBLIC_CLARITY_ID && (
+          <Script id="microsoft-clarity" strategy="afterInteractive">
+            {`(function(c,l,a,r,i,t,y){c[i]=c[i]||function(){(c[i].q=c[i].q||[]).push(arguments)};t=l.createElement(a);y=l.getElementsByTagName(a)[0];t.async=1;t.src=r;y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");`}
+          </Script>
+        )}
       </body>
     </html>
   )
