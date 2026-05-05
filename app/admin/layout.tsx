@@ -1,4 +1,6 @@
 import { ReactNode } from 'react'
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Users, Shield, Settings } from 'lucide-react'
 
@@ -9,7 +11,18 @@ const ADMIN_NAV = [
   { href: '/admin/sitemap', label: 'Site Map', icon: Shield },
 ]
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    redirect('/sign-in?redirect_url=/admin')
+  }
+
+  const adminId = process.env.ADMIN_CLERK_USER_ID
+  if (!adminId || userId !== adminId) {
+    redirect('/')
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F7F4F0' }}>
       {/* Sidebar */}
