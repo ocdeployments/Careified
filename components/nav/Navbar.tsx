@@ -73,30 +73,25 @@ function AuthButton() {
 const panels = {
   caregivers: {
     accent: '#C9973A',
-    title: 'For Caregivers',
-    desc: 'Build a verified profile and get matched with agencies that fit you.',
+    title: 'For Professional Caregivers',
+    desc: "You don't need another app. Build once. Be seen forever.",
     links: [
-      { href: '/profile/build',    label: 'Build your profile',    desc: 'Free — takes 10 minutes'      },
-      { href: '/opportunities',    label: 'Browse opportunities',  desc: 'See open placements'          },
-      { href: '/profile/demo',     label: 'Profile demo',          desc: 'See what agencies see'        },
-      { href: '/for-caregivers',   label: 'For Caregivers',       desc: 'See the caregiver journey'    },
+      { href: '/for-caregivers#why-build', label: 'Why Should I Build My Profile?', desc: 'See how a verified profile gets you discovered by agencies that match your skills.' },
+      { href: '/opportunities',            label: 'Browse Opportunities',           desc: 'See open roles matched to your skills, availability, and location.'               },
+      { href: '/profile/build',            label: 'Claim Your Profile',             desc: 'Build once. Be seen forever. Free — takes 10 minutes.'                           },
     ],
-    cta: { href: '/sign-up?role=caregiver', label: 'Join as a caregiver' },
+    cta: { href: '/profile/build', label: 'Claim Your Profile' },
   },
   agencies: {
-    accent: '#2563EB',
-    title: 'For Agencies',
-    desc: 'Find, vet, and place caregivers faster with AI-powered matching.',
+    accent: '#1E3A8A',
+    title: 'Recruit Without the Legwork.',
+    desc: 'We deliver interview-ready professionals with intelligent AI-powered matches.',
     links: [
-      { href: '/agency/search',    label: 'Search caregivers', desc: 'Browse verified profiles'       },
-      { href: '/agency/shortlist', label: 'Shortlist',         desc: 'Save and compare candidates'    },
-      { href: '/agency/clients',   label: 'My clients',        desc: 'Manage client placements'       },
-      { href: '/agency/settings',  label: 'Agency settings',   desc: 'Branding, areas, compliance'    },
-      { href: '/agency/billing',   label: 'Billing',           desc: 'Plan, modules, trial'           },
-      { href: '/agency/sitemap',   label: 'Site Map',          desc: 'All agency pages'               },
-      { href: '/for-agencies',     label: 'How it works',      desc: 'See the full agency workflow'   },
+      { href: '/agency/signup',  label: 'Join the Careified Network', desc: 'Start recruiting smarter — no manual screening required.'         },
+      { href: '/for-agencies',   label: 'How It Works',               desc: 'See the Careified workflow end-to-end — from search to placement.' },
+      { href: '/demo',           label: 'Try the Platform',           desc: 'Explore a live demo — no login required.'                         },
     ],
-    cta: { href: '/agency/signup', label: 'Start as an agency' },
+    cta: { href: '/agency/signup', label: 'Join the Careified Network' },
   },
   families: {
     accent: '#16A34A',
@@ -255,7 +250,7 @@ export default function Navbar() {
             {/* Links */}
             <div className="col-span-2 grid grid-cols-2 gap-3">
               {panels[activePanel].links
-                .filter(link => link.href !== '/agency/sitemap' || isAgency)
+                .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
                 .map(link => (
                 <Link
                   key={link.href}
@@ -292,7 +287,7 @@ export default function Navbar() {
               {activePanel === key && (
                 <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
                   {panels[key].links
-                    .filter(link => link.href !== '/agency/sitemap' || isAgency)
+                    .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
                     .map(link => (
                     <Link
                       key={link.href}
