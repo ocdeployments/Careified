@@ -139,6 +139,8 @@ export default function Step9References() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [inviteStatus, setInviteStatus] = useState<Record<number, 'idle' | 'sending' | 'sent' | 'error'>>({})
   const [inviteUrls, setInviteUrls] = useState<Record<number, string>>({})
+  const [actionLoading, setActionLoading] = useState<Record<number, 'sending' | 'reminding' | 'cancelling' | null>>({})
+  const [referenceIds, setReferenceIds] = useState<Record<number, string>>({})
   const [copied, setCopied] = useState<Record<number, boolean>>({})
 
   const references = formData.references || []
@@ -210,6 +212,7 @@ export default function Step9References() {
       if (!res.ok) throw new Error(data.error)
       setInviteStatus(prev => ({ ...prev, [index]: 'sent' }))
       setInviteUrls(prev => ({ ...prev, [index]: data.responseUrl }))
+      setReferenceIds(prev => ({ ...prev, [index]: data.referenceId }))
     } catch {
       setInviteStatus(prev => ({ ...prev, [index]: 'error' }))
     }
@@ -219,6 +222,57 @@ export default function Step9References() {
     navigator.clipboard.writeText(inviteUrls[index])
     setCopied(prev => ({ ...prev, [index]: true }))
     setTimeout(() => setCopied(prev => ({ ...prev, [index]: false })), 2000)
+  }
+
+  const sendReferenceEmail = async (index: number) => {
+    if (!referenceIds[index]) return
+    setActionLoading(prev => ({ ...prev, [index]: 'sending' }))
+    try {
+      const res = await fetch('/api/references/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referenceId: referenceIds[index], action: 'send' }),
+      })
+      if (!res.ok) throw new Error('Failed to send')
+    } catch { /* handled */ }
+    setActionLoading(prev => ({ ...prev, [index]: null }))
+  }
+
+  const sendReminder = async (index: number) => {
+    if (!referenceIds[index]) return
+    setActionLoading(prev => ({ ...prev, [index]: 'reminding' }))
+    try {
+      const res = await fetch('/api/references/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referenceId: referenceIds[index], action: 'remind' }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(data.error || 'Failed to send reminder')
+      } else {
+        alert('Reminder sent!')
+      }
+    } catch { /* handled */ }
+    setActionLoading(prev => ({ ...prev, [index]: null }))
+  }
+
+  const cancelReference = async (index: number) => {
+    if (!referenceIds[index]) return
+    if (!confirm('Cancel this reference request?')) return
+    setActionLoading(prev => ({ ...prev, [index]: 'cancelling' }))
+    try {
+      const res = await fetch('/api/references/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referenceId: referenceIds[index], action: 'cancel' }),
+      })
+      if (res.ok) {
+        setInviteStatus(prev => ({ ...prev, [index]: 'idle' }))
+        setReferenceIds(prev => { const n = { ...prev }; delete n[index]; return n })
+      }
+    } catch { /* handled */ }
+    setActionLoading(prev => ({ ...prev, [index]: null }))
   }
 
   const isClientReference = (relationship: string) =>
@@ -448,6 +502,60 @@ export default function Step9References() {
                     <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '8px' }}>
                       Once they submit, a verified badge appears on your profile automatically.
                     </p>
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => sendReferenceEmail(index)}
+                        disabled={actionLoading[index] === 'sending'}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          border: '1px solid #E2E8F0',
+                          background: 'white',
+                          color: '#0D1B3E',
+                          cursor: actionLoading[index] === 'sending' ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {actionLoading[index] === 'sending' ? 'Sending...' : 'Send Email'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => sendReminder(index)}
+                        disabled={actionLoading[index] === 'reminding'}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          border: '1px solid #E2E8F0',
+                          background: 'white',
+                          color: '#C9973A',
+                          cursor: actionLoading[index] === 'reminding' ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {actionLoading[index] === 'reminding' ? 'Sending...' : 'Remind'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cancelReference(index)}
+                        disabled={actionLoading[index] === 'cancelling'}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          border: '1px solid #FCA5A5',
+                          background: 'white',
+                          color: '#DC2626',
+                          cursor: actionLoading[index] === 'cancelling' ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {actionLoading[index] === 'cancelling' ? 'Cancelling...' : 'Cancel'}
+                      </button>
+                    </div>
                   </div>
                 )}
 
