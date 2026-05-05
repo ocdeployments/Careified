@@ -182,10 +182,23 @@ cd /Users/owner/careified
 git status
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
-echo $DATABASE_URL
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
 npx tsc --noEmit 2>&1 | head -20
 ```
 
-## 11. Safe Revert Point
+## 11. Architecture Audit (May 4 2026)
+
+### Orphan Pages Fixed
+- `/admin/badges` — Added to admin dashboard quick links
+- `/admin/reviews` — Added to admin dashboard quick links
+- `/admin/references` — Added to admin dashboard quick links
+- `/agency/settings` — Added to agency dashboard quick actions
+- `/agency/billing` — Added to agency dashboard quick actions
+
+### Testing Infrastructure
+- Playwright MCP configured in `~/.claude/settings.json`
+- Tests: `tests/e2e/navigation.spec.ts` — 4 passing tests
+- Status page now has "Architecture Audit" tab
+
+## 12. Safe Revert Point
 git reset --hard 960aca6
