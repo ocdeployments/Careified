@@ -27,8 +27,8 @@
 
 ## SYSTEM CHECKS (Run Every Session)
 
-- [ ] middleware.ts exists at project root
-- [ ] middleware.ts protects all caregiver/agency/admin routes
+- [x] proxy.ts exists at project root (renamed from middleware.ts May 6 2026)
+- [x] proxy.ts protects all caregiver/agency/admin routes
 - [ ] npx tsc --noEmit passes with zero errors
 - [ ] All required env vars present (see ENV VARS section)
 - [ ] git status is clean before starting
@@ -38,9 +38,9 @@
 
 ## SECURITY — CURRENTLY FAILING ❌
 
-These are active failures as of May 5 2026. Fix before launch.
+These are active failures as of May 6 2026. Fix before launch.
 
-- [ ] middleware.ts EXISTS — MISSING (CRITICAL)
+- [x] proxy.ts EXISTS (was middleware.ts — renamed May 6 2026) ✅ FIXED
 - [ ] /admin/* requires ADMIN_CLERK_USER_ID check — NOT ENFORCED (CRITICAL)
 - [ ] /agency/billing requires agency auth — NOT ENFORCED (HIGH)
 - [ ] /agency/clients requires agency auth — NOT ENFORCED (HIGH)
