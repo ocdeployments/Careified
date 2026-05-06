@@ -494,7 +494,8 @@ export default function StatusPage() {
                 { label: 'SSL cert: rejectUnauthorized: false', file: 'FIXED May 6 2026', reason: 'lib/db.ts now uses true in production' },
                 { label: 'Broken link: /settings', file: 'FIXED', reason: 'Redirects to /settings/communications' },
                 { label: 'Broken link: /agency/support', file: 'FIXED', reason: 'Support page exists' },
-                { label: 'Broken link: /profile/start', file: 'FIXED', reason: 'Changed to /profile/build' },
+                { label: 'Broken link: /profile/start', file: 'FIXED', reason: 'Page does not exist - use /profile/build' },
+                { label: 'Sign-up redirect to /profile/start', file: 'FIXED May 6 2026', reason: 'Changed redirectUrl to /profile/build' },
                 { label: 'Claim Your Profile CTA', file: 'FIXED May 6 2026', reason: 'Now routes through /sign-up?role=caregiver' },
                 { label: '/profile/build defaults to step=0', file: 'FIXED May 4 2026', reason: 'Step 0 is consent/resume upload' },
               ].map((issue, i) => (
