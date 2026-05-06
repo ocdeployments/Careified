@@ -1,6 +1,24 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 4 2026
+# Last updated: May 5 2026
 # Safe revert: 960aca6
+
+---
+
+## SESSION HISTORY
+
+| Session | Description | Status | Commit |
+|---------|-------------|--------|--------|
+| 1–8D | Auth, search, shortlist, profile builder, ID cards, navbar, landing | DONE | 41c6b31 |
+| 9 | ProfilePreviewCard, IDCardReveal, three-column layout | DONE | bbaeb1e |
+| 10A | 51 DB columns, ProfileFormContext, useProfileSave, 3 API routes | DONE | 3fc6eab |
+| 10B | Step1Identity rebuild (Context + useProfileSave) | DONE | 31b1bd2 |
+| 10C | Step2Services rebuild (Context pattern) | DONE | b72055e |
+| 10D-L | Steps 3-10 rebuild (all complete) | DONE | Phase 1 |
+
+### Phase 1 Complete (May 5 2026)
+All 11 profile builder steps working with Context pattern and three-layer save.
+
+---
 
 ## LIVE
 careified.vercel.app | Repo: ocdeployments/Careified (main)
