@@ -482,4 +482,192 @@ If something is unclear — ask before building.
 One wrong assumption costs a commit. One wrong architectural
 decision costs a session.
 
+---
+
+## 14. Client Intake System — Architecture
+
+*From CLIENT_INTAKE.md — designed, not yet built*
+
+### Strategic Context
+The client profile is the mirror image of the caregiver profile.
+Every client field maps to a caregiver filter for matching.
+Without client profiles there is no matching — just a directory.
+
+The agency holds both sides:
+- Creates client profiles from family intake
+- Matches against caregiver profiles
+- Makes placements
+
+Families never directly access client records — only through
+the family portal (Session 14) with agency permission.
+
+### Database Tables Needed
+- `clients` — core client record
+- `client_medical` — Section C (medical history, encrypted)
+- `client_cognitive` — cognitive and mental health
+- `client_adl` — ADL/IADL assessment
+- `client_home` — home environment safety
+- `client_family` — family contacts and decision makers
+- `client_care_plan` — schedule and care plan
+- `client_preferences` — caregiver preferences (matching engine fuel)
+- `client_safety` — safety and emergency
+- `client_consents` — legal consents with e-signatures
+- `client_goals` — goals and notes
+
+### The Matching Matrix
+
+| Client Field | Caregiver Mirror | Weight |
+|-------------|-----------------|-------|
+| preferred_gender | gender | Hard filter |
+| required_languages | languages[] | Hard filter |
+| shift_times_grid | weekly_grid | Hard filter |
+| client location | service_areas + travel_radius | Hard filter |
+| care_types | services[] + specializations[] | Hard filter |
+| required certifications | credentials[] | Hard filter |
+| cognitive status | dementia skills | Hard filter |
+| physical demands | lift_experience[] | Hard filter |
+| preferred_personality | personality_profile.strengths | 10% |
+| hobbies_interests | (future: caregiver hobbies) | 2% |
+| pets | pet_tolerance | Weighted |
+| smoking | smoker_household | Weighted |
+| budget range | hourly_rate | Weighted |
+| consistency_importance | placement_types (permanent) | Weighted |
+| cultural_preferences | (optional match) | Soft |
+
+### Match Score Formula
+Hard filters: pass/fail (fail = excluded from results)
+
+Weighted score (0-100):
+- service_coverage 30% — % of required services caregiver offers
+- schedule_fit 20% — % overlap required/available hours
+- trust_score 15% — aggregate_score normalized to 0-15
+- credential_depth 10% — certs beyond minimum requirement
+- personality_fit 10% — client preference vs caregiver tags
+- experience_level 8% — years + specialization depth match
+- environment_fit 5% — pets/smoke/physical demands
+- interests_alignment 2% — hobbies overlap
+
+### Routes
+- `/agency/clients` → client list (table view)
+- `/agency/clients/new` → 12-section intake form
+- `/agency/clients/[id]` → client profile view
+- `/agency/clients/[id]/edit` → edit any section
+- `/agency/clients/[id]/match` → ranked caregiver matches
+- `/agency/clients/[id]/schedule` → care schedule management
+- `/agency/clients/[id]/notes` → coordinator notes
+
+### Intake Form UX
+Progressive sections (not all shown at once)
+
+Phase 1 — Essential (creates client record, enables matching):
+Sections A, B, H, I — 52 fields — ~15 minutes
+
+Phase 2 — Clinical (unlocks full matching):
+Sections C, D, E — 55 fields — ~20 minutes
+
+Phase 3 — Environment and safety:
+Sections F, G, K — 42 fields — ~15 minutes
+
+Phase 4 — Legal and goals:
+Sections J, L — 20 fields — ~10 minutes
+
+### Build Sequence
+- Session 11A: DB migration — create all 9 tables
+- Session 11B: /agency/clients list page
+- Session 11C: Client intake form Phase 1 (sections A + B + H + I)
+- Session 11D: Client intake form Phase 2 (sections C + D + E)
+- Session 11E: Client intake form Phase 3 (sections F + G + K)
+- Session 11F: Client intake form Phase 4 (sections J + L)
+- Session 11G: Client profile display page
+- Session 12A: Matching engine (hard filters)
+- Session 12B: Matching engine (weighted scoring)
+- Session 12C: /agency/clients/[id]/match display
+
+---
+
+## 15. Rating System — Design
+
+*From RATING_SYSTEM.md — designed, not yet built*
+
+### Core Philosophy
+Reputations are **EARNED** through real work — not portable.
+Careified makes earned reputations **VISIBLE**, **VERIFIABLE** and **UNDENIABLE**.
+
+The rating system captures both:
+- **Professional:** did they do the job right?
+- **Human:** did they treat the person with dignity?
+
+These are NOT the same thing. Both matter enormously.
+
+- Max trust score from self-assessment alone: **4.0**
+- Max trust score with agency validation: **5.0**
+- You cannot self-report your way to a perfect score.
+
+### Four Sources — Weighted by Credibility
+
+| Source | Weight | Notes |
+|--------|--------|-------|
+| Caregiver (self) | Baseline — lowest | Structured fields, not free text |
+| System (behavioural) | Medium | Passive signals — completeness, recency, response rate |
+| Agency (employer) | High | Confirmed working relationship required before scoring |
+| Platform admin | Highest | Verified against external standards |
+
+### Six Rating Categories
+
+1. **Professional Reliability** (CRITICAL)
+   - Punctuality, Reliability, Would re-engage, Professional conduct
+   - "Would re-engage" is the single most powerful binary signal
+
+2. **Human Qualities** (HIGH)
+   - Warmth and friendliness, Dignity and respect, Patience, Emotional presence
+
+3. **Personal Care and Hygiene** (HIGH)
+   - Personal hygiene standards, Client hygiene and personal care, Environment and cleanliness
+
+4. **Beyond the Call** (BONUS — elevates only)
+   - Initiative, Emotional support, Family communication, Creative engagement, Problem solving
+
+5. **Skills Match and Competency** (HIGH)
+   - Specialty match, Medical awareness, Medication handling, Mobility and transfer safety
+
+6. **Communication and Conduct** (MEDIUM)
+   - Communication with agency, Communication with family, Boundaries and professionalism
+
+### Recognition Badges
+
+Earned — not scored. Appear visibly on profile.
+
+| Badge | Trigger condition |
+|-------|------------------|
+| Consistently Reliable | 5x would re-engage across 3+ agencies |
+| Exceptionally Caring | Top dignity + warmth scores from families |
+| Above and Beyond | 3+ agencies noted initiative |
+| Dementia Specialist | Specialty confirmed by 2+ agencies |
+| Family Favourite | Top scores from family feedback |
+| Trusted Veteran | 3+ years on platform, consistently high |
+| Culturally Aware | Cultural sensitivity noted by multiple sources |
+| Quick Response | Consistently high availability update rate |
+| Highly Communicative | Top communication scores across agency + family |
+| Self-Aware | Personality self-assessment consistently validated |
+| Humble Professional | Consistently undersells — agencies always rate higher |
+
+### Caregiver Protections
+- **Minimum relationship threshold** — agency must confirm engagement dates
+- **Statistical outlier protection** — auto-flagged for admin review
+- **Aggregate visibility only** — caregivers see dimension scores in aggregate
+- **Dispute path** — 14 days to flag unfair score before permanent publish
+- **No public negative scores** — only positive signals publicly visible
+
+### Profile Completeness Tiers
+
+| Tier | Score | Unlocks |
+|------|-------|---------|
+| Incomplete | < 40% | Not visible in search |
+| Basic | 40–59% | Visible in search |
+| Verified | 60–79% | Verified badge shown |
+| Professional | 80–94% | Featured matching eligible |
+| Elite | 95%+ | Top placement (requires agency validation) |
+
+---
+
 Last updated: May 5 2026
