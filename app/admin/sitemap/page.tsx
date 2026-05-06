@@ -10,7 +10,34 @@ type RouteInfo = {
   access: string
   filePath: string
   isDynamic: boolean
+  isOrphan: boolean
 }
+
+// Routes that are reachable via navbar/dropdowns (NOT orphans)
+const LINKED_ROUTES = [
+  '/', '/about', '/contact', '/privacy', '/terms',
+  '/for-caregivers', '/for-agencies', '/for-families',
+  '/sign-in', '/sign-up', '/demo', '/opportunities',
+  '/profile/build', '/profile/strength', '/profile/demo',
+  '/settings', '/settings/communications', '/settings/data-rights',
+  '/agency/dashboard', '/agency/search', '/agency/shortlist',
+  '/agency/clients', '/agency/clients/new', '/agency/airecruit',
+  '/agency/airecruit/new', '/agency/settings', '/agency/billing',
+  '/admin', '/admin/agencies', '/admin/caregivers',
+  '/admin/status', '/admin/sitemap', '/admin/badges',
+  '/admin/reviews', '/admin/references',
+]
+
+// Routes that are intentionally not linked (system routes)
+const INTENTIONAL_UNLINKED = [
+  '/id/:caregiverId', '/verify/:slug', '/reference/:token',
+  '/profile/:id', '/demo/dashboard', '/demo/search',
+  '/demo/clients', '/demo/clients/:id',
+  '/agency/pending-approval', '/agency/signup',
+  '/agency/clients/:id', '/agency/clients/:id/review',
+  '/agency/airecruit/:campaignId', '/agency/airecruit/:campaignId/:callId',
+  '/onboarding', '/profile/dispute/:id',
+]
 
 function categorizeRoute(path: string): { category: string; access: string } {
   const segments = path.split('/').filter(Boolean)
@@ -62,13 +89,22 @@ export default async function SitemapPage() {
   
   const routes: RouteInfo[] = allPaths.map(path => {
     const { category, access } = categorizeRoute(path)
-    const filePath = path === '/' 
-      ? 'app/page.tsx' 
+    const filePath = path === '/'
+      ? 'app/page.tsx'
       : `app${path}/page.tsx`
     const isDynamic = path.includes(':')
-    
-    return { route: path, category, access, filePath, isDynamic }
+
+    // Check if route is orphaned (not in navbar/dropdowns)
+    const isOrphan = !LINKED_ROUTES.includes(path) && !INTENTIONAL_UNLINKED.some(u => {
+      const pattern = u.replace(/:[^/]+/g, '[^/]+')
+      return new RegExp(`^${pattern}$`).test(path)
+    })
+
+    return { route: path, category, access, filePath, isDynamic, isOrphan }
   })
+
+  // Get orphan routes
+  const orphanRoutes = routes.filter(r => r.isOrphan)
   
   // Sort: admin, agency, caregiver, public, auth, api
   const categoryOrder: Record<string, number> = {
@@ -104,7 +140,8 @@ export default async function SitemapPage() {
   
   const order = ['admin', 'agency', 'caregiver', 'public', 'auth', 'api']
   const total = routes.length
-  
+  const orphanCount = orphanRoutes.length
+
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: 'system-ui, sans-serif', padding: '32px 24px' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -112,6 +149,29 @@ export default async function SitemapPage() {
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 24px' }}>
           Auto-generated from filesystem — {total} routes
         </p>
+
+        {/* ORPHAN ROUTES SECTION */}
+        {orphanCount > 0 && (
+          <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 16 }}>⚠️</span>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#92400E', margin: 0 }}>Orphan Pages — Need Navigation Links ({orphanCount})</h2>
+            </div>
+            <p style={{ fontSize: 13, color: '#B45309', margin: '0 0 12px' }}>
+              These pages exist but are not linked from navbar/dropdowns. Add to navigation or mark as intentional.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {orphanRoutes.map(r => (
+                <code key={r.route} style={{
+                  fontSize: 12, padding: '4px 10px', borderRadius: 6,
+                  background: 'white', color: '#92400E', border: '1px solid #FDE68A'
+                }}>
+                  {r.route}
+                </code>
+              ))}
+            </div>
+          </div>
+        )}
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {order.map(cat => {
