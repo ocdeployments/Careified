@@ -305,6 +305,7 @@ npx tsc --noEmit 2>&1 | head -5
    - HANDOFF.md
    - CAREIFIED_SPEC.md
    - CAREIFIED_STATUS.md
+   - app/admin/status/page.tsx (to verify it reflects current state)
 
 2. Run the session start checklist:
    ```bash
@@ -371,10 +372,19 @@ npx tsc --noEmit 2>&1 | head -5
    Commit: "chore: update CAREIFIED_STATUS.md — [date]"
    Show diff. Wait for approval.
 
-6. RUN FINAL QA AUDIT
+6. UPDATE /admin/status/page.tsx
+   - Update PENDING array: move fixed items to FIXED, add any new issues
+   - Update SECURITY object: adjust counts, update currentPriority
+   - Update ORPHAN_PAGES: reflect current navigation state
+   - Update BUILT array: add any new features built today
+   - Update dates to current session date
+   Commit: "chore: update admin status page — [date]"
+   Show diff. Wait for approval.
+
+7. RUN FINAL QA AUDIT
    POST report to /api/qa/report with latest commit hash
 
-7. SHOW SESSION SUMMARY:
+8. SHOW SESSION SUMMARY:
    ```
    SESSION COMPLETE — [date]
    ──────────────────────────────
@@ -395,7 +405,7 @@ npx tsc --noEmit 2>&1 | head -5
    [one line — single most important next action]
    ```
 
-## Last updated: May 5, 2026 — Phase 1 Complete
+## Last updated: May 6, 2026 — Phase 1 Complete
 
 ### Demo Environment
 - `/demo` — Landing page with feature tour
