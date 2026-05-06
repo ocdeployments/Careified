@@ -98,7 +98,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/profile/build"
+            href="/sign-up?role=caregiver&redirect_url=/profile/build"
             style={{
               display: 'inline-block',
               marginTop: '32px',
@@ -473,7 +473,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/profile/build"
+            href="/sign-up?role=caregiver&redirect_url=/profile/build"
             style={{
               display: 'inline-block',
               padding: '16px 40px',
