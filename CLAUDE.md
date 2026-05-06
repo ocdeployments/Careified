@@ -278,6 +278,105 @@ npx tsc --noEmit 2>&1 | head -5
 - Outputs: overallScore, recommendation, summary, questionScores, flags, confidence
 - Recommendation values: advance, review, pass
 
+## 14. Session Commands
+
+### When I say "start session" you will:
+1. Read these files in full — in this order:
+   - CONTEXT.md
+   - CLAUDE.md
+   - HANDOFF.md
+   - CAREIFIED_SPEC.md
+   - CAREIFIED_STATUS.md
+
+2. Run the session start checklist:
+   ```bash
+   cd /Users/owner/careified
+   git status
+   git log --oneline -5
+   export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
+   node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
+   npx tsc --noEmit 2>&1 | head -5
+   ```
+
+3. Audit the codebase against CAREIFIED_SPEC.md
+   POST findings to /api/qa/report
+   Show me: PASS / FAIL / WARNING counts only
+
+4. Show this summary:
+   ```
+   SESSION STARTED — [date]
+   ─────────────────────────
+   Git: [last 3 commits]
+   TypeScript: ✅ clean / ❌ X errors
+   DB: ✅ [X caregivers]
+   QA: ❌ X failing  ⚠️ X warnings  ✅ X passing
+   Most critical open issue: [top item from spec]
+   Awaiting your instruction.
+   ```
+
+5. Do not build anything. Wait for my instruction.
+
+---
+
+### When I say "end session" you will:
+1. UPDATE CAREIFIED_SPEC.md
+   - Add new pages + expected behaviours built today
+   - Add new buttons/CTAs with href targets
+   - Move fixed issues to RESOLVED section
+   - Update page count if changed
+   Commit: "chore: update CAREIFIED_SPEC.md — [date]"
+   Show diff. Wait for approval.
+
+2. UPDATE CLAUDE.md
+   - Update Last updated date
+   - Add new key files, DB tables, env vars
+   Commit: "chore: update CLAUDE.md — [date]"
+   Show diff. Wait for approval.
+
+3. UPDATE CONTEXT.md
+   - Add product decisions made today and WHY
+   - Add anything tried that didn't work
+   Commit: "chore: update CONTEXT.md — [date]"
+   Show diff. Wait for approval.
+
+4. UPDATE HANDOFF.md
+   - Update generated date
+   - Add new pages to inventory
+   - Move completed items out of pending
+   - Update safe revert point to latest commit hash
+   Commit: "chore: update HANDOFF.md — [date]"
+   Show diff. Wait for approval.
+
+5. UPDATE CAREIFIED_STATUS.md
+   - Mark completed sessions as DONE with commit hash
+   - Move next session to top of queue
+   Commit: "chore: update CAREIFIED_STATUS.md — [date]"
+   Show diff. Wait for approval.
+
+6. RUN FINAL QA AUDIT
+   POST report to /api/qa/report with latest commit hash
+
+7. SHOW SESSION SUMMARY:
+   ```
+   SESSION COMPLETE — [date]
+   ──────────────────────────────
+   Commits: X
+   [list each hash + message]
+
+   QA Delta:
+   Started:  ❌ X failing  ⚠️ X warnings
+   Finished: ❌ X failing  ⚠️ X warnings
+   Fixed this session: X issues
+
+   Still open (priority order):
+   1. [most critical]
+   2. [second]
+   3. [third]
+
+   Next session should start with:
+   [one line — single most important next action]
+   ```
+
 ## Last updated: May 5, 2026 — Phase 1 Complete
 
 ### Demo Environment
