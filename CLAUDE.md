@@ -381,6 +381,12 @@ npx tsc --noEmit 2>&1 | head -5
    Commit: "chore: update admin status page — [date]"
    Show diff. Wait for approval.
 
+   **IMPORTANT:** When adding new hrefs/redirects, verify all destination pages exist:
+   - Check any new Link hrefs in components/pages point to existing routes
+   - Check any redirectUrl parameters point to existing routes
+   - Use `ls app/` to verify directory structure
+   - Broken redirects = broken user flow
+
 7. RUN FINAL QA AUDIT
    POST report to /api/qa/report with latest commit hash
 
