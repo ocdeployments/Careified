@@ -308,8 +308,11 @@ npx tsc --noEmit 2>&1 | head -5
    - app/admin/status/page.tsx (to verify it reflects current state)
 
 2. Run the session start checklist:
+   Verify you are on the develop branch:
    ```bash
    cd /Users/owner/careified
+   git checkout develop
+   git pull origin develop
    git status
    git log --oneline -5
    export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
