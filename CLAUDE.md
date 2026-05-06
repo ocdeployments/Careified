@@ -434,3 +434,63 @@ npx tsc --noEmit 2>&1 | head -5
 
 Read CAREIFIED_STATUS.md for full build tracker, pending items, and roadmap.
 Read HANDOFF.md for project handoff context.
+
+## 16. Branch Strategy and Production Rules
+
+### Branch Structure
+- `main` — production only. Never commit here directly.
+- `develop` — all builds happen here. This is your working branch.
+- `feature/xxx` — one branch per large feature. Merge into develop.
+- `hotfix/xxx` — emergency production fixes only. Merge to main + develop.
+
+### Daily Workflow
+```bash
+# Always start here
+git checkout develop
+git pull origin develop
+
+# Build, test locally on localhost:3000
+# Commit as normal — one file per commit
+git add .
+git commit -m "feat: what you built"
+git push origin develop
+
+# Vercel auto-generates preview URL
+# Test the preview URL before going to production
+
+# When ready for production
+git checkout main
+git merge develop
+git push origin main
+# Production deploys automatically
+```
+
+### Merging to Production
+Only merge develop → main when:
+- [ ] Preview URL tested and working
+- [ ] npx tsc --noEmit passes with zero errors
+- [ ] No critical items open in QA report
+- [ ] DB backup taken if any migrations included
+
+### Database Safety
+Before any DB migration — always backup first:
+```bash
+pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+Never run DROP, TRUNCATE, or DELETE without a backup.
+Never run migrations on production without testing locally first.
+
+### Rollback
+If production breaks — rollback FIRST, fix second. Never fix under pressure.
+```bash
+vercel rollback
+```
+Or: Vercel Dashboard → Deployments → any previous deploy → Promote to Production
+
+### Never Do This
+- Never commit directly to main
+- Never push untested code to main
+- Never run npx vercel --prod
+- Never change Vercel env vars via CLI
+- Never run DB migrations without a backup
+- Never test new features on production
