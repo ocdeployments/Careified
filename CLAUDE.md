@@ -378,6 +378,12 @@ npx tsc --noEmit 2>&1 | head -5
    - Update ORPHAN_PAGES: reflect current navigation state
    - Update BUILT array: add any new features built today
    - Update dates to current session date
+
+   **SITEMAP CHECK:**
+   - Visit /admin/sitemap to verify all new pages are listed
+   - Check if any new pages are orphans (not in navbar/dropdowns)
+   - Add orphan pages to ORPHAN_PAGES in status page
+   - The sitemap auto-generates from app/ directory - no manual update needed
    Commit: "chore: update admin status page — [date]"
    Show diff. Wait for approval.
 
