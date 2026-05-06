@@ -21,31 +21,22 @@ const BUILT = [
 
 const PENDING = [
   // Security - Critical
-  { priority: 'CRITICAL', label: 'Admin pages unprotected', desc: '/admin/* exposes ALL data - add Clerk auth immediately' },
   { priority: 'CRITICAL', label: 'Webhook no signature verification', desc: 'AIRecruit webhook accepts fake data - add HMAC' },
   { priority: 'CRITICAL', label: 'SQL injection risk lib/db.ts', desc: 'Column names not validated - validate against allowlist' },
   // Security - High
   { priority: 'HIGH', label: 'Reference tokens not UUID', desc: 'Sequential tokens predictable - use gen_random_uuid()' },
   { priority: 'HIGH', label: 'No rate limiting', desc: 'APIs vulnerable to abuse - add rate limiting' },
   { priority: 'HIGH', label: 'XSS in admin/caregivers', desc: 'dangerouslySetInnerHTML line 217 - remove' },
-  // Routing - Broken Links (FIXED May 4 2026)
-  { priority: 'HIGH', label: 'Broken link: /settings', desc: 'FIXED - redirect to /settings/communications' },
-  { priority: 'HIGH', label: 'Broken link: /agency/support', desc: 'FIXED - support page created' },
-  { priority: 'HIGH', label: 'Broken link: /profile/start', desc: 'FIXED - changed to /profile/build' },
-  // UX / Copy
-  { priority: 'HIGH', label: 'UX debt — agency signup', desc: 'FIXED May 4 2026' },
-  { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
-  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
   { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false' },
   { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
-  // Features
-  { priority: 'MED', label: 'LiveProfilePreview', desc: 'FIXED May 4 2026 - ghost-to-live transition in builder' },
-  { priority: 'MED', label: 'Demo environment', desc: 'FIXED May 4 2026 - /demo/* pages with demo data' },
-  { priority: 'MED', label: 'Map for travel radius', desc: 'FIXED May 4 2026 - Leaflet + OpenStreetMap in Step 4' },
+  // Pre-Launch
+  { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
+  { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
+  // Features - Pending
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
   { priority: 'MED', label: 'AIRecruit Session D', desc: 'SMS, retry logic, cron, bulk actions' },
-  { priority: 'MED', label: 'Rating system', desc: 'FIXED May 4 2026 - CTS engine built (DB, calculate.ts, APIs)' },
+  { priority: 'MED', label: 'Rating system', desc: 'NOT BUILT - rating form post-placement' },
   { priority: 'MED', label: 'Family portal Phase 1', desc: '8 features, PWA' },
   { priority: 'LOW', label: 'US Vercel deployment', desc: 'Second project NEXT_PUBLIC_LOCALE=US' },
   { priority: 'LOW', label: 'Apple Developer account', desc: '$99/yr for Wallet passes' },
@@ -63,13 +54,13 @@ const VAPI = [
 ]
 
 const SECURITY = {
-  lastAudit: 'May 4 2026',
-  criticalIssues: 3,
-  highIssues: 6,
-  mediumIssues: 3,
-  brokenLinks: 3,
+  lastAudit: 'May 6 2026',
+  criticalIssues: 2,
+  highIssues: 4,
+  mediumIssues: 1,
+  brokenLinks: 0,
   status: 'FAIL',
-  currentPriority: 'Add auth to /admin/* pages',
+  currentPriority: 'Fix XSS in admin/caregivers page',
 }
 
 type LiveData = {
@@ -144,22 +135,21 @@ export default function StatusPage() {
     { id: 'live', label: 'Live Data' },
   ] as const
 
-  // Architecture Audit - May 4 2026
+  // Architecture Audit - May 6 2026
   const ORPHAN_PAGES = [
-    { path: '/admin/badges', risk: 'HIGH', reason: 'Admin feature, unreachable' },
-    { path: '/admin/references', risk: 'HIGH', reason: 'Admin feature, unreachable' },
-    { path: '/admin/reviews', risk: 'HIGH', reason: 'Admin feature, unreachable' },
-    { path: '/agency/settings', risk: 'MEDIUM', reason: 'No nav link from dashboard' },
-    { path: '/agency/shortlist', risk: 'LOW', reason: 'Linked in dashboard (fixed)' },
-    { path: '/agency/sitemap', risk: 'LOW', reason: 'Internal tool' },
     { path: '/agency/pending-approval', risk: 'LOW', reason: 'Redirect-only (expected)' },
+    { path: '/agency/sitemap', risk: 'LOW', reason: 'Internal tool' },
+    { path: '/admin/status', risk: 'LOW', reason: 'Linked from admin/agencies' },
+    { path: '/admin/sitemap', risk: 'LOW', reason: 'Internal tool' },
+    { path: '/id/[caregiverId]', risk: 'LOW', reason: 'Wallet/QR link only - intentional' },
+    { path: '/verify/[slug]', risk: 'LOW', reason: 'External verification link - intentional' },
   ]
 
   const PUBLIC_UNLINKED = [
-    { path: '/for-agencies', reason: 'Marketing page' },
-    { path: '/for-caregivers', reason: 'Marketing page' },
-    { path: '/for-families', reason: 'Marketing page' },
-    { path: '/opportunities', reason: 'Job feed' },
+    { path: '/for-agencies', reason: 'In navbar dropdown (fixed May 5)' },
+    { path: '/for-caregivers', reason: 'In navbar dropdown (fixed May 5)' },
+    { path: '/for-families', reason: 'In navbar dropdown (fixed May 5)' },
+    { path: '/opportunities', reason: 'Navbar dropdown (fixed May 5)' },
   ]
 
   const pc = (p: string) =>
@@ -265,8 +255,9 @@ export default function StatusPage() {
         {tab === 'audit' && (
           <div>
             <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#0369A1', marginBottom: 4 }}>Architecture Audit — May 4 2026</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0369A1', marginBottom: 4 }}>Architecture Audit — May 6 2026</div>
               <div style={{ fontSize: 13, color: '#0C4A6E' }}>Total pages: 53 | Orphan pages: {ORPHAN_PAGES.length} | Public unlinked: {PUBLIC_UNLINKED.length}</div>
+              <div style={{ fontSize: 12, color: '#0369A1', marginTop: 8 }}>Auth: proxy.ts protects /admin/* and /agency/* routes</div>
             </div>
 
             {/* Orphan Pages */}
@@ -462,9 +453,8 @@ export default function StatusPage() {
 
             {/* Critical Issues */}
             <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#DC2626', marginBottom: 12 }}>Critical Issues (3)</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#DC2626', marginBottom: 12 }}>Critical Issues (2)</h3>
               {[
-                { label: 'Admin pages completely unprotected', file: 'app/admin/*' },
                 { label: 'No webhook signature verification', file: 'app/api/airecruit/webhook/route.ts' },
                 { label: 'SQL injection risk in lib/db.ts', file: 'lib/db.ts lines 56-68' },
               ].map((issue, i) => (
@@ -477,14 +467,12 @@ export default function StatusPage() {
 
             {/* High Issues */}
             <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#D97706', marginBottom: 12 }}>High Priority (6)</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#D97706', marginBottom: 12 }}>High Priority (4)</h3>
               {[
                 { label: 'Reference tokens not UUID', file: 'app/api/references/invite' },
                 { label: 'No rate limiting', file: 'All API routes' },
                 { label: 'XSS: dangerouslySetInnerHTML', file: 'app/admin/caregivers/page.tsx:217' },
-                { label: 'Broken link: /settings', file: 'settings/communications/page.tsx' },
-                { label: 'Broken link: /agency/support', file: 'agency/billing/page.tsx' },
-                { label: 'Broken link: /profile/start', file: 'for-caregivers/page.tsx' },
+                { label: 'SSL cert for Render DB', file: 'lib/db.ts rejectUnauthorized: false' },
               ].map((issue, i) => (
                 <div key={i} style={{ background: 'white', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, color: N }}>{issue.label}</span>
@@ -493,17 +481,20 @@ export default function StatusPage() {
               ))}
             </div>
 
-            {/* Broken Links */}
+            {/* FIXED - Admin Auth */}
             <div>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#16A34A', marginBottom: 12 }}>Broken Links (0) — ALL FIXED</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#16A34A', marginBottom: 12 }}>Fixed Issues</h3>
               {[
-                { link: '/settings', reason: 'FIXED — redirects to /settings/communications' },
-                { link: '/agency/support', reason: 'FIXED — support page created' },
-                { link: '/profile/start', reason: 'FIXED — changed to /profile/build' },
-              ].map((link, i) => (
-                <div key={i} style={{ background: '#F0FDF4', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', gap: 16 }}>
-                  <code style={{ fontSize: 13, color: '#16A34A', fontWeight: 600 }}>{link.link}</code>
-                  <span style={{ fontSize: 13, color: '#64748B' }}>{link.reason}</span>
+                { label: 'Admin pages unprotected', file: 'FIXED May 6 2026 - proxy.ts has ADMIN_CLERK_USER_ID check', reason: 'proxy.ts (/api/auth/protect) now enforces admin access' },
+                { label: 'middleware.ts missing', file: 'FIXED May 6 2026', reason: 'Renamed to proxy.ts with full auth' },
+                { label: 'zod version conflict', file: 'FIXED May 6 2026', reason: 'Upgraded to zod 3.25+' },
+                { label: 'Broken link: /settings', file: 'FIXED', reason: 'Redirects to /settings/communications' },
+                { label: 'Broken link: /agency/support', file: 'FIXED', reason: 'Support page exists' },
+                { label: 'Broken link: /profile/start', file: 'FIXED', reason: 'Changed to /profile/build' },
+              ].map((issue, i) => (
+                <div key={i} style={{ background: '#F0FDF4', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <span style={{ fontSize: 13, color: '#16A34A', fontWeight: 600 }}>{issue.label}</span>
+                  <span style={{ fontSize: 12, color: '#64748B' }}>{issue.file} — {issue.reason}</span>
                 </div>
               ))}
             </div>
