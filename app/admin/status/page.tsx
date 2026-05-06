@@ -27,11 +27,14 @@ const PENDING = [
   { priority: 'HIGH', label: 'Reference tokens not UUID', desc: 'Sequential tokens predictable - use gen_random_uuid()' },
   { priority: 'HIGH', label: 'No rate limiting', desc: 'APIs vulnerable to abuse - add rate limiting' },
   { priority: 'HIGH', label: 'XSS in admin/caregivers', desc: 'dangerouslySetInnerHTML line 217 - remove' },
-  { priority: 'HIGH', label: 'SSL cert for Render DB', desc: 'Currently rejectUnauthorized: false' },
   { priority: 'HIGH', label: 'Lawyer review lib/legal/text.ts', desc: 'All consent text needs legal review' },
-  // Pre-Launch
+  // Pre-Launch - Code
   { priority: 'HIGH', label: 'Copy session', desc: 'ALL page text is placeholder' },
   { priority: 'HIGH', label: 'Clerk production upgrade', desc: 'Switch pk_test_ to pk_live_ — dev banner showing' },
+  // Pre-Launch - Vercel Config (ACTION NEEDED)
+  { priority: 'HIGH', label: 'NEXT_PUBLIC_LOCALE missing', desc: 'Add to Vercel: NEXT_PUBLIC_LOCALE=CA' },
+  { priority: 'MED', label: 'NEXT_PUBLIC_CLARITY_ID missing', desc: 'Add Microsoft Clarity ID to Vercel' },
+  { priority: 'MED', label: 'NEXT_PUBLIC_YBUG_ID missing', desc: 'Add Ybug ID to Vercel' },
   // Features - Pending
   { priority: 'MED', label: 'AIRecruit Session B', desc: 'Consent flow for all agent types' },
   { priority: 'MED', label: 'AIRecruit Session C', desc: 'Profile analysis + reference agent' },
@@ -56,7 +59,7 @@ const VAPI = [
 const SECURITY = {
   lastAudit: 'May 6 2026',
   criticalIssues: 2,
-  highIssues: 4,
+  highIssues: 3,
   mediumIssues: 1,
   brokenLinks: 0,
   status: 'FAIL',
@@ -488,9 +491,12 @@ export default function StatusPage() {
                 { label: 'Admin pages unprotected', file: 'FIXED May 6 2026 - proxy.ts has ADMIN_CLERK_USER_ID check', reason: 'proxy.ts (/api/auth/protect) now enforces admin access' },
                 { label: 'middleware.ts missing', file: 'FIXED May 6 2026', reason: 'Renamed to proxy.ts with full auth' },
                 { label: 'zod version conflict', file: 'FIXED May 6 2026', reason: 'Upgraded to zod 3.25+' },
+                { label: 'SSL cert: rejectUnauthorized: false', file: 'FIXED May 6 2026', reason: 'lib/db.ts now uses true in production' },
                 { label: 'Broken link: /settings', file: 'FIXED', reason: 'Redirects to /settings/communications' },
                 { label: 'Broken link: /agency/support', file: 'FIXED', reason: 'Support page exists' },
                 { label: 'Broken link: /profile/start', file: 'FIXED', reason: 'Changed to /profile/build' },
+                { label: 'Claim Your Profile CTA', file: 'FIXED May 6 2026', reason: 'Now routes through /sign-up?role=caregiver' },
+                { label: '/profile/build defaults to step=0', file: 'FIXED May 4 2026', reason: 'Step 0 is consent/resume upload' },
               ].map((issue, i) => (
                 <div key={i} style={{ background: '#F0FDF4', borderRadius: 8, padding: '10px 14px', marginBottom: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <span style={{ fontSize: 13, color: '#16A34A', fontWeight: 600 }}>{issue.label}</span>
