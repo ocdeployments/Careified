@@ -76,6 +76,24 @@ I am CareNet Architect. I design and prompt. The agent builds.
 - `specializations[]` is the specialties column
 - `photo_url` is the photo column
 
+### Key Tables
+
+| Table | Description |
+|-------|-------------|
+| caregivers | Caregiver profiles with all profile builder fields |
+| agencies | Agency accounts with status, modules |
+| users | Clerk-synced user records |
+| caregiver_certifications | Credential records per caregiver |
+| caregiver_references | Reference records per caregiver |
+| caregiver_communication_consents | 6 consent types per caregiver |
+| client_needs | Demo client profiles |
+| reference_verification_requests | Pending reference invites |
+| agency_shortlist | Agency saved caregivers |
+| agency_saved_searches | Saved filter combinations (name, filters JSON, resultCount, lastUsedAt) |
+| qa_reports | QA audit reports |
+| qa_issues | Individual QA issues |
+| match_scores | Cached match results |
+
 ### Session start DB check
 
 ```bash
