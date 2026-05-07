@@ -508,6 +508,7 @@ export interface CaregiverProfileProps {
   rfBackground?: string
   // Personality
   personalityProfile?: Record<string, any>
+  workingStyleTags?: string[]
   // Work history
   workHistory?: Array<Record<string, any>>
   // References (verified)
@@ -1400,6 +1401,31 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 ))}
               </div>
             </div>
+
+            {/* Derived working style tags - show if available */}
+            {dm.workingStyleTags && dm.workingStyleTags.length > 0 && (
+              <div>
+                <Eyebrow>Your working style</Eyebrow>
+                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {dm.workingStyleTags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      style={{
+                        background: '#FDF6EC',
+                        border: '1px solid #C9973A',
+                        borderRadius: 999,
+                        padding: '4px 14px',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: '#0D1B3E',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <Eyebrow>Top strengths</Eyebrow>
