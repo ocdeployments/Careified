@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
+import { deriveWorkingStyle } from '@/lib/personality/working-style'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -259,6 +260,26 @@ export default function Step7Personality() {
   const selectedAnswer = allAnswers[currentScenario?.id]
   const progressPercent = (answeredCount / SCENARIOS.length) * 100
 
+  // Convert scenario answers to numbered format for deriveWorkingStyle
+  const numberedAnswers = useMemo(() => {
+    const result: Record<number, 'A' | 'B'> = {} as Record<number, 'A' | 'B'>
+    SCENARIOS.forEach((scenario, index) => {
+      const answer = allAnswers[scenario.id]
+      if (answer) {
+        result[index + 1] = answer.style === 'natural' || answer.style === 'proactive' ||
+          answer.style === 'flexible' || answer.style === 'protocol_first' ||
+          answer.style === 'experimental' || answer.style === 'proactive_alt'
+          ? 'A' : 'B'
+      }
+    })
+    return result
+  }, [allAnswers])
+
+  const derivedTags = useMemo(() => {
+    if (answeredCount < 4) return []
+    return deriveWorkingStyle(numberedAnswers)
+  }, [numberedAnswers, answeredCount])
+
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
 
@@ -319,6 +340,30 @@ export default function Step7Personality() {
               </button>
             ))}
           </div>
+
+          {/* Live working style preview */}
+          {derivedTags.length > 0 && (
+            <div style={{ marginTop: '24px', padding: '16px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+                Your working style
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {derivedTags.map(tag => (
+                  <span key={tag} style={{
+                    background: '#FDF6EC',
+                    border: '1px solid #C9973A',
+                    borderRadius: '999px',
+                    padding: '4px 14px',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#0D1B3E',
+                  }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
