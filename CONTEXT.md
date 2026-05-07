@@ -670,4 +670,71 @@ Earned — not scored. Appear visibly on profile.
 
 ---
 
-Last updated: May 5 2026
+## 17. End-of-Session QA Protocol
+
+Run this at the END of every session before closing, after all commits are pushed to main.
+
+### Step 1 — Playwright MCP Browser Check
+Use Playwright MCP to visit these pages on localhost:3000 and report console errors, crashes, and missing content. Report as a table: URL | Status | Console Errors | Notes
+
+Public pages (always check):
+/ | /for-caregivers | /for-agencies | /for-families | /about
+/contact | /privacy | /terms | /profile/demo | /demo
+/agency/signup | /opportunities
+
+Caregiver pages (check if touched this session):
+/profile/build | /profile/strength | /settings/communications | /settings/data-rights
+
+Agency pages (check if touched this session):
+/agency/dashboard | /agency/search | /agency/clients | /agency/settings | /agency/billing
+
+Admin pages (check if touched this session):
+/admin | /admin/agencies | /admin/caregivers | /admin/status
+
+### Step 2 — TypeScript Check
+npx tsc --noEmit
+Zero errors required before session closes.
+
+### Step 3 — Git Check
+git status must be clean.
+git log --oneline -5 to confirm all commits pushed.
+
+### Step 4 — Report
+Show a final table:
+TypeScript: ✅ clean / ❌ X errors
+Pages checked: X
+Pages with errors: X (list them)
+Git: ✅ clean / ❌ uncommitted changes
+Safe revert: [latest commit hash]
+
+### Step 5 — DB Integrity Check
+Run caregiver + agency count query. Confirm counts haven't dropped unexpectedly.
+
+### Step 6 — Broken Link Scan
+Grep all href="/" values in app/ and components/. Cross-reference against known routes. Flag any that don't exist.
+
+### Step 7 — Orphan Page Check
+List any new pages added this session. Verify each has a reachability path (NAV / ACTION / DYNAMIC / SYSTEM). Flag true orphans.
+
+### Step 8 — Env Var Drift
+Grep all process.env references added this session. Verify each exists in .env.local and is documented in CAREIFIED_SPEC.md ENV VARS table.
+
+### Step 9 — Security Regression
+Run three checks:
+
+- ADMIN_CLERK_USER_ID present in app/admin/layout.tsx
+- auth() present in app/agency/layout.tsx
+- No new dangerouslySetInnerHTML in any file
+
+### Step 10 — Console Warnings
+Playwright MCP re-run, this time capturing both errors AND warnings.
+
+### Step 11 — Doc Freshness
+Confirm CAREIFIED_SPEC.md, HANDOFF.md, CAREIFIED_STATUS.md all updated this session.
+
+### Step 12 — Safe Revert Update
+Update safe revert point in HANDOFF.md and CAREIFIED_STATUS.md to latest commit hash.
+
+---
+
+Last updated: May 7 2026
