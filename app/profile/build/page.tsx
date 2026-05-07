@@ -13,6 +13,7 @@ import Step4Location from './Step4Location'
 import Step5Credentials from './Step5Credentials'
 import Step9References from './Step9References'
 import Step10OpenQuestions from './Step10OpenQuestions'
+import Step11Consent from './Step11Consent'
 import Step6Compliance from './Step6Compliance'
 import Step7Personality from './Step7Personality'
 import Step8WorkHistory from './Step8WorkHistory'
@@ -37,10 +38,11 @@ const STEPS = [
  { num: 8, title: 'Work History', desc: 'Experience, employers' },
  { num: 9, title: 'References', desc: 'Who vouches for you' },
  { num: 10, title: 'Open Q\'s', desc: 'Final profile questions' },
+ { num: 11, title: 'Your Preferences', desc: 'Communication & consent' },
 ]
 
-const PROGRESS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-const TIERS = ['Incomplete', 'Incomplete', 'Basic', 'Location', 'Verified', 'Compliance', 'Professional', 'Work History', 'References', 'Open Q\'s']
+const PROGRESS = [15, 30, 50, 57, 64, 70, 76, 82, 88, 94, 100]
+const TIERS = ['Incomplete', 'Incomplete', 'Basic', 'Location', 'Verified', 'Compliance', 'Professional', 'Work History', 'References', 'Open Q\'s', 'Ready to Submit']
 
 const MILESTONES: Record<number, { text: string; sub: string }> = {
   3: { text: 'Complete all steps to maximise your match score', sub: 'Agencies can find you once you complete Availability.' },
@@ -128,7 +130,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const navigate = (dir: 'forward' | 'back') => {
  setAnimDir(dir)
  const next = dir === 'forward' ? currentStep + 1 : currentStep - 1
- if (next >= 1 && next <= 10) router.push(`?step=${next}`)
+ if (next >= 1 && next <= 11) router.push(`?step=${next}`)
  }
 
   const goToStep = (num: number) => {
@@ -168,6 +170,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  case 8: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step8WorkHistory /></motion.div></AnimatePresence>
  case 9: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step9References /></motion.div></AnimatePresence>
  case 10: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step10OpenQuestions /></motion.div></AnimatePresence>
+ case 11: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step11Consent /></motion.div></AnimatePresence>
  default: return <Step1Identity />
  }
  }
@@ -372,18 +375,18 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 whileHover={{ scale: 1.03 }}
 whileTap={{ scale: 0.98 }}
 transition={{ duration: 0.15 }}
- disabled={currentStep < 10}
+ disabled={currentStep < 11}
  style={{
  width: '100%', padding: '10px',
  borderRadius: '8px', border: 'none',
  fontSize: '12px', fontWeight: 600,
  fontFamily: FONT_SANS,
- cursor: currentStep === 6 ? 'pointer' : 'not-allowed',
- opacity: currentStep === 6 ? 1 : 0.3,
- background: currentStep === 6
+ cursor: currentStep === 11 ? 'pointer' : 'not-allowed',
+ opacity: currentStep === 11 ? 1 : 0.3,
+ background: currentStep === 11
  ? 'linear-gradient(135deg, #C9973A, #E8B86D)'
  : '#F1F5F9',
- color: currentStep === 6 ? '#0D1B3E' : '#94A3B8',
+ color: currentStep === 11 ? '#0D1B3E' : '#94A3B8',
  transition: 'all 0.2s',
  }}
  >
@@ -418,6 +421,7 @@ transition={{ duration: 0.15 }}
  {currentStep === 8 && "Your experience."}
  {currentStep === 9 && "Who vouches for you?"}
  {currentStep === 10 && "Final questions."}
+ {currentStep === 11 && "Almost done — just set your preferences below."}
  </div>
  </div>
 
@@ -492,7 +496,7 @@ transition={{ duration: 0.15 }}
  <div />
  )}
 
- {currentStep < 10 ? (
+ {currentStep < 11 ? (
  <motion.button
 whileHover={{ scale: 1.03 }}
 whileTap={{ scale: 0.98 }}
