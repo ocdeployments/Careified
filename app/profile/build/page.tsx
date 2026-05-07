@@ -20,7 +20,6 @@ import Step8WorkHistory from './Step8WorkHistory'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
-import CommunicationConsents from '@/components/profile/CommunicationConsents'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 import GhostProfileModal from '@/components/profile/GhostProfileModal'
 
@@ -148,15 +147,10 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  </div>
 )
 
- // Step 0 — consent gate (shown before builder if not yet consented)
+ // Step 0 — redirect to Step 1 (consent now at Step 11)
   if (currentStep === 0) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#F7F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', maxWidth: '640px', width: '100%', border: '1px solid #E2E8F0' }}>
-          <CommunicationConsents mode="signup" onSubmit={() => router.push('/profile/build?step=1')} />
-        </div>
-      </div>
-    )
+    router.replace('/profile/build?step=1')
+    return null
   }
 
   switch (currentStep) {
