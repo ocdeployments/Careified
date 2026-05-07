@@ -10,6 +10,7 @@ const COLORS = {
   amber: '#D97706',
   slate: '#64748B',
   border: '#E2E8F0',
+  muted: '#94A3B8',
 }
 
 interface Props {
@@ -25,7 +26,6 @@ export default function CommunicationConsents({ mode, onSubmit }: Props) {
     return initial
   })
   const [loading, setLoading] = useState(false)
-  const [expanded, setExpanded] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -77,26 +77,24 @@ export default function CommunicationConsents({ mode, onSubmit }: Props) {
     <div style={{ fontFamily: 'system-ui, sans-serif', color: COLORS.navy }}>
       <div style={{ marginBottom: '24px' }}>
         <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
-          Communication preferences
+          Stay in control of how Careified reaches out
         </div>
         <p style={{ fontSize: '14px', color: COLORS.slate, lineHeight: 1.5, margin: 0 }}>
-          Control which calls Careified can make on your behalf. You can change these any time.
+          You choose what Careified can do on your behalf. You can change your mind anytime in Settings.
         </p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {types.map(type => {
-          const isHigh = type.riskLevel === 'high'
-          const isMed = type.riskLevel === 'medium'
-          const isExpanded = expanded === type.id
           const isOn = granted[type.id]
+          const isCurrentEmployer = type.id === 'current_employer_calls'
 
           return (
             <div key={type.id} style={{
-              border: '1px solid ' + (isHigh && isOn ? COLORS.red : COLORS.border),
+              border: '1px solid ' + COLORS.border,
               borderRadius: '12px',
               padding: '16px',
-              background: isHigh && isOn ? '#FEF2F2' : 'white',
+              background: 'white',
               transition: 'background 0.2s',
             }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: (type.required && isOn) ? 'not-allowed' : 'pointer' }}>
@@ -111,37 +109,18 @@ export default function CommunicationConsents({ mode, onSubmit }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                     <span style={{ fontSize: '14px', fontWeight: 600 }}>{type.label}</span>
                     {type.required && (
-                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#F1F5F9', color: COLORS.slate }}>
-                        REQUIRED
-                      </span>
-                    )}
-                    {isHigh && (
-                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#FEF2F2', color: COLORS.red }}>
-                        HIGH RISK
-                      </span>
-                    )}
-                    {isMed && (
-                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#FFFBEB', color: COLORS.amber }}>
-                        MEDIUM
+                      <span style={{ fontSize: '12px', color: COLORS.muted, fontStyle: 'italic' }}>
+                        (required)
                       </span>
                     )}
                   </div>
                   <p style={{ fontSize: '13px', color: COLORS.slate, margin: 0, lineHeight: 1.5 }}>
                     {type.description}
                   </p>
-                  {type.warningText && (
-                    <button
-                      type="button"
-                      onClick={e => { e.preventDefault(); setExpanded(isExpanded ? null : type.id) }}
-                      style={{ fontSize: '12px', color: COLORS.red, background: 'none', border: 'none', padding: '8px 0 0', cursor: 'pointer', textDecoration: 'underline' }}
-                    >
-                      {isExpanded ? 'Hide warning' : 'Read this first'}
-                    </button>
-                  )}
-                  {isExpanded && type.warningText && (
-                    <div style={{ marginTop: '8px', padding: '12px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', fontSize: '13px', color: '#991B1B', lineHeight: 1.5 }}>
-                      {type.warningText}
-                    </div>
+                  {isCurrentEmployer && (
+                    <p style={{ fontSize: '12px', color: COLORS.muted, margin: '8px 0 0', fontStyle: 'italic' }}>
+                      We recommend caution — this may alert your current employer.
+                    </p>
                   )}
                 </div>
               </label>
