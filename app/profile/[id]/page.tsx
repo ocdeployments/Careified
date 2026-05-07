@@ -3,6 +3,7 @@
 import { notFound } from 'next/navigation'
 import { Pool } from 'pg'
 import CaregiverProfileDemo from '@/components/profile/CaregiverProfileDemo'
+import { deriveWorkingStyle } from '@/lib/personality/working-style'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -87,7 +88,33 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
 
   // Map DB snake_case to component props
   const personality = caregiver.personality_profile || {}
-  const workingStyleScenarios = personality.scenarios || {}
+  const savedScenarios = personality.scenarios || {}
+
+  // Convert scenario IDs to numbered format for deriveWorkingStyle
+  const scenarioIdToNum: Record<string, number> = {
+    patience: 1,
+    empathy: 2,
+    adaptability: 3,
+    communication: 4,
+    emergency_response: 5,
+    problem_solving: 6,
+    observation: 7,
+  }
+
+  const numberedAnswers: Record<number, 'A' | 'B'> = {} as Record<number, 'A' | 'B'>
+  const aStyles = ['natural', 'proactive', 'flexible', 'protocol_first', 'experimental']
+
+  for (const [id, answer] of Object.entries(savedScenarios)) {
+    const num = scenarioIdToNum[id]
+    const answerObj = answer as { style?: string }
+    if (num && answerObj && typeof answerObj === 'object' && answerObj.style) {
+      numberedAnswers[num] = aStyles.includes(answerObj.style) ? 'A' : 'B'
+    }
+  }
+
+  const workingStyleTags = Object.keys(numberedAnswers).length >= 4
+    ? deriveWorkingStyle(numberedAnswers)
+    : []
 
   return (
     <CaregiverProfileDemo
@@ -133,6 +160,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       rfPhysicalLimitation={caregiver.rf_physical_limitation}
       rfBackground={caregiver.rf_background}
       personalityProfile={caregiver.personality_profile}
+      workingStyleTags={workingStyleTags}
       workHistory={caregiver.work_history}
       verifiedReferences={verifiedReferences}
       certifications={certifications}
