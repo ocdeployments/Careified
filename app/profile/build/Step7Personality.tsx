@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { deriveWorkingStyle } from '@/lib/personality/working-style'
+import WorkingStyleTags from '@/components/profile/WorkingStyleTags'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -347,21 +348,7 @@ export default function Step7Personality() {
               <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
                 Your working style
               </div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {derivedTags.map(tag => (
-                  <span key={tag} style={{
-                    background: '#FDF6EC',
-                    border: '1px solid #C9973A',
-                    borderRadius: '999px',
-                    padding: '4px 14px',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#0D1B3E',
-                  }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <WorkingStyleTags tags={derivedTags} />
             </div>
           )}
 
