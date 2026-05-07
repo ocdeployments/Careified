@@ -81,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         )}
         {process.env.NEXT_PUBLIC_YBUG_ID && (
           <Script id="ybug-init" strategy="afterInteractive">
-            {`window.ybug_settings = {"id": "${process.env.NEXT_PUBLIC_YBUG_ID}"};(function(d,s){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.ybug.io.js';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);})(document);`}
+            {`window.ybug_settings = {"id": "${process.env.NEXT_PUBLIC_YBUG_ID}"};(function(d,s){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.ybug.io/button.js';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);})(document);`}
           </Script>
         )}
       </body>
