@@ -251,4 +251,4 @@ npx tsc --noEmit 2>&1 | head -20
 | 5 | Demo Gate | Already open |
 
 ## 15. Safe Revert Point
-git reset --hard 960aca6
+git reset --hard de47f75

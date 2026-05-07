@@ -612,3 +612,12 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 | Navbar caregiver dropdown updated | ✅ | May 5 2026 |
 | Navbar agency dropdown updated | ✅ | May 5 2026 |
 | Clarity + Ybug scripts added | ✅ | May 5 2026 |
+| Consent UI redesign - remove risk badges | ✅ | May 7 2026 |
+| Step 11 consent added to profile builder | ✅ | May 7 2026 |
+| Working style tag engine built | ✅ | May 7 2026 |
+| Step7 live working style preview | ✅ | May 7 2026 |
+| WorkingStyleTags reusable component | ✅ | May 7 2026 |
+| Profile scorecard shows working style tags | ✅ | May 7 2026 |
+| Profile builder crash fix (undefined title) | ✅ | May 7 2026 |
+| Ybug script URL corrected | ✅ | May 7 2026 |
+| End-of-session QA protocol expanded | ✅ | May 7 2026 |
