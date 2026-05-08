@@ -36,21 +36,21 @@ export default function ProfileStartPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: COLORS.warmWhite, fontFamily: "'DM Sans', sans-serif", color: COLORS.navy }}>
-      {/* Section 1: Hero */}
-      <section style={{ padding: '48px 24px 32px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+      {/* SECTION 1 — Hero */}
+      <section style={{ padding: '60px 24px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: '12px', fontWeight: 700, color: COLORS.gold, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '16px' }}>
           For Professional Caregivers
         </div>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '32px', lineHeight: 1.3, color: COLORS.navy, marginBottom: '16px' }}>
-          You've spent years earning your reputation. Every time you move agencies, you leave it behind. Careified fixes that.
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '38px', lineHeight: 1.3, color: COLORS.navy, margin: '0 auto 20px', maxWidth: '720px' }}>
+          You've spent years earning your reputation. Every time you move agencies, you leave it behind.
         </h1>
-        <p style={{ fontSize: '15px', color: COLORS.slate, maxWidth: '60ch', margin: '0 auto', lineHeight: 1.6 }}>
-          This is not a resume. It's a verified professional identity — built once, updated as you grow, visible only to caregiving agencies that are actively hiring.
+        <p style={{ fontSize: '20px', fontWeight: 700, color: COLORS.gold, marginBottom: '24px' }}>
+          Careified fixes that.
         </p>
       </section>
 
-      {/* Section 2: Trust Pills */}
-      <section style={{ padding: '0 24px 32px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', maxWidth: '900px', margin: '0 auto' }}>
+      {/* SECTION 2 — Trust Pills */}
+      <section style={{ padding: '0 24px 40px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', maxWidth: '900px', margin: '0 auto' }}>
         {['15 minutes to go live', 'Private until you\'re ready', 'Edit anytime', 'Always free for caregivers'].map((pill, i) => (
           <span key={i} style={{
             border: `1px solid ${COLORS.gold}`,
@@ -65,12 +65,8 @@ export default function ProfileStartPage() {
         ))}
       </section>
 
-      {/* Section 3: Product Screenshot Mockup */}
-      <section style={{ padding: '0 24px 40px', textAlign: 'center' }}>
-        <div style={{ fontSize: '15px', color: COLORS.slate, marginBottom: '32px', fontFamily: "'DM Sans', sans-serif" }}>
-          This is what agencies see when they find you.
-        </div>
-
+      {/* SECTION 3 — Mockup + Two Column */}
+      <section style={{ padding: '0 24px' }}>
         {/* Browser Chrome Mockup */}
         <div style={{
           background: '#1a1a2e',
@@ -90,93 +86,95 @@ export default function ProfileStartPage() {
             padding: '0 16px',
             gap: '8px'
           }}>
-            {/* Three Dots */}
             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F57' }} />
             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFBD2E' }} />
             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28CA41' }} />
-
-            {/* URL Bar */}
-            <div style={{
-              background: '#3d3d5c',
-              borderRadius: '6px',
-              flex: 1,
-              height: '20px',
-              marginLeft: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: '12px'
-            }}>
+            <div style={{ background: '#3d3d5c', borderRadius: '6px', flex: 1, height: '20px', marginLeft: '12px', display: 'flex', alignItems: 'center', paddingLeft: '12px' }}>
               <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif" }}>
                 careified.vercel.app/profile/demo
               </span>
             </div>
           </div>
-
-          {/* Screenshot Image */}
+          {/* Screenshot */}
           <div style={{ position: 'relative' }}>
-            <img
-              src="/images/profile-demo-preview.png"
-              alt="Maria Santos Careified profile"
-              style={{ width: '100%', display: 'block' }}
-            />
-            {/* Fade Overlay */}
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '120px',
-              background: 'linear-gradient(to bottom, transparent, #F7F4F0)',
-              pointerEvents: 'none'
-            }} />
+            <img src="/images/profile-demo-preview.png" alt="Maria Santos Careified profile" style={{ width: '100%', display: 'block' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, transparent, #F7F4F0)', pointerEvents: 'none' }} />
           </div>
         </div>
 
-        {/* Body Copy Below Mockup */}
-        <div style={{ marginTop: '32px', fontFamily: "'DM Sans', sans-serif", color: COLORS.navy }}>
-          <p style={{ fontSize: '16px', maxWidth: '520px', margin: '0 auto 12px', lineHeight: 1.6 }}>
-            You've answered the same questions for every agency you've ever worked with. You've proven yourself — over and over — and none of them can share what they know.
-          </p>
-          <p style={{ fontSize: '16px', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6, fontWeight: 600, color: COLORS.navy }}>
-            Build your profile once. Your credentials, your reputation, your working style — permanent, portable, and visible to every agency actively hiring.
-          </p>
-        </div>
+        {/* Two Column Layout */}
+        <div style={{ display: 'flex', gap: '48px', alignItems: 'center', maxWidth: '900px', margin: '40px auto 0', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {/* Left Column */}
+          <div style={{ maxWidth: '380px', textAlign: 'left' }}>
+            <span style={{ fontSize: '48px', color: COLORS.gold, lineHeight: 0.5 }}>"</span>
+            <p style={{ fontSize: '17px', lineHeight: 1.7, color: COLORS.navy, marginTop: '12px' }}>
+              You've answered the same questions at every agency. Proven yourself — over and over. None of them can share what they know.
+            </p>
+            <p style={{ fontSize: '17px', fontWeight: 700, color: COLORS.navy, marginTop: '16px' }}>
+              Build once. Be found by every agency actively hiring.
+            </p>
+          </div>
 
-        {/* Side-by-side Links */}
-        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', fontFamily: "'DM Sans', sans-serif" }}>
-          <a href="/profile/demo" target="_blank" style={{ fontSize: '15px', color: COLORS.navy, textDecoration: 'underline' }}>
-            See the full profile →
-          </a>
-          <span style={{ fontSize: '14px', color: COLORS.slate }}>or</span>
-          <button onClick={scrollToCTA} style={{ fontSize: '15px', color: COLORS.gold, textDecoration: 'underline', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
-            start building yours
-          </button>
+          {/* Right Column — CTA Card */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 24px rgba(13,27,62,0.10)', textAlign: 'center' }}>
+            <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '20px', fontWeight: 700, color: COLORS.navy, marginBottom: '8px' }}>
+              Start building your profile
+            </h3>
+            <p style={{ fontSize: '14px', color: COLORS.slate, marginBottom: '24px' }}>
+              Free for caregivers. Always.
+            </p>
+            <button
+              onClick={scrollToCTA}
+              style={{
+                background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
+                color: COLORS.navy,
+                fontWeight: 700,
+                padding: '14px 32px',
+                borderRadius: '999px',
+                fontSize: '16px',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'inline-block',
+              }}
+            >
+              Claim Your Profile
+            </button>
+            <div style={{ marginTop: '16px' }}>
+              <a href="/profile/demo" style={{ fontSize: '13px', color: COLORS.slate, textDecoration: 'underline' }}>
+                See a sample profile →
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Section 4: What Happens Next */}
-      <section style={{ padding: '0 24px 60px', maxWidth: '600px', margin: '0 auto' }}>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '22px', color: COLORS.navy, marginBottom: '24px' }}>
+      {/* SECTION 4 — What Happens Next (2x2 Grid) */}
+      <section style={{ padding: '60px 24px', background: COLORS.goldTint, maxWidth: '640px', margin: '0 auto', borderRadius: '16px', marginTop: '48px' }}>
+        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '22px', color: COLORS.navy, marginBottom: '24px', textAlign: 'center' }}>
           What happens next
         </h2>
-        <ol style={{ paddingLeft: '20px', margin: 0 }}>
-          {['Your identity — name, photo, location, languages', 'Your experience — services, skills, work history', 'Your credentials — certifications, availability, compliance', 'Go live — the more complete your profile, the higher you appear in agency searches'].map((item, i) => (
-            <li key={i} style={{ fontSize: '16px', color: COLORS.navy, marginBottom: '12px', lineHeight: 1.5 }}>
-              {item}
-            </li>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+          {[
+            { num: '1', title: 'Identity', desc: 'name, photo, location, languages' },
+            { num: '2', title: 'Experience', desc: 'services, skills, work history' },
+            { num: '3', title: 'Credentials', desc: 'certifications, availability, compliance' },
+            { num: '4', title: 'Go live', desc: 'the more complete, the higher you appear' },
+          ].map((card) => (
+            <div key={card.num} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #E2E8F0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: COLORS.gold, color: 'white', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {card.num}
+                </div>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: COLORS.navy }}>{card.title}</span>
+              </div>
+              <span style={{ fontSize: '12px', color: COLORS.slate }}>{card.desc}</span>
+            </div>
           ))}
-        </ol>
+        </div>
       </section>
 
-      {/* Section 5: Reassurance */}
-      <section style={{ padding: '0 24px 40px', textAlign: 'center' }}>
-        <p style={{ fontSize: '15px', color: COLORS.slate, maxWidth: '50ch', margin: '0 auto' }}>
-          You don't need everything ready today. Start with your name and experience — you can add credentials and references anytime.
-        </p>
-      </section>
-
-      {/* Section 6: Pre-CTA Gate or CTA */}
-      <section id="cta-section" style={{ padding: '0 24px 80px', textAlign: 'center' }}>
+      {/* SECTION 6 — CTA Gate (Dark) */}
+      <section id="cta-section" style={{ padding: '60px 24px 80px', background: COLORS.navy, textAlign: 'center' }}>
         {isSignedIn && isVerified ? (
           <a href="/profile/build" style={{
             background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
@@ -191,55 +189,48 @@ export default function ProfileStartPage() {
             Let's Build Your Profile
           </a>
         ) : (
-          <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'left' }}>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.navy, marginBottom: '8px' }}>
-              Before we get started
+          <>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '28px', color: 'white', marginBottom: '12px' }}>
+              Ready to be found?
+            </h2>
+            <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.7)', marginBottom: '32px' }}>
+              It takes 15 minutes. It lasts your entire career.
+            </p>
+            <div style={{ maxWidth: '360px', margin: '0 auto', padding: '32px', borderRadius: '16px', background: 'white' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '20px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={ageConfirmed}
+                  onChange={(e) => setAgeConfirmed(e.target.checked)}
+                  style={{ marginTop: '3px', accentColor: COLORS.gold, width: '18px', height: '18px' }}
+                />
+                <span style={{ fontSize: '14px', color: COLORS.navy }}>
+                  I confirm I am 18 years of age or older
+                </span>
+              </label>
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={!canProceed}
+                style={{
+                  background: canProceed ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : '#E2E8F0',
+                  color: canProceed ? COLORS.navy : '#94A3B8',
+                  fontWeight: 700,
+                  padding: '16px 48px',
+                  borderRadius: '999px',
+                  fontSize: '18px',
+                  border: 'none',
+                  cursor: canProceed ? 'pointer' : 'not-allowed',
+                  width: '100%',
+                }}
+              >
+                Continue
+              </button>
+              <p style={{ fontSize: '13px', color: COLORS.slate, marginTop: '16px', textAlign: 'center' }}>
+                Your information is never sold or shared.
+              </p>
             </div>
-            <p style={{ fontSize: '14px', color: COLORS.slate, marginBottom: '20px' }}>
-              Confirm you're 18 or older to get started — takes 2 minutes.
-            </p>
-
-            {/* Age Confirmation */}
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '20px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={ageConfirmed}
-                onChange={(e) => setAgeConfirmed(e.target.checked)}
-                style={{ marginTop: '3px', accentColor: COLORS.gold, width: '18px', height: '18px' }}
-              />
-              <span style={{ fontSize: '14px', color: COLORS.navy }}>
-                I confirm I am 18 years of age or older
-              </span>
-            </label>
-
-            {/* Continue Button */}
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={!canProceed}
-              style={{
-                background: canProceed ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : '#E2E8F0',
-                color: canProceed ? COLORS.navy : '#94A3B8',
-                fontWeight: 700,
-                padding: '16px 48px',
-                borderRadius: '999px',
-                fontSize: '18px',
-                border: 'none',
-                cursor: canProceed ? 'pointer' : 'not-allowed',
-                width: '100%',
-              }}
-            >
-              Continue
-            </button>
-            <p style={{ fontSize: '13px', color: COLORS.slate, textAlign: 'center', marginTop: '16px' }}>
-              Your information is never sold or shared with third parties.
-            </p>
-          </div>
-        )}
-        {!isSignedIn && (
-          <div style={{ fontSize: '13px', color: COLORS.slate, textAlign: 'center', marginTop: '20px' }}>
-            No credit card. No catch. Your data stays yours.
-          </div>
+          </>
         )}
       </section>
     </div>
