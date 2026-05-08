@@ -178,7 +178,7 @@ Consent types:
 ## 9. Git Workflow Rules
 - One file per commit
 - npx tsc --noEmit before every commit
-- git push origin main after every commit
+- ⛔ NEVER run git push automatically. Pushing to origin is a manual human action only. Claude commits locally only. User runs git push when satisfied with local results.
 - Never use npx vercel --prod
 - Never set env vars via CLI — dashboard only
 
