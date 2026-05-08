@@ -3,6 +3,67 @@
 Read this file completely at the start of every session.
 Last updated: May 8, 2026
 
+---
+
+## ⚠️ SESSION HEALTH MONITOR — READ THIS FIRST, EVERY MESSAGE
+
+You must track and report session health at the start of EVERY response, no exceptions.
+
+### How to Track
+
+Maintain a running estimate using these weights:
+
+| Action | Token Cost |
+|--------|------------|
+| Each user message | +500 tokens |
+| Each of your responses | +1,000 tokens |
+| Each file you read fully | +3,000 tokens (small), +8,000 tokens (large, >200 lines) |
+| Each bash/code execution | +1,000 tokens |
+| Session start (CLAUDE.md + context files loaded) | +25,000 tokens |
+
+**Estimated session budget:** 150,000 tokens before forced end.
+
+### Status Bar
+
+Begin EVERY response with this one-line status (above all other output):
+
+```
+🟢 SESSION: ~XX,XXX / 150,000 tokens used (~XX%) | XX msgs | Safe to continue
+```
+
+Change the emoji and message based on thresholds:
+
+| Usage | Emoji | Message |
+|-------|-------|---------|
+| 0–60% | 🟢 | Safe to continue |
+| 61–79% | 🟡 | Consider running /end-session soon |
+| 80–89% | 🟠 | Run /end-session after this task |
+| 90–99% | 🔴 | WARNING: Run /end-session NOW before next task |
+| 100%+ | 💀 | CRITICAL: Running /end-session immediately |
+
+### Forced Actions
+
+At 🟠 (80%): After completing the current task, proactively say:
+
+> "⚠️ Session is at ~80%. Please run /end-session before starting the next task to preserve all progress."
+
+At 🔴 (90%): Before doing ANY work, say:
+
+> "🔴 Session is critically full. I strongly recommend running /end-session right now. If you proceed, the session may crash and lose context. Type 'continue anyway' to override, or run /end-session."
+
+At 💀 (100%+): Do not attempt the task. Instead:
+
+1. Run the end-session protocol immediately (update all status files)
+2. Output: "💀 Session limit reached. End-session has been run. Start a new session to continue."
+
+### User Commands
+
+- `/status` — user asking for session health check, output full status breakdown
+- `/end-session` — user manually triggering end session; run the full handoff protocol from HANDOFF.md
+- `/reset-counter` — user confirming a new session started; reset your token estimate to 25,000
+
+---
+
 ## 1. Project Identity
 
 **Product:** Careified
@@ -234,6 +295,33 @@ npx tsc --noEmit 2>&1 | head -5
 ```
 
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
+
+---
+
+## 12a. Session Start — Git Rules
+
+⛔ **At session start, Claude MUST NOT run any of the following:**
+
+- `git add`
+- `git commit`
+- `git push`
+- `git merge`
+- `git rebase`
+- `git reset`
+
+**Session start is READ ONLY.** The only git commands permitted are:
+
+- `git status` — to see local state
+- `git log --oneline -5` — to see recent history
+- `git diff --name-only` — to see what changed since last commit
+
+**If uncommitted files are found at session start, Claude should:**
+
+1. List them clearly in the session start report
+2. Ask: "There are uncommitted local changes from the previous session. Would you like to review them before we begin?"
+3. Wait for user direction — do NOT commit or discard anything automatically
+
+---
 
 ## 13. Testing & Quality Assurance
 
