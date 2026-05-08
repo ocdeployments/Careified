@@ -98,7 +98,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/sign-up?role=caregiver&redirect_url=/profile/build"
+            href="/sign-up?role=caregiver&redirect_url=/profile/start"
             style={{
               display: 'inline-block',
               marginTop: '32px',
@@ -114,7 +114,7 @@ export default function ForCaregiversPage() {
               cursor: 'pointer',
             }}
           >
-            Claim Your Profile
+            Build My Profile
           </Link>
         </div>
       </section>
@@ -473,7 +473,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/sign-up?role=caregiver&redirect_url=/profile/build"
+            href="/sign-up?role=caregiver&redirect_url=/profile/start"
             style={{
               display: 'inline-block',
               padding: '16px 40px',
@@ -486,7 +486,7 @@ export default function ForCaregiversPage() {
               fontFamily: SANS,
             }}
           >
-            Claim Your Profile
+            Build My Profile
           </Link>
 
           <p style={{
