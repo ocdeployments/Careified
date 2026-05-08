@@ -596,7 +596,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           background: C.navy,
           position: 'relative',
           overflow: 'hidden',
-          padding: '40px 24px 36px',
+          padding: '80px 24px 72px',
         }}
       >
         {/* Grain */}
