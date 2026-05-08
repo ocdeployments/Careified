@@ -648,24 +648,16 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 flexShrink: 0,
               }}
             >
-              <div
+              <img
+                src="/Maria Santos_Demo_Pic.png"
+                alt="Maria Santos"
                 style={{
                   width: '100%',
                   height: '100%',
+                  objectFit: 'cover',
                   borderRadius: '50%',
-                  background: C.navyTint,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: SERIF,
-                  fontSize: 34,
-                  fontWeight: 400,
-                  color: '#F5F0E8',
-                  letterSpacing: '0.02em',
                 }}
-              >
-                {initials}
-              </div>
+              />
             </div>
 
             <div style={{ flex: 1, minWidth: 240 }}>
