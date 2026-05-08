@@ -78,9 +78,9 @@ const panels = {
     links: [
       { href: '/for-caregivers#why-build', label: 'Why Should I Build My Profile?', desc: 'See how a verified profile gets you discovered by agencies that match your skills.' },
       { href: '/opportunities',            label: 'Browse Opportunities',           desc: 'See open roles matched to your skills, availability, and location.'               },
-      { href: '/profile/build',            label: 'Claim Your Profile',             desc: 'Build once. Be seen forever. Free — takes 10 minutes.'                           },
+      { href: '/profile/start',            label: 'Start Your Careified Profile',             desc: 'Build once. Be seen forever. Free — takes 15 minutes.'                           },
     ],
-    cta: { href: '/profile/build', label: 'Claim Your Profile' },
+    cta: { href: '/profile/start', label: 'Build My Profile' },
   },
   agencies: {
     accent: '#1E3A8A',
