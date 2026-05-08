@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Last updated: May 8 2026
-# Safe revert: db3690e
+# Safe revert: 142ea98
 
 ---
 
@@ -15,6 +15,8 @@
 | 10C | Step2Services rebuild (Context pattern) | DONE | b72055e |
 | 10D-L | Steps 3-10 rebuild (all complete) | DONE | Phase 1 |
 | 11 | PRODUCTION_CHECKLIST, /profile/start screenshot mockup, /profile/demo enhancements | DONE | db3690e |
+| 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
+| 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -118,6 +120,32 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
+- Photo position editor: COMPLETED (May 8 2026) - drag-to-reposition, zoom, persist to DB
+- Onboarding gate: COMPLETED (May 8 2026) - name + phone OTP + age confirmation
+
+---
+
+## SESSION MAY 8 2026 — COMPLETED
+
+### Photo Position Editor
+- PhotoUploadEditor.tsx: Modal with 280px crop circle, drag, zoom 1-3x
+- ProfilePhoto.tsx: Renders with transform(x,y) scale, edit overlay
+- Step1Identity wired to use editor
+- DB columns: photo_x, photo_y, photo_scale (added)
+
+### Onboarding Gate Redesign
+- /onboarding: Single collection point after Clerk signup
+- First/Last name: letters only, min 2 chars, real-time validation
+- Phone OTP: 6-digit, auto-advance, paste support, 60s resend, 3 attempt lockout
+- Age confirmation checkbox required
+- Continue disabled until all fields valid
+- API routes: /api/auth/send-phone-otp, /api/auth/verify-phone-otp, /api/caregivers/me
+- Redirect caregivers to /onboarding instead of /profile/build
+
+### Session Protocol Updates
+- SESSION HEALTH MONITOR added to CLAUDE.md (token tracking, status bar)
+- Session Start Git Rules added (read-only at session start)
+- Git push now MANUAL ONLY (removed auto-push rule from HANDOFF.md)
 
 ---
 
