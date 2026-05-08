@@ -233,6 +233,8 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 npx tsc --noEmit 2>&1 | head -5
 ```
 
+- Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
+
 ## 13. Testing & Quality Assurance
 
 ### Playwright MCP
