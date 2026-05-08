@@ -1,7 +1,7 @@
 # CLAUDE.md — Careified
 
 Read this file completely at the start of every session.
-Last updated: May 7, 2026
+Last updated: May 8, 2026
 
 ## 1. Project Identity
 
