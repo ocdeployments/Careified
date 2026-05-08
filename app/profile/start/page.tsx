@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -11,16 +12,6 @@ const COLORS = {
   warmWhite: '#F7F4F0',
   goldTint: '#FDF6EC',
   slate: '#64748B',
-}
-
-const MARIA_DATA = {
-  name: 'Maria Santos',
-  credential: 'PSW',
-  jobTitle: 'Personal Support Worker',
-  city: 'Toronto',
-  state: 'Ontario',
-  workingStyleTags: ['Calm under pressure', 'Emotionally attuned', 'Adapts to change'],
-  tier: 'Verified',
 }
 
 export default function ProfileStartPage() {
@@ -59,6 +50,13 @@ export default function ProfileStartPage() {
   const handleContinue = () => {
     if (!canProceed) return
     router.push(`/sign-up?role=caregiver&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`)
+  }
+
+  const scrollToCTA = () => {
+    const ctaSection = document.getElementById('cta-section')
+    if (ctaSection) {
+      ctaSection.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   const inputStyle = {
@@ -106,56 +104,92 @@ export default function ProfileStartPage() {
         ))}
       </section>
 
-      {/* Section 3: Profile Preview Card */}
+      {/* Section 3: Product Screenshot Mockup */}
       <section style={{ padding: '0 24px 60px', textAlign: 'center' }}>
-        <div style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '20px' }}>
-          This is a snippet of what agencies see when they find you.
+        <div style={{ fontSize: '15px', color: COLORS.slate, marginBottom: '32px', fontFamily: "'DM Sans', sans-serif" }}>
+          This is what agencies see when they find you.
         </div>
-        <div style={{ maxWidth: '480px', margin: '0 auto', background: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', textAlign: 'left' }}>
-          {/* Identity Card */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: COLORS.goldTint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 700, color: COLORS.navy, flexShrink: 0 }}>
-              MS
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.navy, marginBottom: '4px' }}>
-                {MARIA_DATA.name}
-              </div>
-              <div style={{ fontSize: '14px', color: COLORS.slate, marginBottom: '8px' }}>
-                {MARIA_DATA.credential} — {MARIA_DATA.jobTitle}
-              </div>
-              <div style={{ fontSize: '13px', color: COLORS.slate, marginBottom: '12px' }}>
-                {MARIA_DATA.city}, {MARIA_DATA.state}
-              </div>
-              {/* Working Style Tags */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                {MARIA_DATA.workingStyleTags.map((tag, i) => (
-                  <span key={i} style={{
-                    background: COLORS.goldTint,
-                    border: `1px solid ${COLORS.gold}`,
-                    borderRadius: '999px',
-                    padding: '4px 12px',
-                    fontSize: '12px',
-                    color: COLORS.navy,
-                  }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              {/* Tier Badge */}
-              <span style={{
-                background: '#F0FDF4',
-                border: '1px solid #BBF7D0',
-                borderRadius: '999px',
-                padding: '4px 12px',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: '#16A34A',
-              }}>
-                {MARIA_DATA.tier}
+
+        {/* Browser Chrome Mockup */}
+        <div style={{
+          background: '#1a1a2e',
+          borderRadius: '12px',
+          boxShadow: '0 24px 64px rgba(13,27,62,0.25)',
+          overflow: 'hidden',
+          maxWidth: '780px',
+          margin: '0 auto',
+          position: 'relative'
+        }}>
+          {/* Top Bar */}
+          <div style={{
+            background: '#2d2d44',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 16px',
+            gap: '8px'
+          }}>
+            {/* Three Dots */}
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F57' }} />
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFBD2E' }} />
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28CA41' }} />
+
+            {/* URL Bar */}
+            <div style={{
+              background: '#3d3d5c',
+              borderRadius: '6px',
+              flex: 1,
+              height: '20px',
+              marginLeft: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: '12px'
+            }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif" }}>
+                careified.vercel.app/profile/demo
               </span>
             </div>
           </div>
+
+          {/* Screenshot Image */}
+          <div style={{ position: 'relative' }}>
+            <img
+              src="/images/profile-demo-preview.png"
+              alt="Maria Santos Careified profile"
+              style={{ width: '100%', display: 'block' }}
+            />
+            {/* Fade Overlay */}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '120px',
+              background: 'linear-gradient(to bottom, transparent, #F7F4F0)',
+              pointerEvents: 'none'
+            }} />
+          </div>
+        </div>
+
+        {/* Body Copy Below Mockup */}
+        <div style={{ marginTop: '32px', fontFamily: "'DM Sans', sans-serif", color: COLORS.navy }}>
+          <p style={{ fontSize: '16px', maxWidth: '480px', margin: '0 auto 8px', lineHeight: 1.5 }}>
+            Your name. Your credentials. Your working style. Your trust score.
+          </p>
+          <p style={{ fontSize: '16px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.5 }}>
+            All verified. All in one place.
+          </p>
+        </div>
+
+        {/* Side-by-side Links */}
+        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', fontFamily: "'DM Sans', sans-serif" }}>
+          <a href="/profile/demo" target="_blank" style={{ fontSize: '15px', color: COLORS.navy, textDecoration: 'underline' }}>
+            See the full profile →
+          </a>
+          <span style={{ fontSize: '14px', color: COLORS.slate }}>or</span>
+          <button onClick={scrollToCTA} style={{ fontSize: '15px', color: COLORS.gold, textDecoration: 'underline', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+            start building yours
+          </button>
         </div>
       </section>
 
@@ -181,7 +215,7 @@ export default function ProfileStartPage() {
       </section>
 
       {/* Section 6: Pre-CTA Gate or CTA */}
-      <section style={{ padding: '0 24px 80px', textAlign: 'center' }}>
+      <section id="cta-section" style={{ padding: '0 24px 80px', textAlign: 'center' }}>
         {isSignedIn && isVerified ? (
           <a href="/profile/build" style={{
             background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
