@@ -134,11 +134,11 @@ export default function ProfileStartPage() {
 
         {/* Body Copy Below Mockup */}
         <div style={{ marginTop: '32px', fontFamily: "'DM Sans', sans-serif", color: COLORS.navy }}>
-          <p style={{ fontSize: '16px', maxWidth: '480px', margin: '0 auto 8px', lineHeight: 1.5 }}>
-            Your name. Your credentials. Your working style. Your trust score.
+          <p style={{ fontSize: '16px', maxWidth: '520px', margin: '0 auto 12px', lineHeight: 1.6 }}>
+            You've answered the same questions for every agency you've ever worked with. You've proven yourself — over and over — and none of them can share what they know.
           </p>
-          <p style={{ fontSize: '16px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.5 }}>
-            All verified. All in one place.
+          <p style={{ fontSize: '16px', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6, fontWeight: 600, color: COLORS.navy }}>
+            Build your profile once. Your credentials, your reputation, your working style — permanent, portable, and visible to every agency actively hiring.
           </p>
         </div>
 
