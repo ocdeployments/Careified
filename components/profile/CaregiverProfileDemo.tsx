@@ -16,6 +16,7 @@ import {
   AlertCircle,
   User,
 } from 'lucide-react'
+import ProfilePhoto from './ProfilePhoto'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Careified — Caregiver Profile (Agency-facing hiring scorecard)
@@ -637,28 +638,14 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         >
           {/* Left: identity */}
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            {/* Avatar with gold ring */}
-            <div
-              style={{
-                width: 104,
-                height: 104,
-                borderRadius: '50%',
-                padding: 3,
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src="/Maria Santos_Demo_Pic.png"
-                alt="Maria Santos"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: '50%',
-                }}
-              />
-            </div>
+            <ProfilePhoto
+              url="/Maria Santos_Demo_Pic.png"
+              x={0}
+              y={0}
+              scale={1.2}
+              size={104}
+              initials="MS"
+            />
 
             <div style={{ flex: 1, minWidth: 240 }}>
               {/* Name + tier */}
