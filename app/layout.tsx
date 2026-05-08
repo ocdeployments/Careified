@@ -1,6 +1,6 @@
 import './globals.css'
 import { DM_Serif_Display, DM_Sans } from 'next/font/google'
-import Navbar from '@/components/nav/Navbar'
+import NavbarWrapper from '@/components/nav/NavbarWrapper'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import Script from 'next/script'
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-          <Navbar />
+          <NavbarWrapper />
           <main id="main-content" className="pt-16">
             {children}
           </main>
