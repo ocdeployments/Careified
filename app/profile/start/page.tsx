@@ -1,11 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useSignUp } from '@clerk/nextjs'
-import { Check } from 'lucide-react'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -14,138 +11,20 @@ const COLORS = {
   warmWhite: '#F7F4F0',
   goldTint: '#FDF6EC',
   slate: '#64748B',
-  error: '#DC2626',
-  success: '#16A34A',
-  border: '#E2E8F0',
 }
 
 export default function ProfileStartPage() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
-  const { signUp, isLoaded: signUpLoaded } = useSignUp() as any
-  
-  const [phone, setPhone] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
-  const [phoneError, setPhoneError] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', ''])
-  const [otpError, setOtpError] = useState('')
-  const [otpLoading, setOtpLoading] = useState(false)
-  const [phoneVerified, setPhoneVerified] = useState(false)
-  const [resendTimer, setResendTimer] = useState(0)
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const otpInputsRef: any = []
 
   const isSignedIn = isLoaded && user
   const isVerified = isSignedIn && user.emailAddresses[0]?.verification?.status === 'verified'
-  const canProceed = phoneVerified && ageConfirmed
-
-  // Resend countdown
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
-      return () => clearTimeout(t)
-    }
-  }, [resendTimer])
-
-  const validatePhone = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 10)
-    setPhone(digits)
-    if (digits && digits.length < 10) {
-      setPhoneError('Please enter a 10-digit number')
-    } else {
-      setPhoneError('')
-    }
-    setPhoneVerified(false)
-  }
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 10)
-    if (digits.length === 0) return ''
-    if (digits.length <= 3) return digits
-    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-  }
-
-  const handleSendOTP = async () => {
-    const digits = phone.replace(/\D/g, '')
-    if (digits.length !== 10) {
-      setPhoneError('Please enter a 10-digit number')
-      return
-    }
-    if (/^(\d)\1{9}$/.test(digits)) {
-      setPhoneError('Please enter a valid phone number')
-      return
-    }
-
-    if (!signUpLoaded || !signUp) {
-      setPhoneError('Authentication not ready. Please try again.')
-      return
-    }
-
-    setOtpLoading(true)
-    setOtpError('')
-
-    try {
-      // Start phone verification with Clerk
-      await signUp.preparePhoneNumberVerification({ strategy: 'phone_code', phoneNumber: `+1${digits}` })
-      setOtpSent(true)
-      setResendTimer(60)
-      setTimeout(() => otpInputsRef.current[0]?.focus(), 100)
-    } catch (err: any) {
-      console.error('Send OTP error:', err)
-      setPhoneError(err.errors?.[0]?.message || 'Failed to send code. Please try again.')
-    } finally {
-      setOtpLoading(false)
-    }
-  }
-
-  const handleOTPChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return
-
-    const newCode = [...otpCode]
-    newCode[index] = value.slice(-1)
-    setOtpCode(newCode)
-    setOtpError('')
-
-    if (value && index < 5) {
-      otpInputsRef.current[index + 1]?.focus()
-    }
-
-    if (newCode.every(d => d) && newCode.join('').length === 6) {
-      verifyOTP(newCode.join(''))
-    }
-  }
-
-  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      otpInputsRef.current[index - 1]?.focus()
-    }
-  }
-
-  const verifyOTP = async (code: string) => {
-    if (!signUpLoaded || !signUp) return
-
-    setOtpLoading(true)
-    setOtpError('')
-
-    try {
-      await signUp.attemptPhoneNumberVerification({ strategy: 'phone_code', code })
-      setPhoneVerified(true)
-    } catch (err: any) {
-      console.error('Verify OTP error:', err)
-      setOtpError(err.errors?.[0]?.message || 'Incorrect code. Please try again.')
-      setOtpCode(['', '', '', '', '', ''])
-      otpInputsRef.current[0]?.focus()
-    } finally {
-      setOtpLoading(false)
-    }
-  }
+  const canProceed = ageConfirmed
 
   const handleContinue = () => {
     if (!canProceed) return
-    router.push(`/sign-up?role=caregiver&phone=${encodeURIComponent(phone)}`)
+    router.push('/sign-up?role=caregiver')
   }
 
   const scrollToCTA = () => {
@@ -153,18 +32,6 @@ export default function ProfileStartPage() {
     if (ctaSection) {
       ctaSection.scrollIntoView({ behavior: 'smooth' })
     }
-  }
-
-  const inputStyle = {
-    width: '100%',
-    padding: '14px 16px',
-    border: `1px solid ${COLORS.gold}`,
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontFamily: "'DM Sans', sans-serif",
-    outline: 'none',
-    background: 'white',
-    color: COLORS.navy,
   }
 
   return (
@@ -329,100 +196,8 @@ export default function ProfileStartPage() {
               Before we get started
             </div>
             <p style={{ fontSize: '14px', color: COLORS.slate, marginBottom: '20px' }}>
-              Verify your phone number to create your secure profile.
+              Confirm you're 18 or older to get started — takes 2 minutes.
             </p>
-
-            {/* Phone Input */}
-            <div style={{ marginBottom: '16px' }}>
-              {phoneVerified ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 16px', background: '#F0FDF4', borderRadius: 8, border: '1px solid #BBF7D0' }}>
-                  <Check size={18} color={COLORS.success} />
-                  <span style={{ color: COLORS.success, fontWeight: 500 }}>{formatPhone(phone)}</span>
-                  <span style={{ fontSize: 12, color: COLORS.slate }}>Verified</span>
-                </div>
-              ) : (
-                <>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: COLORS.slate, fontSize: 15 }}>+1</span>
-                    <input
-                      type="tel"
-                      placeholder="(416) 555-1234"
-                      value={formatPhone(phone)}
-                      onChange={(e) => validatePhone(e.target.value)}
-                      disabled={otpSent}
-                      style={{ ...inputStyle, paddingLeft: 40 }}
-                    />
-                  </div>
-                  {phoneError && <div style={{ fontSize: '12px', color: COLORS.error, marginTop: '4px' }}>{phoneError}</div>}
-                  
-                  {!otpSent && (
-                    <button
-                      type="button"
-                      onClick={handleSendOTP}
-                      disabled={phone.replace(/\D/g, '').length !== 10 || otpLoading}
-                      style={{
-                        marginTop: 12,
-                        padding: '10px 20px',
-                        background: phone.replace(/\D/g, '').length === 10 ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : COLORS.border,
-                        color: phone.replace(/\D/g, '').length === 10 ? COLORS.navy : COLORS.slate,
-                        border: 'none',
-                        borderRadius: 8,
-                        fontSize: 14,
-                        fontWeight: 600,
-                        cursor: phone.replace(/\D/g, '').length === 10 ? 'pointer' : 'not-allowed',
-                        opacity: otpLoading ? 0.7 : 1,
-                      }}
-                    >
-                      {otpLoading ? 'Sending...' : 'Send Code'}
-                    </button>
-                  )}
-
-                  {/* OTP Input */}
-                  {otpSent && !phoneVerified && (
-                    <div style={{ marginTop: 16 }}>
-                      <div style={{ fontSize: 13, color: COLORS.slate, marginBottom: 8 }}>Enter 6-digit code</div>
-                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                        {otpCode.map((digit, i) => (
-                          <input
-                            key={i}
-                            ref={(el) => { otpInputsRef.current[i] = el }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={e => handleOTPChange(i, e.target.value)}
-                            onKeyDown={e => handleOTPKeyDown(i, e)}
-                            style={{
-                              width: 44,
-                              height: 52,
-                              textAlign: 'center',
-                              fontSize: 20,
-                              fontWeight: 600,
-                              border: `1.5px solid ${otpError ? COLORS.error : COLORS.border}`,
-                              borderRadius: 8,
-                              outline: 'none',
-                            }}
-                          />
-                        ))}
-                      </div>
-                      {otpError && <div style={{ fontSize: 12, color: COLORS.error, marginTop: 8, textAlign: 'center' }}>{otpError}</div>}
-                      <div style={{ marginTop: 12, textAlign: 'center' }}>
-                        {resendTimer > 0 ? (
-                          <span style={{ fontSize: 13, color: COLORS.slate }}>Resend in {resendTimer}s</span>
-                        ) : (
-                          <button
-                            onClick={handleSendOTP}
-                            style={{ background: 'none', border: 'none', color: COLORS.gold, fontSize: 13, fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}
-                          >
-                            Resend code
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
 
             {/* Age Confirmation */}
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '20px', cursor: 'pointer' }}>
