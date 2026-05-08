@@ -34,6 +34,9 @@ export interface ProfileFormData {
   }
   bio?: string
   photoUrl?: string
+  photoX?: number
+  photoY?: number
+  photoScale?: number
 
   // Step 2 — Services
   services?: string[]

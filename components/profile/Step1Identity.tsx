@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { useLocale } from '@/lib/locale/useLocale'
+import PhotoUploadEditor from './PhotoUploadEditor'
 
 // Design system colors
 const COLORS = {
@@ -107,6 +108,8 @@ export default function Step1Identity() {
   const [zipLooking, setZipLooking] = useState(false)
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(formData.photoUrl || null)
+  const [photoEditorOpen, setPhotoEditorOpen] = useState(false)
+  const [pendingPhoto, setPendingPhoto] = useState<string | null>(null)
   const [focused, setFocused] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -181,12 +184,27 @@ export default function Step1Identity() {
       const reader = new FileReader()
       reader.onload = (ev) => {
         const dataUrl = ev.target?.result as string
-        setPhotoPreview(dataUrl)
-        saveField('photoUrl', dataUrl)
+        setPendingPhoto(dataUrl)
+        setPhotoEditorOpen(true)
       }
       reader.readAsDataURL(file)
     }
     img.src = objectUrl
+  }
+
+  const handlePhotoSave = (data: { url: string; x: number; y: number; scale: number }) => {
+    setPhotoPreview(data.url)
+    setPhotoEditorOpen(false)
+    setPendingPhoto(null)
+    saveField('photoUrl', data.url)
+    saveField('photoX', data.x)
+    saveField('photoY', data.y)
+    saveField('photoScale', data.scale)
+  }
+
+  const handlePhotoEditorCancel = () => {
+    setPhotoEditorOpen(false)
+    setPendingPhoto(null)
   }
 
   const toggleLanguage = useCallback((lang: string) => {
@@ -594,6 +612,17 @@ export default function Step1Identity() {
           </div>
         )}
       </div>
+
+      {/* Photo Position Editor Modal */}
+      <PhotoUploadEditor
+        isOpen={photoEditorOpen}
+        imageUrl={pendingPhoto || ''}
+        initialX={formData.photoX || 0}
+        initialY={formData.photoY || 0}
+        initialScale={formData.photoScale || 1}
+        onSave={handlePhotoSave}
+        onCancel={handlePhotoEditorCancel}
+      />
     </div>
   )
 }

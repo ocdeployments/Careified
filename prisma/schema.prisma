@@ -47,6 +47,9 @@ model Caregiver {
   hourly_rate                    Decimal?                      @db.Decimal(10, 2)
   bio                            String?
   photo_url                      String?
+  photo_x                        Decimal?                      @default(0) @db.Decimal(10, 2)
+  photo_y                        Decimal?                      @default(0) @db.Decimal(10, 2)
+  photo_scale                    Decimal?                      @default(1) @db.Decimal(3, 2)
   years_experience               Int?
   rating_count                   Int?                          @default(0)
   aggregate_score                Decimal?                      @default(0) @db.Decimal(3, 2)
