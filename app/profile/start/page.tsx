@@ -170,22 +170,20 @@ export default function ProfileStartPage() {
   return (
     <div style={{ minHeight: '100vh', background: COLORS.warmWhite, fontFamily: "'DM Sans', sans-serif", color: COLORS.navy }}>
       {/* Section 1: Hero */}
-      <section style={{ padding: '80px 24px 60px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+      <section style={{ padding: '48px 24px 32px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ fontSize: '12px', fontWeight: 700, color: COLORS.gold, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '16px' }}>
           For Professional Caregivers
         </div>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '42px', lineHeight: 1.2, color: COLORS.navy, marginBottom: '24px' }}>
-          You've spent years earning your reputation.<br />
-          Every time you move agencies, you leave it behind.<br />
-          Careified fixes that.
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '32px', lineHeight: 1.3, color: COLORS.navy, marginBottom: '16px' }}>
+          You've spent years earning your reputation. Every time you move agencies, you leave it behind. Careified fixes that.
         </h1>
-        <p style={{ fontSize: '17px', color: COLORS.slate, maxWidth: '60ch', margin: '0 auto', lineHeight: 1.6 }}>
+        <p style={{ fontSize: '15px', color: COLORS.slate, maxWidth: '60ch', margin: '0 auto', lineHeight: 1.6 }}>
           This is not a resume. It's a verified professional identity — built once, updated as you grow, visible only to caregiving agencies that are actively hiring.
         </p>
       </section>
 
       {/* Section 2: Trust Pills */}
-      <section style={{ padding: '0 24px 60px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', maxWidth: '900px', margin: '0 auto' }}>
+      <section style={{ padding: '0 24px 32px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', maxWidth: '900px', margin: '0 auto' }}>
         {['15 minutes to go live', 'Private until you\'re ready', 'Edit anytime', 'Always free for caregivers'].map((pill, i) => (
           <span key={i} style={{
             border: `1px solid ${COLORS.gold}`,
@@ -201,7 +199,7 @@ export default function ProfileStartPage() {
       </section>
 
       {/* Section 3: Product Screenshot Mockup */}
-      <section style={{ padding: '0 24px 60px', textAlign: 'center' }}>
+      <section style={{ padding: '0 24px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: '15px', color: COLORS.slate, marginBottom: '32px', fontFamily: "'DM Sans', sans-serif" }}>
           This is what agencies see when they find you.
         </div>
