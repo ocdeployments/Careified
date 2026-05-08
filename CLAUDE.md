@@ -342,85 +342,54 @@ npx tsc --noEmit 2>&1 | head -5
 
 ---
 
-### When I say "end session" you will:
-1. UPDATE CAREIFIED_SPEC.md
-   - Add new pages + expected behaviours built today
-   - Add new buttons/CTAs with href targets
-   - Move fixed issues to RESOLVED section
-   - Update page count if changed
-   Commit: "chore: update CAREIFIED_SPEC.md — [date]"
-   Show diff. Wait for approval.
+### /end-session — Safe Stop (auto or manual)
+Run in this order:
 
-2. UPDATE CLAUDE.md
-   - Update Last updated date
-   - Add new key files, DB tables, env vars
-   Commit: "chore: update CLAUDE.md — [date]"
-   Show diff. Wait for approval.
+1. UPDATE CAREIFIED_STATUS.md with session summary (what was done, what's in progress, files modified)
 
-3. UPDATE CONTEXT.md
-   - Add product decisions made today and WHY
-   - Add anything tried that didn't work
-   Commit: "chore: update CONTEXT.md — [date]"
-   Show diff. Wait for approval.
-
-4. UPDATE HANDOFF.md
-   - Update generated date
-   - Add new pages to inventory
-   - Move completed items out of pending
-   - Update safe revert point to latest commit hash
-   Commit: "chore: update HANDOFF.md — [date]"
-   Show diff. Wait for approval.
-
-5. UPDATE CAREIFIED_STATUS.md
-   - Mark completed sessions as DONE with commit hash
-   - Move next session to top of queue
-   Commit: "chore: update CAREIFIED_STATUS.md — [date]"
-   Show diff. Wait for approval.
-
-6. UPDATE /admin/status/page.tsx
-   - Update PENDING array: move fixed items to FIXED, add any new issues
-   - Update SECURITY object: adjust counts, update currentPriority
-   - Update ORPHAN_PAGES: reflect current navigation state
-   - Update BUILT array: add any new features built today
-   - Update dates to current session date
-
-   **SITEMAP CHECK:**
-   - Visit /admin/sitemap to verify all new pages are listed
-   - Check if any new pages are orphans (not in navbar/dropdowns)
-   - Add orphan pages to ORPHAN_PAGES in status page
-   - The sitemap auto-generates from app/ directory - no manual update needed
-   Commit: "chore: update admin status page — [date]"
-   Show diff. Wait for approval.
-
-   **IMPORTANT:** When adding new hrefs/redirects, verify all destination pages exist:
-   - Check any new Link hrefs in components/pages point to existing routes
-   - Check any redirectUrl parameters point to existing routes
-   - Use `ls app/` to verify directory structure
-   - Broken redirects = broken user flow
-
-7. RUN FINAL QA AUDIT
-   POST report to /api/qa/report with latest commit hash
-
-8. SHOW SESSION SUMMARY:
+2. Commit ONLY documentation files:
+   ```bash
+   git add CAREIFIED_STATUS.md HANDOFF.md CLAUDE.md
+   git commit -m "session-end: status update [$(date +%Y-%m-%d)]"
    ```
-   SESSION COMPLETE — [date]
-   ──────────────────────────────
-   Commits: X
-   [list each hash + message]
 
-   QA Delta:
-   Started:  ❌ X failing  ⚠️ X warnings
-   Finished: ❌ X failing  ⚠️ X warnings
-   Fixed this session: X issues
-
-   Still open (priority order):
-   1. [most critical]
-   2. [second]
-   3. [third]
-
-   Next session should start with:
-   [one line — single most important next action]
+3. Output a Modified Files Report:
+   ```bash
+   git status --short
+   git diff --name-only HEAD
    ```
+   List every locally modified file that has NOT been pushed.
+
+4. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
+
+---
+
+### /confirm-push — Manual Push After Review
+Only run when user explicitly types /confirm-push:
+
+1. Run npx tsc --noEmit — report results
+
+2. If TS errors exist, ask: "TypeScript errors found. Run /force-push to push anyway, or fix errors first."
+
+3. If clean (or user ran /force-push):
+   ```bash
+   git add -A
+   git commit -m "session-end: code changes [$(date +%Y-%m-%d)]"
+   git push origin main
+   ```
+
+4. Confirm: "✅ All changes pushed to origin/main. Safe to start new session."
+
+---
+
+### /force-push — Override TS errors
+Skips the TS check and pushes regardless. Use only when you know the errors are pre-existing.
+
+---
+
+**NEVER auto-push code without /confirm-push**
+The session limit auto-trigger only runs Step 1 (/end-session).
+/confirm-push is ALWAYS a manual human decision. No exceptions.
 
 ## Last updated: May 6, 2026 — Phase 1 Complete
 
