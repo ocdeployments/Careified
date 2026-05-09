@@ -11,7 +11,7 @@ export default function SignInPage() {
       padding: '40px 20px',
     }}>
       <SignIn
-        signUpUrl="/sign-up"
+        signUpFallbackRedirectUrl="/onboarding"
         fallbackRedirectUrl="/api/auth/role-redirect"
         appearance={{
           variables: {
