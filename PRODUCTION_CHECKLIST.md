@@ -18,7 +18,7 @@
 - [ ] Rate limiting — all registration + reference + AI API routes
 - [ ] UUID reference tokens — app/api/references/invite/route.ts
 - [ ] SQL injection fix — lib/db.ts lines 56-68 (validate keys against column allowlist)
-- [ ] Remove dangerouslySetInnerHTML — app/admin/caregivers/page.tsx line 217
+- [x] Remove dangerouslySetInnerHTML — app/admin/caregivers/page.tsx line 217
 
 ### Legal / Compliance
 - [ ] Lawyer review lib/legal/text.ts
