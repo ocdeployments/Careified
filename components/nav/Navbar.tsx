@@ -225,7 +225,7 @@ export default function Navbar() {
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
           <img
-            src="/Carefied-logo.png"
+            src="/Careified-logo.png"
             alt="Careified"
             style={{
               height: '64px',
@@ -293,12 +293,13 @@ export default function Navbar() {
           })}
           <Link
             href="/about"
+            onClick={() => setActivePanel(null)}
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 500,
-              color: 'rgba(255,255,255,0.8)',
+              color: 'rgba(255,255,255,0.75)',
               textDecoration: 'none',
               transition: 'all 0.15s ease',
             }}
@@ -307,12 +308,13 @@ export default function Navbar() {
           </Link>
           <Link
             href="/contact"
+            onClick={() => setActivePanel(null)}
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 500,
-              color: 'rgba(255,255,255,0.8)',
+              color: 'rgba(255,255,255,0.75)',
               textDecoration: 'none',
               transition: 'all 0.15s ease',
             }}
@@ -357,7 +359,10 @@ export default function Navbar() {
             left: 0,
             right: 0,
             background: '#0D1B3E',
-            borderTop: '1px solid rgba(255,255,255,0.07)',
+            border: '1px solid rgba(201,151,58,0.2)',
+            borderTop: 'none',
+            borderRadius: '0 0 12px 12px',
+            overflow: 'hidden',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}
         >
