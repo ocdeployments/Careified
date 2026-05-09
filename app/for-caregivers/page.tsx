@@ -400,7 +400,7 @@ export default function ForCaregiversPage() {
               textAlign: 'center',
             }}>
               <Link
-                href="/profile/build"
+                href="/sign-up?role=caregiver"
                 style={{
                   fontFamily: SANS,
                   fontSize: '14px',
