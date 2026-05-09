@@ -615,6 +615,18 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 | Empty state — search 0 results | HIGH | |
 | Empty state — shortlist empty | HIGH | |
 | Empty state — clients empty | HIGH | |
+| Agency Roster | CRITICAL | Agency builds caregiver profiles on their behalf |
+| Caregiver profile claim | CRITICAL | Caregiver claims agency-built profile |
+| CSV caregiver import | HIGH | Agency uploads existing roster |
+| Caregiver contact info on profile | HIGH | Phone + email visible to approved agencies |
+| Pipeline status (5 stages) | HIGH | Discovered/Contacted/Interviewing/Placed/Inactive |
+| Multi-user agency accounts | HIGH | Coordinator + owner same account |
+| Locale scoping CA/US | CRITICAL | CA caregivers never visible to US agencies |
+| QuickFill Basic | MEDIUM | In-app shift blast to matched caregivers |
+| QuickFill Standard | PHASE 2 | WhatsApp + SMS blast |
+| QuickFill AI | PHASE 2 | AI confirmation call after YES response |
+| "You're live" banner | MEDIUM | After caregiver completes Step 3 |
+| Profile view notification | MEDIUM | In-app when agency views profile |
 
 ---
 
