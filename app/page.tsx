@@ -28,44 +28,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── How it works (cream) ── */}
-        <section className="bg-[#F7F4F0] px-6 py-20" aria-label="How Careified works">
-          <div className="max-w-[960px] mx-auto">
-            <h2 className="font-serif text-[38px] text-[#0D1B3E] leading-tight mb-10">
-              A reputation system<br />caregiving has never had
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: <UserCheck size={24} className="text-[#0D1B3E]" />,
-                  num: '01',
-                  title: 'Build your profile',
-                  desc: '7 steps. Your complete professional record — credentials, experience, references.',
-                },
-                {
-                  icon: <Search size={24} className="text-[#0D1B3E]" />,
-                  num: '02',
-                  title: 'Get placed',
-                  desc: 'Agencies search by match score, availability, and specialization.',
-                },
-                {
-                  icon: <Shield size={24} className="text-[#0D1B3E]" />,
-                  num: '03',
-                  title: 'Earn your score',
-                  desc: 'Verified badges and ratings no one can take away.',
-                },
-              ].map(step => (
-                <div key={step.num} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                  <div className="font-serif text-2xl font-bold text-[#C9973A] mb-3">{step.num}</div>
-                  <div className="mb-3">{step.icon}</div>
-                  <div className="text-[15px] font-semibold text-[#0D1B3E] mb-2">{step.title}</div>
-                  <div className="text-[13px] text-slate-600 leading-relaxed">{step.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ── The Careified Engine (warm white) ── */}
         <section
           style={{ background: '#F7F4F0', padding: '80px 24px' }}
@@ -219,36 +181,6 @@ export default function HomePage() {
             <p style={{ fontSize: '11px', color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', maxWidth: '600px', margin: '24px auto 0', lineHeight: 1.5 }}>
               Careified organises and presents information submitted by caregivers and collected from third parties. All placement decisions rest with the agency. Careified does not certify, verify, or recommend any individual.
             </p>
-          </div>
-        </section>
-
-        {/* ── CTA (dark gradient) ── */}
-        <section
-          className="px-6 py-20 text-center"
-          style={{ background: 'linear-gradient(135deg, #0D1B3E 0%, #1E3A8A 100%)' }}
-          aria-label="Call to action"
-        >
-          <div className="max-w-2xl mx-auto">
-            <h2 className="font-serif text-3xl md:text-[44px] font-bold text-white leading-tight mb-3">
-              The information problem<br />in caregiving ends here
-            </h2>
-            <p className="text-sm text-white/80 mb-9 leading-relaxed">
-              75% annual turnover. Every hire starts blind. Not anymore.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/sign-up?role=agency"
-                className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-br from-[#C9973A] to-[#E8B86D] text-[#0D1B3E] text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-              >
-                I'm an agency
-              </Link>
-              <Link
-                href="/sign-up?role=caregiver"
-                className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white/10 border border-white/30 text-white text-sm font-medium hover:bg-white/20 transition-all focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
-              >
-                I'm a caregiver — it's free
-              </Link>
-            </div>
           </div>
         </section>
 
