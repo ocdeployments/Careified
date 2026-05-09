@@ -22,10 +22,10 @@ export default function HomePage() {
                 How it works
               </div>
               <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: '32px', color: '#0D1B3E', marginBottom: '16px', lineHeight: 1.2 }}>
-                Three actors. One engine. A flywheel that compounds.
+                Caregivers. Agencies. Clients. An engine built to serve all three.
               </h2>
               <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '15px', color: '#64748B', margin: '0 auto', maxWidth: '480px', lineHeight: 1.6 }}>
-                Every profile built, every placement made, every rating submitted makes the next match more accurate.
+                The caregiving industry runs on gut feel and incomplete information. Not anymore.
               </p>
             </div>
 
