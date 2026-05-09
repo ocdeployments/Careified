@@ -104,17 +104,6 @@ export default function ProfileStartPage() {
 
         {/* Two Column Layout */}
         <div style={{ display: 'flex', gap: '48px', alignItems: 'center', maxWidth: '900px', margin: '40px auto 0', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {/* Left Column */}
-          <div style={{ maxWidth: '380px', textAlign: 'left' }}>
-            <span style={{ fontSize: '48px', color: COLORS.gold, lineHeight: 0.5 }}>"</span>
-            <p style={{ fontSize: '17px', lineHeight: 1.7, color: COLORS.navy, marginTop: '12px' }}>
-              You've answered the same questions at every agency. Proven yourself — over and over. None of them can share what they know.
-            </p>
-            <p style={{ fontSize: '17px', fontWeight: 700, color: COLORS.navy, marginTop: '16px' }}>
-              Build once. Be found by every agency actively hiring.
-            </p>
-          </div>
-
           {/* Right Column — CTA Card */}
           <div style={{ background: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 24px rgba(13,27,62,0.10)', textAlign: 'center' }}>
             <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '20px', fontWeight: 700, color: COLORS.navy, marginBottom: '8px' }}>
