@@ -180,40 +180,6 @@ export default function ProfileStartPage() {
             </a>
           </div>
         </div>
-
-        {/* Two Column Layout */}
-        <div style={{ display: 'flex', gap: '48px', alignItems: 'center', maxWidth: '900px', margin: '40px auto 0', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {/* Right Column — CTA Card */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 24px rgba(13,27,62,0.10)', textAlign: 'center' }}>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '20px', fontWeight: 700, color: COLORS.navy, marginBottom: '8px' }}>
-              Start building your profile
-            </h3>
-            <p style={{ fontSize: '14px', color: COLORS.slate, marginBottom: '24px' }}>
-              Free for caregivers. Always.
-            </p>
-            <button
-              onClick={scrollToCTA}
-              style={{
-                background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
-                color: COLORS.navy,
-                fontWeight: 700,
-                padding: '14px 32px',
-                borderRadius: '999px',
-                fontSize: '16px',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'inline-block',
-              }}
-            >
-              Claim Your Profile
-            </button>
-            <div style={{ marginTop: '16px' }}>
-              <a href="/profile/demo" style={{ fontSize: '13px', color: COLORS.slate, textDecoration: 'underline' }}>
-                See a sample profile →
-              </a>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* SECTION 4 — What Happens Next (2x2 Grid) */}
