@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 // In-memory OTP store (use Redis in production)
 const otpStore: Map<string, { code: string; expires: number; attempts: number }> = new Map()
@@ -38,6 +39,12 @@ function formatPhoneForDisplay(phone: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit check
+    const clientIp = getClientIp(request)
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+    }
+
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
