@@ -39,6 +39,11 @@
 - [ ] Uptime monitoring configured (Render + Vercel)
 - [ ] Error tracking configured (Sentry — SENTRY_DSN env var)
 - [ ] Staging environment created (separate Vercel project + DB)
+- [ ] careified.ca domain purchased | ❌ | Romy | Namecheap/GoDaddy |
+- [ ] careified.com domain purchased | ❌ | Romy | Namecheap/GoDaddy |
+- [ ] careified.ca pointed to Vercel CA project | ❌ | Romy | |
+- [ ] careified.com pointed to Vercel US project | ❌ | Romy | |
+- [ ] GitHub branch protection enabled on main | ❌ | Romy | 3 rules |
 
 ---
 
@@ -56,6 +61,14 @@
 - [ ] demo_leads DB table — capture and store demo gate submissions
 - [ ] Stripe integration — PAYMENTS_ENABLED=false currently, no revenue collection
 - [ ] Module pricing confirmed and wired to Stripe
+- [ ] Agency Roster | ❌ | Week 1 | Critical — enables cold start |
+- [ ] Caregiver claims agency-built profile | ❌ | Week 1 | Viral loop |
+- [ ] CSV caregiver import | ❌ | Week 1 | Cold start solver |
+- [ ] Caregiver contact info visible to agencies | ❌ | Week 1 | Dead end fix |
+- [ ] Pipeline status (5 stages) | ❌ | Week 1 | Agency workflow |
+- [ ] Multi-user agency accounts | ❌ | Week 2 | |
+- [ ] Locale column + CA/US data scoping | ❌ | Week 2 | Critical |
+- [ ] QuickFill Basic (in-app only) | ❌ | Week 3 | If time allows |
 
 ### Broken Links (404s)
 - [ ] /agency/support — linked from /agency/billing, page not built
@@ -165,6 +178,11 @@
 - [ ] Apple Developer account ($99/yr) for Wallet passes
 - [ ] US demo caregivers seeded (TX, FL, NY)
 - [ ] US demo clients seeded
+
+### Agency Onboarding
+- [ ] Ontario agency early adopter agreement | ❌ | Romy | 3 months free |
+- [ ] Texas agency early adopter agreement | ❌ | Romy | 3 months free |
+- [ ] Both agencies on Growth tier (free) | ❌ | Romy | Early adopter |
 
 ### QA Automation
 - [ ] Playwright E2E suite — full 36-page coverage
