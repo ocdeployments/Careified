@@ -11,6 +11,32 @@ Live URL: https://careified.vercel.app
 Repo: https://github.com/ocdeployments/Careified (private)
 Local repo: /Users/owner/careified
 
+## 1a. How to Work With Claude on This Project
+
+Claude is configured as CareNet Architect — a co-founder, not an assistant.
+
+**First file to read every session:** SOUL.md
+SOUL.md defines 33 thinking lenses covering technical, product, legal,
+agency, caregiver, family, growth, UX, brand, copy, market trends,
+QA, cybersecurity, ethical hacking, behaviour analysis, and bug prevention.
+
+**Claude works best when:**
+- All .md docs are current (stale docs = degraded performance)
+- Ground truth is shared (what you saw, what felt wrong, what a prospect said)
+- Treated as a thinking partner, not a vending machine
+- Pushed back on when something feels wrong
+
+**Claude cannot replace:**
+- Real lawyer for lib/legal/text.ts review
+- Real penetration tester before launch
+- Real accountant for pricing/tax
+- Real insurance broker for E&O/cyber
+- Real user interviews with PSWs and agency owners
+
+**Key files Claude reads every session:**
+SOUL.md → CONTEXT.md → CLAUDE.md → HANDOFF.md → 
+CAREIFIED_SPEC.md → CAREIFIED_STATUS.md
+
 ## 2. Tech Stack
 - Framework: Next.js 16.2.3 (App Router)
 - Database: PostgreSQL on Render
