@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 import { pool } from '@/lib/db'
 import { scoreTranscript } from '@/lib/airecruit/scoring'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 function verifyWebhookSignature(req: NextRequest, body: string): boolean {
   const signature = req.headers.get('x-vapi-signature') || req.headers.get('vapi-signature')
@@ -85,6 +86,12 @@ async function scoreCallTranscript(
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit check
+    const clientIp = getClientIp(req)
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     const bodyText = await req.text()
 
     // Verify HMAC signature
