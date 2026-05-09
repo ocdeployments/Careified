@@ -311,7 +311,7 @@ No green as primary. No emojis in UI.
 
 1. One file per commit
 2. npx tsc --noEmit before every commit
-3. git push origin main after every commit
+3. ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 4. Stop after each commit, wait for confirmation
 5. No new packages without asking
 6. NEVER npx vercel --prod
