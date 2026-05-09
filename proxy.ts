@@ -15,7 +15,6 @@ const isPublicRoute = createRouteMatcher([
   '/for-agencies',
   '/for-families',
   '/profile/[id]',
-  '/profile/build',
   '/profile/start',
   '/profile/demo-preview',
   '/api/health',
