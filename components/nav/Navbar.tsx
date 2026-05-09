@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown, Info, Briefcase, UserCheck, Building2, Presentation, Play, Heart, Users } from 'lucide-react'
 import { UserButton, useAuth, useUser } from '@clerk/nextjs'
 import BrandLogo from '../BrandLogo'
 
@@ -15,22 +15,43 @@ function AuthButton() {
   if (!isLoaded) return null
   if (userId) {
     return (
-      <div className="flex items-center gap-3">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <Link
           href="/profile/strength"
-          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+          style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.8)',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            transition: 'color 0.15s',
+            textDecoration: 'none',
+          }}
         >
           Profile strength
         </Link>
         <Link
           href="/settings/data-rights"
-          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+          style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.8)',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            transition: 'color 0.15s',
+            textDecoration: 'none',
+          }}
         >
           Data rights
         </Link>
         <Link
           href="/settings/communications"
-          className="text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+          style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.8)',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            transition: 'color 0.15s',
+            textDecoration: 'none',
+          }}
         >
           Communications
         </Link>
@@ -49,13 +70,33 @@ function AuthButton() {
     <>
       <Link
         href="/sign-up"
-        className="text-xs font-medium px-3.5 py-1.5 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+        style={{
+          fontSize: '12px',
+          fontWeight: 500,
+          padding: '6px 14px',
+          borderRadius: '8px',
+          border: '1px solid rgba(255,255,255,0.15)',
+          color: 'rgba(255,255,255,0.75)',
+          background: 'none',
+          textDecoration: 'none',
+          transition: 'all 0.15s ease',
+        }}
       >
         Sign in
       </Link>
       <Link
         href="/sign-up"
-        className="text-xs font-semibold px-4 py-2 rounded-lg bg-[#C9973A] text-white hover:bg-[#b8862e] transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+        style={{
+          fontSize: '12px',
+          fontWeight: 600,
+          padding: '8px 16px',
+          borderRadius: '8px',
+          background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+          color: '#0D1B3E',
+          boxShadow: '0 2px 8px rgba(201,151,58,0.3)',
+          textDecoration: 'none',
+          transition: 'all 0.15s ease',
+        }}
       >
         Get started
       </Link>
@@ -69,10 +110,11 @@ const panels = {
     accent: '#C9973A',
     title: 'For Professional Caregivers',
     desc: "You don't need another app. Build once. Be seen forever.",
+    icon: Info,
     links: [
-      { href: '/for-caregivers#why-build', label: 'Why Should I Build My Profile?', desc: 'See how a verified profile gets you discovered by agencies that match your skills.' },
-      { href: '/opportunities',            label: 'Browse Opportunities',           desc: 'See open roles matched to your skills, availability, and location.'               },
-      { href: '/profile/start',            label: 'Start Your Careified Profile',             desc: 'Build once. Be seen forever. Free — takes 15 minutes.'                           },
+      { href: '/for-caregivers#why-build', label: 'Why Should I Build My Profile?', desc: 'See how a verified profile gets you discovered by agencies that match your skills.', icon: Info },
+      { href: '/opportunities',            label: 'Browse Opportunities',           desc: 'See open roles matched to your skills, availability, and location.', icon: Briefcase },
+      { href: '/profile/start',            label: 'Start Your Careified Profile',             desc: 'Build once. Be seen forever. Free — takes 15 minutes.', icon: UserCheck },
     ],
     cta: { href: '/profile/start', label: 'Build My Profile' },
   },
@@ -80,10 +122,11 @@ const panels = {
     accent: '#1E3A8A',
     title: 'Recruit Without the Legwork.',
     desc: 'We deliver interview-ready professionals with intelligent AI-powered matches.',
+    icon: Building2,
     links: [
-      { href: '/agency/signup',  label: 'Join the Careified Network', desc: 'Start recruiting smarter — no manual screening required.'         },
-      { href: '/for-agencies',   label: 'How It Works',               desc: 'See the Careified workflow end-to-end — from search to placement.' },
-      { href: '/demo',           label: 'Try the Platform',           desc: 'Explore a live demo — no login required.'                         },
+      { href: '/agency/signup',  label: 'Join the Careified Network', desc: 'Start recruiting smarter — no manual screening required.', icon: Building2 },
+      { href: '/for-agencies',   label: 'How It Works',               desc: 'See the Careified workflow end-to-end — from search to placement.', icon: Presentation },
+      { href: '/demo',           label: 'Try the Platform',           desc: 'Explore a live demo — no login required.', icon: Play },
     ],
     cta: { href: '/agency/signup', label: 'Join the Careified Network' },
   },
@@ -91,9 +134,10 @@ const panels = {
     accent: '#16A34A',
     title: 'For Families',
     desc: 'Find trusted, verified caregivers for your loved ones.',
+    icon: Heart,
     links: [
-      { href: '/for-families', label: 'How it works', desc: 'See how families use Careified' },
-      { href: '/about',        label: 'About us',     desc: 'Our mission and team'           },
+      { href: '/for-families', label: 'How it works', desc: 'See how families use Careified', icon: Heart },
+      { href: '/about',        label: 'About us',     desc: 'Our mission and team',           icon: Users },
     ],
     cta: { href: '/sign-up', label: 'Find a caregiver' },
   },
@@ -111,6 +155,12 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navRef = useRef<HTMLElement>(null)
+
+  // Track current path for active indicator
+  const [currentPath, setCurrentPath] = useState('')
+  useEffect(() => {
+    setCurrentPath(window.location.pathname)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -139,21 +189,35 @@ export default function Navbar() {
   const togglePanel = (key: PanelKey) =>
     setActivePanel(prev => (prev === key ? null : key))
 
+  // Check if section is active based on current path
+  const isSectionActive = (key: PanelKey) => {
+    const panelLinks = panels[key].links.map(l => l.href)
+    return panelLinks.some(href => currentPath.startsWith(href.split('#')[0]))
+  }
+
   return (
     <nav
       ref={navRef}
-      className={[
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-200 bg-[#0D1B3E]',
-        scrolled ? 'shadow-lg shadow-black/20' : '',
-      ].join(' ')}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        background: 'rgba(13,27,62,0.97)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(201,151,58,0.15)',
+        transition: 'box-shadow 0.2s',
+        boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.2)' : 'none',
+      }}
       aria-label="Main navigation"
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
         {/* Logo */}
         <Link
           href="/"
-          className="focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none rounded"
+          style={{ borderRadius: '4px', outline: 'none' }}
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
           <img
@@ -169,51 +233,94 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-1">
-          {(Object.keys(panels) as PanelKey[]).map(key => (
-            <button
-              key={key}
-              onClick={() => togglePanel(key)}
-              aria-expanded={activePanel === key}
-              aria-haspopup="true"
-              className={[
-                'flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                'focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none',
-                activePanel === key
-                  ? 'text-white bg-white/10'
-                  : 'text-white/80 hover:text-white hover:bg-white/10',
-              ].join(' ')}
-            >
-              <span className="capitalize">{key}</span>
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-200 ${activePanel === key ? 'rotate-180' : ''}`}
-              />
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {(Object.keys(panels) as PanelKey[]).map(key => {
+            const isActive = isSectionActive(key)
+            return (
+              <button
+                key={key}
+                onClick={() => togglePanel(key)}
+                aria-expanded={activePanel === key}
+                aria-haspopup="true"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  background: activePanel === key ? 'rgba(255,255,255,0.1)' : 'transparent',
+                  color: activePanel === key ? '#fff' : 'rgba(255,255,255,0.8)',
+                }}
+              >
+                <span style={{ textTransform: 'capitalize' }}>{key}</span>
+                {isActive && (
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C9973A', marginLeft: '4px', display: 'inline-block' }} />
+                )}
+                <ChevronDown
+                  size={14}
+                  style={{
+                    transition: 'transform 0.2s ease',
+                    transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                />
+              </button>
+            )
+          })}
           <Link
             href="/about"
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.8)',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+            }}
           >
             About
           </Link>
           <Link
             href="/contact"
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.8)',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+            }}
           >
             Contact
           </Link>
         </div>
 
         {/* Desktop auth */}
-        <div className="hidden md:flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <AuthButton />
         </div>
 
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+          style={{
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '36px',
+            height: '36px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            background: 'transparent',
+            color: '#fff',
+          }}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
@@ -221,43 +328,94 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* ── Desktop dropdown panel (light bg) ── */}
+      {/* ── Desktop dropdown panel (dark theme) ── */}
       {activePanel && (
-        <div className="hidden md:block absolute top-full left-0 right-0 bg-white border-t border-slate-200 shadow-2xl">
-          <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-3 gap-8">
-            {/* Panel info */}
-            <div>
-              <h2 className="text-[#0D1B3E] font-serif text-xl font-bold mb-2">
+        <div
+          style={{
+            display: 'none',
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: '#0D1B3E',
+            borderTop: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px' }}>
+            {/* Panel header */}
+            <div style={{ paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#E8B86D', marginBottom: '4px' }}>
                 {panels[activePanel].title}
-              </h2>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              </div>
+              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)' }}>
                 {panels[activePanel].desc}
-              </p>
+              </div>
               <Link
                 href={panels[activePanel].cta.href}
                 onClick={() => setActivePanel(null)}
-                className="inline-block mt-4 px-4 py-2 rounded-lg bg-[#C9973A] text-white text-sm font-semibold hover:bg-[#b8862e] transition-colors focus-visible:ring-2 focus-visible:ring-[#0D1B3E] focus-visible:outline-none"
+                style={{
+                  display: 'inline-block',
+                  marginTop: '16px',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                  color: '#0D1B3E',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(201,151,58,0.3)',
+                  transition: 'all 0.15s ease',
+                }}
               >
                 {panels[activePanel].cta.label}
               </Link>
             </div>
             {/* Links */}
-            <div className="col-span-2 grid grid-cols-2 gap-3">
+            <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {panels[activePanel].links
                 .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
-                .map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setActivePanel(null)}
-                  className="group p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
-                >
-                  <div className="text-sm font-semibold text-[#0D1B3E] group-hover:text-[#C9973A] transition-colors">
-                    {link.label}
-                  </div>
-                  <div className="text-xs text-slate-500 mt-0.5">{link.desc}</div>
-                </Link>
-              ))}
+                .map((link, idx) => {
+                  const PanelIcon = link.icon
+                  const isFeatured = idx === 0
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setActivePanel(null)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: isFeatured ? '1px solid rgba(201,151,58,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                        background: isFeatured ? 'rgba(201,151,58,0.06)' : 'rgba(255,255,255,0.03)',
+                        textDecoration: 'none',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '7px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        background: isFeatured ? 'rgba(201,151,58,0.15)' : 'rgba(255,255,255,0.07)',
+                      }}>
+                        <PanelIcon size={16} style={{ color: isFeatured ? '#E8B86D' : 'rgba(255,255,255,0.6)' }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '2px' }}>
+                          {link.label}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{link.desc}</div>
+                      </div>
+                    </Link>
+                  )
+                })}
             </div>
           </div>
         </div>
@@ -265,21 +423,37 @@ export default function Navbar() {
 
       {/* ── Mobile menu ── */}
       {mobileOpen && (
-        <div className="md:hidden bg-[#0D1B3E] border-t border-white/10 px-4 py-4 space-y-1">
+        <div style={{ display: 'block', background: '#0D1B3E', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '16px 24px' }}>
           {(Object.keys(panels) as PanelKey[]).map(key => (
             <div key={key}>
               <button
                 onClick={() => togglePanel(key)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.8)',
+                }}
               >
-                <span className="capitalize">{key}</span>
+                <span style={{ textTransform: 'capitalize' }}>{key}</span>
                 <ChevronDown
                   size={14}
-                  className={`transition-transform duration-200 ${activePanel === key ? 'rotate-180' : ''}`}
+                  style={{
+                    transition: 'transform 0.2s ease',
+                    transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
                 />
               </button>
               {activePanel === key && (
-                <div className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3">
+                <div style={{ marginLeft: '12px', marginTop: '4px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
                   {panels[key].links
                     .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
                     .map(link => (
@@ -287,7 +461,14 @@ export default function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                      className="block px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+                      style={{
+                        display: 'block',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        color: 'rgba(255,255,255,0.7)',
+                        textDecoration: 'none',
+                      }}
                     >
                       {link.label}
                     </Link>
@@ -295,7 +476,15 @@ export default function Navbar() {
                   <Link
                     href={panels[key].cta.href}
                     onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                    className="block px-3 py-2 rounded-lg text-sm font-semibold text-[#C9973A] hover:text-[#E8B86D] transition-colors"
+                    style={{
+                      display: 'block',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#C9973A',
+                      textDecoration: 'none',
+                    }}
                   >
                     {panels[key].cta.label} →
                   </Link>
@@ -306,11 +495,19 @@ export default function Navbar() {
           <Link
             href="/about"
             onClick={() => setMobileOpen(false)}
-            className="block px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            style={{
+              display: 'block',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.8)',
+              textDecoration: 'none',
+            }}
           >
             About
           </Link>
-          <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+          <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <AuthButton />
           </div>
         </div>
