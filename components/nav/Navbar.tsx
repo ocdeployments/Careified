@@ -172,15 +172,11 @@ export default function Navbar() {
   // Close panel on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      // If click is inside the dropdown panel, do nothing (keep it open)
-      if (dropdownRef.current?.contains(e.target as Node)) {
-        return
-      }
-      // Otherwise close the dropdown
+      if (navRef.current?.contains(e.target as Node)) return
       setActivePanel(null)
     }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   // Close mobile menu on resize to desktop
