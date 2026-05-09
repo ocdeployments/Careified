@@ -332,7 +332,6 @@ export default function Navbar() {
       {activePanel && (
         <div
           style={{
-            display: 'none',
             position: 'absolute',
             top: '100%',
             left: 0,
