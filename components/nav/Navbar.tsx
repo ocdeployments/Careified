@@ -60,7 +60,7 @@ function AuthButton() {
         Sign in
       </Link>
       <Link
-        href="/sign-up"
+        href="/sign-in"
         className="text-xs font-semibold px-4 py-2 rounded-lg bg-[#C9973A] text-white hover:bg-[#b8862e] transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
       >
         Get started
@@ -101,7 +101,7 @@ const panels = {
       { href: '/for-families', label: 'How it works', desc: 'See how families use Careified' },
       { href: '/about',        label: 'About us',     desc: 'Our mission and team'           },
     ],
-    cta: { href: '/sign-up?role=family', label: 'Find a caregiver' },
+    cta: { href: '/sign-in', label: 'Find a caregiver' },
   },
 } as const
 
