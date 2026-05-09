@@ -114,9 +114,9 @@ const panels = {
     links: [
       { href: '/for-caregivers#why-build', label: 'Why Should I Build My Profile?', desc: 'See how a verified profile gets you discovered by agencies that match your skills.', icon: Info },
       { href: '/opportunities',            label: 'Browse Opportunities',           desc: 'See open roles matched to your skills, availability, and location.', icon: Briefcase },
-      { href: '/profile/start',            label: 'Start Your Careified Profile',             desc: 'Build once. Be seen forever. Free — takes 15 minutes.', icon: UserCheck },
+      { href: '/sign-up?role=caregiver&redirect_url=/profile/build', label: 'Start Your Careified Profile',             desc: 'Build once. Be seen forever. Free — takes 15 minutes.', icon: UserCheck },
     ],
-    cta: { href: '/profile/start', label: 'Build My Profile' },
+    cta: { href: '/sign-up?role=caregiver&redirect_url=/profile/build', label: 'Build My Profile' },
   },
   agencies: {
     accent: '#1E3A8A',
@@ -155,6 +155,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navRef = useRef<HTMLElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Track current path for active indicator
   const [currentPath, setCurrentPath] = useState('')
@@ -171,12 +172,15 @@ export default function Navbar() {
   // Close panel on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setActivePanel(null)
+      // If click is inside the dropdown panel, do nothing (keep it open)
+      if (dropdownRef.current?.contains(e.target as Node)) {
+        return
       }
+      // Otherwise close the dropdown
+      setActivePanel(null)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
   }, [])
 
   // Close mobile menu on resize to desktop
@@ -212,7 +216,7 @@ export default function Navbar() {
       }}
       aria-label="Main navigation"
     >
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 40px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
         {/* Logo */}
         <Link
@@ -233,7 +237,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
           {(Object.keys(panels) as PanelKey[]).map(key => {
             const isActive = isSectionActive(key)
             return (
@@ -246,15 +250,29 @@ export default function Navbar() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  fontFamily: 'DM Sans, sans-serif',
+                  fontSize: '13px',
                   fontWeight: 500,
+                  letterSpacing: '0.01em',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
-                  background: activePanel === key ? 'rgba(255,255,255,0.1)' : 'transparent',
-                  color: activePanel === key ? '#fff' : 'rgba(255,255,255,0.8)',
+                  background: activePanel === key ? 'rgba(201,151,58,0.08)' : 'transparent',
+                  color: activePanel === key ? '#E8B86D' : 'rgba(255,255,255,0.75)',
+                }}
+                onMouseEnter={(e) => {
+                  if (activePanel !== key) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+                    e.currentTarget.style.color = '#fff'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activePanel !== key) {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
+                  }
                 }}
               >
                 <span style={{ textTransform: 'capitalize' }}>{key}</span>
@@ -264,6 +282,8 @@ export default function Navbar() {
                 <ChevronDown
                   size={14}
                   style={{
+                    marginLeft: '4px',
+                    opacity: 0.6,
                     transition: 'transform 0.2s ease',
                     transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
                   }}
