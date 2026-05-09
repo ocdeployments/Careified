@@ -82,51 +82,60 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Flywheel visual */}
-            <div style={{ background: '#0D1B3E', borderRadius: '20px', padding: '32px 24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {/* Node 1: Caregiver profile */}
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(201,151,58,0.15)', border: '2px solid #C9973A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                    <span style={{ color: '#C9973A', fontSize: '11px' }}>01</span>
-                  </div>
-                  <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#C9973A', fontWeight: 500 }}>Caregiver profile</div>
-                </div>
+            {/* Flywheel SVG */}
+            <div style={{ background: '#0D1B3E', borderRadius: '20px', padding: '40px 24px', marginBottom: '32px' }}>
+              <svg width="100%" viewBox="0 0 560 340" style={{ display: 'block', maxWidth: '560px', margin: '0 auto' }}>
+                <defs>
+                  <marker id="arr-fw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M2 1L8 5L2 9" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </marker>
+                </defs>
 
-                <div style={{ color: '#C9973A', fontSize: '18px', flexShrink: 0 }}>→</div>
+                {/* Circular orbit ring */}
+                <circle cx="280" cy="170" r="130" fill="none" stroke="rgba(201,151,58,0.2)" stroke-width="1" stroke-dasharray="8 5"/>
 
-                {/* Node 2: Client intake */}
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(30,58,138,0.15)', border: '2px solid #1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                    <span style={{ color: '#1E3A8A', fontSize: '11px' }}>02</span>
-                  </div>
-                  <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#1E3A8A', fontWeight: 500 }}>Client intake</div>
-                </div>
+                {/* Curved clockwise arrows between nodes */}
+                <path d="M 355 68 A 130 130 0 0 1 408 143" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path d="M 408 197 A 130 130 0 0 1 355 272" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path d="M 205 272 A 130 130 0 0 1 152 197" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path d="M 152 143 A 130 130 0 0 1 205 68" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
 
-                <div style={{ color: '#C9973A', fontSize: '18px', flexShrink: 0 }}>→</div>
+                {/* Node 1: Top — Caregiver Profile */}
+                <rect x="180" y="22" width="200" height="48" rx="10" fill="rgba(201,151,58,0.15)" stroke="rgba(201,151,58,0.4)" stroke-width="1"/>
+                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#E8B86D" text-anchor="middle" x="280" y="41" letter-spacing="0.08em">CAREGIVER PROFILE</text>
+                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="280" y="58">Structured. Comparable. Portable.</text>
 
-                {/* Node 3: Careified Engine (center, larger) */}
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', boxShadow: '0 4px 20px rgba(201,151,58,0.4)' }}>
-                    <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: '11px', color: '#0D1B3E', fontWeight: 'bold' }}>AI</span>
-                  </div>
-                  <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: '14px', color: '#C9973A', fontWeight: 'bold' }}>Careified Engine</div>
-                </div>
+                {/* Node 2: Right — Client Intake */}
+                <rect x="408" y="146" width="148" height="48" rx="10" fill="rgba(30,58,138,0.4)" stroke="rgba(37,99,235,0.4)" stroke-width="1"/>
+                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#93C5FD" text-anchor="middle" x="482" y="165" letter-spacing="0.08em">CLIENT INTAKE</text>
+                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="482" y="182">Needs + preferences</text>
 
-                <div style={{ color: '#C9973A', fontSize: '18px', flexShrink: 0 }}>→</div>
+                {/* Node 3: Bottom — Placement + Rating */}
+                <rect x="180" y="282" width="200" height="48" rx="10" fill="rgba(180,83,9,0.25)" stroke="rgba(217,119,6,0.4)" stroke-width="1"/>
+                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#FCD34D" text-anchor="middle" x="280" y="301" letter-spacing="0.08em">PLACEMENT + RATING</text>
+                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="280" y="318">Agency decides. Score updates.</text>
 
-                {/* Node 4: Placement + rating */}
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(180,83,9,0.15)', border: '2px solid #B45309', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                    <span style={{ color: '#B45309', fontSize: '11px' }}>04</span>
-                  </div>
-                  <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#B45309', fontWeight: 500 }}>Placement + rating</div>
-                </div>
-              </div>
+                {/* Node 4: Left — Trust Score */}
+                <rect x="4" y="146" width="148" height="48" rx="10" fill="rgba(201,151,58,0.12)" stroke="rgba(201,151,58,0.3)" stroke-width="1"/>
+                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#E8B86D" text-anchor="middle" x="78" y="165" letter-spacing="0.08em">TRUST SCORE</text>
+                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="78" y="182">Compounds over time</text>
 
-              <div style={{ marginTop: '20px', fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', textAlign: 'center' }}>
+                {/* Centre: Careified Engine */}
+                <circle cx="280" cy="170" r="65" fill="#0D1B3E" stroke="rgba(201,151,58,0.35)" stroke-width="1.5"/>
+                <text font-family="'DM Serif Display',Georgia,serif" font-size="14" fill="#E8B86D" text-anchor="middle" x="280" y="163">Careified</text>
+                <text font-family="'DM Serif Display',Georgia,serif" font-size="14" fill="#E8B86D" text-anchor="middle" x="280" y="181">Engine</text>
+                <text font-family="'DM Sans',sans-serif" font-size="10" fill="rgba(255,255,255,0.35)" text-anchor="middle" x="280" y="198">Criteria alignment</text>
+
+                {/* Dashed spokes from centre to nodes */}
+                <line x1="280" y1="105" x2="280" y2="70" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+                <line x1="344" y1="170" x2="408" y2="170" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+                <line x1="280" y1="235" x2="280" y2="282" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+                <line x1="216" y1="170" x2="156" y2="170" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+              </svg>
+
+              <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', marginTop: '20px' }}>
                 ↻ Every placement improves the next match
-              </div>
+              </p>
             </div>
 
             {/* Compounding row */}
