@@ -122,13 +122,30 @@ Needs reliability signals before placement, not after.
 Will pay $249/month if it saves them 10 hours a week.
 
 ### First Test Agencies
-- Canada: Friend's startup agency launching June 2026 (Ontario)
-  New agency — no legacy workflow, will adopt fully
-  Will refer other agencies if experience is excellent
-  
-- USA: Texas agency — has seen the platform, loved it
-  First US validation — treat their feedback as product gospel
-  Everything they ask for that doesn't exist = build it
+
+CANADA — Ontario startup agency
+- New agency launching June 2026 — same timeline as Careified
+- Relationship-based commitment — friend of founder
+- Has not seen full platform yet — demo needed before June 15
+- Will be on Growth tier free for 3 months (early adopter)
+- Starting with approximately 20 caregivers in first 3 months
+- Strategy: make their launch easier than doing it alone
+- If successful: will refer other Ontario agencies
+- Risk: friendship-based commitment is fragile —
+  product must deliver value in first 30 minutes
+
+USA — Texas agency
+- Has seen the platform — loved it
+- First US market validation
+- Will be on Growth tier free for 3 months (early adopter)
+- Treat every piece of their feedback as product gospel
+- What they want (inferred from agency hat exercise):
+  - Agency Roster — add their existing caregivers
+  - Contact info visible on profiles
+  - Pipeline tracking
+  - Alignment score explained clearly
+  - HIPAA compliance language visible
+  - Pricing clarity (contact us minimum)
 
 ### Family — Who They Are
 An adult child managing a parent's care from a distance.
@@ -317,6 +334,12 @@ by at least one agency owner unprompted.
 5. Both sides must see value in the first session
 6. We replace the old system — we do not improve it
 7. June 15 ships — no scope creep past this date
+8. QuickFill fills shifts in 20 minutes — not 2 hours
+9. Both test agencies feel value in first 30 minutes
+10. No caregiver conversations yet — validate supply side 
+    assumptions before Phase 2 build
+11. develop branch only — main is production, 
+    Romy controls all merges manually
 
 ---
 
