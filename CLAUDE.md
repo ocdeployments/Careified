@@ -292,6 +292,20 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 # Step 0 — Always read SOUL.md first before any other file
 cd /Users/owner/careified
 git status
+echo "--- Doc check ---"
+for doc in FOUNDER.md SOUL.md ROADMAP.md CONTEXT.md \
+  CLAUDE.md BEST_PRACTICES.md CAREIFIED_SPEC.md \
+  CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md \
+  AI_PLAYBOOK.md COPY.md PRICING.md \
+  SECURITY_RUNBOOK.md USER_JOURNEYS.md \
+  INTEGRATIONS.md LESSONS_LEARNED.md; do
+  if [ -f "$doc" ]; then
+    echo "✅ $doc"
+  else
+    echo "❌ MISSING: $doc — flag to Romy immediately"
+  fi
+done
+echo "--- End doc check ---"
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
@@ -610,3 +624,7 @@ Or: Vercel Dashboard → Deployments → any previous deploy → Promote to Prod
 - Never change Vercel env vars via CLI
 - Never run DB migrations without a backup
 - Never test new features on production
+- Never push to main under any circumstances
+- Only Romy merges develop → main manually from terminal
+- Branch protection rules must be active on GitHub main
+  (Restrict updates, Restrict deletions, Block force pushes)
