@@ -62,6 +62,22 @@ export default function PendingApprovalPage() {
           </ul>
         </div>
 
+        {/* Preview the platform card */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-6 text-left">
+          <p className="text-xs text-slate-500 mb-3">
+            While you wait — preview the platform
+          </p>
+          <p className="text-xs text-slate-600 mb-4">
+            See exactly what you'll have access to once approved.
+          </p>
+          <Link
+            href="/demo"
+            className="inline-block px-4 py-2 rounded-lg border border-[#C9973A] text-[#C9973A] text-sm font-semibold bg-transparent hover:bg-[#C9973A] hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
+          >
+            Launch Preview
+          </Link>
+        </div>
+
         <Link
           href="/"
           className="inline-block px-6 py-2.5 rounded-xl bg-navy text-white text-sm font-semibold hover:bg-navy-light transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
