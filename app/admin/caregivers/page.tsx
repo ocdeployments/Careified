@@ -1,9 +1,8 @@
-// Force dynamic rendering to avoid build-time DB queries
-export const dynamic = 'force-dynamic'
+'use client'
 
-import { pool } from '@/lib/db'
 import { Suspense } from 'react'
 import { Search, Filter, Edit, X, Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 interface Caregiver {
   id: string
@@ -16,39 +15,26 @@ interface Caregiver {
   created_at: string
 }
 
-async function getCaregivers(search = '', status = '') {
-  let query = 'SELECT id, first_name, last_name, email, phone, status, is_verified, created_at FROM caregivers'
-  const params: string[] = []
-  const conditions: string[] = []
+export default function AdminCaregiversPage() {
+  const [caregivers, setCaregivers] = useState<Caregiver[]>([])
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [editingCaregiver, setEditingCaregiver] = useState<Caregiver | null>(null)
 
-  if (search) {
-    conditions.push(`(LOWER(first_name) LIKE LOWER($1) OR LOWER(last_name) LIKE LOWER($1) OR LOWER(email) LIKE LOWER($1))`)
-    params.push(`%${search}%`)
+  useEffect(() => {
+    fetchCaregivers()
+  }, [search, status])
+
+  async function fetchCaregivers() {
+    const params = new URLSearchParams()
+    if (search) params.set('search', search)
+    if (status) params.set('status', status)
+    const res = await fetch(`/api/admin/caregivers?${params}`)
+    if (res.ok) {
+      const data = await res.json()
+      setCaregivers(data)
+    }
   }
-
-  if (status && status !== 'all') {
-    conditions.push(`status = $${params.length + 1}`)
-    params.push(status)
-  }
-
-  if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ')
-  }
-
-  query += ' ORDER BY created_at DESC LIMIT 100'
-
-  const { rows } = await pool.query(query, params)
-  return rows
-}
-
-export default async function AdminCaregiversPage({
-  searchParams,
-}: {
-  searchParams: { search?: string; status?: string }
-}) {
-  const search = searchParams.search || ''
-  const status = searchParams.status || ''
-  const caregivers = await getCaregivers(search, status)
 
   return (
     <div>
@@ -65,13 +51,13 @@ export default async function AdminCaregiversPage({
       </p>
 
       {/* Search & Filter */}
-      <form style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
           <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
           <input
             type="text"
-            name="search"
-            defaultValue={search}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or email..."
             style={{
               width: '100%',
@@ -87,8 +73,8 @@ export default async function AdminCaregiversPage({
         <div style={{ position: 'relative' }}>
           <Filter size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
           <select
-            name="status"
-            defaultValue={status}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
             style={{
               padding: '12px 12px 12px 44px',
               border: '1px solid #E2E8F0',
@@ -105,22 +91,7 @@ export default async function AdminCaregiversPage({
             <option value="inactive">Inactive</option>
           </select>
         </div>
-        <button
-          type="submit"
-          style={{
-            padding: '12px 24px',
-            background: '#0D1B3E',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          Search
-        </button>
-      </form>
+        </div>
 
       {/* Results Table */}
       <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
@@ -173,7 +144,6 @@ export default async function AdminCaregiversPage({
                   <td style={{ padding: '14px 16px' }}>
                     <button
                       type="button"
-                      data-caregiver={JSON.stringify(c)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -186,10 +156,7 @@ export default async function AdminCaregiversPage({
                         color: '#0D1B3E',
                         cursor: 'pointer',
                       }}
-                      onClick={(e) => {
-                        const data = JSON.parse(e.currentTarget.dataset.caregiver || '{}')
-                        window.dispatchEvent(new CustomEvent('openEditModal', { detail: data }))
-                      }}
+                      onClick={() => setEditingCaregiver(c)}
                     >
                       <Edit size={14} />
                       Edit
@@ -207,90 +174,54 @@ export default async function AdminCaregiversPage({
       </p>
 
       {/* Edit Modal - Client Component */}
-      <EditModal />
+      <EditModal caregiver={editingCaregiver} onClose={() => setEditingCaregiver(null)} />
     </div>
   )
 }
 
-function EditModal() {
+function EditModal({ caregiver, onClose }: { caregiver: Caregiver | null; onClose: () => void }) {
+  const [saving, setSaving] = useState(false)
+
+  if (!caregiver) return null
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSaving(true)
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData)
+    const res = await fetch('/api/admin/caregivers', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (res.ok) {
+      window.location.reload()
+    } else {
+      alert('Failed to update caregiver')
+      setSaving(false)
+    }
+  }
+
   return (
-    <script dangerouslySetInnerHTML={{
-      __html: `
-        document.addEventListener('DOMContentLoaded', function() {
-          let modal = null
-          
-          window.addEventListener('openEditModal', function(e) {
-            const c = e.detail
-            if (!modal) {
-              modal = document.createElement('div')
-              modal.id = 'edit-modal'
-              modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999'
-              document.body.appendChild(modal)
-            }
-            modal.innerHTML = '<div style="background:white;padding:32px;border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow:auto">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
-                '<h2 style="font-family:DM Serif Display,serif;font-size:20px;color:#0D1B3E;margin:0">Edit Caregiver</h2>' +
-                '<button id="close-modal" style="background:none;border:none;cursor:pointer;padding:4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>' +
-              '</div>' +
-              '<form id="edit-form">' +
-                '<input type="hidden" name="id" value="' + c.id + '">' +
-                '<div style="margin-bottom:16px">' +
-                  '<label style="display:block;font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:8px">First Name</label>' +
-                  '<input type="text" name="first_name" value="' + (c.first_name || '') + '" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box">' +
-                '</div>' +
-                '<div style="margin-bottom:16px">' +
-                  '<label style="display:block;font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:8px">Last Name</label>' +
-                  '<input type="text" name="last_name" value="' + (c.last_name || '') + '" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box">' +
-                '</div>' +
-                '<div style="margin-bottom:16px">' +
-                  '<label style="display:block;font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:8px">Email</label>' +
-                  '<input type="email" name="email" value="' + (c.email || '') + '" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box">' +
-                '</div>' +
-                '<div style="margin-bottom:16px">' +
-                  '<label style="display:block;font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:8px">Phone</label>' +
-                  '<input type="text" name="phone" value="' + (c.phone || '') + '" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box">' +
-                '</div>' +
-                '<div style="margin-bottom:24px">' +
-                  '<label style="display:block;font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:8px">Status</label>' +
-                  '<select name="status" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box;background:white">' +
-                    '<option value="active"' + (c.status === 'active' ? ' selected' : '') + '>Active</option>' +
-                    '<option value="pending"' + (c.status === 'pending' ? ' selected' : '') + '>Pending</option>' +
-                    '<option value="inactive"' + (c.status === 'inactive' ? ' selected' : '') + '>Inactive</option>' +
-                  '</select>' +
-                '</div>' +
-                '<div style="display:flex;gap:12px">' +
-                  '<button type="submit" style="flex:1;padding:14px;background:#C9A84C;color:#0D1B3E;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Save Changes</button>' +
-                  '<button type="button" id="cancel-modal" style="padding:14px 24px;background:white;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;color:#64748B;cursor:pointer">Cancel</button>' +
-                '</div>' +
-              '</form>' +
-            '</div>'
-            modal.style.display = 'flex'
-            
-            document.getElementById('close-modal').onclick = function() { modal.style.display = 'none' }
-            document.getElementById('cancel-modal').onclick = function() { modal.style.display = 'none' }
-            modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none' }
-            
-            document.getElementById('edit-form').onsubmit = async function(e) {
-              e.preventDefault()
-              const formData = new FormData(e.target)
-              const data = Object.fromEntries(formData)
-              
-              const res = await fetch('/api/admin/caregivers', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-              })
-              
-              if (res.ok) {
-                modal.style.display = 'none'
-                location.reload()
-              } else {
-                alert('Failed to update caregiver')
-              }
-            }
-          })
-        })
-      `
-    }} />
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99 }}
+      onClick={onClose}
+    >
+      <div style={{ background: 'white', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '20px', color: '#0D1B3E', margin: 0 }}>Edit Caregiver</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><X size={20} color="#64748B" /></button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <input type="hidden" name="id" value={caregiver.id} />
+          <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>First Name</label><input type="text" name="first_name" defaultValue={caregiver.first_name} style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} /></div>
+          <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Last Name</label><input type="text" name="last_name" defaultValue={caregiver.last_name} style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} /></div>
+          <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Email</label><input type="email" name="email" defaultValue={caregiver.email} style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} /></div>
+          <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Phone</label><input type="text" name="phone" defaultValue={caregiver.phone} style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} /></div>
+          <div style={{ marginBottom: '24px' }}><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#0D1B3E', marginBottom: '8px' }}>Status</label><select name="status" defaultValue={caregiver.status} style={{ width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', background: 'white' }}><option value="active">Active</option><option value="pending">Pending</option><option value="inactive">Inactive</option></select></div>
+          <div style={{ display: 'flex', gap: '12px' }}><button type="submit" disabled={saving} style={{ flex: 1, padding: '14px', background: '#C9A84C', color: '#0D1B3E', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}>{saving ? 'Saving...' : 'Save Changes'}</button><button type="button" onClick={onClose} style={{ padding: '14px 24px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', color: '#64748B', cursor: 'pointer' }}>Cancel</button></div>
+        </form>
+      </div>
+    </div>
   )
 }
