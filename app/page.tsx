@@ -67,6 +67,13 @@ export default function HomePage() {
 
             {/* Flywheel SVG */}
             <div style={{ background: '#0D1B3E', borderRadius: '20px', padding: '40px 24px', marginBottom: '32px' }}>
+              <style>{`
+                @keyframes spin-cw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes spin-ccw { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+                @keyframes pulse-dot { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+                .eng-outer { transform-origin: 280px 170px; animation: spin-cw 12s linear infinite; }
+                .eng-inner { transform-origin: 280px 170px; animation: spin-ccw 8s linear infinite; }
+              `}</style>
               <svg width="100%" viewBox="0 0 560 340" style={{ display: 'block', maxWidth: '560px', margin: '0 auto' }}>
                 <defs>
                   <marker id="arr-fw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -103,11 +110,48 @@ export default function HomePage() {
                 <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#E8B86D" text-anchor="middle" x="78" y="165" letter-spacing="0.08em">TRUST SCORE</text>
                 <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="78" y="182">Compounds over time</text>
 
-                {/* Centre: Careified Engine */}
-                <circle cx="280" cy="170" r="65" fill="#0D1B3E" stroke="rgba(201,151,58,0.35)" stroke-width="1.5"/>
-                <text font-family="'DM Serif Display',Georgia,serif" font-size="14" fill="#E8B86D" text-anchor="middle" x="280" y="163">Careified</text>
-                <text font-family="'DM Serif Display',Georgia,serif" font-size="14" fill="#E8B86D" text-anchor="middle" x="280" y="181">Engine</text>
-                <text font-family="'DM Sans',sans-serif" font-size="10" fill="rgba(255,255,255,0.35)" text-anchor="middle" x="280" y="198">Criteria alignment</text>
+                {/* Centre: Animated Careified Engine */}
+                {/* Glow */}
+                <circle cx="280" cy="170" r="75" fill="rgba(201,151,58,0.06)"/>
+
+                {/* Outer rotating spokes */}
+                <g className="eng-outer">
+                  <circle cx="280" cy="170" r="62" fill="none" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 6"/>
+                  <line x1="280" y1="108" x2="280" y2="120" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="334" y1="124" x2="325" y2="132" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="342" y1="170" x2="330" y2="170" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="334" y1="216" x2="325" y2="208" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="280" y1="232" x2="280" y2="220" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="226" y1="216" x2="235" y2="208" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="218" y1="170" x2="230" y2="170" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="226" y1="124" x2="235" y2="132" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+                  <circle cx="280" cy="108" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="334" cy="124" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="342" cy="170" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="334" cy="216" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="280" cy="232" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="226" cy="216" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="218" cy="170" r="3" fill="#C9973A" opacity="0.8"/>
+                  <circle cx="226" cy="124" r="3" fill="#C9973A" opacity="0.8"/>
+                </g>
+
+                {/* Inner counter-rotating spokes */}
+                <g className="eng-inner">
+                  <circle cx="280" cy="170" r="46" fill="none" stroke="rgba(201,151,58,0.1)" stroke-width="0.5" stroke-dasharray="2 8"/>
+                  <line x1="280" y1="124" x2="280" y2="136" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="316" y1="134" x2="308" y2="142" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="326" y1="170" x2="314" y2="170" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="316" y1="206" x2="308" y2="198" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="280" y1="216" x2="280" y2="204" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="244" y1="206" x2="252" y2="198" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="234" y1="170" x2="246" y2="170" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                  <line x1="244" y1="134" x2="252" y2="142" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
+                </g>
+
+                {/* Static centre */}
+                <circle cx="280" cy="170" r="36" fill="#0D1B3E" stroke="rgba(201,151,58,0.4)" stroke-width="1.5"/>
+                <text font-family="'DM Serif Display',Georgia,serif" font-size="11" fill="#E8B86D" text-anchor="middle" x="280" y="166">Careified</text>
+                <text font-family="'DM Serif Display',Georgia,serif" font-size="11" fill="#E8B86D" text-anchor="middle" x="280" y="180">Engine</text>
 
                 {/* Dashed spokes from centre to nodes */}
                 <line x1="280" y1="105" x2="280" y2="70" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
