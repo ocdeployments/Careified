@@ -65,105 +65,112 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Flywheel SVG */}
+            {/* NEW: CSS Grid Engine Layout */}
             <div style={{ background: '#0D1B3E', borderRadius: '20px', padding: '40px 24px', marginBottom: '32px' }}>
               <style>{`
-                @keyframes spin-cw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                @keyframes spin-ccw { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-                @keyframes pulse-dot { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-                @keyframes dash-flow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -40; } }
-                .eng-outer { transform-origin: 280px 170px; animation: spin-cw 12s linear infinite; }
-                .eng-inner { transform-origin: 280px 170px; animation: spin-ccw 8s linear infinite; }
-                .flow-arrow { animation: dash-flow 3s linear infinite; }
+                @keyframes ring-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes eng-cw    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes eng-ccw   { from{transform:rotate(0deg)} to{transform:rotate(-360deg)} }
+                .ring-wrap-c { position:absolute; inset:0; border-radius:50%; animation:ring-spin 4s linear infinite; }
+                .ring-face-c { width:100%; height:100%; border-radius:50%;
+                  background: conic-gradient(
+                    from 0deg,
+                    rgba(201,151,58,0.2)   0deg,
+                    rgba(201,151,58,0.2)   180deg,
+                    rgba(201,151,58,0.4)   220deg,
+                    rgba(232,184,109,0.75) 250deg,
+                    rgba(255,220,140,1.0)  268deg,
+                    rgba(255,255,255,0.95) 275deg,
+                    rgba(255,220,140,1.0)  282deg,
+                    rgba(232,184,109,0.75) 310deg,
+                    rgba(201,151,58,0.2)   360deg
+                  );
+                  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px), white 100%, transparent 0);
+                  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px), white 100%, transparent 0);
+                }
+                .eng-svg-c { position:absolute; inset:0; width:100%; height:100%; }
+                .eng-outer-c { transform-origin:170px 170px; animation:eng-cw 12s linear infinite; }
+                .eng-inner-c { transform-origin:170px 170px; animation:eng-ccw 8s linear infinite; }
               `}</style>
-              <svg width="100%" viewBox="0 0 560 340" style={{ display: 'block', maxWidth: '560px', margin: '0 auto' }}>
-                <defs>
-                  <marker id="arr-fw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                    <path d="M2 1L8 5L2 9" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </marker>
-                </defs>
 
-                {/* Circular orbit ring */}
-                <circle cx="280" cy="170" r="130" fill="none" stroke="rgba(201,151,58,0.2)" stroke-width="1" stroke-dasharray="8 5"/>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 340px 1fr', gridTemplateRows:'auto 340px auto', gap:'16px', alignItems:'center', justifyItems:'center', maxWidth:'800px', margin:'0 auto' }}>
 
-                {/* Curved clockwise arrows between nodes */}
-                <path className="flow-arrow" d="M 355 68 A 130 130 0 0 1 408 143" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path className="flow-arrow" d="M 408 197 A 130 130 0 0 1 355 272" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path className="flow-arrow" d="M 205 272 A 130 130 0 0 1 152 197" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path className="flow-arrow" d="M 152 143 A 130 130 0 0 1 205 68" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                {/* TOP — Caregiver */}
+                <div style={{ gridColumn:2, gridRow:1, width:'100%', background:'rgba(201,151,58,0.1)', border:'1.5px solid rgba(201,151,58,0.5)', borderRadius:'12px', padding:'16px', textAlign:'center' }}>
+                  <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#E8B86D', marginBottom:'8px' }}>Caregiver</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'17px', color:'#fff', lineHeight:1.35, marginBottom:'4px' }}>Verified profile.</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'14px', color:'rgba(255,255,255,0.45)', lineHeight:1.35 }}>Ready to be found.</div>
+                </div>
 
-                {/* Node 1: Top — Caregiver Profile */}
-                <rect x="180" y="22" width="200" height="48" rx="10" fill="rgba(201,151,58,0.15)" stroke="rgba(201,151,58,0.4)" stroke-width="1"/>
-                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#E8B86D" text-anchor="middle" x="280" y="41" letter-spacing="0.08em">CAREGIVER PROFILE</text>
-                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="280" y="58">Structured. Comparable. Portable.</text>
+                {/* CENTRE */}
+                <div style={{ gridColumn:2, gridRow:2, position:'relative', width:'340px', height:'340px' }}>
+                  <div className="ring-wrap-c"><div className="ring-face-c"></div></div>
+                  <svg className="eng-svg-c" viewBox="0 0 340 340">
+                    <g className="eng-outer-c">
+                      <circle cx="170" cy="170" r="82" fill="none" stroke="rgba(201,151,58,0.12)" strokeWidth="1" strokeDasharray="3 6"/>
+                      <line x1="170" y1="88"  x2="170" y2="104" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="228" y1="101" x2="220" y2="115" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="252" y1="170" x2="236" y2="170" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="228" y1="239" x2="220" y2="225" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="170" y1="252" x2="170" y2="236" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="112" y1="239" x2="120" y2="225" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="88"  y1="170" x2="104" y2="170" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <line x1="112" y1="101" x2="120" y2="115" stroke="#C9973A" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                      <circle cx="170" cy="88"  r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="228" cy="101" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="252" cy="170" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="228" cy="239" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="170" cy="252" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="112" cy="239" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="88"  cy="170" r="4" fill="#C9973A" opacity="0.85"/>
+                      <circle cx="112" cy="101" r="4" fill="#C9973A" opacity="0.85"/>
+                    </g>
+                    <g className="eng-inner-c">
+                      <circle cx="170" cy="170" r="60" fill="none" stroke="rgba(201,151,58,0.08)" strokeWidth="0.5" strokeDasharray="2 8"/>
+                      <line x1="170" y1="110" x2="170" y2="124" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="212" y1="128" x2="204" y2="138" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="230" y1="170" x2="216" y2="170" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="212" y1="212" x2="204" y2="202" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="170" y1="230" x2="170" y2="216" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="128" y1="212" x2="136" y2="202" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="110" y1="170" x2="124" y2="170" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                      <line x1="128" y1="128" x2="136" y2="138" stroke="rgba(201,151,58,0.45)" strokeWidth="1" strokeLinecap="round"/>
+                    </g>
+                    <line x1="170" y1="122" x2="170" y2="88"  stroke="rgba(201,151,58,0.08)" strokeWidth="1" strokeDasharray="3 4"/>
+                    <line x1="218" y1="170" x2="252" y2="170" stroke="rgba(201,151,58,0.08)" strokeWidth="1" strokeDasharray="3 4"/>
+                    <line x1="170" y1="218" x2="170" y2="252" stroke="rgba(201,151,58,0.08)" strokeWidth="1" strokeDasharray="3 4"/>
+                    <line x1="122" y1="170" x2="88"  y2="170" stroke="rgba(201,151,58,0.08)" strokeWidth="1" strokeDasharray="3 4"/>
+                    <circle cx="170" cy="170" r="50" fill="#0D1B3E" stroke="rgba(201,151,58,0.5)" strokeWidth="1.5"/>
+                    <text fontFamily="'DM Serif Display',Georgia,serif" fontSize="15" fill="#E8B86D" textAnchor="middle" x="170" y="164">Careified</text>
+                    <text fontFamily="'DM Serif Display',Georgia,serif" fontSize="15" fill="#E8B86D" textAnchor="middle" x="170" y="182">Engine</text>
+                  </svg>
+                </div>
 
-                {/* Node 2: Right — Client Intake */}
-                <rect x="408" y="146" width="148" height="48" rx="10" fill="rgba(30,58,138,0.4)" stroke="rgba(37,99,235,0.4)" stroke-width="1"/>
-                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#93C5FD" text-anchor="middle" x="482" y="165" letter-spacing="0.08em">CLIENT INTAKE</text>
-                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="482" y="182">Needs + preferences</text>
+                {/* BOTTOM — Client */}
+                <div style={{ gridColumn:2, gridRow:3, width:'100%', background:'rgba(180,83,9,0.3)', border:'1.5px solid rgba(217,119,6,0.5)', borderRadius:'12px', padding:'16px', textAlign:'center' }}>
+                  <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#FCD34D', marginBottom:'8px' }}>Client</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'17px', color:'#fff', lineHeight:1.35, marginBottom:'4px' }}>The right caregiver.</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'14px', color:'rgba(255,255,255,0.45)', lineHeight:1.35 }}>Every time.</div>
+                </div>
 
-                {/* Node 3: Bottom — Placement + Rating */}
-                <rect x="180" y="282" width="200" height="48" rx="10" fill="rgba(180,83,9,0.25)" stroke="rgba(217,119,6,0.4)" stroke-width="1"/>
-                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#FCD34D" text-anchor="middle" x="280" y="301" letter-spacing="0.08em">PLACEMENT + RATING</text>
-                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="280" y="318">Agency decides. Score updates.</text>
+                {/* LEFT — Agency Recruit */}
+                <div style={{ gridColumn:1, gridRow:2, width:'100%', background:'rgba(30,58,138,0.5)', border:'1.5px solid rgba(37,99,235,0.5)', borderRadius:'12px', padding:'16px', textAlign:'center' }}>
+                  <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#93C5FD', marginBottom:'8px' }}>Agency — Recruit</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'17px', color:'#fff', lineHeight:1.35, marginBottom:'8px' }}>Find and build your bench.</div>
+                  <div style={{ fontSize:'11px', color:'rgba(147,197,253,0.6)', lineHeight:1.4 }}>Profiles verified.</div>
+                </div>
 
-                {/* Node 4: Left — Trust Score */}
-                <rect x="4" y="146" width="148" height="48" rx="10" fill="rgba(201,151,58,0.12)" stroke="rgba(201,151,58,0.3)" stroke-width="1"/>
-                <text font-family="'DM Sans',sans-serif" font-size="10" font-weight="700" fill="#E8B86D" text-anchor="middle" x="78" y="165" letter-spacing="0.08em">TRUST SCORE</text>
-                <text font-family="'DM Sans',sans-serif" font-size="11" fill="rgba(255,255,255,0.55)" text-anchor="middle" x="78" y="182">Compounds over time</text>
+                {/* RIGHT — Agency Place */}
+                <div style={{ gridColumn:3, gridRow:2, width:'100%', background:'rgba(30,58,138,0.5)', border:'1.5px solid rgba(37,99,235,0.5)', borderRadius:'12px', padding:'16px', textAlign:'center' }}>
+                  <div style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', color:'#93C5FD', marginBottom:'8px' }}>Agency — Place</div>
+                  <div style={{ fontFamily:'"DM Serif Display",serif', fontSize:'17px', color:'#fff', lineHeight:1.35, marginBottom:'8px' }}>Match bench to client need.</div>
+                  <div style={{ fontSize:'11px', color:'rgba(147,197,253,0.6)', lineHeight:1.4 }}>Engine finds the fit.</div>
+                </div>
 
-                {/* Centre: Animated Careified Engine */}
-                {/* Glow */}
-                <circle cx="280" cy="170" r="75" fill="rgba(201,151,58,0.06)"/>
+              </div>
 
-                {/* Outer rotating spokes */}
-                <g className="eng-outer">
-                  <circle cx="280" cy="170" r="62" fill="none" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 6"/>
-                  <line x1="280" y1="108" x2="280" y2="120" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="334" y1="124" x2="325" y2="132" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="342" y1="170" x2="330" y2="170" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="334" y1="216" x2="325" y2="208" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="280" y1="232" x2="280" y2="220" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="226" y1="216" x2="235" y2="208" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="218" y1="170" x2="230" y2="170" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <line x1="226" y1="124" x2="235" y2="132" stroke="#C9973A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
-                  <circle cx="280" cy="108" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="334" cy="124" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="342" cy="170" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="334" cy="216" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="280" cy="232" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="226" cy="216" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="218" cy="170" r="3" fill="#C9973A" opacity="0.8"/>
-                  <circle cx="226" cy="124" r="3" fill="#C9973A" opacity="0.8"/>
-                </g>
-
-                {/* Inner counter-rotating spokes */}
-                <g className="eng-inner">
-                  <circle cx="280" cy="170" r="46" fill="none" stroke="rgba(201,151,58,0.1)" stroke-width="0.5" stroke-dasharray="2 8"/>
-                  <line x1="280" y1="124" x2="280" y2="136" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="316" y1="134" x2="308" y2="142" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="326" y1="170" x2="314" y2="170" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="316" y1="206" x2="308" y2="198" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="280" y1="216" x2="280" y2="204" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="244" y1="206" x2="252" y2="198" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="234" y1="170" x2="246" y2="170" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                  <line x1="244" y1="134" x2="252" y2="142" stroke="rgba(201,151,58,0.45)" stroke-width="1" stroke-linecap="round"/>
-                </g>
-
-                {/* Static centre */}
-                <circle cx="280" cy="170" r="36" fill="#0D1B3E" stroke="rgba(201,151,58,0.4)" stroke-width="1.5"/>
-                <text font-family="'DM Serif Display',Georgia,serif" font-size="11" fill="#E8B86D" text-anchor="middle" x="280" y="166">Careified</text>
-                <text font-family="'DM Serif Display',Georgia,serif" font-size="11" fill="#E8B86D" text-anchor="middle" x="280" y="180">Engine</text>
-
-                {/* Dashed spokes from centre to nodes */}
-                <line x1="280" y1="105" x2="280" y2="70" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
-                <line x1="344" y1="170" x2="408" y2="170" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
-                <line x1="280" y1="235" x2="280" y2="282" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
-                <line x1="216" y1="170" x2="156" y2="170" stroke="rgba(201,151,58,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
-              </svg>
-
-              <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', marginTop: '20px' }}>
-                ↻ Every placement improves the next match
+              <p style={{ textAlign:'center', fontFamily:'"DM Serif Display",serif', fontSize:'22px', color:'#E8B86D', marginTop:'24px' }}>
+                Make informed decisions.
               </p>
             </div>
 
