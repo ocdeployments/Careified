@@ -33,8 +33,11 @@ The platform thinks ahead so humans do not have to.
 | Agency AI Assistant | WhatsApp/Telegram/SMS | Two-way | ❌ Phase 3 |
 | Caregiver AI Assistant | WhatsApp | Two-way | ❌ Phase 3 |
 | Family Update Bot | WhatsApp | One-way | ❌ Phase 2 |
-| QuickFill confirmation call | Phone call | Outbound | ❌ Phase 2 |
-| QuickFill broadcast | WhatsApp/SMS | Outbound | ❌ Phase 2 |
+| QuickFill broadcast | WhatsApp/SMS/In-app | Outbound | ❌ Phase 2 |
+| QuickFill confirmation | Phone call | Outbound | ❌ Phase 2 |
+| Family shift updates | WhatsApp | Outbound | ❌ Phase 2 |
+| Caregiver late alert | WhatsApp | Inbound triggered | ❌ Phase 3 |
+| Caregiver sick call | WhatsApp | Inbound triggered | ❌ Phase 3 |
 | AI Command Bar | In-platform | Two-way | ✅ Built |
 
 ---
@@ -453,6 +456,93 @@ Every blast interaction logged:
 - Confirmed / No-showed (post-shift)
 
 This data feeds aggregate_score over time.
+
+---
+
+## QUICKFILL — AI DISPATCH SYSTEM
+
+### What it is
+Instant shift blast to all qualified available
+caregivers in area. Agency broadcasts urgent need.
+Caregivers respond YES/NO. AI confirms and schedules.
+This is Uber dispatch applied to home care.
+
+### Consent requirement
+Caregivers must opt into match_time_calls consent type.
+Opt-in copy:
+"Get notified instantly when shifts matching your
+ profile open up in your area. Via WhatsApp, SMS,
+ or call. You control which channel."
+
+### Blast message template (WhatsApp/SMS)
+"New shift — [Agency Name]
+ [Day] [Date], [Start]-[End] ([Hours]hrs)
+ [Area] — [Specialty required if any]
+ $[Rate]/hr
+
+ Reply YES to be considered
+ Reply NO to skip
+ Reply STOP to opt out of all alerts"
+
+### Eligibility filter (lib/blast/eligibility.ts)
+Before blast fires, check:
+- service_area overlaps shift location
+- availability_grid covers shift time
+- required specializations present on profile
+- match_time_calls consent active
+- not already placed that shift day
+- not on suppression list
+- subscription tier allows receiving blasts
+
+### On YES response
+1. Added to response list with timestamp
+2. Agency dashboard updates in real time
+3. Vapi call fires within 5 minutes
+4. AI confirms: availability, address, rate, questions
+5. Caregiver accepts → shift assigned
+6. All others notified: shift filled
+7. Family notified: caregiver confirmed
+8. Response logged for reliability scoring
+
+### AI confirmation call script
+"Hi [Name], this is Careified calling on behalf
+of [Agency]. You expressed interest in the
+[Day] shift in [Area] from [Start] to [End].
+
+I'm calling to confirm you're still available
+and interested. The rate is $[Rate] per hour.
+
+Press 1 to confirm — we'll send you the
+full address right away.
+Press 2 if you're no longer available.
+Press 3 to speak with someone at [Agency]."
+
+### Reliability signal
+Every blast interaction is logged:
+- Response time (fast responders flagged positively)
+- Response rate (consistent responders trusted more)
+- Acceptance rate (committed or browsing?)
+- No-show rate (post-shift verification)
+
+This data feeds aggregate_score over time.
+Agencies see reliability signals before placement.
+This is data no other platform has.
+
+### DB tables needed
+shift_blasts:
+id, agency_id, client_id, shift_date, start_time,
+end_time, service_area, required_specializations[],
+required_certifications[], hourly_rate, notes,
+status (draft/active/filled/cancelled/expired),
+fill_rule (first_response/agency_selects/best_match),
+sent_to_count, response_yes_count, response_no_count,
+filled_by (caregiver_id), created_at, expires_at
+
+blast_responses:
+id, blast_id, caregiver_id,
+response (yes/no/no_response),
+responded_at, ai_call_id, confirmed,
+selected, notified_filled
 
 ---
 
