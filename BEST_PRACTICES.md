@@ -6,9 +6,10 @@ Formatting may be inconsistent from source
 ---
 # BEST_PRACTICES.md
 # Careified — Engineering & Product Best Practices
-# Created: May 8 2026
+# Created: May 8 2026 | Updated: May 9 2026
 # Rule: Read at START of every session
 # Rule: Update when a new pattern is established
+# Rule: Update /end-session runs these 5 docs updates automatically
 # Source: Derived from LESSONS_LEARNED.md — every entry here has a real failure behind it
 
 ---
