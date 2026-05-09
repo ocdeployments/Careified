@@ -619,7 +619,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             top: -80,
             left: -80,
             width: 320,
-            height: 320,
+            height: 480,
             background: 'radial-gradient(circle, rgba(201,151,58,0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
@@ -638,13 +638,18 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         >
           {/* Left: identity */}
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <ProfilePhoto
-              url="/Maria Santos_Demo_Pic.png"
-              x={0}
-              y={0}
-              scale={1.2}
-              size={104}
-              initials="MS"
+            <img
+              src="/Maria Santos_Demo_Pic.png"
+              alt="Maria Santos"
+              style={{
+                width: '130px',
+                height: '130px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                objectPosition: 'center top',
+                border: '3px solid #C9973A',
+                display: 'block',
+              }}
             />
 
             <div style={{ flex: 1, minWidth: 240 }}>
