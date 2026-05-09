@@ -11,23 +11,6 @@ export default function HomePage() {
         {/* ── Hero (dark navy) ── */}
         <CareifiedHero />
 
-        {/* ── Stats bar (very dark) ── */}
-        <section className="bg-[#080F1E] px-6 py-5" aria-label="Industry statistics">
-          <div className="max-w-[960px] mx-auto grid grid-cols-2 md:grid-cols-4">
-            {[
-              { n: '75%',    l: 'Annual turnover'   },
-              { n: '4 in 5', l: 'Leave 100 days'    },
-              { n: '9.7M',   l: 'Jobs by 2034'      },
-              { n: '15+',    l: 'Live in TX'         },
-            ].map(stat => (
-              <div key={stat.n} className="p-3">
-                <div className="font-serif text-[22px] font-bold text-white">{stat.n}</div>
-                <div className="text-[11px] text-white/70 mt-1 leading-tight">{stat.l}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* ── The Careified Engine (warm white) ── */}
         <section
           style={{ background: '#F7F4F0', padding: '80px 24px' }}
