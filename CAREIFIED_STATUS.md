@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 5 2026
-# Safe revert: 960aca6
+# Last updated: May 9 2026
+# Safe revert: ce2e967
 
 ---
 
@@ -14,6 +14,10 @@
 | 10B | Step1Identity rebuild (Context + useProfileSave) | DONE | 31b1bd2 |
 | 10C | Step2Services rebuild (Context pattern) | DONE | b72055e |
 | 10D-L | Steps 3-10 rebuild (all complete) | DONE | Phase 1 |
+| 11 | PRODUCTION_CHECKLIST, /profile/start screenshot mockup, /profile/demo enhancements | DONE | db3690e |
+| 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
+| 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
+| 14 | Working style tag engine + Step 7 preview + Step 11 consent | DONE | ce2e967 |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -42,7 +46,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ### Marketing Pages
 - Landing page, /for-caregivers, /for-agencies, /for-families, /about, /contact, /privacy, /terms
 
-### Profile Builder (Steps 0-10)
+### Profile Builder (Steps 0-11)
 - Step 0: Communication consent gate + resume upload (LLM parsing via OpenRouter/Mistral)
 - Step 1: Identity (name, photo, bio, languages, DOB)
 - Step 2: Services, diagnosis experience + years, ADLs + frequency, specialized techniques
@@ -54,6 +58,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - Step 8: Work history
 - Step 9: References with verification invite links
 - Step 10: Open questions
+- Step 11: Communication consent preferences (6 consent types)
 - ProfileFormContext + useProfileSave (3-layer save: memory > localStorage > DB)
 
 ### Profile Page (/profile/[id])
@@ -167,8 +172,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ### Authorization Leaks (Should be 403, not 404)
 | Page | Current | Should Be |
 |------|---------|-----------|
-| `/admin/*` | No auth - data exposed! | 403 Forbidden |
-| `/agency/*` (not agency role) | 404 | 403 Forbidden |
+| `/admin/*` | ✅ FIXED May 6 2026 | 403 Forbidden (proxy.ts + layout.tsx) |
+| `/agency/*` (not agency role) | ✅ FIXED May 6 2026 | 403 Forbidden (proxy.ts + layout.tsx) |
 
 ### User Journey Dead Ends
 - **Agency signup**: After submit lands on `/agency/pending-approval` - no way to check status
@@ -183,11 +188,16 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 2. Redeploy Vercel after adding env vars
 3. Copy session — ALL page text is placeholder
 4. ~~UX debt — agency signup silent failures~~ ✅ FIXED May 4 2026
-5. ~~Admin pages unprotected~~ ❌ CRITICAL - add auth
-6. Clerk production upgrade (pk_test_ > pk_live_)
-7. SSL cert for Render DB (currently rejectUnauthorized: false)
+5. ~~Admin pages unprotected~~ ✅ FIXED May 6 2026 (proxy.ts + layout.tsx)
+6. Clerk production upgrade (pk_test_ > pk_live_) — STILL OPEN
+7. SSL cert for Render DB ✅ FIXED (lib/db.ts conditional)
 8. Lawyer review of lib/legal/text.ts
 9. E&O / Cyber / General Liability insurance
+10. XSS: dangerouslySetInnerHTML in admin/caregivers — STILL OPEN
+11. Webhook HMAC signature verification — STILL OPEN
+12. SQL injection risk lib/db.ts — STILL OPEN
+13. Rate limiting on APIs — STILL OPEN
+14. Gold hex #C9A84C → #C9A84C fix — STILL OPEN (30 files)
 
 ### Infrastructure
 9. US Vercel deployment (second project, NEXT_PUBLIC_LOCALE=US)
@@ -196,14 +206,16 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Features Queued
 12. Admin panel Phase 1 (content editor, build tracker, analytics, feature flags)
-13. LiveProfilePreview (ghost to live animation in builder)
-14. AIRecruit Session B (consent), C (profile analysis), D (SMS, retry, cron)
-15. Rating system (post-placement ratings, trust score, honesty scoring)
-16. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
-17. Background check integration — Checkr (deferred Year 1)
-18. PSV verification — Persona/Didit, Nursys (deferred Year 1)
-19. Upload photo API
-20. Map for travel radius (Leaflet)
+13. ~~LiveProfilePreview~~ ✅ DONE (May 4 2026)
+14. ~~Working style tag engine~~ ✅ DONE (May 9 2026)
+15. ~~Step 11 consent step~~ ✅ DONE (May 9 2026)
+16. AIRecruit Session B (consent), C (profile analysis), D (SMS, retry, cron)
+17. Rating system (post-placement ratings, trust score, honesty scoring)
+18. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
+19. Background check integration — Checkr (deferred Year 1)
+20. PSV verification — Persona/Didit, Nursys (deferred Year 1)
+21. Upload photo API
+22. ~~Map for travel radius (Leaflet)~~ ✅ DONE (May 4 2026)
 
 ---
 
