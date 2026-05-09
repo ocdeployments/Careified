@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -10,6 +11,12 @@ async function getCaregiver(clerkUserId: string) {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit check
+  const clientIp = getClientIp(req)
+  if (!checkRateLimit(clientIp)) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
+
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const caregiver = await getCaregiver(userId)
