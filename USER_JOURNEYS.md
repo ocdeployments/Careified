@@ -330,6 +330,94 @@ Entry: Caregiver messages Careified WhatsApp
 
 ---
 
+## JOURNEY 11 — QUICKFILL: INSTANT SHIFT DISPATCH
+
+### Entry points
+- Agency dashboard → "QuickFill" button ❌
+- WhatsApp: "Need PSW Monday 9am Scarborough" ❌
+- Client detail page → "Fill urgent shift" ❌
+
+### Agency steps ❌ (Phase 2)
+1. Agency triggers QuickFill
+2. Fills: date, time, area, requirements, rate
+3. System filters eligible caregivers
+4. Blast sent simultaneously — WhatsApp + SMS + in-app
+5. Live response dashboard updates in real time
+6. Agency selects preferred OR first to confirm gets it
+7. AI Recruiter calls confirmed caregiver
+8. Shift assigned — all others notified
+9. Family notified
+10. Reliability scores updated
+
+### Caregiver steps ❌ (Phase 2)
+1. WhatsApp message received
+2. Replies YES
+3. Added to response list
+4. AI Recruiter calls within 5 minutes
+5. Confirms details on call
+6. If selected: full address sent via WhatsApp
+7. If not selected: "Shift filled, watch for more"
+
+### Success state
+Shift filled in under 20 minutes.
+No coordinator phone calls.
+Caregiver gets opportunity without searching.
+Reliability data captured automatically.
+
+### Failure states
+- No caregivers eligible → agency notified,
+  widen criteria suggestion shown
+- No YES responses in 30 min → agency notified,
+  manual outreach suggested
+- Caregiver confirms then no-shows →
+  reliability flag raised, agency notified immediately
+- Vapi down → agency called directly by coordinator
+
+---
+
+## JOURNEY 12 — AGENCY ROSTER: ADDING EXISTING CAREGIVERS
+
+### Entry points
+- Agency dashboard → "Add caregivers" ❌
+- Agency dashboard → "Import roster" ❌
+- Onboarding flow step 2 ❌
+
+### CSV Import flow ❌
+1. Agency clicks "Import roster"
+2. Downloads CSV template
+3. Fills: first_name, last_name, email, phone,
+         role, years_experience, city, province_state
+4. Uploads CSV
+5. Preview screen — review before confirming
+6. Confirm → stub profiles created in bulk
+7. Caregivers notified via email to claim profile
+
+### Manual add flow ❌
+1. Agency clicks "Add caregiver"
+2. Fills: name, phone, email, role
+3. Stub profile created
+4. Caregiver notified to claim
+
+### Caregiver claim flow ❌
+1. Caregiver receives:
+   "[Agency] created a Careified profile for you"
+2. Clicks claim link → /claim/[token]
+3. Creates account or signs in
+4. Reviews pre-filled profile
+5. Edits and completes own details
+6. Profile ownership transferred to caregiver
+7. Caregiver owns profile forever —
+   survives if they leave agency
+
+### Success state
+Agency has full bench on platform day one.
+No cold start problem.
+Caregivers own portable profiles without
+initiating the process themselves.
+This is the viral loop — critical for supply growth.
+
+---
+
 ## DEAD ENDS — CURRENT (fix before June 15)
 
 | Dead End | Page | Fix |
