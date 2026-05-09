@@ -441,36 +441,61 @@ Session is not complete until all items are checked.**
 
 Run in this order:
 
-1. **Playwright E2E:** `npx playwright test tests/e2e/navigation.spec.ts`
-2. **Link audit:** `npx tsx scripts/audit-links.ts`
-3. **Auth audit:** `npx tsx scripts/audit-auth.ts`
-4. **Update CAREIFIED_SPEC.md** — add new pages, resolve fixed issues
-5. **Update CAREIFIED_STATUS.md** — session summary (what was done, what's in progress, files modified)
-6. **Update PRODUCTION_CHECKLIST.md** — check off completed items
-7. **Update MASTER_DOCS.md** — new decisions, new errors discovered
-8. **Update safe revert point in HANDOFF.md and STATUS.md**
-9. **Broken link scan:** `grep -rn 'href="/' app/ components/ | grep -v node_modules`
-10. **Orphan page check** — any new pages without reachability path
-11. **Env var drift:** grep new process.env references, verify in .env.local
-12. **Security regression:** confirm no new dangerouslySetInnerHTML, no unprotected routes
-13. **Mobile spot check** on all pages touched this session
-14. **Confirm Vercel deployment live after push**
-15. **npm audit** — no new critical vulnerabilities
+1. **Step 1 — Update ALL documentation files**
+   Run in this exact order:
+   1. UPDATE CAREIFIED_STATUS.md
+      - What was built this session
+      - What's in progress
+      - Files modified
+      - Safe revert point
 
-16. Commit documentation files:
-    ```bash
-    git add CAREIFIED_STATUS.md CAREIFIED_SPEC.md PRODUCTION_CHECKLIST.md MASTER_DOCS.md HANDOFF.md CLAUDE.md
-    git commit -m "session-end: status update [$(date +%Y-%m-%d)]"
-    ```
+   2. UPDATE PRODUCTION_CHECKLIST.md
+      - Check off any completed items (only if verified live)
+      - Add any new issues discovered this session
+      - Update SESSION LOG table with date, items completed, items added
+      - Never check off items that haven't been verified live
 
-17. Output a Modified Files Report:
+   3. UPDATE CAREIFIED_SPEC.md
+      - Add new pages to inventory
+      - Move resolved issues to RESOLVED table
+      - Add new features to FEATURES NOT YET BUILT table
+      - Update any expected behaviours that changed
+
+   4. UPDATE MASTER_DOCS.md
+      - Add any new technical decisions with date stamp
+      - Add any new user errors discovered
+      - Update security inventory status for items fixed
+      - Add any new backlog items
+
+   5. UPDATE CONTEXT.md
+      - Add new decisions to Section 5 if significant
+      - Update pre-launch checklist if items completed
+
+   Then commit ALL documentation files together:
+   ```bash
+   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md MASTER_DOCS.md CONTEXT.md CLAUDE.md HANDOFF.md
+   git commit -m "session-end: docs update [$(date +%Y-%m-%d)]"
+   ```
+
+2. **Playwright E2E:** `npx playwright test tests/e2e/navigation.spec.ts`
+3. **Link audit:** `npx tsx scripts/audit-links.ts`
+4. **Auth audit:** `npx tsx scripts/audit-auth.ts`
+5. **Broken link scan:** `grep -rn 'href="/' app/ components/ | grep -v node_modules`
+6. **Orphan page check** — any new pages without reachability path
+7. **Env var drift:** grep new process.env references, verify in .env.local
+8. **Security regression:** confirm no new dangerouslySetInnerHTML, no unprotected routes
+9. **Mobile spot check** on all pages touched this session
+10. **Confirm Vercel deployment live after push**
+11. **npm audit** — no new critical vulnerabilities
+
+12. Output a Modified Files Report:
     ```bash
     git status --short
     git diff --name-only HEAD
     ```
     List every locally modified file that has NOT been pushed.
 
-18. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
+13. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
 
 ---
 
