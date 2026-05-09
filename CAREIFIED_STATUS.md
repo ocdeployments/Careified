@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Last updated: May 9 2026
-# Safe revert: 22eaa45
+# Safe revert: 97a95ad
 
 ---
 
@@ -17,6 +17,7 @@
 | 11 | PRODUCTION_CHECKLIST, /profile/start screenshot mockup, /profile/demo enhancements | DONE | db3690e |
 | 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
 | 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
+| 14 | Session identity docs (SOUL.md, FOUNDER.md, BEST_PRACTICES update) | DONE | 97a95ad |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
