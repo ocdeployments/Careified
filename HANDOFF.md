@@ -1,5 +1,5 @@
 # Careified — Project Handoff Document
-Generated: May 5, 2026 (Phase 1 Complete)
+Generated: May 5, 2026 | Updated: May 9 2026 (Phase 1 Complete)
 
 ## 1. Project Overview
 Careified is a professional caregiving platform connecting caregivers with agencies and families.
@@ -228,17 +228,24 @@ npx tsc --noEmit 2>&1 | head -20
 - `scripts/seed-qa-report.ts` — Seeds initial 25 issues
 - Run: `npx tsx scripts/seed-qa-report.ts`
 
-## 13. Security (May 5 2026)
+## 13. Security (May 9 2026)
 
 ### Middleware
-- `middleware.ts` — Clerk auth with public routes whitelist
-- `app/admin/layout.tsx` — ADMIN_CLERK_USER_ID enforcement
-- `app/agency/layout.tsx` — Login + approved agency check
+- `proxy.ts` (renamed from middleware.ts May 6 2026) — Clerk auth with public routes
+- `app/admin/layout.tsx` — ADMIN_CLERK_USER_ID enforcement ✅ FIXED
+- `app/agency/layout.tsx` — Login + approved agency check ✅ FIXED
 
 ### Protected Routes
-- `/admin/*` — Requires ADMIN_CLERK_USER_ID match
-- `/agency/*` — Requires login + approved agency status
+- `/admin/*` — Requires ADMIN_CLERK_USER_ID match ✅
+- `/agency/*` — Requires login + approved agency status ✅
 - `/demo/*` — Open (public)
+
+### Known Security Issues (STILL OPEN)
+- Vapi webhook HMAC signature verification — NOT BUILT
+- SQL injection risk lib/db.ts lines 56-68 — NOT FIXED
+- XSS via dangerouslySetInnerHTML admin/caregivers — NOT FIXED
+- No rate limiting on APIs — NOT BUILT
+- Gold hex #C9A84C inconsistency (30 files) — NOT FIXED
 
 ## 14. Phase 1 Complete (May 5 2026)
 
@@ -251,4 +258,4 @@ npx tsc --noEmit 2>&1 | head -20
 | 5 | Demo Gate | Already open |
 
 ## 15. Safe Revert Point
-git reset --hard 960aca6
+git reset --hard ce2e967
