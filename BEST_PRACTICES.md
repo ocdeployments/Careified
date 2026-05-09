@@ -59,7 +59,7 @@
 - `npx tsc --noEmit` before every commit
 - Commit message format: `feat:` / `fix:` / `chore:` / `docs:` / `copy:`
 - Never commit directly to main — use develop branch
-- Never auto-push — push is always a manual human decision
+- ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 - Safe revert point updated in HANDOFF.md and STATUS.md after every session
 
 ---

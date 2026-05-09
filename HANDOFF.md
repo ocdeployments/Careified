@@ -17,7 +17,7 @@ Local repo: /Users/owner/careified
 - ORM: Prisma 7 + pg Pool (raw SQL for some queries)
 - Auth: Clerk 7.0.12 (DEV keys — production pending)
 - Styling: Inline styles only (no Tailwind classes - v4 production issues)
-- Deployment: Vercel (auto-deploy from GitHub main)
+- Deployment: Vercel (user manually pushes to GitHub main)
 - Locale: lib/locale/config.ts — CA/US via NEXT_PUBLIC_LOCALE
 
 ## 3. Environment Variables

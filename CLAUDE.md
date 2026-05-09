@@ -262,7 +262,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 ## 9. Deployment
 
 - **Platform:** Vercel → GitHub (ocdeployments/Careified, branch: main)
-- **Trigger:** `git push origin main` (auto-deploy)
+- **Trigger:** ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 - **NEVER:** `npx vercel --prod`
 - **NEVER:** set env vars via CLI
 
@@ -573,7 +573,7 @@ git push origin develop
 git checkout main
 git merge develop
 git push origin main
-# Production deploys automatically
+# ⛔ DO NOT push. User runs git push manually when ready.
 ```
 
 ### Merging to Production
