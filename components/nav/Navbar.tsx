@@ -48,12 +48,6 @@ function AuthButton() {
   return (
     <>
       <Link
-        href="/demo"
-        className="text-xs font-medium px-3.5 py-1.5 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
-      >
-        Try Demo
-      </Link>
-      <Link
         href="/sign-up"
         className="text-xs font-medium px-3.5 py-1.5 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
       >
