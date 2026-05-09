@@ -71,8 +71,10 @@ export default function HomePage() {
                 @keyframes spin-cw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 @keyframes spin-ccw { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
                 @keyframes pulse-dot { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+                @keyframes dash-flow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -40; } }
                 .eng-outer { transform-origin: 280px 170px; animation: spin-cw 12s linear infinite; }
                 .eng-inner { transform-origin: 280px 170px; animation: spin-ccw 8s linear infinite; }
+                .flow-arrow { animation: dash-flow 3s linear infinite; }
               `}</style>
               <svg width="100%" viewBox="0 0 560 340" style={{ display: 'block', maxWidth: '560px', margin: '0 auto' }}>
                 <defs>
@@ -85,10 +87,10 @@ export default function HomePage() {
                 <circle cx="280" cy="170" r="130" fill="none" stroke="rgba(201,151,58,0.2)" stroke-width="1" stroke-dasharray="8 5"/>
 
                 {/* Curved clockwise arrows between nodes */}
-                <path d="M 355 68 A 130 130 0 0 1 408 143" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path d="M 408 197 A 130 130 0 0 1 355 272" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path d="M 205 272 A 130 130 0 0 1 152 197" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
-                <path d="M 152 143 A 130 130 0 0 1 205 68" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path className="flow-arrow" d="M 355 68 A 130 130 0 0 1 408 143" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path className="flow-arrow" d="M 408 197 A 130 130 0 0 1 355 272" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path className="flow-arrow" d="M 205 272 A 130 130 0 0 1 152 197" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
+                <path className="flow-arrow" d="M 152 143 A 130 130 0 0 1 205 68" fill="none" stroke="#C9973A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr-fw)" opacity="0.7"/>
 
                 {/* Node 1: Top — Caregiver Profile */}
                 <rect x="180" y="22" width="200" height="48" rx="10" fill="rgba(201,151,58,0.15)" stroke="rgba(201,151,58,0.4)" stroke-width="1"/>
