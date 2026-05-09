@@ -295,6 +295,10 @@ npx tsc --noEmit 2>&1 | head -5
 ```
 
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
+- Read MASTER_DOCS.md — note any new decisions or errors to log
+- Confirm Vercel last deployment succeeded (check vercel.com dashboard)
+- Run npm audit — flag any critical vulnerabilities
+- Confirm DB record counts match last session
 
 ---
 
@@ -431,24 +435,42 @@ npx tsc --noEmit 2>&1 | head -5
 ---
 
 ### /end-session — Safe Stop (auto or manual)
+
+⛔ **DO NOT skip any step. Each item is mandatory.
+Session is not complete until all items are checked.**
+
 Run in this order:
 
-1. UPDATE CAREIFIED_STATUS.md with session summary (what was done, what's in progress, files modified)
+1. **Playwright E2E:** `npx playwright test tests/e2e/navigation.spec.ts`
+2. **Link audit:** `npx tsx scripts/audit-links.ts`
+3. **Auth audit:** `npx tsx scripts/audit-auth.ts`
+4. **Update CAREIFIED_SPEC.md** — add new pages, resolve fixed issues
+5. **Update CAREIFIED_STATUS.md** — session summary (what was done, what's in progress, files modified)
+6. **Update PRODUCTION_CHECKLIST.md** — check off completed items
+7. **Update MASTER_DOCS.md** — new decisions, new errors discovered
+8. **Update safe revert point in HANDOFF.md and STATUS.md**
+9. **Broken link scan:** `grep -rn 'href="/' app/ components/ | grep -v node_modules`
+10. **Orphan page check** — any new pages without reachability path
+11. **Env var drift:** grep new process.env references, verify in .env.local
+12. **Security regression:** confirm no new dangerouslySetInnerHTML, no unprotected routes
+13. **Mobile spot check** on all pages touched this session
+14. **Confirm Vercel deployment live after push**
+15. **npm audit** — no new critical vulnerabilities
 
-2. Commit ONLY documentation files:
-   ```bash
-   git add CAREIFIED_STATUS.md HANDOFF.md CLAUDE.md
-   git commit -m "session-end: status update [$(date +%Y-%m-%d)]"
-   ```
+16. Commit documentation files:
+    ```bash
+    git add CAREIFIED_STATUS.md CAREIFIED_SPEC.md PRODUCTION_CHECKLIST.md MASTER_DOCS.md HANDOFF.md CLAUDE.md
+    git commit -m "session-end: status update [$(date +%Y-%m-%d)]"
+    ```
 
-3. Output a Modified Files Report:
-   ```bash
-   git status --short
-   git diff --name-only HEAD
-   ```
-   List every locally modified file that has NOT been pushed.
+17. Output a Modified Files Report:
+    ```bash
+    git status --short
+    git diff --name-only HEAD
+    ```
+    List every locally modified file that has NOT been pushed.
 
-4. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
+18. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
 
 ---
 
