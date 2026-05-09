@@ -33,6 +33,8 @@ The platform thinks ahead so humans do not have to.
 | Agency AI Assistant | WhatsApp/Telegram/SMS | Two-way | ❌ Phase 3 |
 | Caregiver AI Assistant | WhatsApp | Two-way | ❌ Phase 3 |
 | Family Update Bot | WhatsApp | One-way | ❌ Phase 2 |
+| QuickFill confirmation call | Phone call | Outbound | ❌ Phase 2 |
+| QuickFill broadcast | WhatsApp/SMS | Outbound | ❌ Phase 2 |
 | AI Command Bar | In-platform | Two-way | ✅ Built |
 
 ---
@@ -377,6 +379,80 @@ Before any AI feature goes live:
 - Test score generated and visible
 - Test failure state (what if Vapi is down?)
 - Test double-fire prevention (idempotency)
+
+---
+
+## QUICKFILL — AI DISPATCH FLOW
+
+### Trigger
+Agency creates shift blast via dashboard or WhatsApp:
+"Need PSW Monday 9am Scarborough dementia experience"
+
+### Eligibility filter
+lib/blast/eligibility.ts checks:
+- Service area overlap with shift location
+- Availability grid covers shift time
+- Required specializations present
+- match_time_calls consent active
+- Not already placed that shift
+- Not on suppression list
+
+### Broadcast message (WhatsApp/SMS)
+"New shift — [Agency Name]
+ [Day] [Date], [Start]-[End] ([Hours]hrs)
+ [Area] — [Specialty required]
+ $[Rate]/hr
+
+ Reply YES to be considered
+ Reply NO to skip
+ Reply STOP to opt out"
+
+### On YES response
+1. Caregiver added to response list with timestamp
+2. Agency dashboard updates in real time
+3. Vapi outbound call fires within 5 minutes
+4. AI confirms:
+   - Availability confirmed
+   - Address acknowledged
+   - Rate confirmed
+   - Any questions answered
+5. Caregiver says yes → confirmed
+6. Shift assigned → all others notified filled
+
+### AI call script — QuickFill confirmation
+"Hi [Name], this is Careified calling on behalf
+of [Agency Name] about the [Day] shift in [Area].
+
+You indicated you are available and interested.
+I just want to confirm a few details.
+
+The shift is [Date] from [Start] to [End],
+[Hours] hours at $[Rate] per hour,
+at [General Area — not full address yet].
+
+Can you confirm you are still available
+and interested in this shift?
+
+Press 1 for Yes
+Press 2 for No
+Press 3 to speak with the agency"
+
+### On confirmation
+- Shift assigned to caregiver
+- Full address sent via WhatsApp
+- Calendar invite sent
+- Agency notified
+- Other caregivers notified: "Shift filled"
+- Family notified: "[Name] confirmed for [Day]"
+
+### Reliability signal captured
+Every blast interaction logged:
+- Responded / Did not respond
+- Response time
+- Accepted / Declined
+- Confirmed / No-showed (post-shift)
+
+This data feeds aggregate_score over time.
 
 ---
 
