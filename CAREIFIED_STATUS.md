@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 8 2026
-# Safe revert: 142ea98
+# Last updated: May 9 2026
+# Safe revert: 22eaa45
 
 ---
 
@@ -122,6 +122,23 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
 - Photo position editor: COMPLETED (May 8 2026) - drag-to-reposition, zoom, persist to DB
 - Onboarding gate: COMPLETED (May 8 2026) - name + phone OTP + age confirmation
+
+---
+
+## SESSION MAY 9 2026 — COMPLETED
+
+### Documentation Fixes
+- Removed auto-push rules from CLAUDE.md, HANDOFF.md, CAREIFIED_STATUS.md, BEST_PRACTICES.md
+- All docs now state: "⛔ DO NOT push. Commit locally only. User runs git push manually when ready."
+
+### Navbar Visual Refresh
+- Nav bar: rgba(13,27,62,0.97), backdrop blur 12px, gold border bottom
+- Dropdown cards: Lucide icons (Info, Briefcase, UserCheck / Building2, Presentation, Play / Heart, Users)
+- Featured card: gold border, subtle gold background
+- Dropdown header: gold title, white subtitle
+- Active section: gold dot indicator when on matching path
+- CTA button: gold gradient, navy text, shadow
+- Sign in: transparent with border
 
 ---
 
