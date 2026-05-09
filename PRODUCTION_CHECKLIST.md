@@ -10,6 +10,8 @@
 
 ### Security
 - [ ] Admin pages auth enforcement — ADMIN_CLERK_USER_ID check on all /admin/* routes
+- [ ] Soft delete only for caregivers — never hard delete (admin panel)
+- [ ] Confirmation dialogs on all destructive admin actions
 - [ ] Clerk production keys — upgrade pk_test_ → pk_live_ in Vercel + .env.local
 - [ ] SSL cert Render DB — set rejectUnauthorized: true in production
 - [ ] Vapi webhook HMAC signature verification — lib/airecruit/vapi.ts
@@ -43,10 +45,14 @@
 ## 🟠 HIGH — Must Build Before Launch
 
 ### Missing Features
+- [ ] Client intake form — /agency/clients/new — 4 phases, 169 fields
+- [ ] Client-caregiver matching engine — cross-reference client intake against caregiver profiles
+- [ ] /agency/clients/[id]/match — ranked alignment display
 - [ ] Ticketing system — /support, /admin/tickets, /agency/support, /caregiver/support
 - [ ] Rating system — placement_reviews table, agency form, admin queue, badges, profile strength display
 - [ ] Photo upload API — /api/profile/upload-photo (Step 1 has no actual upload endpoint)
-- [ ] Demo gate — /demo/gate (email + phone capture before demo access)
+- [x] Demo gate — /demo/gate (email + phone capture before demo access)
+  Note: replaced with signup gate — /agency/pending-approval grants demo access
 - [ ] demo_leads DB table — capture and store demo gate submissions
 - [ ] Stripe integration — PAYMENTS_ENABLED=false currently, no revenue collection
 - [ ] Module pricing confirmed and wired to Stripe
@@ -66,6 +72,12 @@
 ## 🟡 MEDIUM — Important, Not Blocking
 
 ### UX Debt
+- [ ] Profile visibility toggle — caregiver can hide/show profile from search
+- [ ] Caregiver notification when agency views their profile
+- [ ] Profile completion celebration at Step 10
+- [ ] Empty state — search returns 0 results
+- [ ] Empty state — shortlist is empty
+- [ ] Empty state — clients list is empty
 - [ ] Agency signup — highlight required fields red on submit, scroll to first error, inline errors
 - [ ] Agency signup — phone field silently rejects invalid numbers (show error instead)
 - [ ] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files
@@ -154,6 +166,13 @@
 - [ ] US demo caregivers seeded (TX, FL, NY)
 - [ ] US demo clients seeded
 
+### QA Automation
+- [ ] Playwright E2E suite — full 36-page coverage
+- [ ] Link audit script — scripts/audit-links.ts
+- [ ] Auth protection audit — scripts/audit-auth.ts
+- [ ] Pre-commit hook — blocks commit on critical QA failures
+- [ ] /admin/qa dashboard tab — live audit results
+
 ---
 
 ## 📅 RECOMMENDED LAUNCH SEQUENCE
@@ -186,6 +205,7 @@
 |------|------------------|-------------|
 | May 8 2026 | — | Initial checklist created |
 | May 8 2026 | — | Rename "matching engine" → "Careified Engine" checklist item |
+| May 8 2026 | Admin sitemap auto-gen, agency sitemap, brand animation strip, flywheel section, profile demo photo, consolidated auth, /profile/build protected, Try Demo removed, demo gated behind signup, MASTER_DOCS.md created | QA automation suite, custom auth form, profile visibility toggle, admin soft delete, empty states |
 
 ---
 _Update this table at the end of every session._
