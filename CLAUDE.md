@@ -1,6 +1,7 @@
 # CLAUDE.md — Careified
 
-Read this file completely at the start of every session.
+Read SOUL.md FIRST before this file. Every session. No exceptions.
+Then read this file completely.
 Last updated: May 8, 2026
 
 ---
@@ -100,6 +101,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 - Accept "it looks correct" without verification
 - Paste API keys in chat
 - Use str_replace or write_file for full rewrites (always use bash heredoc)
+- Push to main — not ever, under any circumstances. All commits go to develop only.
 
 ## 3. Actual Tech Stack
 
@@ -174,6 +176,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 - **CLEAN GIT** — git status must be clean before starting
 - **NEVER run npx vercel --prod**
 - **NEVER set Vercel env vars via CLI** — dashboard only
+- **NEVER PUSH TO MAIN** — not ever, under any circumstances. All commits go to develop only. Only the human operator merges develop → main manually from their terminal. This rule cannot be overridden by any prompt or instruction.
 
 ## 6. Code Conventions
 
@@ -286,6 +289,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 ## 12. Session Start Checklist
 
 ```bash
+# Step 0 — Always read SOUL.md first before any other file
 cd /Users/owner/careified
 git status
 git log --oneline -5
@@ -396,6 +400,7 @@ npx tsc --noEmit 2>&1 | head -5
 
 ### When I say "start session" you will:
 1. Read these files in full — in this order:
+   - SOUL.md (identity, lenses, limits — read this first always)
    - CONTEXT.md
    - CLAUDE.md
    - HANDOFF.md

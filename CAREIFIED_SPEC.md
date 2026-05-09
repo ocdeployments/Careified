@@ -9,8 +9,12 @@
 ## HOW TO USE THIS FILE
 
 ### Start of every session — paste this prompt to Claude:
-> "Read CAREIFIED_SPEC.md. Run a static audit against the current
-> codebase. Report PASS, FAIL, or MISSING for each item.
+> "Read SOUL.md first. Then read CAREIFIED_SPEC.md, CONTEXT.md,
+> CLAUDE.md, HANDOFF.md, CAREIFIED_STATUS.md in full.
+> Apply all 33 lenses from SOUL.md.
+> Run a static audit against the current codebase.
+> Report PASS, FAIL, or MISSING for each item.
+> Come with a point of view on what matters most today.
 > Do not fix anything. Wait for my instruction."
 
 ### End of every session — paste this prompt to Claude:
