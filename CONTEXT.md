@@ -167,6 +167,26 @@ Regulatory environment (PIPEDA, CRTC) is well understood.
 PSW certification is standardised in Ontario. Existing network
 in Ontario. US expansion (HIPAA, TCPA) planned post-launch.
 
+### Why demo is gated behind agency signup (May 8 2026)
+Competitive protection — open demos expose profile design,
+scoring system, and UX patterns to competitors before launch.
+Demo access granted after agency signup on /agency/pending-approval.
+
+### Why Careified Engine not Matching Engine (May 8 2026)
+Brand ownership. "Matching Engine" is generic and forgettable.
+"Careified Engine" is ownable, proprietary-sounding, and
+reinforces the platform name at every mention.
+
+### Why client intake is required for matching (May 8 2026)
+Without client data, matching is just filtering by caregiver attributes.
+With client intake, the engine performs genuine compatibility scoring
+across 7 dimensions. Client intake is therefore a pre-launch blocker.
+
+### Why single auth entry point (May 8 2026)
+Separate sign-in and sign-up pages created confusion and split the
+Clerk configuration. Single /sign-up entry point with Clerk handling
+new vs existing users inline. Simpler, less fragile.
+
 ---
 
 ## 6. What We Tried That Didn't Work
@@ -318,6 +338,9 @@ Target: Ontario PSW community first.
 - [ ] US Vercel deployment (second project)
 - [ ] Stripe account + pricing confirmed
 - [ ] Incident response runbook written
+- [ ] MASTER_DOCS.md reviewed and up to date
+- [ ] All user error fixes from MASTER_DOCS.md Section 3 addressed
+- [ ] Security inventory from MASTER_DOCS.md Section 2 all green
 
 ---
 
