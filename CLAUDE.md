@@ -296,6 +296,8 @@ npx tsc --noEmit 2>&1 | head -5
 
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
 - Read MASTER_DOCS.md — note any new decisions or errors to log
+- Read BEST_PRACTICES.md — confirm no rules are being violated before building
+- Read LESSONS_LEARNED.md — confirm no repeated mistakes from previous sessions
 - Confirm Vercel last deployment succeeded (check vercel.com dashboard)
 - Run npm audit — flag any critical vulnerabilities
 - Confirm DB record counts match last session
