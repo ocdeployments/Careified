@@ -47,16 +47,21 @@ AGENCY SIDE
 - [ ] Shortlist management ✅ built
 - [ ] Agency Roster — agency builds caregiver profiles on their behalf ❌ not built
 - [ ] CSV caregiver import — agency uploads existing roster ❌ not built
-- [ ] Pipeline status on shortlisted caregivers ❌ not built
+- [ ] Pipeline status on shortlisted caregivers (5 stages) ❌ not built
+  Stages: Discovered → Contacted → Interviewing → Placed → Inactive
 - [ ] Caregiver contact info visible to approved agencies ❌ not built
 - [ ] Demo gated behind agency signup ❌ fix today
 - [ ] Multi-user agency accounts (coordinator + owner) ❌ not built
+- [ ] Locale column added to caregivers + agencies tables ❌ not built
+- [ ] CA/US data scoping enforced in all DB queries ❌ not built
 
 CAREGIVER SIDE
 - [ ] Profile builder Steps 0-11 ✅ built
 - [ ] Caregiver claims agency-built profile ❌ not built
 - [ ] Profile visible in search after Step 3 ✅ built
 - [ ] Verify slug and ID card ✅ built
+- [ ] "You're now live in search" banner after Step 3 ❌ not built
+- [ ] Profile view notification (in-app) ❌ not built
 
 AI RECRUIT
 - [ ] Outbound screening calls ✅ built
@@ -65,8 +70,8 @@ AI RECRUIT
 - [ ] Campaign UI ✅ built
 
 PLATFORM
-- [ ] careified.ca domain live (Canada) ❌ not done
-- [ ] careified.com domain live (US) ❌ not done
+- [ ] careified.ca domain purchased and pointed to Vercel ❌ not done
+- [ ] careified.com domain purchased and pointed to Vercel ❌ not done
 - [ ] Locale scoping — CA data never visible to US ❌ needs locale column
 - [ ] No placeholder copy anywhere ❌ copy session needed
 - [ ] Clerk production keys ❌ critical
@@ -76,6 +81,8 @@ PLATFORM
 - [ ] SQL injection fix ✅ fixed
 - [ ] Rate limiting ✅ fixed
 - [ ] Gold hex #C9973A consistent across all files ❌ 30 files still wrong
+- [ ] GitHub branch protection enabled on main ❌ not done
+- [ ] Both test agencies onboarded before June 15 ❌ not done
 
 ### SHOULD SHIP — if time allows
 - [ ] Basic email notifications (shortlist alert to agency)
