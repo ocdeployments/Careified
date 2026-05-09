@@ -65,40 +65,119 @@ export default function ProfileStartPage() {
         ))}
       </section>
 
-      {/* SECTION 3 — Mockup + Two Column */}
+      {/* SECTION 3 — Blurred Lock Treatment */}
       <section style={{ padding: '0 24px' }}>
-        {/* Browser Chrome Mockup */}
+        <p style={{ fontSize: '14px', color: COLORS.slate, textAlign: 'center', marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px' }}>
+          Your profile looks like this — visible only to verified agencies.
+        </p>
+        
+        {/* Blurred lock treatment */}
         <div style={{
-          background: '#1a1a2e',
-          borderRadius: '12px',
-          boxShadow: '0 24px 64px rgba(13,27,62,0.25)',
-          overflow: 'hidden',
+          position: 'relative',
           maxWidth: '780px',
           margin: '0 auto',
-          position: 'relative'
+          borderRadius: '12px',
+          overflow: 'hidden',
+          border: '1px solid rgba(201,151,58,0.2)',
         }}>
-          {/* Top Bar */}
+          {/* Blurred placeholder — suggests a real profile exists */}
           <div style={{
-            background: '#2d2d44',
-            height: '36px',
+            background: 'linear-gradient(135deg, #0D1B3E 0%, #1E3A8A 50%, #0D1B3E 100%)',
+            height: '280px',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            padding: '0 16px',
-            gap: '8px'
+            justifyContent: 'center',
+            gap: '16px',
+            padding: '40px 24px',
           }}>
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F57' }} />
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFBD2E' }} />
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28CA41' }} />
-            <div style={{ background: '#3d3d5c', borderRadius: '6px', flex: 1, height: '20px', marginLeft: '12px', display: 'flex', alignItems: 'center', paddingLeft: '12px' }}>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif" }}>
-                careified.vercel.app/profile/demo
-              </span>
+            {/* Fake blurred profile shape */}
+            <div style={{
+              width: '100%',
+              maxWidth: '500px',
+              background: 'rgba(255,255,255,0.04)',
+              borderRadius: '12px',
+              padding: '24px',
+              filter: 'blur(4px)',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(201,151,58,0.3)' }}/>
+                <div>
+                  <div style={{ width: '160px', height: '16px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', marginBottom: '8px' }}/>
+                  <div style={{ width: '100px', height: '12px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}/>
+                </div>
+                <div style={{ marginLeft: 'auto', width: '80px', height: '32px', background: 'rgba(201,151,58,0.3)', borderRadius: '6px' }}/>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {[120, 90, 110].map((w, i) => (
+                  <div key={i} style={{ width: w, height: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}/>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} style={{ height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '4px' }}/>
+                ))}
+              </div>
             </div>
           </div>
-          {/* Screenshot */}
-          <div style={{ position: 'relative' }}>
-            <img src="/images/profile-demo-preview.png" alt="Maria Santos Careified profile" style={{ width: '100%', display: 'block' }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, transparent, #F7F4F0)', pointerEvents: 'none' }} />
+
+          {/* Lock overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            background: 'rgba(13,27,62,0.6)',
+            backdropFilter: 'blur(2px)',
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: 'rgba(201,151,58,0.15)',
+              border: '1px solid rgba(201,151,58,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9973A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div style={{
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: '18px',
+              color: '#fff',
+              textAlign: 'center',
+            }}>
+              See what agencies see.
+            </div>
+            <div style={{
+              fontSize: '13px',
+              color: 'rgba(255,255,255,0.55)',
+              textAlign: 'center',
+              maxWidth: '280px',
+              lineHeight: 1.5,
+            }}>
+              Full profiles are visible to verified caregivers and approved agencies only.
+            </div>
+            <a href="/sign-up?role=caregiver" style={{
+              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+              color: '#0D1B3E',
+              fontWeight: 700,
+              fontSize: '14px',
+              padding: '12px 28px',
+              borderRadius: '999px',
+              textDecoration: 'none',
+              marginTop: '4px',
+            }}>
+              Create your free profile
+            </a>
           </div>
         </div>
 
