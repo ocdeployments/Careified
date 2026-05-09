@@ -639,7 +639,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           {/* Left: identity */}
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <img
-              src="/Maria Santos_Demo_Pic.png"
+              src="/maria-santos-demo.png"
               alt="Maria Santos"
               style={{
                 width: '130px',
