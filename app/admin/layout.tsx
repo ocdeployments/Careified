@@ -19,7 +19,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   const adminId = process.env.ADMIN_CLERK_USER_ID
-  if (!adminId || userId !== adminId) {
+  if (!adminId) {
+    redirect('/')
+  }
+
+  if (userId !== adminId) {
     redirect('/')
   }
 

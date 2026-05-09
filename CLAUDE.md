@@ -1,7 +1,68 @@
 # CLAUDE.md — Careified
 
 Read this file completely at the start of every session.
-Last updated: May 9, 2026 — Phase 1 Complete
+Last updated: May 8, 2026
+
+---
+
+## ⚠️ SESSION HEALTH MONITOR — READ THIS FIRST, EVERY MESSAGE
+
+You must track and report session health at the start of EVERY response, no exceptions.
+
+### How to Track
+
+Maintain a running estimate using these weights:
+
+| Action | Token Cost |
+|--------|------------|
+| Each user message | +500 tokens |
+| Each of your responses | +1,000 tokens |
+| Each file you read fully | +3,000 tokens (small), +8,000 tokens (large, >200 lines) |
+| Each bash/code execution | +1,000 tokens |
+| Session start (CLAUDE.md + context files loaded) | +25,000 tokens |
+
+**Estimated session budget:** 150,000 tokens before forced end.
+
+### Status Bar
+
+Begin EVERY response with this one-line status (above all other output):
+
+```
+🟢 SESSION: ~XX,XXX / 150,000 tokens used (~XX%) | XX msgs | Safe to continue
+```
+
+Change the emoji and message based on thresholds:
+
+| Usage | Emoji | Message |
+|-------|-------|---------|
+| 0–60% | 🟢 | Safe to continue |
+| 61–79% | 🟡 | Consider running /end-session soon |
+| 80–89% | 🟠 | Run /end-session after this task |
+| 90–99% | 🔴 | WARNING: Run /end-session NOW before next task |
+| 100%+ | 💀 | CRITICAL: Running /end-session immediately |
+
+### Forced Actions
+
+At 🟠 (80%): After completing the current task, proactively say:
+
+> "⚠️ Session is at ~80%. Please run /end-session before starting the next task to preserve all progress."
+
+At 🔴 (90%): Before doing ANY work, say:
+
+> "🔴 Session is critically full. I strongly recommend running /end-session right now. If you proceed, the session may crash and lose context. Type 'continue anyway' to override, or run /end-session."
+
+At 💀 (100%+): Do not attempt the task. Instead:
+
+1. Run the end-session protocol immediately (update all status files)
+2. Output: "💀 Session limit reached. End-session has been run. Start a new session to continue."
+
+### User Commands
+
+- `/status` — user asking for session health check, output full status breakdown
+- `/end-session` — user manually triggering end session; run the full handoff protocol from HANDOFF.md
+- `/reset-counter` — user confirming a new session started; reset your token estimate to 25,000
+
+---
 
 ## 1. Project Identity
 
@@ -192,7 +253,6 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 | app/profile/build/Step8WorkHistory.tsx | ✅ |
 | app/profile/build/Step9References.tsx | ✅ |
 | app/profile/build/Step10OpenQuestions.tsx | ✅ |
-| app/profile/build/Step11Consent.tsx | ✅ |
 | app/demo/page.tsx | ✅ Demo landing |
 | app/demo/dashboard/page.tsx | ✅ |
 | app/demo/search/page.tsx | ✅ |
@@ -202,7 +262,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 ## 9. Deployment
 
 - **Platform:** Vercel → GitHub (ocdeployments/Careified, branch: main)
-- **Trigger:** `git push origin main` (auto-deploy)
+- **Trigger:** ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 - **NEVER:** `npx vercel --prod`
 - **NEVER:** set env vars via CLI
 
@@ -233,6 +293,41 @@ export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
 npx tsc --noEmit 2>&1 | head -5
 ```
+
+- Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
+- Read MASTER_DOCS.md — note any new decisions or errors to log
+- Read BEST_PRACTICES.md — confirm no rules are being violated before building
+- Read LESSONS_LEARNED.md — confirm no repeated mistakes from previous sessions
+- Confirm Vercel last deployment succeeded (check vercel.com dashboard)
+- Run npm audit — flag any critical vulnerabilities
+- Confirm DB record counts match last session
+
+---
+
+## 12a. Session Start — Git Rules
+
+⛔ **At session start, Claude MUST NOT run any of the following:**
+
+- `git add`
+- `git commit`
+- `git push`
+- `git merge`
+- `git rebase`
+- `git reset`
+
+**Session start is READ ONLY.** The only git commands permitted are:
+
+- `git status` — to see local state
+- `git log --oneline -5` — to see recent history
+- `git diff --name-only` — to see what changed since last commit
+
+**If uncommitted files are found at session start, Claude should:**
+
+1. List them clearly in the session start report
+2. Ask: "There are uncommitted local changes from the previous session. Would you like to review them before we begin?"
+3. Wait for user direction — do NOT commit or discard anything automatically
+
+---
 
 ## 13. Testing & Quality Assurance
 
@@ -341,85 +436,97 @@ npx tsc --noEmit 2>&1 | head -5
 
 ---
 
-### When I say "end session" you will:
-1. UPDATE CAREIFIED_SPEC.md
-   - Add new pages + expected behaviours built today
-   - Add new buttons/CTAs with href targets
-   - Move fixed issues to RESOLVED section
-   - Update page count if changed
-   Commit: "chore: update CAREIFIED_SPEC.md — [date]"
-   Show diff. Wait for approval.
+### /end-session — Safe Stop (auto or manual)
 
-2. UPDATE CLAUDE.md
-   - Update Last updated date
-   - Add new key files, DB tables, env vars
-   Commit: "chore: update CLAUDE.md — [date]"
-   Show diff. Wait for approval.
+⛔ **DO NOT skip any step. Each item is mandatory.
+Session is not complete until all items are checked.**
 
-3. UPDATE CONTEXT.md
-   - Add product decisions made today and WHY
-   - Add anything tried that didn't work
-   Commit: "chore: update CONTEXT.md — [date]"
-   Show diff. Wait for approval.
+Run in this order:
 
-4. UPDATE HANDOFF.md
-   - Update generated date
-   - Add new pages to inventory
-   - Move completed items out of pending
-   - Update safe revert point to latest commit hash
-   Commit: "chore: update HANDOFF.md — [date]"
-   Show diff. Wait for approval.
+1. **Step 1 — Update ALL documentation files**
+   Run in this exact order:
+   1. UPDATE CAREIFIED_STATUS.md
+      - What was built this session
+      - What's in progress
+      - Files modified
+      - Safe revert point
 
-5. UPDATE CAREIFIED_STATUS.md
-   - Mark completed sessions as DONE with commit hash
-   - Move next session to top of queue
-   Commit: "chore: update CAREIFIED_STATUS.md — [date]"
-   Show diff. Wait for approval.
+   2. UPDATE PRODUCTION_CHECKLIST.md
+      - Check off any completed items (only if verified live)
+      - Add any new issues discovered this session
+      - Update SESSION LOG table with date, items completed, items added
+      - Never check off items that haven't been verified live
 
-6. UPDATE /admin/status/page.tsx
-   - Update PENDING array: move fixed items to FIXED, add any new issues
-   - Update SECURITY object: adjust counts, update currentPriority
-   - Update ORPHAN_PAGES: reflect current navigation state
-   - Update BUILT array: add any new features built today
-   - Update dates to current session date
+   3. UPDATE CAREIFIED_SPEC.md
+      - Add new pages to inventory
+      - Move resolved issues to RESOLVED table
+      - Add new features to FEATURES NOT YET BUILT table
+      - Update any expected behaviours that changed
 
-   **SITEMAP CHECK:**
-   - Visit /admin/sitemap to verify all new pages are listed
-   - Check if any new pages are orphans (not in navbar/dropdowns)
-   - Add orphan pages to ORPHAN_PAGES in status page
-   - The sitemap auto-generates from app/ directory - no manual update needed
-   Commit: "chore: update admin status page — [date]"
-   Show diff. Wait for approval.
+   4. UPDATE MASTER_DOCS.md
+      - Add any new technical decisions with date stamp
+      - Add any new user errors discovered
+      - Update security inventory status for items fixed
+      - Add any new backlog items
 
-   **IMPORTANT:** When adding new hrefs/redirects, verify all destination pages exist:
-   - Check any new Link hrefs in components/pages point to existing routes
-   - Check any redirectUrl parameters point to existing routes
-   - Use `ls app/` to verify directory structure
-   - Broken redirects = broken user flow
+   5. UPDATE CONTEXT.md
+      - Add new decisions to Section 5 if significant
+      - Update pre-launch checklist if items completed
 
-7. RUN FINAL QA AUDIT
-   POST report to /api/qa/report with latest commit hash
-
-8. SHOW SESSION SUMMARY:
+   Then commit ALL documentation files together:
+   ```bash
+   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md MASTER_DOCS.md CONTEXT.md CLAUDE.md HANDOFF.md
+   git commit -m "session-end: docs update [$(date +%Y-%m-%d)]"
    ```
-   SESSION COMPLETE — [date]
-   ──────────────────────────────
-   Commits: X
-   [list each hash + message]
 
-   QA Delta:
-   Started:  ❌ X failing  ⚠️ X warnings
-   Finished: ❌ X failing  ⚠️ X warnings
-   Fixed this session: X issues
+2. **Playwright E2E:** `npx playwright test tests/e2e/navigation.spec.ts`
+3. **Link audit:** `npx tsx scripts/audit-links.ts`
+4. **Auth audit:** `npx tsx scripts/audit-auth.ts`
+5. **Broken link scan:** `grep -rn 'href="/' app/ components/ | grep -v node_modules`
+6. **Orphan page check** — any new pages without reachability path
+7. **Env var drift:** grep new process.env references, verify in .env.local
+8. **Security regression:** confirm no new dangerouslySetInnerHTML, no unprotected routes
+9. **Mobile spot check** on all pages touched this session
+10. **Confirm Vercel deployment live after push**
+11. **npm audit** — no new critical vulnerabilities
 
-   Still open (priority order):
-   1. [most critical]
-   2. [second]
-   3. [third]
+12. Output a Modified Files Report:
+    ```bash
+    git status --short
+    git diff --name-only HEAD
+    ```
+    List every locally modified file that has NOT been pushed.
 
-   Next session should start with:
-   [one line — single most important next action]
+13. Say: "⚠️ Local code changes are saved but NOT committed to git. Review your local changes at /Users/owner/careified, then run /confirm-push when satisfied."
+
+---
+
+### /confirm-push — Manual Push After Review
+Only run when user explicitly types /confirm-push:
+
+1. Run npx tsc --noEmit — report results
+
+2. If TS errors exist, ask: "TypeScript errors found. Run /force-push to push anyway, or fix errors first."
+
+3. If clean (or user ran /force-push):
+   ```bash
+   git add -A
+   git commit -m "session-end: code changes [$(date +%Y-%m-%d)]"
+   git push origin main
    ```
+
+4. Confirm: "✅ All changes pushed to origin/main. Safe to start new session."
+
+---
+
+### /force-push — Override TS errors
+Skips the TS check and pushes regardless. Use only when you know the errors are pre-existing.
+
+---
+
+**NEVER auto-push code without /confirm-push**
+The session limit auto-trigger only runs Step 1 (/end-session).
+/confirm-push is ALWAYS a manual human decision. No exceptions.
 
 ## Last updated: May 6, 2026 — Phase 1 Complete
 
@@ -466,7 +573,7 @@ git push origin develop
 git checkout main
 git merge develop
 git push origin main
-# Production deploys automatically
+# ⛔ DO NOT push. User runs git push manually when ready.
 ```
 
 ### Merging to Production

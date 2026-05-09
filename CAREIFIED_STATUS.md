@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Last updated: May 9 2026
-# Safe revert: ce2e967
+# Safe revert: 22eaa45
 
 ---
 
@@ -17,7 +17,6 @@
 | 11 | PRODUCTION_CHECKLIST, /profile/start screenshot mockup, /profile/demo enhancements | DONE | db3690e |
 | 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
 | 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
-| 14 | Working style tag engine + Step 7 preview + Step 11 consent | DONE | ce2e967 |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -46,7 +45,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ### Marketing Pages
 - Landing page, /for-caregivers, /for-agencies, /for-families, /about, /contact, /privacy, /terms
 
-### Profile Builder (Steps 0-11)
+### Profile Builder (Steps 0-10)
 - Step 0: Communication consent gate + resume upload (LLM parsing via OpenRouter/Mistral)
 - Step 1: Identity (name, photo, bio, languages, DOB)
 - Step 2: Services, diagnosis experience + years, ADLs + frequency, specialized techniques
@@ -58,7 +57,6 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - Step 8: Work history
 - Step 9: References with verification invite links
 - Step 10: Open questions
-- Step 11: Communication consent preferences (6 consent types)
 - ProfileFormContext + useProfileSave (3-layer save: memory > localStorage > DB)
 
 ### Profile Page (/profile/[id])
@@ -122,6 +120,49 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
+- Photo position editor: COMPLETED (May 8 2026) - drag-to-reposition, zoom, persist to DB
+- Onboarding gate: COMPLETED (May 8 2026) - name + phone OTP + age confirmation
+
+---
+
+## SESSION MAY 9 2026 — COMPLETED
+
+### Documentation Fixes
+- Removed auto-push rules from CLAUDE.md, HANDOFF.md, CAREIFIED_STATUS.md, BEST_PRACTICES.md
+- All docs now state: "⛔ DO NOT push. Commit locally only. User runs git push manually when ready."
+
+### Navbar Visual Refresh
+- Nav bar: rgba(13,27,62,0.97), backdrop blur 12px, gold border bottom
+- Dropdown cards: Lucide icons (Info, Briefcase, UserCheck / Building2, Presentation, Play / Heart, Users)
+- Featured card: gold border, subtle gold background
+- Dropdown header: gold title, white subtitle
+- Active section: gold dot indicator when on matching path
+- CTA button: gold gradient, navy text, shadow
+- Sign in: transparent with border
+
+---
+
+## SESSION MAY 8 2026 — COMPLETED
+
+### Photo Position Editor
+- PhotoUploadEditor.tsx: Modal with 280px crop circle, drag, zoom 1-3x
+- ProfilePhoto.tsx: Renders with transform(x,y) scale, edit overlay
+- Step1Identity wired to use editor
+- DB columns: photo_x, photo_y, photo_scale (added)
+
+### Onboarding Gate Redesign
+- /onboarding: Single collection point after Clerk signup
+- First/Last name: letters only, min 2 chars, real-time validation
+- Phone OTP: 6-digit, auto-advance, paste support, 60s resend, 3 attempt lockout
+- Age confirmation checkbox required
+- Continue disabled until all fields valid
+- API routes: /api/auth/send-phone-otp, /api/auth/verify-phone-otp, /api/caregivers/me
+- Redirect caregivers to /onboarding instead of /profile/build
+
+### Session Protocol Updates
+- SESSION HEALTH MONITOR added to CLAUDE.md (token tracking, status bar)
+- Session Start Git Rules added (read-only at session start)
+- Git push now MANUAL ONLY (removed auto-push rule from HANDOFF.md)
 
 ---
 
@@ -172,8 +213,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ### Authorization Leaks (Should be 403, not 404)
 | Page | Current | Should Be |
 |------|---------|-----------|
-| `/admin/*` | ✅ FIXED May 6 2026 | 403 Forbidden (proxy.ts + layout.tsx) |
-| `/agency/*` (not agency role) | ✅ FIXED May 6 2026 | 403 Forbidden (proxy.ts + layout.tsx) |
+| `/admin/*` | No auth - data exposed! | 403 Forbidden |
+| `/agency/*` (not agency role) | 404 | 403 Forbidden |
 
 ### User Journey Dead Ends
 - **Agency signup**: After submit lands on `/agency/pending-approval` - no way to check status
@@ -188,16 +229,11 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 2. Redeploy Vercel after adding env vars
 3. Copy session — ALL page text is placeholder
 4. ~~UX debt — agency signup silent failures~~ ✅ FIXED May 4 2026
-5. ~~Admin pages unprotected~~ ✅ FIXED May 6 2026 (proxy.ts + layout.tsx)
-6. Clerk production upgrade (pk_test_ > pk_live_) — STILL OPEN
-7. SSL cert for Render DB ✅ FIXED (lib/db.ts conditional)
+5. ~~Admin pages unprotected~~ ❌ CRITICAL - add auth
+6. Clerk production upgrade (pk_test_ > pk_live_)
+7. SSL cert for Render DB (currently rejectUnauthorized: false)
 8. Lawyer review of lib/legal/text.ts
 9. E&O / Cyber / General Liability insurance
-10. XSS: dangerouslySetInnerHTML in admin/caregivers — STILL OPEN
-11. Webhook HMAC signature verification — STILL OPEN
-12. SQL injection risk lib/db.ts — STILL OPEN
-13. Rate limiting on APIs — STILL OPEN
-14. Gold hex #C9A84C → #C9A84C fix — STILL OPEN (30 files)
 
 ### Infrastructure
 9. US Vercel deployment (second project, NEXT_PUBLIC_LOCALE=US)
@@ -206,16 +242,14 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Features Queued
 12. Admin panel Phase 1 (content editor, build tracker, analytics, feature flags)
-13. ~~LiveProfilePreview~~ ✅ DONE (May 4 2026)
-14. ~~Working style tag engine~~ ✅ DONE (May 9 2026)
-15. ~~Step 11 consent step~~ ✅ DONE (May 9 2026)
-16. AIRecruit Session B (consent), C (profile analysis), D (SMS, retry, cron)
-17. Rating system (post-placement ratings, trust score, honesty scoring)
-18. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
-19. Background check integration — Checkr (deferred Year 1)
-20. PSV verification — Persona/Didit, Nursys (deferred Year 1)
-21. Upload photo API
-22. ~~Map for travel radius (Leaflet)~~ ✅ DONE (May 4 2026)
+13. LiveProfilePreview (ghost to live animation in builder)
+14. AIRecruit Session B (consent), C (profile analysis), D (SMS, retry, cron)
+15. Rating system (post-placement ratings, trust score, honesty scoring)
+16. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
+17. Background check integration — Checkr (deferred Year 1)
+18. PSV verification — Persona/Didit, Nursys (deferred Year 1)
+19. Upload photo API
+20. Map for travel radius (Leaflet)
 
 ---
 
@@ -294,7 +328,7 @@ No green as primary. No emojis in UI.
 
 1. One file per commit
 2. npx tsc --noEmit before every commit
-3. git push origin main after every commit
+3. ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 4. Stop after each commit, wait for confirmation
 5. No new packages without asking
 6. NEVER npx vercel --prod

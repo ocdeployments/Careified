@@ -1,15 +1,9 @@
-
-BEST_PRACTICES.md
-10.41 KB •271 lines
-•
-Formatting may be inconsistent from source
 ---
 # BEST_PRACTICES.md
 # Careified — Engineering & Product Best Practices
-# Created: May 8 2026 | Updated: May 9 2026
+# Created: May 8 2026
 # Rule: Read at START of every session
 # Rule: Update when a new pattern is established
-# Rule: Update /end-session runs these 5 docs updates automatically
 # Source: Derived from LESSONS_LEARNED.md — every entry here has a real failure behind it
 
 ---
@@ -65,7 +59,7 @@ Formatting may be inconsistent from source
 - `npx tsc --noEmit` before every commit
 - Commit message format: `feat:` / `fix:` / `chore:` / `docs:` / `copy:`
 - Never commit directly to main — use develop branch
-- Never auto-push — push is always a manual human decision
+- ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
 - Safe revert point updated in HANDOFF.md and STATUS.md after every session
 
 ---

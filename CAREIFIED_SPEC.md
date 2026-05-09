@@ -601,6 +601,16 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 | Stripe + billing | HIGH | Pre-launch |
 | Clerk production keys | CRITICAL | Pre-launch |
 | SSL cert Render DB | HIGH | Pre-launch |
+| QA automation suite | CRITICAL | Playwright E2E + link audit + auth audit |
+| Custom auth form | MEDIUM | Post-launch — replace Clerk pre-built |
+| Profile visibility toggle | MEDIUM | Caregiver can hide/show profile |
+| Caregiver notification — agency viewed | LOW | |
+| Profile completion celebration | MEDIUM | Step 10 ceremony |
+| Admin soft delete | CRITICAL | Never hard delete caregivers |
+| Admin confirmation dialogs | HIGH | Approve, override, module change |
+| Empty state — search 0 results | HIGH | |
+| Empty state — shortlist empty | HIGH | |
+| Empty state — clients empty | HIGH | |
 
 ---
 
@@ -618,3 +628,23 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 | Navbar caregiver dropdown updated | ✅ | May 5 2026 |
 | Navbar agency dropdown updated | ✅ | May 5 2026 |
 | Clarity + Ybug scripts added | ✅ | May 5 2026 |
+| Consent UI redesign - remove risk badges | ✅ | May 7 2026 |
+| Step 11 consent added to profile builder | ✅ | May 7 2026 |
+| Working style tag engine built | ✅ | May 7 2026 |
+| Step7 live working style preview | ✅ | May 7 2026 |
+| WorkingStyleTags reusable component | ✅ | May 7 2026 |
+| Profile scorecard shows working style tags | ✅ | May 7 2026 |
+| Profile builder crash fix (undefined title) | ✅ | May 7 2026 |
+| Ybug script URL corrected | ✅ | May 7 2026 |
+| End-of-session QA protocol expanded | ✅ | May 7 2026 |
+| Admin sitemap auto-gen from filesystem | ✅ | May 8 2026 |
+| Agency sitemap page + navbar link | ✅ | May 8 2026 |
+| PRODUCTION_CHECKLIST.md created | ✅ | May 8 2026 |
+| Stats bar removed from homepage | ✅ | May 8 2026 |
+| Ticker strip replaced with brand animation | ✅ | May 8 2026 |
+| Try Demo removed from navbar | ✅ | May 8 2026 |
+| Demo gated behind agency signup | ✅ | May 8 2026 |
+| Sign-in/sign-up consolidated | ✅ | May 8 2026 |
+| /profile/build removed from public routes | ✅ | May 8 2026 |
+| Profile demo photo — maria-santos-demo.png | ✅ | May 8 2026 |
+| Flywheel section added to homepage | ✅ | May 8 2026 |

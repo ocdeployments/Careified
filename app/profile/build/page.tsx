@@ -398,7 +398,7 @@ transition={{ duration: 0.15 }}
  letterSpacing: '0.1em', textTransform: 'uppercase',
  color: '#C9973A', marginBottom: '6px',
  }}>
- Step {currentStep} · {STEPS[currentStep - 1].title}
+ Step {currentStep} · {STEPS[currentStep - 1]?.title || 'Starting'}
  </div>
  <div style={{
  fontFamily: FONT_SERIF,

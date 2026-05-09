@@ -165,19 +165,119 @@ export default function CareifiedHero() {
           <MobileCardStack />
         </>
 
-        {/* Bottom ledger */}
-        <div
-          className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t pt-6 text-[10px] uppercase tracking-[0.28em]"
+        {/* Brand animation */}
+        <section
           style={{
-            borderColor: 'rgba(245,240,232,0.08)',
-            color: 'rgba(245,240,232,0.4)',
+            background: '#0D1B3E',
+            padding: '32px 24px',
+            overflow: 'hidden',
           }}
         >
-          <span>CAREGIVING IS A PROFESSION</span>
-          <span className="hidden md:inline">VERIFIED. RECOGNIZED. TRUSTED.</span>
-          <span>BUILT FOR CAREGIVERS · AGENCIES · FAMILIES</span>
-          <span>YOUR CAREER. YOUR REPUTATION. YOUR RECORD.</span>
-        </div>
+          <div
+            id="brand-animation"
+            style={{
+              maxWidth: '900px',
+              margin: '0 auto',
+              textAlign: 'center',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span id="ba-1" style={{
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: '22px',
+              color: 'rgba(255,255,255,0.25)',
+              opacity: 0,
+              transition: 'opacity 0.6s ease',
+              whiteSpace: 'nowrap',
+            }}>Recognized</span>
+
+            <span id="ba-sep1" style={{
+              color: 'rgba(201,151,58,0.3)',
+              fontSize: '18px',
+              opacity: 0,
+              transition: 'opacity 0.4s ease',
+            }}>·</span>
+
+            <span id="ba-2" style={{
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: '22px',
+              color: 'rgba(255,255,255,0.25)',
+              opacity: 0,
+              transition: 'opacity 0.6s ease',
+              whiteSpace: 'nowrap',
+            }}>Verified</span>
+
+            <span id="ba-sep2" style={{
+              color: 'rgba(201,151,58,0.3)',
+              fontSize: '18px',
+              opacity: 0,
+              transition: 'opacity 0.4s ease',
+            }}>·</span>
+
+            <span id="ba-3" style={{
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: '22px',
+              color: 'rgba(255,255,255,0.25)',
+              opacity: 0,
+              transition: 'opacity 0.6s ease',
+              whiteSpace: 'nowrap',
+            }}>Qualified</span>
+
+            <span id="ba-sep3" style={{
+              color: 'rgba(201,151,58,0.3)',
+              fontSize: '18px',
+              opacity: 0,
+              transition: 'opacity 0.4s ease',
+            }}>·</span>
+
+            <span id="ba-4" style={{
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: '28px',
+              color: '#C9973A',
+              opacity: 0,
+              transition: 'opacity 0.8s ease',
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.02em',
+            }}>Careified.</span>
+          </div>
+
+          <script dangerouslySetInnerHTML={{ __html: `
+            (function() {
+              function show(id, delay) {
+                setTimeout(function() {
+                  var el = document.getElementById(id);
+                  if (el) el.style.opacity = '1';
+                }, delay);
+              }
+              function runAnim() {
+                ['ba-1','ba-sep1','ba-2','ba-sep2','ba-3','ba-sep3','ba-4'].forEach(function(id) {
+                  var el = document.getElementById(id);
+                  if (el) el.style.opacity = '0';
+                });
+                show('ba-1', 300);
+                show('ba-sep1', 800);
+                show('ba-2', 1000);
+                show('ba-sep2', 1500);
+                show('ba-3', 1700);
+                show('ba-sep3', 2200);
+                show('ba-4', 2400);
+                setTimeout(runAnim, 6000);
+              }
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                  setTimeout(runAnim, 500);
+                });
+              } else {
+                setTimeout(runAnim, 500);
+              }
+            })();
+          ` }} />
+        </section>
       </div>
     </section>
   )
