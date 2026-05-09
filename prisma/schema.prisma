@@ -27,6 +27,8 @@ model Caregiver {
   last_name                      String?                       @db.VarChar(255)
   preferred_name                 String?                       @db.VarChar(255)
   phone                          String?                       @db.VarChar(50)
+  phone_verified                 Boolean?                      @default(false)
+  age_confirmed                  Boolean?                      @default(false)
   email                          String?                       @db.VarChar(255)
   gender                         String?                       @db.VarChar(20)
   date_of_birth                  DateTime?                     @db.Date
@@ -47,6 +49,9 @@ model Caregiver {
   hourly_rate                    Decimal?                      @db.Decimal(10, 2)
   bio                            String?
   photo_url                      String?
+  photo_x                        Decimal?                      @default(0) @db.Decimal(10, 2)
+  photo_y                        Decimal?                      @default(0) @db.Decimal(10, 2)
+  photo_scale                    Decimal?                      @default(1) @db.Decimal(3, 2)
   years_experience               Int?
   rating_count                   Int?                          @default(0)
   aggregate_score                Decimal?                      @default(0) @db.Decimal(3, 2)

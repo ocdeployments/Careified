@@ -13,6 +13,22 @@ const pool = new Pool({
     : { rejectUnauthorized: false }
 });
 
+// Column allowlist to prevent SQL injection
+const CAREGIVER_COLUMNS = new Set([
+  'id', 'user_id', 'first_name', 'last_name', 'email', 'phone', 'status',
+  'is_verified', 'created_at', 'updated_at', 'photo_url', 'bio', 'languages',
+  'years_experience', 'hourly_rate', 'service_areas', 'travel_radius',
+  'specializations', 'certifications', 'availability', 'personality_profile',
+  'aggregate_score', 'trust_score', 'personality_score', 'credential_score',
+  'reference_score', 'availability_score', 'experience_score'
+]);
+
+function validateColumn(key: string): void {
+  if (!CAREGIVER_COLUMNS.has(key)) {
+    throw new Error(`Invalid column name: ${key}`);
+  }
+}
+
 export const prisma = {
   user: {
     findUnique: async ({ where }: { where: { id: string } }) => {
@@ -57,6 +73,8 @@ export const prisma = {
       let query = 'SELECT * FROM caregivers';
       const values: any[] = [];
       if (where) {
+        // Validate all column names against allowlist
+        Object.keys(where).forEach(k => validateColumn(k));
         const conditions = Object.keys(where).map((k, i) => {
           values.push(where[k]);
           return `${k} = $${i + 1}`;

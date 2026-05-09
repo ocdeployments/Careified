@@ -114,7 +114,7 @@ export default function ForCaregiversPage() {
               cursor: 'pointer',
             }}
           >
-            Claim Your Profile
+            Build My Profile
           </Link>
         </div>
       </section>
@@ -400,7 +400,7 @@ export default function ForCaregiversPage() {
               textAlign: 'center',
             }}>
               <Link
-                href="/profile/build"
+                href="/sign-up?role=caregiver"
                 style={{
                   fontFamily: SANS,
                   fontSize: '14px',
@@ -486,7 +486,7 @@ export default function ForCaregiversPage() {
               fontFamily: SANS,
             }}
           >
-            Claim Your Profile
+            Build My Profile
           </Link>
 
           <p style={{

@@ -16,6 +16,7 @@ import {
   AlertCircle,
   User,
 } from 'lucide-react'
+import ProfilePhoto from './ProfilePhoto'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Careified — Caregiver Profile (Agency-facing hiring scorecard)
@@ -595,7 +596,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           background: C.navy,
           position: 'relative',
           overflow: 'hidden',
-          padding: '40px 24px 36px',
+          padding: '80px 24px 72px',
         }}
       >
         {/* Grain */}
@@ -618,7 +619,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             top: -80,
             left: -80,
             width: 320,
-            height: 320,
+            height: 480,
             background: 'radial-gradient(circle, rgba(201,151,58,0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
@@ -637,36 +638,19 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         >
           {/* Left: identity */}
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            {/* Avatar with gold ring */}
-            <div
+            <img
+              src="/maria-santos-demo.png"
+              alt="Maria Santos"
               style={{
-                width: 104,
-                height: 104,
+                width: '130px',
+                height: '130px',
                 borderRadius: '50%',
-                padding: 3,
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                flexShrink: 0,
+                objectFit: 'cover',
+                objectPosition: 'center top',
+                border: '3px solid #C9973A',
+                display: 'block',
               }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  background: C.navyTint,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: SERIF,
-                  fontSize: 34,
-                  fontWeight: 400,
-                  color: '#F5F0E8',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {initials}
-              </div>
-            </div>
+            />
 
             <div style={{ flex: 1, minWidth: 240 }}>
               {/* Name + tier */}

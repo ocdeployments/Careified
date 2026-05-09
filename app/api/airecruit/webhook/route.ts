@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 import { pool } from '@/lib/db'
 import { scoreTranscript } from '@/lib/airecruit/scoring'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+
+function verifyWebhookSignature(req: NextRequest, body: string): boolean {
+  const signature = req.headers.get('x-vapi-signature') || req.headers.get('vapi-signature')
+  const webhookSecret = process.env.VAPI_WEBHOOK_SECRET
+
+  if (!webhookSecret || !signature) {
+    console.error('Missing webhook secret or signature')
+    return false
+  }
+
+  const expectedSignature = createHmac('sha256', webhookSecret)
+    .update(body)
+    .digest('hex')
+
+  return signature === expectedSignature
+}
 
 async function scoreCallTranscript(
   callId: string,
@@ -68,7 +86,20 @@ async function scoreCallTranscript(
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    // Rate limit check
+    const clientIp = getClientIp(req)
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
+    const bodyText = await req.text()
+
+    // Verify HMAC signature
+    if (!verifyWebhookSignature(req, bodyText)) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+
+    const body = JSON.parse(bodyText)
 
     const { message } = body
     if (!message) {
