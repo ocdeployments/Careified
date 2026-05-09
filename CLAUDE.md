@@ -1,7 +1,7 @@
 # CLAUDE.md — Careified
 
 Read this file completely at the start of every session.
-Last updated: May 5, 2026 — Phase 1 Complete
+Last updated: May 9, 2026 — Phase 1 Complete
 
 ## 1. Project Identity
 
@@ -192,6 +192,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 | app/profile/build/Step8WorkHistory.tsx | ✅ |
 | app/profile/build/Step9References.tsx | ✅ |
 | app/profile/build/Step10OpenQuestions.tsx | ✅ |
+| app/profile/build/Step11Consent.tsx | ✅ |
 | app/demo/page.tsx | ✅ Demo landing |
 | app/demo/dashboard/page.tsx | ✅ |
 | app/demo/search/page.tsx | ✅ |
