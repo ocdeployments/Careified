@@ -70,6 +70,7 @@
 - [ ] Agency signup — phone field silently rejects invalid numbers (show error instead)
 - [ ] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files
 - [ ] Agency card copy — fix non-recommender liability language ("screens candidates" / "delivers interview-ready professionals")
+- [ ] Rename "matching engine" → "Careified Engine" across all UI copy, comments, and lib/matching/ references
 - [ ] Profile builder — add completion celebration / confirmation at Step 10
 - [ ] Demo pages — add guided tour / step-by-step walkthrough
 - [ ] Mobile responsiveness audit — all 36 pages
@@ -184,6 +185,7 @@
 | Date | Items Checked Off | Items Added |
 |------|------------------|-------------|
 | May 8 2026 | — | Initial checklist created |
+| May 8 2026 | — | Rename "matching engine" → "Careified Engine" checklist item |
 
 ---
 _Update this table at the end of every session._
