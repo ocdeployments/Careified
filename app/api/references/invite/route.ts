@@ -19,13 +19,16 @@ export async function POST(req: NextRequest) {
   if (!referenceName || !relationship) return NextResponse.json({ error: 'Name and relationship required' }, { status: 400 })
   if (!referenceEmail && !referencePhone) return NextResponse.json({ error: 'Email or phone required' }, { status: 400 })
 
+  // Generate UUID token for secure reference link
+  const token = crypto.randomUUID()
+
   const result = await pool.query(
-    `INSERT INTO reference_verification_requests (caregiver_id, reference_name, reference_email, reference_phone, relationship)
-     VALUES ($1, $2, $3, $4, $5) RETURNING id, token`,
-    [caregiver.id, referenceName, referenceEmail || null, referencePhone || null, relationship]
+    `INSERT INTO reference_verification_requests (caregiver_id, reference_name, reference_email, reference_phone, relationship, token)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, token`,
+    [caregiver.id, referenceName, referenceEmail || null, referencePhone || null, relationship, token]
   )
 
-  const { id, token } = result.rows[0]
+  const { id } = result.rows[0]
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://careified.vercel.app'
   return NextResponse.json({ id, token, referenceId: id, responseUrl: `${appUrl}/reference/${token}` })
 }
