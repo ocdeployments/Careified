@@ -11,14 +11,28 @@ export default async function AgencyLayout({ children }: { children: React.React
 
   // Check agency exists and is approved
   const { rows } = await pool.query(
-    'SELECT status FROM agencies WHERE clerk_user_id = $1',
+    'SELECT id, status FROM agencies WHERE clerk_user_id = $1',
     [userId]
   )
 
   if (!rows.length) {
-    redirect('/onboarding')
+    // Check if user is a team member
+    const teamMember = await pool.query(
+      `SELECT tm.role FROM agency_team_members tm
+       JOIN agencies a ON a.id = tm.agency_id
+       WHERE tm.clerk_user_id = $1 AND tm.status = 'active' AND a.status = 'approved'`,
+      [userId]
+    )
+
+    if (teamMember.rows.length === 0) {
+      redirect('/onboarding')
+    }
+
+    // Team member - allow access
+    return <>{children}</>
   }
 
+  // Agency owner
   if (rows[0].status !== 'approved' && rows[0].status !== 'active') {
     redirect('/agency/pending-approval')
   }

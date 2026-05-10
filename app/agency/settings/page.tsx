@@ -289,6 +289,50 @@ export default function AgencySettingsPage() {
           </div>
         </Section>
 
+        {/* Team Members */}
+        <Section title="Team Members" desc="Invite team members to share access. Owner cannot be removed.">
+          {team.length === 0 ? (
+            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>Just you for now. Invite a coordinator to share the workload.</p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 20 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Name</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Email</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Role</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Status</th>
+                  <th style={{ textAlign: 'right', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '12px 0', fontWeight: 500, color: N }}>{agency?.first_name} {agency?.last_name}</td>
+                  <td style={{ padding: '12px 0', color: '#64748B' }}>{agency?.email}</td>
+                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#FDF6EC', color: '#92400E' }}>Owner</span></td>
+                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#DCFCE7', color: '#166534' }}>Active</span></td>
+                  <td style={{ padding: '12px 0', textAlign: 'right' }}>-</td>
+                </tr>
+                {team.map(m => (
+                  <tr key={m.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '12px 0', fontWeight: 500, color: N }}>{m.first_name} {m.last_name}</td>
+                    <td style={{ padding: '12px 0', color: '#64748B' }}>{m.email}</td>
+                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.role === 'coordinator' ? '#0D1B3E' : '#F1F5F9', color: m.role === 'coordinator' ? 'white' : '#64748B' }}>{m.role === 'coordinator' ? 'Coordinator' : 'Viewer'}</span></td>
+                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.status === 'active' ? '#DCFCE7' : m.status === 'pending' ? '#FEF3C7' : '#FEE2E2', color: m.status === 'active' ? '#166534' : m.status === 'pending' ? '#92400E' : '#DC2626' }}>{m.status === 'active' ? 'Active' : m.status === 'pending' ? 'Pending' : 'Suspended'}</span></td>
+                    <td style={{ padding: '12px 0', textAlign: 'right' }}><button onClick={() => remove(m.id, m.first_name + ' ' + m.last_name)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', color: '#DC2626', fontSize: 12, cursor: 'pointer' }}>Remove</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <form onSubmit={invite} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>First name</label><input required value={inviteForm.first_name} onChange={e => setInviteForm(f => ({ ...f, first_name: e.target.value }))} style={inp} placeholder="Jane" /></div>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Last name</label><input required value={inviteForm.last_name} onChange={e => setInviteForm(f => ({ ...f, last_name: e.target.value }))} style={inp} placeholder="Smith" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Email</label><input required type="email" value={inviteForm.email} onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} style={inp} placeholder="jane@agency.com" /></div>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Role</label><select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))} style={inp}><option value="coordinator">Coordinator</option><option value="viewer">Viewer</option></select></div>
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}><button type="submit" disabled={inviting} style={{ width: '100%', padding: '11px 16px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: N, fontWeight: 600, fontSize: 14, cursor: inviting ? 'not-allowed' : 'pointer', opacity: inviting ? 0.7 : 1 }}>{inviting ? 'Sending...' : 'Send Invitation'}</button></div>
+          </form>
+        </Section>
+
         {saving && (
           <div style={{ position: 'fixed', bottom: 24, right: 24, background: N, color: 'white', padding: '10px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>
             Saving...
