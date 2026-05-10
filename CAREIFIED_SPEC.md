@@ -459,21 +459,17 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Architecture Audit tab present
 - Build tracker visible
 
-### /admin/sitemap
-- REACHABILITY: ACTION (from /admin)
-- All pages listed by access level
+### /admin/sitemap (DELETED May 10 2026 — use Next.js sitemap.ts)
 
 ### /admin/badges
 - REACHABILITY: ACTION (from /admin quick links — fixed May 4)
 - Badges management renders
 
-### /admin/reviews
-- REACHABILITY: ACTION (from /admin quick links — fixed May 4)
-- Reviews management renders
+### /admin/reviews (REDIRECTED May 10 2026 → /admin/caregivers)
+- Now redirects to /admin/caregivers
 
-### /admin/references
-- REACHABILITY: ACTION (from /admin quick links — fixed May 4)
-- References management renders
+### /admin/references (REDIRECTED May 10 2026 → /admin/caregivers)
+- Now redirects to /admin/caregivers
 
 ---
 
