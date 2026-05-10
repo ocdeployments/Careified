@@ -1,6 +1,7 @@
 // Careified — Caregiver Public Profile Page (new design)
 
 import { notFound } from 'next/navigation'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
 import CaregiverProfileDemo from '@/components/profile/CaregiverProfileDemo'
 import { deriveWorkingStyle } from '@/lib/personality/working-style'
@@ -76,6 +77,35 @@ async function getBadges(caregiverId: string) {
   } catch { return [] }
 }
 
+async function getContactInfo(caregiverId: string) {
+  try {
+    const result = await pool.query(
+      `SELECT phone, email FROM caregivers WHERE id = $1`,
+      [caregiverId]
+    )
+    return result.rows[0] || null
+  } catch { return null }
+}
+
+async function checkIsApprovedAgency(): Promise<boolean> {
+  try {
+    const { userId } = await auth()
+    if (!userId) return false
+
+    const client = await clerkClient()
+    const user = await client.users.getUser(userId)
+    const role = user.publicMetadata?.role as string
+
+    if (role !== 'agency') return false
+
+    const { rows } = await pool.query(
+      'SELECT status FROM agencies WHERE clerk_user_id = $1',
+      [userId]
+    )
+    return rows.length > 0 && rows[0].status === 'approved'
+  } catch { return false }
+}
+
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
   const caregiver = await getCaregiver(id)
@@ -85,6 +115,10 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   const certifications = await getCertifications(id)
   const ratings = await getPlacementRatings(id)
   const badges = await getBadges(id)
+
+  // Check if viewer is an approved agency
+  const isApprovedAgency = await checkIsApprovedAgency()
+  const contactInfo = isApprovedAgency ? await getContactInfo(id) : null
 
   // Map DB snake_case to component props
   const personality = caregiver.personality_profile || {}
@@ -169,6 +203,8 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       openQ3={caregiver.open_q3}
       placementRatings={ratings}
       badges={badges}
+      contactPhone={contactInfo?.phone}
+      contactEmail={contactInfo?.email}
     />
   )
 }
