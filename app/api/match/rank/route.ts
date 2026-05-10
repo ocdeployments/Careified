@@ -10,6 +10,7 @@ import {
 } from '@/lib/matching'
 import type { MatchNeed } from '@/lib/matching'
 import { generateGapAnalysis } from '@/lib/matching/gap-analysis'
+import { getLocale } from '@/lib/locale/get-locale'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
@@ -35,11 +36,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Get agency service areas to filter caregiver pool
+  // Also enforce locale scoping - agency can only see caregivers in same locale
+  const locale = getLocale()
   let agencyServiceAreas: string[] = []
   try {
     const agencyRow = await pool.query(
-      'SELECT service_areas, provinces FROM agencies WHERE clerk_user_id = $1',
-      [userId]
+      'SELECT service_areas, provinces FROM agencies WHERE clerk_user_id = $1 AND locale = $2',
+      [userId, locale]
     )
     if (agencyRow.rows[0]?.service_areas?.length) {
       agencyServiceAreas = agencyRow.rows[0].service_areas
