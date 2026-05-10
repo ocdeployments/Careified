@@ -13,11 +13,11 @@ export default function ForAgenciesPage() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
 
   const benefits = [
-    { title: 'AI-Powered Matching', desc: 'Intelligent algorithms match you with caregivers based on skills, availability, and client needs.', icon: Search },
-    { title: 'Verified Credentials', desc: 'Every caregiver is verified — background checks, certifications, and references confirmed.', icon: Shield },
+    { title: 'Alignment-Based Search', desc: 'Filter by 20+ criteria. See alignment scores instantly. Every caregiver profile is a complete professional record.', icon: Search },
+    { title: 'Agency Roster', desc: 'Add your existing caregivers to the platform. They claim their profiles. You own your bench.', icon: Users },
+    { title: 'AIRecruit', desc: 'AI calls and screens candidates automatically. Reference checks done while you sleep. Only interview-ready candidates reach your desk.', icon: Shield },
+    { title: 'Verified Credentials', desc: 'Every caregiver is verified — background checks, certifications, and references confirmed.', icon: CheckCircle },
     { title: 'Placement Ratings', desc: 'See performance ratings from past placements to make informed hiring decisions.', icon: Star },
-    { title: 'Client Management', desc: 'Track clients, matches, and placements all in one unified dashboard.', icon: Calendar },
-    { title: 'Flexible Terms', desc: 'No long-term contracts. Use the platform as much or as little as you need.', icon: FileText },
     { title: 'Dedicated Support', desc: 'Our team is available to help you find the right fit for your agency.', icon: Headphones },
   ]
 
@@ -79,7 +79,7 @@ export default function ForAgenciesPage() {
             lineHeight: 1.6,
             fontFamily: "'DM Sans', sans-serif"
           }}>
-            We deliver interview-ready professionals with intelligent AI-powered matches.
+            Stop screening 200 resumes. Start talking to the right caregivers.
           </p>
 
           <Link
@@ -233,9 +233,9 @@ export default function ForAgenciesPage() {
       <section style={{ padding: '60px 20px', background: N, textAlign: 'center' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'center', gap: '64px', flexWrap: 'wrap' }}>
           {[
-            { value: '15K+', label: 'Verified Caregivers' },
-            { value: '500+', label: 'Partner Agencies' },
-            { value: '94%', label: 'Match Rate' },
+            { value: '75%', label: 'Annual Turnover' },
+            { value: '4 in 5', label: 'Leave in 100 Days' },
+            { value: '9.7M', label: 'Jobs by 2034' },
           ].map((stat, i) => (
             <div key={i}>
               <div style={{
