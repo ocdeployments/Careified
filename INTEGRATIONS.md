@@ -1,8 +1,9 @@
 # INTEGRATIONS.md — Careified Third-Party Integrations
-# What connects to Careified and how
-# Last updated: May 9 2026
-# Rule: No new integration without founder approval
-# Rule: Every integration needs a fallback state
+# Purpose: What connects to Careified and how
+# Updated: May 9 2026
+# Update trigger: When integrations are built or new ones are planned
+# Owner: Both
+# DO NOT DUPLICATE: AI flows (AI_PLAYBOOK.md), env vars (CLAUDE.md)
 
 ---
 

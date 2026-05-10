@@ -1,9 +1,9 @@
 # AI_PLAYBOOK.md — Careified AI Strategy and Implementation
-# Covers: Vapi, WhatsApp, Telegram, SMS, OpenRouter
-# Last updated: May 9 2026
-# Rule: Every AI interaction must have consent before firing
-# Rule: Every AI output must be labeled as AI-generated
-# Rule: Non-recommender language applies to all AI output
+# Purpose: Vapi, WhatsApp, Telegram, SMS, OpenRouter integration specs and flows
+# Updated: May 9 2026
+# Update trigger: When AI integrations are built or new flows are designed
+# Owner: Both
+# DO NOT DUPLICATE: Integration status (INTEGRATIONS.md), security (SECURITY_RUNBOOK.md)
 
 ---
 

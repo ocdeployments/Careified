@@ -1,10 +1,9 @@
 # CLAUDE.md — Careified
-
-Read SOUL.md FIRST before this file. Every session. No exceptions.
-Then read this file completely.
-Last updated: May 8, 2026
-
----
+# Purpose: Technical rules, stack details, conventions, and session protocols
+# Updated: May 9 2026
+# Update trigger: When a technical rule or convention changes
+# Owner: Claude
+# DO NOT DUPLICATE: Decisions (CONTEXT.md), standards (BEST_PRACTICES.md), identity (SOUL.md)
 
 ## ⚠️ SESSION HEALTH MONITOR — READ THIS FIRST, EVERY MESSAGE
 

@@ -1,9 +1,9 @@
 # CONTEXT.md — Careified
-# The "why" behind every decision
-# Read this before CLAUDE.md, SPEC.md, and HANDOFF.md
-# Last updated: May 5 2026
-
----
+# Purpose: Every product and technical decision with the reasoning behind it
+# Updated: May 9 2026
+# Update trigger: Every session a decision is made
+# Owner: Both
+# DO NOT DUPLICATE: Rules (CLAUDE.md), status (CAREIFIED_STATUS.md), vision (FOUNDER.md)
 
 ## 1. What Careified Is
 
@@ -186,6 +186,30 @@ across 7 dimensions. Client intake is therefore a pre-launch blocker.
 Separate sign-in and sign-up pages created confusion and split the
 Clerk configuration. Single /sign-up entry point with Clerk handling
 new vs existing users inline. Simpler, less fragile.
+
+### Why Next.js App Router (Early 2026)
+SSR + RSC for SEO and auth. Pages router was too legacy.
+App Router provides better performance and modern patterns.
+
+### Why Render PostgreSQL (Early 2026)
+Cost-effective, simplicity, managed backups.
+PlanetScale and Supabase were considered but rejected.
+
+### Why pg Pool + Prisma hybrid (Early 2026)
+Raw SQL for complex match queries, Prisma for schema.
+ORM-only was too slow for match ranking queries.
+
+### Why non-recommender positioning (May 4 2026)
+Liability protection — platform presents, agency decides.
+Recommender model created legal risk.
+
+### Why verification tiers 1-4 with confidence multipliers (May 4 2026)
+Honest signal weighting vs binary verified/unverified.
+Binary was too simplistic for reliability assessment.
+
+### Why proxy.ts renamed from middleware.ts (May 4 2026)
+Next.js 16 Edge Runtime incompatible with pg Pool.
+Keep as middleware.ts broke DB connections.
 
 ---
 

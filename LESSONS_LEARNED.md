@@ -1,10 +1,10 @@
 ---
 # LESSONS_LEARNED.md
-# Careified — Lessons Learned Log
-# Created: May 8 2026
-# Rule: Add entry at END of every session — no matter how small
-# Rule: Read at START of every session — don't repeat mistakes
-# Format: Date | Category | What happened | What to do instead
+# Purpose: Institutional memory — every mistake made and what we learned
+# Updated: May 9 2026
+# Update trigger: Every session — minimum 1 entry
+# Owner: Both
+# DO NOT DUPLICATE: Best practices (BEST_PRACTICES.md), rules (CLAUDE.md)
 
 ---
 

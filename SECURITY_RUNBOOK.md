@@ -1,8 +1,9 @@
 # SECURITY_RUNBOOK.md — Careified Security Procedures
-# Last updated: May 9 2026
-# Rule: Read before any security-related build work
-# Rule: Update after every security fix or incident
-# Rule: Review quarterly after launch
+# Purpose: Security procedures, incident response, and compliance requirements
+# Updated: May 9 2026
+# Update trigger: When security fixes are applied or new vulnerabilities found
+# Owner: Both
+# DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), status (CAREIFIED_STATUS.md)
 
 ---
 
