@@ -295,8 +295,10 @@ Never build against this table — it was never created.
 | white_label | Agency branding, custom domain | Add-on |
 | enterprise | API access, custom integrations | Custom |
 
-Pricing figures: TBD — Stripe session pending.
-PAYMENTS_ENABLED=false until Stripe account confirmed.
+### Pricing Status
+Internal pricing model lives in PRICING.md.
+User-facing pricing suppressed until Stripe is live (PAYMENTS_ENABLED=false).
+Pricing page shows "contact us" until then.
 Launch currency: CAD. USD second.
 
 ---
