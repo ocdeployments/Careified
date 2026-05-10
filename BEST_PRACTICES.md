@@ -83,7 +83,7 @@
 - Commit message format: `feat:` / `fix:` / `chore:` / `docs:` / `copy:`
 - Never commit directly to main — use develop branch
 - ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
-- Safe revert point updated in HANDOFF.md and STATUS.md after every session
+- Safe revert point updated in CAREIFIED_STATUS.md after every session
 
 ---
 
@@ -214,10 +214,9 @@ Every session must update:
 1. CAREIFIED_STATUS.md — what was done
 2. PRODUCTION_CHECKLIST.md — what was completed/added
 3. CAREIFIED_SPEC.md — new pages, resolved issues
-4. MASTER_DOCS.md — new decisions, security updates
-5. LESSONS_LEARNED.md — at least one entry
-6. BEST_PRACTICES.md — if new pattern established
-7. CONTEXT.md — significant decisions only
+4. LESSONS_LEARNED.md — at least one entry
+5. BEST_PRACTICES.md — if new pattern established
+6. CONTEXT.md — significant decisions only
 
 ---
 
