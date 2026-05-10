@@ -101,6 +101,7 @@ export default async function AgencyDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
             {[
               { label: 'Find a caregiver', desc: 'Search and filter all profiles', href: '/agency/search', primary: true },
+              { label: 'Agency Roster', desc: 'Add and manage your caregivers', href: '/agency/roster', primary: true },
               { label: 'New client intake', desc: 'Add a client and run matches', href: '/agency/clients/new', primary: false },
               { label: 'My clients', desc: `${clients.length} active`, href: '/agency/clients', primary: false },
               { label: 'Shortlist', desc: `${shortlistCount} saved`, href: '/agency/shortlist', primary: false },
