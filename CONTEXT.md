@@ -362,9 +362,6 @@ Target: Ontario PSW community first.
 - [ ] US Vercel deployment (second project)
 - [ ] Stripe account + pricing confirmed
 - [ ] Incident response runbook written
-- [ ] MASTER_DOCS.md reviewed and up to date
-- [ ] All user error fixes from MASTER_DOCS.md Section 3 addressed
-- [ ] Security inventory from MASTER_DOCS.md Section 2 all green
 
 ---
 
@@ -777,10 +774,10 @@ Run three checks:
 Playwright MCP re-run, this time capturing both errors AND warnings.
 
 ### Step 11 — Doc Freshness
-Confirm CAREIFIED_SPEC.md, HANDOFF.md, CAREIFIED_STATUS.md all updated this session.
+Confirm CAREIFIED_SPEC.md and CAREIFIED_STATUS.md all updated this session.
 
 ### Step 12 — Safe Revert Update
-Update safe revert point in HANDOFF.md and CAREIFIED_STATUS.md to latest commit hash.
+Update safe revert point in CAREIFIED_STATUS.md to latest commit hash.
 
 ---
 
