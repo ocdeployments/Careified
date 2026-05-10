@@ -184,7 +184,23 @@ Verify no plain text in DB after migration.
 
 ## INCIDENT RESPONSE
 
-### Severity levels
+### SEVERITY MATRIX
+
+**P0 — Active breach, data exfiltration, production down**
+- Response: immediate, drop everything
+- Notify: Romy + lawyer within 1 hour
+- PIPEDA: assess for 72-hour OPC notification requirement
+- Communication: status page within 4 hours
+
+**P1 — Confirmed vulnerability, no active exploitation**
+- Response: same day
+- Patch + verify within 24 hours
+
+**P2 — Suspected issue, needs investigation**
+- Response: within 1 business day
+- Document outcome regardless of finding
+
+### LEGACY SEVERITY (still used internally)
 
 CRITICAL — respond immediately (within 1 hour)
 - Data breach (PII/PHI exposed)
@@ -226,7 +242,13 @@ LOW — respond within 1 week
 3. NOTIFY (within 72 hours — PIPEDA requirement)
    Canada: Office of the Privacy Commissioner
    Report: https://www.priv.gc.ca/en/report-a-concern
-   
+
+   **PIPEDA BREACH NOTIFICATION (CANADA)**
+   Real-risk-of-significant-harm breaches must be reported to the OPC
+   "as soon as feasible" — interpreted as 72 hours.
+   Affected individuals must be notified directly.
+   Records of all breaches kept for 24 months.
+
    USA: Depends on state law
    Texas: Attorney General if 250+ affected
    
