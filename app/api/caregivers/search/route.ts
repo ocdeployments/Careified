@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
+import { getLocale } from '@/lib/locale/get-locale'
 
 // Use shared pool from lib/db.ts - NO hardcoded credentials
 const pool = new Pool({
@@ -12,7 +13,7 @@ const pool = new Pool({
 async function handleSearch(request: NextRequest) {
   try {
     let f: Record<string, any> = {}
-    
+
     // Support both GET (query params) and POST (body)
     if (request.method === 'POST') {
       const body = await request.json()
@@ -23,7 +24,7 @@ async function handleSearch(request: NextRequest) {
         if (value) f[key] = value
       })
     }
-    
+
     // Get filter parameters
     const city = f.city
     const state = f.state
@@ -36,10 +37,13 @@ async function handleSearch(request: NextRequest) {
     const minExperience = f.minExperience
     const searchQuery = f.q || f.searchQuery
 
+    // Locale scoping - filter to current deployment region
+    const locale = getLocale()
+
     // Build WHERE clause
-    let whereConditions = ["status = 'approved'"]
-    const queryParams: any[] = []
-    let paramCount = 1
+    let whereConditions = ["status = 'approved'", "locale = $1"]
+    const queryParams: any[] = [locale]
+    let paramCount = 2  // $1 is locale
 
     if (city) {
       whereConditions.push(`LOWER(city) = LOWER($${paramCount})`)
