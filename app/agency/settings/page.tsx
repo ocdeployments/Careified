@@ -218,6 +218,21 @@ export default function AgencySettingsPage() {
           ))}
         </Section>
 
+        {/* Billing */}
+        <Section title="Billing" desc="Subscription and payment management.">
+          <div style={{ padding: '20px', background: '#FDF6EC', borderRadius: 12, border: '1px solid #E8B86D' }}>
+            <p style={{ fontSize: 14, color: '#0D1B3E', marginBottom: 12, fontWeight: 500 }}>
+              Billing and subscription management coming June 2026.
+            </p>
+            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 12 }}>
+              During beta: all features included free.
+            </p>
+            <p style={{ fontSize: 13, color: '#64748B' }}>
+              Questions? Contact <a href="mailto:hello@careified.ca" style={{ color: '#C9973A' }}>hello@careified.ca</a>
+            </p>
+          </div>
+        </Section>
+
         {saving && (
           <div style={{ position: 'fixed', bottom: 24, right: 24, background: N, color: 'white', padding: '10px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>
             Saving...
