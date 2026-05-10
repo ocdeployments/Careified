@@ -63,14 +63,27 @@ The platform thinks ahead so humans do not have to.
 - Webhook endpoint: /api/airecruit/webhook
 
 ### Consent Types
-| Type | Status | Gate File |
-|------|--------|-----------|
-| recruit_calls | ✅ Built | lib/airecruit/consent-gate.ts |
-| reference_calls | ❌ Session B | |
-| past_employer_calls | ❌ Session C | |
-| current_employer_calls | DROPPED | Legal risk |
-| regulatory_calls | ❌ Pending | |
-| match_time_calls | ❌ Pending | |
+| Type | Status | Phase | Feature Unlocked |
+|------|--------|-------|-------------------|
+| recruit_calls | ✅ Built | Launch (Phase 1) | AIRecruit screening calls |
+| reference_calls | ❌ Session B | Phase 2 (Aug) | Reference verification |
+| past_employer_calls | ❌ Session C | Phase 3 (Oct) | Employment verification |
+| current_employer_calls | DROPPED | — | Legal risk — intentional |
+| regulatory_calls | ❌ Pending | Phase 2 (Aug) | Credential verification |
+| match_time_calls | ❌ Pending | Phase 2 (Aug) | Powers QuickFill |
+
+### Phase Sequencing
+
+**For June 15 launch — REQUIRED:**
+- recruit_calls — ✅ built
+
+**Phase 2 (August 2026):**
+- reference_calls — Session B (unlocks reference verification)
+- regulatory_calls — Session B (unlocks credential verification)
+- match_time_calls — Session B (unlocks QuickFill)
+
+**Phase 3 (October 2026):**
+- past_employer_calls — Session C (unlocks employment verification)
 
 ---
 
