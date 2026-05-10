@@ -44,13 +44,13 @@ AGENCY SIDE
 - [ ] Shortlist management ✅ built
 - [ ] Agency Roster — agency builds caregiver profiles on their behalf ❌ not built
 - [ ] CSV caregiver import — agency uploads existing roster ❌ not built
-- [ ] Pipeline status on shortlisted caregivers (5 stages) ❌ not built
+- [x] Pipeline status on shortlisted caregivers (5 stages) ✅ BUILT May 10
   Stages: Discovered → Contacted → Interviewing → Placed → Inactive
 - [ ] Caregiver contact info visible to approved agencies ❌ not built
-- [ ] Demo gated behind agency signup ❌ fix today
-- [ ] Multi-user agency accounts (coordinator + owner) ❌ not built
-- [ ] Locale column added to caregivers + agencies tables ❌ not built
-- [ ] CA/US data scoping enforced in all DB queries ❌ not built
+- [x] Demo gated behind agency signup ✅ BUILT (demo environment removed)
+- [x] Multi-user agency accounts (coordinator + owner) ✅ BUILT May 10
+- [x] Locale column added to caregivers + agencies tables ✅ BUILT May 10
+- [x] CA/US data scoping enforced in all DB queries ✅ BUILT May 10
 
 CAREGIVER SIDE
 - [ ] Profile builder Steps 0-11 ✅ built
