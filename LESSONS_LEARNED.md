@@ -123,6 +123,18 @@ Do instead: When integrating any orchestration layer (Vapi, similar), explicitly
 
 ---
 
+### May 10 2026 — Autonomous build mode
+
+What happened: First autonomous session run. Mission was Session 3 Part B: Multi-user agency accounts. All required work already done (demo pages already deleted, redirects already in place, sitemap already exists, gold hex already correct, agency layout already supports team members).
+
+What worked: Faster execution, no approval delays. One file per commit still maintained. TypeScript check before every commit — non-negotiable.
+
+What to watch: Pre-existing work confused the mission checklist — had to verify each item rather than assuming it needed building.
+
+Rule confirmed: Autonomous is fine for building. Never autonomous for: pushing to any branch, DB destructive operations, deleting large features.
+
+---
+
 ## PATTERNS TO WATCH
 
 These mistakes happen repeatedly — extra vigilance needed:
