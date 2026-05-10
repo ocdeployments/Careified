@@ -50,6 +50,15 @@
 - [ ] careified.com pointed to Vercel US project | ❌ | Romy | |
 - [ ] GitHub branch protection enabled on main | ❌ | Romy | 3 rules |
 
+### Demo Data Hygiene
+- [ ] Decision: wipe / quarantine / convert demo caregivers before launch
+- [ ] Decision: wipe / quarantine / convert demo agencies before launch
+- [ ] Decision: wipe / quarantine demo clients before launch
+- [ ] If quarantining: add is_demo boolean column, exclude from production queries, keep accessible at /demo/* only
+- [ ] If wiping: scripts/wipe-demo-data.ts, run on launch day with backup
+- [ ] /profile/demo Maria Santos must remain — marketing page, not search data
+- [ ] Confirm: /demo/search uses mock data only (not shared with production search)
+
 ---
 
 ## 🟠 HIGH — Must Build Before Launch
