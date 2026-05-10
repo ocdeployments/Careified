@@ -3,6 +3,7 @@
 # Updated: May 9 2026
 # Update trigger: When pricing decisions are made
 # Owner: Romy
+# STATUS: Internal working model. Not user-facing until Stripe live. Subject to change before launch.
 # DO NOT DUPLICATE: Revenue model (FOUNDER.md), billing (PRODUCTION_CHECKLIST.md)
 
 ---
