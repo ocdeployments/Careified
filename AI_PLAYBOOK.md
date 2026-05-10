@@ -47,12 +47,32 @@ The platform thinks ahead so humans do not have to.
 ### Current Setup
 - Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
 - Assistant name: AIRecruit Screener
-- Phone Number ID: efd1fdc0-6795-4d5f-a399-b95367bd88ff
-- Phone number: +1 (518) 617-4826 (US Twilio)
+- US Phone Number ID: efd1fdc0-6795-4d5f-a399-b95367bd88ff
+- US phone: +1 (518) 617-4826 (Vapi-provisioned, serves US calls)
+- CA Phone Number ID: ❌ TO BE PROVISIONED before June 15
+- CA phone: ❌ TO BE PROVISIONED (Ontario DID — 416/647/289/905)
 - Type: Outbound warm leads
 - Voice: ElevenLabs via Vapi TTS
 - Model: openai/gpt-4o
-- Canadian calls: supported via same US number
+- Locale routing: caregiver locale determines which number calls
+
+## PROVIDER ARCHITECTURE — IMPORTANT
+
+Careified uses TWO separate provider relationships:
+
+**VOICE (Vapi) — Phase 1 live**
+- Vapi handles all voice AI calls
+- Vapi uses Twilio internally — that Twilio account is NOT accessible to Careified
+- Careified pays Vapi, Vapi pays Twilio
+- Two phone numbers: US (live) + CA (to be provisioned)
+
+**MESSAGING (Twilio direct) — Phase 2**
+- Careified opens its own Twilio account
+- Used for: SMS transactional + WhatsApp Business
+- Completely separate from Vapi's Twilio
+- Setup: 1 day (account, number, webhook)
+
+Do NOT assume Vapi credentials grant SMS/WhatsApp access. They do not.
 
 ### Vapi Rules
 - NEVER fire a call without checking consent gate first
@@ -188,7 +208,9 @@ Agency sees reference result on profile
 
 ### Twilio WhatsApp setup
 
-Twilio account (already have via Vapi)
+Twilio account REQUIRED — Careified opens own Twilio account.
+Vapi's underlying Twilio is internal to Vapi and not accessible.
+Setup: 1 day for account, 3-5 days WhatsApp Business approval via Meta.
 Apply for WhatsApp Business API access
 Create WhatsApp Business profile
 Get approved phone number
@@ -244,8 +266,9 @@ Set webhook: POST to Telegram API
 ## SMS — SETUP
 
 ### Provider
-Twilio (already integrated via Vapi)
-Add direct SMS capability separate from Vapi.
+Twilio direct — Careified-owned account. Separate from Vapi.
+Vapi is voice-only from Careified's perspective.
+Setup: 1 day. Cost: ~$0.0079 USD per SMS US, ~$0.0075 CAD per SMS Canada.
 
 ### Use cases
 - Caregiver late arrival alert

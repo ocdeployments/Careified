@@ -370,12 +370,17 @@ npx tsc --noEmit 2>&1 | head -5
 ### Current Vapi Setup
 - **Assistant ID:** fdd84833-80ef-4c50-8391-2d7b38e56ead
 - **Assistant name:** AIRecruit Screener
-- **Phone Number ID:** efd1fdc0-6795-4d5f-a399-b95367bd88ff
-- **Phone number:** +1 (518) 617-4826 (US Twilio)
+- **US Phone Number ID:** efd1fdc0-6795-4d5f-a399-b95367bd88ff
+- **US phone:** +1 (518) 617-4826 (Vapi-provisioned)
+- **CA Phone Number ID:** ❌ TO BE PROVISIONED before June 15
+- **CA phone:** ❌ TO BE PROVISIONED (Ontario DID)
 - **Type:** Outbound, warm leads, empathetic + friendly
 - **Voice:** ElevenLabs via Vapi TTS
 - **Model:** openai/gpt-4o with system prompt override
-- **Canadian calls:** Supported via same US Twilio number
+- **Locale routing:** caregiver locale determines which number calls
+- **Provider note:** Vapi uses Twilio internally — Careified does NOT own
+  that Twilio account. SMS/WhatsApp require separate Careified-owned Twilio
+  account (Phase 2).
 
 ### Consent Types
 - `recruit_calls`: ✅ BUILT

@@ -48,6 +48,19 @@ Status: ❌ NOT BUILT — blocker for June 15 launch
 
 ## PHASE 1 INTEGRATIONS (June 15)
 
+### Vapi CA DID Provisioning — REQUIRED FOR LAUNCH
+Purpose: Canadian-area-code phone for AIRecruit calls to Ontario PSWs.
+US area code calling Canadian numbers lowers pickup rate significantly.
+Cost: ~$1-2 USD/month for Canadian DID via Vapi
+Setup: 30 minutes
+Owner: Romy (provision via Vapi dashboard)
+Env var: VAPI_PHONE_NUMBER_ID_CA (new)
+Status: ❌ NOT PROVISIONED — required before June 15
+
+Code change required: lib/airecruit/vapi.ts must select
+VAPI_PHONE_NUMBER_ID (US) or VAPI_PHONE_NUMBER_ID_CA (CA)
+based on caregiver locale before placing call.
+
 ### CSV Import (build in-house)
 Purpose: Agency uploads existing caregiver roster
 Complexity: Low — 1 week build
@@ -76,7 +89,8 @@ Cost: ~$0.005 USD per message (low volume)
 Setup time: 3-5 days (Meta approval required)
 
 Setup steps:
-1. Twilio account (already have via Vapi)
+1. Twilio account REQUIRED — Careified opens own Twilio account.
+   Cannot use Vapi's internal Twilio.
 2. Enable WhatsApp in Twilio console
 3. Create WhatsApp Business profile
 4. Submit message templates for approval
@@ -91,10 +105,11 @@ Fallback: SMS via Twilio if WhatsApp unavailable
 
 ### Twilio SMS (direct)
 Purpose: SMS notifications separate from Vapi
-Cost: ~$0.0075 USD per message
-Setup: 1 day (already have Twilio via Vapi)
+Cost: ~$0.0079 USD per SMS US, ~$0.0075 CAD per SMS Canada
+Setup: 1 day. Open separate Careified-owned Twilio account.
+Vapi is voice-only from Careified's perspective.
 
-Add to existing Twilio account:
+Add to new Careified Twilio account:
 - Provision SMS-capable number
 - Build /api/sms/send route
 - Add to caregiver_communication_consents
