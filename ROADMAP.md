@@ -112,9 +112,8 @@ Monday May 9
 - [ ] ROADMAP.md created (this file)
 
 Tuesday May 13
-- [ ] Agency Roster — data model + API
+- [ ] Agency Roster — see AGENCY_ROSTER_SPEC.md for full spec
 - [ ] Agency can create caregiver stub profile
-- [ ] Caregiver notified to claim profile
 
 Wednesday May 14
 - [ ] CSV caregiver import
