@@ -394,5 +394,32 @@ Review monthly.
 
 ---
 
+## EXTERNAL DEPENDENCIES & LEAD TIMES
+
+These items depend on third parties. Lead times are estimates — start early to hit June 15.
+
+| Item | Typical Lead Time | Start By | At Risk If Not Started |
+|------|------------------|----------|----------------------|
+| Insurance (E&O, Cyber, General Liability) | 2-4 weeks broker + underwriting | May 11 | June 15 launch delayed |
+| Lawyer review (lib/legal/text.ts + Privacy + ToS) | 1-2 weeks | May 11 | Legal exposure |
+| Stripe business verification + first payout | 7-14 days | May 18 | No revenue collection |
+| Apple Developer account ($99/yr) | 1-3 days | May 25 | Wallet passes unavailable |
+| Domain DNS propagation + SSL | 24-48 hours after purchase | June 13 | Site doesn't resolve |
+| Clerk production tier (paid plan + verification) | Same day to 48 hrs | June 10 | Dev banner shows |
+| Twilio WhatsApp Business approval | 3-5 days | May 25 (Phase 2) | WhatsApp notifications blocked |
+| A2P 10DLC SMS registration (US) | 2-4 weeks | May 18 (if doing SMS) | US SMS blocked |
+
+### Notes
+
+- **Insurance:** E&O (Errors & Omissions), Cyber, and General Liability required before launch. Get quotes from 2-3 brokers. Cyber is most critical — covers data breach response.
+- **Lawyer:** lib/legal/text.ts all consent text needs review. Privacy/ToS need final review.
+- **Stripe:** Business verification can take longer for new accounts. Start early.
+- **DNS:** Buy domains first. Point to Vercel. SSL auto-provisions.
+- **Clerk:** Dev banner showing = using test keys. Upgrade to production keys at least 1 week before launch.
+
+If any item above is not started by the "Start By" date, June 15 launch is at risk.
+
+---
+
 Last updated: May 9 2026
 Next review: May 16 2026 (end of Week 1)
