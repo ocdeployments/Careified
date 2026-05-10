@@ -21,6 +21,31 @@
 
 ---
 
+### Transactional Email — REQUIRED FOR JUNE 15
+Purpose: Agency approval emails, caregiver claim links, reference invites, data export delivery, all flows in COPY.md "EMAIL TEMPLATES — SUBJECTS"
+
+**BLOCKER:** Cannot launch without this. Agency approval, claim flow, and reference invites all depend on email.
+
+Options to evaluate:
+- **Resend** — cheap, modern, React-friendly templates, good deliverability (RECOMMENDED)
+- **Postmark** — best-in-class deliverability, premium pricing
+- **AWS SES** — cheapest at scale, complex setup
+- **SendGrid** — enterprise-grade, heavier setup
+
+**Recommendation:** Resend for launch — simplest setup, sufficient deliverability, React Email template support fits the stack. Re-evaluate at 10k+ emails/month.
+
+Build estimate: 2 days (provider setup + 8 template wiring + retry logic)
+
+Env vars needed:
+```
+RESEND_API_KEY
+RESEND_FROM_EMAIL=hello@careified.ca
+```
+
+Status: ❌ NOT BUILT — blocker for June 15 launch
+
+---
+
 ## PHASE 1 INTEGRATIONS (June 15)
 
 ### CSV Import (build in-house)
