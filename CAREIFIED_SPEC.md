@@ -399,14 +399,10 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Compliance section present
 - Changes save on blur
 
-### /agency/billing
-- REACHABILITY: ACTION (agency dashboard quick link)
-- Module pricing placeholder renders
-- Support link present (⚠️ /agency/support page not yet built)
+### /agency/billing (REDIRECTED May 10 2026 → /agency/settings)
+- Now redirects to /agency/settings
 
-### /agency/sitemap
-- REACHABILITY: ACTION (admin only)
-- All agency pages listed by access level
+### /agency/sitemap (DELETED May 10 2026 — use Next.js sitemap.ts)
 
 ---
 
