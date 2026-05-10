@@ -48,7 +48,14 @@
 - [ ] careified.com domain purchased | ❌ | Romy | Namecheap/GoDaddy |
 - [ ] careified.ca pointed to Vercel CA project | ❌ | Romy | |
 - [ ] careified.com pointed to Vercel US project | ❌ | Romy | |
-- [ ] GitHub branch protection enabled on main | ❌ | Romy | 3 rules |
+- [ ] GitHub branch protection on `main` — REQUIRED before launch:
+  - [ ] Require pull request before merging
+  - [ ] Require status checks to pass (npx tsc --noEmit)
+  - [ ] Restrict who can push to: Romy only
+  - [ ] Block force pushes
+  - [ ] Restrict deletions
+  - Owner: Romy
+  - Reason: Vercel auto-deploys main. Without this, a single bad push crashes production.
 
 ### Demo Data Hygiene
 - [ ] Decision: wipe / quarantine / convert demo caregivers before launch
