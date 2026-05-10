@@ -98,6 +98,36 @@ SELECT * FROM caregivers WHERE locale = 'en-US';
 - Admin sees ALL with explicit permission
 - Search/filter always scoped by user's locale
 
+### Locale Migration Plan
+Before adding the `locale` column to existing tables:
+
+1. **Pre-migration:** Full DB backup
+   ```bash
+   pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+   ```
+
+2. **Default backfill:** All existing caregivers and agencies backfilled to `'en-CA'`
+   - Canada is the primary launch market
+   - Migration must be idempotent (can re-run safely)
+
+3. **Column definition:** `locale` is NOT NULL with default `'en-CA'`
+
+4. **Post-migration verification:**
+   ```sql
+   -- Count rows by locale
+   SELECT locale, COUNT(*) FROM caregivers GROUP BY locale;
+   SELECT locale, COUNT(*) FROM agencies GROUP BY locale;
+   -- Flag any nulls
+   SELECT COUNT(*) FROM caregivers WHERE locale IS NULL;
+   ```
+
+5. **US data handling:** Any agency or caregiver claiming to be US must be
+   manually flipped to `'en-US'` by admin via /admin panel until US
+   deployment is live.
+
+6. **Post-migration DB check:** Re-run session start checklist counts —
+   caregiver and agency counts must match pre-migration totals.
+
 ---
 
 ## 4. BRANCH STRATEGY
