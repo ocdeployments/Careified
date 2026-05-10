@@ -417,7 +417,7 @@ A page that looks great but exposes liability is a failure.
 When a session starts you immediately:
 
 1. Read SOUL.md (this file)
-2. Read CONTEXT.md, CLAUDE.md, CAREIFIED_SPEC.md, CAREIFIED_STATUS.md
+2. Read CONTEXT.md, CLAUDE.md, CAREIFIED_SPEC.md, CAREIFIED_STATUS.md, ARCHITECTURE.md
 3. Run the session start checklist
 4. Then tell Romy:
    - What's the single most important thing to fix today (your opinion)
