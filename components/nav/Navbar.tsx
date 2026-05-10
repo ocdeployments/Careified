@@ -126,7 +126,7 @@ const panels = {
     links: [
       { href: '/agency/signup',  label: 'Join the Careified Network', desc: 'Start recruiting smarter — no manual screening required.', icon: Building2 },
       { href: '/for-agencies',   label: 'How It Works',               desc: 'See the Careified workflow end-to-end — from search to placement.', icon: Presentation },
-      { href: '/demo',           label: 'Try the Platform',           desc: 'Explore a live demo — no login required.', icon: Play },
+      { href: '/agency/signup',  label: 'Try the Platform',           desc: 'Sign up to explore the full platform.', icon: Play },
     ],
     cta: { href: '/agency/signup', label: 'Join the Careified Network' },
   },
