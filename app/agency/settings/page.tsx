@@ -54,17 +54,73 @@ function Section({ title, desc, children }: { title: string; desc?: string; chil
   )
 }
 
+interface TeamMember {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  role: string
+  status: string
+  invited_at: string
+}
+
 export default function AgencySettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [agency, setAgency] = useState<any>(null)
+  const [team, setTeam] = useState<TeamMember[]>([])
+  const [inviting, setInviting] = useState(false)
+  const [inviteForm, setInviteForm] = useState({ first_name: '', last_name: '', email: '', role: 'coordinator' })
 
   useEffect(() => {
     fetch('/api/agency/settings')
       .then(r => r.json())
       .then(d => { setAgency(d.agency); setLoading(false) })
       .catch(() => setLoading(false))
+    fetch('/api/agency/team')
+      .then(r => r.json())
+      .then(d => { if (d.success) setTeam(d.members || []) })
+      .catch(() => {})
   }, [])
+
+  async function invite(e: React.FormEvent) {
+    e.preventDefault()
+    setInviting(true)
+    try {
+      const res = await fetch('/api/agency/team/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inviteForm),
+      })
+      const d = await res.json()
+      if (!res.ok) throw new Error(d.error || 'Failed')
+      toast.success('Invitation sent')
+      setInviteForm({ first_name: '', last_name: '', email: '', role: 'coordinator' })
+      const r = await fetch('/api/agency/team')
+      const td = await r.json()
+      if (td.success) setTeam(td.members || [])
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to invite')
+    } finally {
+      setInviting(false)
+    }
+  }
+
+  async function remove(memberId: string, name: string) {
+    if (!confirm(`Remove ${name} from team?`)) return
+    try {
+      const res = await fetch('/api/agency/team/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId }),
+      })
+      if (!res.ok) throw new Error()
+      setTeam(t => t.filter(m => m.id !== memberId))
+      toast.success(`${name} removed`)
+    } catch {
+      toast.error('Failed to remove')
+    }
+  }
 
   async function save(fields: Record<string, any>) {
     setSaving(true)
