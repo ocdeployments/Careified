@@ -188,6 +188,16 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Caregiver → /profile/build
 - Agency → /agency/signup or /agency/pending-approval
 
+### /claim/[token]
+- REACHABILITY: SYSTEM (email link from agency)
+- Public page — no auth required
+- Valid token → shows pre-filled profile data
+- Expired token → clear error message
+- Already claimed → redirect to /sign-in
+- T+C checkbox required before proceeding
+- Consent timestamped and stored
+- CTA routes to /sign-up with claim_token param
+
 ---
 
 ## CAREGIVER PAGES (Auth Required)
@@ -323,6 +333,18 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Saved candidates list renders
 - Empty state handled gracefully
 - Remove from shortlist works
+
+### /agency/roster
+- REACHABILITY: ACTION (agency dashboard quick link)
+- Auth: approved agency required
+- Upload zone renders (PDF/DOC/DOCX, 5MB)
+- Resume parse returns editable fields
+- Manual entry option present
+- Create + invite flow works end to end
+- Roster table shows all agency caregivers
+- Status badges correct per caregiver state
+- Resend invite works
+- Empty state has CTA
 
 ### /agency/clients
 - REACHABILITY: ACTION (agency dashboard quick link)
