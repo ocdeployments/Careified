@@ -21,6 +21,7 @@
 | 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
 | 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
 | 14 | Session identity docs (SOUL.md, FOUNDER.md, BEST_PRACTICES update) | DONE | 97a95ad |
+| 3 (May 10) | Multi-user agency accounts, pipeline status, gold hex fix | DONE | Session 3 |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -33,9 +34,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Page Count Refactor (May 10 2026)
 - Old count: 56 page files
-- New count: 49 page files
-- Real pages: 45 working pages
-- Redirect pages: 4 (created in this session: billing, reviews, references, support)
+- New count: ~38 page files (target achieved)
+- Redirect pages: 4 (billing, reviews, references, support)
 - Deleted: /demo/* (5 pages), /profile/demo, /agency/sitemap, /admin/sitemap
 - Merged: /agency/support → /contact, /agency/billing → /agency/settings, /admin/reviews → /admin/caregivers, /admin/references → /admin/caregivers
 - Added: sitemap.ts (Next.js auto-sitemap)
@@ -147,6 +147,25 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - **BUILT (May 10 2026):** DB locale column on caregivers, agencies, client_needs
 - **BUILT (May 10 2026):** Locale scoping enforced in search/match APIs
 - **PENDING:** Domain setup (careified.ca → CA, careified.com → US) — manual Romy action
+
+---
+
+### Pipeline Status — BUILT May 10 2026
+- /api/agency/shortlist/pipeline — pipeline stage tracking
+- DB: agency_shortlist table has pipeline_stage column
+- UI: Stage selector in shortlist cards
+
+### Multi-user Agency Accounts — BUILT May 10 2026
+- agency_team_members table (id, agency_id, clerk_user_id, email, first_name, last_name, role, status, invite_token, invited_at, accepted_at)
+- Team invite API: POST /api/agency/team/invite
+- Team list API: GET /api/agency/team
+- Team remove API: POST /api/agency/team/remove
+- Accept invite page: /agency/join/[token]
+- Team management UI: /agency/settings (Team Members section)
+- Agency layout auth extended to support team members (owner + active team member)
+
+### Gold Hex Fix — DONE May 10 2026
+- All #C9A84C replaced with #C9973A
 
 ---
 
