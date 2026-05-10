@@ -115,6 +115,9 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Locale System
 - lib/locale/config.ts CA/US variants, NEXT_PUBLIC_LOCALE, geo-redirect via proxy.ts
+- **BUILT (May 10 2026):** DB locale column on caregivers, agencies, client_needs
+- **BUILT (May 10 2026):** Locale scoping enforced in search/match APIs
+- **PENDING:** Domain setup (careified.ca → CA, careified.com → US) — manual Romy action
 
 ---
 
