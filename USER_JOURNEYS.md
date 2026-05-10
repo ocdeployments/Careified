@@ -295,18 +295,22 @@ Everyone's time is respected.
 ### Entry points
 - Caregiver visits /settings/data-rights ✅
 
-### Steps ✅
+### Steps
 1. Caregiver requests data export
-2. System creates support ticket (auto) ✅
-3. Admin receives ticket
-4. Export generated within 30 days (PIPEDA requirement)
-5. Caregiver receives download link via email
+2. System creates support ticket (auto) ❌ NOT BUILT — support_tickets table does not exist
+3. Admin receives ticket ❌
+4. Export generated within 30 days (PIPEDA requirement) ❌
+5. Caregiver receives download link via email ❌
 
-### Delete flow ✅
-1. Caregiver requests deletion
-2. System creates support ticket
-3. Admin processes within 30 days
-4. All data deleted or anonymised
+### Delete flow
+1. Caregiver requests deletion ❌
+2. System creates support ticket ❌ NOT BUILT
+3. Admin processes within 30 days ❌
+4. All data deleted or anonymised ❌
+
+### BLOCKER
+❌ support_tickets table does not exist. PIPEDA data rights requests have
+no system of record. Required for June 15 launch. See TICKETING_SPEC.md.
 5. Caregiver notified
 
 ---
