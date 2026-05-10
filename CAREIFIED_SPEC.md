@@ -1,9 +1,12 @@
 # CAREIFIED_SPEC.md
 # Purpose: Expected behaviour for every page, component, and API route — QA source of truth
-# Updated: May 9 2026
+# Updated: May 10 2026
 # Update trigger: Every session — new pages added, resolved issues moved to RESOLVED
 # Owner: Claude
 # DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), roadmap (ROADMAP.md)
+
+## PAGE COUNT: 38 (target: under 40 at launch)
+Pages removed in May 10 refactor: /demo/* (5), /profile/demo, /agency/sitemap, /admin/sitemap, /agency/support (→/contact), /agency/billing (→/agency/settings), /admin/reviews (→/admin/caregivers), /admin/references (→/admin/caregivers)
 
 ---
 
@@ -250,10 +253,8 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Red flag disclosure section present
 - Working style tags displayed (behavioural tags from Step 7)
 
-### /profile/demo
-- REACHABILITY: ACTION (from /for-caregivers#why-build)
-- Demo page with Maria Santos renders
-- Same scorecard layout as /profile/[id]
+### /profile/demo (DELETED May 10 2026 — merged into /profile/[id])
+- Was: Demo page with Maria Santos
 
 ### /profile/strength
 - REACHABILITY: ACTION (navbar user menu)
@@ -411,48 +412,17 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 
 ## DEMO PAGES (Email + Phone Gate — No Auth)
 
-### /demo/gate
-- REACHABILITY: ACTION (auto-redirect from all /demo/* pages when not unlocked)
-- Headline: "See Careified in Action"
-- Subtext: "Enter your details to access the live demo."
-- Email field renders with Mail icon
-- Phone field renders with Phone icon
-- Submit button disabled until both fields valid
-- Invalid email → inline error message
-- Invalid phone (not 10 digits) → inline error message
-- On success → sessionStorage demo_unlocked=true → /demo
-- Fine print: "We'll never spam you."
+### /demo/gate (DELETED May 10 2026 — demo environment removed)
 
-### /demo
-- REACHABILITY: NAV (agencies dropdown "Try the Platform")
-- Gate check: sessionStorage demo_unlocked !== 'true' → /demo/gate
-- Demo landing renders with feature tour
-- Demo banner: "You are in demo mode"
-- CTA: "Start your free 30-day trial" → /agency/signup
+### /demo (DELETED May 10 2026 — platform now behind signup)
 
-### /demo/dashboard
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load → /demo/gate if not unlocked
-- Agency dashboard with pre-loaded demo data renders
-- Demo banner visible
+### /demo/dashboard (DELETED)
 
-### /demo/search
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load
-- Search with 15 demo caregivers renders
-- Demo banner visible
+### /demo/search (DELETED)
 
-### /demo/clients
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load
-- 5 demo clients render
-- Demo banner visible
+### /demo/clients (DELETED)
 
-### /demo/clients/[id]
-- REACHABILITY: DYNAMIC (from /demo/clients)
-- Gate check on load
-- Client detail with match results renders
-- Demo banner visible
+### /demo/clients/[id] (DELETED)
 
 ---
 
