@@ -278,7 +278,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 ## 11. Messaging Rules
 
-- Never show pricing figures
+- Never show pricing figures in user-facing copy until Stripe is live (PAYMENTS_ENABLED=true)
 - Never name competitors — "general job boards" only
 - Never use emojis — lucide-react only
 - Families never see supply-side data
