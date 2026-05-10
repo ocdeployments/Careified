@@ -95,6 +95,10 @@ reputation compounds with each placement.
 Caregiver owns portable professional profile
 without initiating the process themselves.
 
+### BLOCKER: Requires transactional email provider
+See INTEGRATIONS.md "Transaction Email — REQUIRED FOR JUNE 15".
+Until resolved, this journey cannot ship.
+
 ### This is the viral loop — critical for supply growth
 
 ---
@@ -180,6 +184,9 @@ without initiating the process themselves.
 ### Success state
 Agency has their full bench on platform day one.
 No cold start. No waiting for caregiver self-signup.
+
+### BLOCKER: Requires transactional email provider
+See INTEGRATIONS.md "Transaction Email — REQUIRED FOR JUNE 15".
 
 ---
 
