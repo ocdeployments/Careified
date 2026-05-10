@@ -59,7 +59,7 @@ At 💀 (100%+): Do not attempt the task. Instead:
 ### User Commands
 
 - `/status` — user asking for session health check, output full status breakdown
-- `/end-session` — user manually triggering end session; run the full handoff protocol from HANDOFF.md
+- `/end-session` — user manually triggering end session; update docs and stop
 - `/reset-counter` — user confirming a new session started; reset your token estimate to 25,000
 
 ---
@@ -312,7 +312,6 @@ npx tsc --noEmit 2>&1 | head -5
 ```
 
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
-- Read MASTER_DOCS.md — note any new decisions or errors to log
 - Read BEST_PRACTICES.md — confirm no rules are being violated before building
 - Read LESSONS_LEARNED.md — confirm no repeated mistakes from previous sessions
 - Confirm Vercel last deployment succeeded (check vercel.com dashboard)
@@ -416,7 +415,6 @@ npx tsc --noEmit 2>&1 | head -5
    - SOUL.md (identity, lenses, limits — read this first always)
    - CONTEXT.md
    - CLAUDE.md
-   - HANDOFF.md
    - CAREIFIED_SPEC.md
    - CAREIFIED_STATUS.md
    - app/admin/status/page.tsx (to verify it reflects current state)
@@ -481,19 +479,13 @@ Run in this order:
       - Add new features to FEATURES NOT YET BUILT table
       - Update any expected behaviours that changed
 
-   4. UPDATE MASTER_DOCS.md
-      - Add any new technical decisions with date stamp
-      - Add any new user errors discovered
-      - Update security inventory status for items fixed
-      - Add any new backlog items
-
-   5. UPDATE CONTEXT.md
+   4. UPDATE CONTEXT.md
       - Add new decisions to Section 5 if significant
       - Update pre-launch checklist if items completed
 
    Then commit ALL documentation files together:
    ```bash
-   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md MASTER_DOCS.md CONTEXT.md CLAUDE.md HANDOFF.md
+   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md CONTEXT.md CLAUDE.md
    git commit -m "session-end: docs update [$(date +%Y-%m-%d)]"
    ```
 
@@ -562,7 +554,6 @@ The session limit auto-trigger only runs Step 1 (/end-session).
 - Draggable marker, circle overlay, radius selector
 
 Read CAREIFIED_STATUS.md for full build tracker, pending items, and roadmap.
-Read HANDOFF.md for project handoff context.
 
 ## 16. Branch Strategy and Production Rules
 
