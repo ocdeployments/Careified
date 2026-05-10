@@ -117,6 +117,10 @@ Do instead: Always push to main branch — Vercel auto-deploys. Never run npx ve
 What happened: Docs accumulated contradictions over multiple sessions. PRICING/CLAUDE/CONTEXT disagreed on pricing visibility. MASTER_DOCS.md and HANDOFF.md were referenced but didn't exist. PHI encryption was mis-categorised. Locale migration had no backfill plan. Email provider was missing entirely. Demo data hygiene wasn't planned.
 Do instead: At end of every session, run grep against all .md files for the topic touched that day. If two files mention the same fact, verify they say the same thing. DOC_INDEX.md is now the source-of-truth map — consult before adding new content to any doc.
 
+**ARCHITECTURE — Vapi/Twilio provider confusion + missing CA DID**
+What happened: Docs described AIRecruit phone as "US Twilio" and stated "we already have Twilio via Vapi." Both inaccurate. Vapi abstracts Twilio internally but Careified has no direct Twilio access. Created false assumption that Phase 2 SMS/WhatsApp would reuse the Vapi Twilio account. Separately, no CA DID was provisioned despite Canada-first launch — Ontario PSWs would receive calls from a US number, killing pickup rate.
+Do instead: When integrating any orchestration layer (Vapi, similar), explicitly document what is OWNED vs what is ABSTRACTED. Twilio under Vapi = abstracted (not Careified's). Twilio for SMS = will be owned (Careified opens own account Phase 2). Geography-first launches require geography-specific phone numbers from Day 1. Pickup rate is a launch metric — protect it.
+
 ---
 
 ## PATTERNS TO WATCH
