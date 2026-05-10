@@ -71,6 +71,20 @@ Currency: CAD launch, USD second
 Model: Two-sided marketplace — agencies pay, caregivers pay premium
 Timeline: Soft launch June 15 2026
 
+### LAUNCH SEQUENCING (CANONICAL)
+
+**Phase 1A — June 15 2026: Canada launch on careified.ca**
+- Ontario test agency live
+- careified.ca domain + locale=en-CA enforced
+- Full feature set
+
+**Phase 1B — Within 30 days of June 15: US soft-launch on careified.com**
+- Texas test agency live
+- careified.com domain + locale=en-US enforced
+- US-specific items: TCPA already built, US states in signup, US background check label
+
+These are NOT the same launch. Treating them as one creates a double-feature scope on June 15.
+
 ### Revenue Streams
 
 AGENCIES (B2B subscription)
