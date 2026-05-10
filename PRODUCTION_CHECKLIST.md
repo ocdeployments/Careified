@@ -88,13 +88,13 @@
 - [ ] Caregiver claims agency-built profile | ❌ | Week 1 | Viral loop |
 - [ ] CSV caregiver import | ❌ | Week 1 | Cold start solver |
 - [ ] Caregiver contact info visible to agencies | ❌ | Week 1 | Dead end fix |
-- [ ] Pipeline status (5 stages) | ❌ | Week 1 | Agency workflow |
-- [ ] Multi-user agency accounts | ❌ | Week 2 | |
-- [ ] Locale column + CA/US data scoping | ❌ | Week 2 | Critical |
+- [x] Pipeline status (5 stages) | ✅ | DONE May 10 | Agency workflow |
+- [x] Multi-user agency accounts | ✅ | DONE May 10 | |
+- [x] Locale column + CA/US data scoping | ✅ | DONE May 10 | Critical |
 - [ ] QuickFill Basic (in-app only) | ❌ | Week 3 | If time allows |
 
 ### Broken Links (404s)
-- [ ] /agency/support — linked from /agency/billing, page not built
+- [x] /agency/support — linked from /agency/billing, now redirects to /contact ✅
 - [ ] /settings — no index page, linked from multiple places
 - [ ] /profile/start — linked in /for-caregivers, should be /profile/build
 
@@ -116,7 +116,7 @@
 - [ ] Empty state — clients list is empty
 - [ ] Agency signup — highlight required fields red on submit, scroll to first error, inline errors
 - [ ] Agency signup — phone field silently rejects invalid numbers (show error instead)
-- [ ] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files
+- [x] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files | ✅ DONE May 10
 - [ ] Agency card copy — fix non-recommender liability language ("screens candidates" / "delivers interview-ready professionals")
 - [ ] Rename "matching engine" → "Careified Engine" across all UI copy, comments, and lib/matching/ references
 - [ ] Profile builder — add completion celebration / confirmation at Step 10
