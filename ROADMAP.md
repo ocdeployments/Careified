@@ -94,10 +94,15 @@ PLATFORM
 - Family portal
 - Caregiver payment tiers
 - Rating system
-- Ticketing system
 - Stripe live billing
 - Background check integration
 - Reference AI calls
+
+### PHASE 1 MUST SHIP — Ticketing (PIPEDA)
+- [ ] Ticketing minimum (support_tickets + ticket_messages tables) — see TICKETING_SPEC.md
+- [ ] /settings/data-rights auto-creates data_rights ticket
+- [ ] /admin/tickets queue for Romy
+- [ ] /agency/support and /caregiver/support forms
 
 ---
 
