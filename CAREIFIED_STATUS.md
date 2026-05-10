@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Purpose: Current build state — what is done, what is pending, what is broken
-# Updated: May 9 2026
+# Updated: May 10 2026
 # Update trigger: Every session — mandatory
 # Owner: Claude
 # DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
@@ -94,6 +94,17 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - /agency/clients/[id] — ranked matches + verify-in-call gaps
 - Match gap analysis engine (lib/matching/gap-analysis.ts)
 - 5 demo clients: Eleanor, Robert, Margaret, James, Dorothy
+
+### Agency Roster (May 10 2026) — BUILT
+- /agency/roster — Add and manage agency caregivers
+- Upload zone (PDF/DOC/DOCX, 5MB, LLM parse)
+- Manual entry option
+- Create + invite flow (end to end)
+- Roster table with status badges (stub/invited/incomplete/complete/active)
+- Resend invite action
+- /claim/[token] — Public caregiver claim page
+- DB columns: created_by_agency_id, profile_status, claim_token, claim_token_expires_at, claimed_at, resume_url, locale
+- Dashboard link: gold primary action after "Find a caregiver"
 
 ### Communication Consent
 - 6 consent types, /settings/communications, consent gate in builder
