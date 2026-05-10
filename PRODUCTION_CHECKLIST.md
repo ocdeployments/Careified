@@ -18,6 +18,12 @@
 - [ ] UUID reference tokens — app/api/references/invite/route.ts
 - [ ] SQL injection fix — lib/db.ts lines 56-68 (validate keys against column allowlist)
 - [x] Remove dangerouslySetInnerHTML — app/admin/caregivers/page.tsx line 217
+- [ ] PHI encryption migration — columns currently plain text, need AES-256-GCM before launch
+  - [ ] Identify every PHI column (client_medical, client_cognitive, diagnosis_experience, free-text observation fields)
+  - [ ] Write encrypt-at-rest migration using PHI_ENCRYPTION_KEY
+  - [ ] Write decrypt-on-read in lib/db.ts query helpers
+  - [ ] Test: encrypt, read back, confirm decryption matches original
+  - [ ] Document encryption pattern in BEST_PRACTICES.md
 
 ### Legal / Compliance
 - [ ] Lawyer review lib/legal/text.ts
@@ -100,7 +106,6 @@
 - [ ] Mobile responsiveness audit — all 36 pages
 
 ### Data Integrity
-- [ ] PHI encryption migration — columns currently plain text, need AES-256-GCM before launch
 - [ ] aggregate_score wiring — CTS engine exists but not triggered by anything
 - [ ] caregiver_attributes table seeding — empty, graceful fallback exists
 
