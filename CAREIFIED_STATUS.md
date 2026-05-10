@@ -31,6 +31,13 @@ All 11 profile builder steps working with Context pattern and three-layer save.
 careified.vercel.app | Repo: ocdeployments/Careified (main)
 Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreSQL, Clerk 7.0.12
 
+### Page Count Refactor (May 10 2026)
+- Old count: 56 pages
+- New count: 38 pages
+- Deleted: /demo/* (5 pages), /profile/demo, /agency/sitemap, /admin/sitemap
+- Merged: /agency/support → /contact, /agency/billing → /agency/settings, /admin/reviews → /admin/caregivers, /admin/references → /admin/caregivers
+- Added: sitemap.ts (Next.js auto-sitemap)
+
 ---
 
 ## BUILT AND LIVE
