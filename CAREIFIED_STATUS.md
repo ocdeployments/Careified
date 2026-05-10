@@ -88,6 +88,15 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - **DEMO MODE FIX (May 4 2026):** ClientSearch component now accepts `isDemo` prop for demo routes
 - Demo search (/demo/search) uses 5 mock caregivers with client-side filtering
 
+### Agency Roster (May 10 2026)
+- /agency/roster — add caregivers with resume upload or manual entry
+- API: /api/agency/roster/upload — parse resume with LLM (PDF/DOC/DOCX)
+- API: /api/agency/roster/create — create stub caregiver with claim token
+- API: /api/agency/roster/invite — send claim invitation email
+- /claim/[token] — public page for caregiver to claim profile
+- Profile status workflow: stub → invited → incomplete → complete → active
+- Dashboard link: "Agency Roster" in quick actions (gold accent)
+
 ### Client Intake & Match Analysis
 - /agency/clients — client list
 - /agency/clients/new — intake form (8 sections)
