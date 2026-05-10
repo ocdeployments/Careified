@@ -69,6 +69,22 @@ export default function ContactPage() {
                   <div style={{ fontSize: '16px', fontWeight: 500, color: '#0D1B3E' }}>Mon-Fri, 9am-6pm EST</div>
                 </div>
               </div>
+
+              {/* Agency Support Section */}
+              <div style={{ marginTop: '32px', padding: '24px', background: '#FDF6EC', borderRadius: '12px', border: '1px solid #E8B86D' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D1B3E', marginBottom: '12px' }}>
+                  Agency Support
+                </h3>
+                <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '12px', lineHeight: 1.5 }}>
+                  For platform support, email <strong>support@careified.ca</strong>
+                </p>
+                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '8px' }}>
+                  Response within 24 hours.
+                </p>
+                <p style={{ fontSize: '13px', color: '#64748B' }}>
+                  Ticketing system coming June 2026.
+                </p>
+              </div>
             </div>
           </div>
           
