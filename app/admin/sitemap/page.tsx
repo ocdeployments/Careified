@@ -1,222 +1,355 @@
+// Careified — Admin Sitemap (Live Visual Tool)
+// Auto-discovers all pages from filesystem at runtime
+
 import { promises as fs } from 'fs'
 import { join } from 'path'
+import Link from 'next/link'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
+const S = "'DM Sans', sans-serif"
 
 type RouteInfo = {
   route: string
   category: string
   access: string
-  filePath: string
+  status: string
+  lineCount: number
   isDynamic: boolean
-  isOrphan: boolean
 }
 
-// Routes that are reachable via navbar/dropdowns (NOT orphans)
-const LINKED_ROUTES = [
-  '/', '/about', '/contact', '/privacy', '/terms',
-  '/for-caregivers', '/for-agencies', '/for-families',
-  '/sign-in', '/sign-up', '/demo', '/opportunities',
-  '/profile/build', '/profile/strength', '/profile/demo',
-  '/settings', '/settings/communications', '/settings/data-rights',
-  '/agency/dashboard', '/agency/search', '/agency/shortlist',
-  '/agency/clients', '/agency/clients/new', '/agency/airecruit',
-  '/agency/airecruit/new', '/agency/settings', '/agency/billing',
-  '/admin', '/admin/agencies', '/admin/caregivers',
-  '/admin/status', '/admin/sitemap', '/admin/badges',
-  '/admin/reviews', '/admin/references',
-]
-
-// Routes that are intentionally not linked (system routes)
-const INTENTIONAL_UNLINKED = [
-  '/id/:caregiverId', '/verify/:slug', '/reference/:token',
-  '/profile/:id', '/demo/dashboard', '/demo/search',
-  '/demo/clients', '/demo/clients/:id',
-  '/agency/pending-approval', '/agency/signup',
-  '/agency/clients/:id', '/agency/clients/:id/review',
-  '/agency/airecruit/:campaignId', '/agency/airecruit/:campaignId/:callId',
-  '/onboarding', '/profile/dispute/:id',
-]
+// AUTH REQUIREMENTS (hardcoded mapping)
+const ACCESS_MAP: Record<string, string> = {
+  '/': 'PUBLIC',
+  '/for-caregivers': 'PUBLIC',
+  '/for-agencies': 'PUBLIC',
+  '/for-families': 'PUBLIC',
+  '/about': 'PUBLIC',
+  '/contact': 'PUBLIC',
+  '/privacy': 'PUBLIC',
+  '/terms': 'PUBLIC',
+  '/sign-in': 'PUBLIC',
+  '/sign-up': 'PUBLIC',
+  '/onboarding': 'PUBLIC',
+  '/opportunities': 'PUBLIC',
+  '/verify/[slug]': 'PUBLIC',
+  '/id/[caregiverId]': 'PUBLIC',
+  '/reference/[token]': 'PUBLIC',
+  '/claim/[token]': 'PUBLIC',
+  '/profile/build': 'CAREGIVER',
+  '/profile/start': 'CAREGIVER',
+  '/profile/strength': 'CAREGIVER',
+  '/profile/dispute/[id]': 'CAREGIVER',
+  '/profile/[id]': 'AGENCY',
+  '/settings': 'CAREGIVER',
+  '/settings/communications': 'CAREGIVER',
+  '/settings/data-rights': 'CAREGIVER',
+  '/agency/dashboard': 'AGENCY',
+  '/agency/search': 'AGENCY',
+  '/agency/shortlist': 'AGENCY',
+  '/agency/roster': 'AGENCY',
+  '/agency/clients': 'AGENCY',
+  '/agency/clients/new': 'AGENCY',
+  '/agency/clients/[id]': 'AGENCY',
+  '/agency/clients/[id]/review': 'AGENCY',
+  '/agency/airecruit': 'AGENCY',
+  '/agency/airecruit/new': 'AGENCY',
+  '/agency/airecruit/[campaignId]': 'AGENCY',
+  '/agency/airecruit/[campaignId]/[callId]': 'AGENCY',
+  '/agency/settings': 'AGENCY',
+  '/agency/billing': 'AGENCY',
+  '/agency/signup': 'PUBLIC',
+  '/agency/pending-approval': 'PUBLIC',
+  '/admin': 'ADMIN',
+  '/admin/agencies': 'ADMIN',
+  '/admin/caregivers': 'ADMIN',
+  '/admin/status': 'ADMIN',
+  '/admin/sitemap': 'ADMIN',
+  '/admin/badges': 'ADMIN',
+}
 
 function categorizeRoute(path: string): { category: string; access: string } {
   const segments = path.split('/').filter(Boolean)
   
-  if (segments[0] === 'api') return { category: 'api', access: 'API route' }
-  if (segments[0] === 'admin') return { category: 'admin', access: 'Super admin only' }
-  if (segments[0] === 'agency') return { category: 'agency', access: 'Approved agency' }
-  if (segments[0] === 'profile' || segments[0] === 'opportunities' || segments[0] === 'settings' || segments[0] === 'id' || segments[0] === 'verify') {
-    return { category: 'caregiver', access: 'Caregiver login' }
-  }
-  if (segments[0] === 'sign-in' || segments[0] === 'sign-up' || segments[0] === 'onboarding') {
-    return { category: 'auth', access: 'Auth' }
-  }
-  if (segments[0] === 'reference') return { category: 'public', access: 'Public token-based' }
-  return { category: 'public', access: 'No auth required' }
+  if (segments[0] === 'api') return { category: 'API', access: 'API' }
+  if (segments[0] === 'admin') return { category: 'Admin', access: 'ADMIN' }
+  if (segments[0] === 'agency') return { category: 'Agency', access: 'AGENCY' }
+  if (segments[0] === 'profile') return { category: 'Caregiver', access: 'CAREGIVER' }
+  if (segments[0] === 'settings') return { category: 'Caregiver', access: 'CAREGIVER' }
+  if (segments[0] === 'reference') return { category: 'System', access: 'PUBLIC' }
+  if (segments[0] === 'claim') return { category: 'System', access: 'PUBLIC' }
+  if (segments[0] === 'verify') return { category: 'System', access: 'PUBLIC' }
+  if (segments[0] === 'id') return { category: 'System', access: 'PUBLIC' }
+  if (path.startsWith('/sign-')) return { category: 'Auth', access: 'PUBLIC' }
+  if (segments[0] === 'onboarding') return { category: 'Auth', access: 'PUBLIC' }
+  if (path === '/') return { category: 'Marketing', access: 'PUBLIC' }
+  
+  return { category: 'Marketing', access: 'PUBLIC' }
 }
 
-async function walkDir(dir: string, base: string): Promise<string[]> {
-  const entries = await fs.readdir(dir, { withFileTypes: true })
-  const paths: string[] = []
+async function getAllPages(): Promise<RouteInfo[]> {
+  const appDir = join(process.cwd(), 'app')
+  const pages: RouteInfo[] = []
   
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name)
-    const relativePath = fullPath.replace(base, '').replace(/\\/g, '/')
-    
-    if (entry.isDirectory()) {
-      if (entry.name.startsWith('.')) continue
-      if (entry.name === 'api' || entry.name === 'admin' || entry.name === 'agency' || 
-          entry.name === 'profile' || entry.name === 'opportunities' || entry.name === 'settings' ||
-          entry.name === 'id' || entry.name === 'verify' || entry.name === 'reference') {
-        const subPaths = await walkDir(fullPath, base)
-        paths.push(...subPaths)
+  async function scanDir(dir: string, prefix: string = '') {
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const fullPath = join(dir, entry.name)
+        
+        if (entry.isDirectory()) {
+          if (entry.name.startsWith('.')) continue
+          if (entry.name === 'api') {
+            // Scan API routes separately
+            await scanApiRoutes(join(dir, entry.name))
+            continue
+          }
+          
+          const routeSegment = entry.name === 'app' ? '' : `/${entry.name}`
+          await scanDir(fullPath, prefix + routeSegment)
+        } else if (entry.name === 'page.tsx' || entry.name === 'page.ts') {
+          let route = prefix || '/'
+          
+          // Check for dynamic route
+          if (route.includes('[id]') || route.includes('[token]') || 
+              route.includes('[slug]') || route.includes('[campaignId]') ||
+              route.includes('[caregiverId]')) {
+            route = route.replace(/\[id\]/g, '[id]')
+            route = route.replace(/\[token\]/g, '[token]')
+            route = route.replace(/\[slug\]/g, '[slug]')
+            route = route.replace(/\[campaignId\]/g, '[campaignId]')
+            route = route.replace(/\[caregiverId\]/g, '[caregiverId]')
+          }
+          
+          // Get line count
+          const content = await fs.readFile(fullPath, 'utf-8')
+          const lineCount = content.split('\n').length
+          
+          const { category, access } = categorizeRoute(route)
+          
+          pages.push({
+            route,
+            category,
+            access: ACCESS_MAP[route] || access,
+            status: lineCount < 20 ? 'STUB' : 'LIVE',
+            lineCount,
+            isDynamic: route.includes('['),
+          })
+        }
       }
-    } else if (entry.name === 'page.tsx' || entry.name === 'route.ts') {
-      let route = relativePath.replace('/page.tsx', '').replace('/route.ts', '')
-      if (route.includes('[')) {
-        route = route.replace(/\[([^\]]+)\]/g, ':$1')
-      }
-      paths.push(route || '/')
+    } catch (e) {
+      // Skip inaccessible directories
     }
   }
   
-  return paths
+  async function scanApiRoutes(apiDir: string) {
+    try {
+      const entries = await fs.readdir(apiDir, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const fullPath = join(apiDir, entry.name)
+        
+        if (entry.isDirectory()) {
+          const routeSegment = `/${entry.name}`
+          await scanApiDir(fullPath, routeSegment)
+        }
+      }
+    } catch (e) {}
+  }
+  
+  async function scanApiDir(dir: string, prefix: string) {
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const fullPath = join(dir, entry.name)
+        
+        if (entry.isDirectory()) {
+          await scanApiDir(fullPath, `${prefix}/${entry.name}`)
+        } else if (entry.name === 'route.ts') {
+          const content = await fs.readFile(fullPath, 'utf-8')
+          const lineCount = content.split('\n').length
+          
+          pages.push({
+            route: `/api${prefix}`,
+            category: 'API',
+            access: 'API',
+            status: lineCount < 10 ? 'STUB' : 'LIVE',
+            lineCount,
+            isDynamic: false,
+          })
+        }
+      }
+    } catch (e) {}
+  }
+  
+  await scanDir(appDir)
+  return pages
 }
 
 export default async function SitemapPage() {
-  const appDir = join(process.cwd(), 'app')
-  const allPaths = await walkDir(appDir, appDir)
-  
-  const routes: RouteInfo[] = allPaths.map(path => {
-    const { category, access } = categorizeRoute(path)
-    const filePath = path === '/'
-      ? 'app/page.tsx'
-      : `app${path}/page.tsx`
-    const isDynamic = path.includes(':')
-
-    // Check if route is orphaned (not in navbar/dropdowns)
-    const isOrphan = !LINKED_ROUTES.includes(path) && !INTENTIONAL_UNLINKED.some(u => {
-      const pattern = u.replace(/:[^/]+/g, '[^/]+')
-      return new RegExp(`^${pattern}$`).test(path)
-    })
-
-    return { route: path, category, access, filePath, isDynamic, isOrphan }
-  })
-
-  // Get orphan routes
-  const orphanRoutes = routes.filter(r => r.isOrphan)
-  
-  // Sort: admin, agency, caregiver, public, auth, api
-  const categoryOrder: Record<string, number> = {
-    admin: 0,
-    agency: 1,
-    caregiver: 2,
-    public: 3,
-    auth: 4,
-    api: 5,
-  }
-  
-  routes.sort((a, b) => {
-    const orderDiff = categoryOrder[a.category] - categoryOrder[b.category]
-    if (orderDiff !== 0) return orderDiff
-    return a.route.localeCompare(b.route)
-  })
+  const pages = await getAllPages()
   
   // Group by category
-  const grouped = routes.reduce((acc, route) => {
-    if (!acc[route.category]) acc[route.category] = []
-    acc[route.category].push(route)
+  const grouped = pages.reduce((acc, page) => {
+    const cat = page.category
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(page)
     return acc
   }, {} as Record<string, RouteInfo[]>)
   
-  const categoryInfo: Record<string, { label: string; color: string; bg: string; border: string }> = {
-    admin: { label: 'Admin — super access only', color: '#B91C1C', bg: '#FEF2F2', border: '#FECACA' },
-    agency: { label: 'Agency — approved login required', color: '#1D4ED8', bg: '#EFF6FF', border: '#BFDBFE' },
-    caregiver: { label: 'Caregiver — login required', color: '#0F766E', bg: '#F0FDFA', border: '#99F6E4' },
-    public: { label: 'Public', color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0' },
-    auth: { label: 'Auth', color: '#7C3AED', bg: '#FAF5FF', border: '#DDD6FE' },
-    api: { label: 'API', color: '#374151', bg: '#F3F4F6', border: '#D1D5DB' },
+  // Calculate stats
+  const stats = {
+    total: pages.length,
+    public: pages.filter(p => p.access === 'PUBLIC').length,
+    agency: pages.filter(p => p.access === 'AGENCY').length,
+    admin: pages.filter(p => p.access === 'ADMIN').length,
+    caregiver: pages.filter(p => p.access === 'CAREGIVER').length,
+    live: pages.filter(p => p.status === 'LIVE').length,
+    stubs: pages.filter(p => p.status === 'STUB').length,
   }
   
-  const order = ['admin', 'agency', 'caregiver', 'public', 'auth', 'api']
-  const total = routes.length
-  const orphanCount = orphanRoutes.length
-
+  const categories = Object.keys(grouped).sort()
+  
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: 'system-ui, sans-serif', padding: '32px 24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: N, margin: '0 0 4px' }}>Site map</h1>
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 24px' }}>
-          Auto-generated from filesystem — {total} routes
+    <div style={{ fontFamily: S, background: '#F7F4F0', minHeight: '100vh', padding: '24px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: N, margin: '0 0 8px' }}>
+          Sitemap
+        </h1>
+        <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>
+          Live visual representation of all routes in the application
         </p>
-
-        {/* ORPHAN ROUTES SECTION */}
-        {orphanCount > 0 && (
-          <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 16 }}>⚠️</span>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#92400E', margin: 0 }}>Orphan Pages — Need Navigation Links ({orphanCount})</h2>
-            </div>
-            <p style={{ fontSize: 13, color: '#B45309', margin: '0 0 12px' }}>
-              These pages exist but are not linked from navbar/dropdowns. Add to navigation or mark as intentional.
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {orphanRoutes.map(r => (
-                <code key={r.route} style={{
-                  fontSize: 12, padding: '4px 10px', borderRadius: 6,
-                  background: 'white', color: '#92400E', border: '1px solid #FDE68A'
-                }}>
-                  {r.route}
-                </code>
-              ))}
-            </div>
+      </div>
+      
+      {/* Summary Bar */}
+      <div style={{ 
+        background: N, 
+        borderRadius: 12, 
+        padding: '16px 20px', 
+        marginBottom: 24,
+        display: 'flex',
+        gap: 24,
+        flexWrap: 'wrap',
+      }}>
+        <div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: '#F5F0E8', fontFamily: "'DM Serif Display', serif" }}>
+            {stats.total}
           </div>
-        )}
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {order.map(cat => {
-            const routesInCat = grouped[cat]
-            if (!routesInCat?.length) return null
-            const info = categoryInfo[cat]
-            
-            return (
-              <div key={cat} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 16, overflow: 'hidden' }}>
-                <div style={{ background: info.bg, borderBottom: `1px solid ${info.border}`, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: info.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: info.color }}>{info.label}</span>
-                  <span style={{ fontSize: 12, color: '#94A3B8', marginLeft: 'auto' }}>{routesInCat.length} routes</span>
-                </div>
-                
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <th style={{ textAlign: 'left', padding: '10px 20px', fontSize: 11, fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>Route</th>
-                      <th style={{ textAlign: 'left', padding: '10px 20px', fontSize: 11, fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>Access</th>
-                      <th style={{ textAlign: 'left', padding: '10px 20px', fontSize: 11, fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>File</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {routesInCat.map((route, i) => (
-                      <tr key={route.route} style={{ borderBottom: i < routesInCat.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
-                        <td style={{ padding: '12px 20px' }}>
-                          <code style={{ fontSize: 13, fontFamily: 'monospace', color: N, fontWeight: 500 }}>{route.route}</code>
-                          {route.isDynamic && (
-                            <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#FEF3C7', color: '#92400E' }}>[dynamic]</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '12px 20px', color: '#64748B', fontSize: 12 }}>{route.access}</td>
-                        <td style={{ padding: '12px 20px' }}>
-                          <code style={{ fontSize: 11, fontFamily: 'monospace', color: '#94A3B8' }}>{route.filePath}</code>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          })}
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Total Pages
+          </div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Public</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#22C55E' }}>{stats.public}</div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Agency</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#3B82F6' }}>{stats.agency}</div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Admin</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#EF4444' }}>{stats.admin}</div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Caregiver</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: G }}>{stats.caregiver}</div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Live</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#22C55E' }}>{stats.live}</div>
+        </div>
+        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 24 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Stubs</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#94A3B8' }}>{stats.stubs}</div>
         </div>
       </div>
+      
+      {/* Category Cards */}
+      {categories.map(cat => (
+        <div key={cat} style={{ 
+          background: 'white', 
+          borderRadius: 12, 
+          border: '1px solid #E2E8F0',
+          marginBottom: 16,
+          overflow: 'hidden',
+        }}>
+          <div style={{ 
+            background: cat === 'Marketing' ? '#0D1B3E' : 
+                       cat === 'Auth' ? '#1E3A8A' :
+                       cat === 'Agency' ? '#1E3A8A' :
+                       cat === 'Caregiver' ? '#92400E' :
+                       cat === 'Admin' ? '#7C2D12' :
+                       cat === 'System' ? '#065F46' : '#64748B',
+            padding: '12px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: 'white', margin: 0 }}>
+              {cat}
+            </h2>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
+              {grouped[cat].length} routes
+            </span>
+          </div>
+          
+          <div style={{ padding: 8 }}>
+            {grouped[cat].map((page, idx) => (
+              <div key={idx} style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 12px',
+                borderBottom: idx < grouped[cat].length - 1 ? '1px solid #F1F5F9' : 'none',
+                gap: 12,
+              }}>
+                <code style={{ 
+                  flex: 1, 
+                  fontSize: 13, 
+                  color: N,
+                  fontFamily: 'monospace',
+                }}>
+                  {page.route}
+                </code>
+                <span style={{
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: page.access === 'PUBLIC' ? '#DCFCE7' :
+                              page.access === 'AGENCY' ? '#DBEAFE' :
+                              page.access === 'ADMIN' ? '#FEE2E2' :
+                              page.access === 'CAREGIVER' ? '#FEF3C7' :
+                              '#F1F5F9',
+                  color: page.access === 'PUBLIC' ? '#16A34A' :
+                         page.access === 'AGENCY' ? '#1D4ED8' :
+                         page.access === 'ADMIN' ? '#DC2626' :
+                         page.access === 'CAREGIVER' ? '#D97706' :
+                         '#64748B',
+                }}>
+                  {page.access}
+                </span>
+                <span style={{
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: page.status === 'LIVE' ? '#DCFCE7' : '#F1F5F9',
+                  color: page.status === 'LIVE' ? '#16A34A' : '#94A3B8',
+                }}>
+                  {page.status}
+                </span>
+                <span style={{ fontSize: 11, color: '#94A3B8', minWidth: 40, textAlign: 'right' }}>
+                  {page.lineCount} lines
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
