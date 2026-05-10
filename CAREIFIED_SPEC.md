@@ -11,7 +11,7 @@
 
 ### Start of every session — paste this prompt to Claude:
 > "Read SOUL.md first. Then read CAREIFIED_SPEC.md, CONTEXT.md,
-> CLAUDE.md, HANDOFF.md, CAREIFIED_STATUS.md in full.
+> CLAUDE.md, CAREIFIED_STATUS.md in full.
 > Apply all 33 lenses from SOUL.md.
 > Run a static audit against the current codebase.
 > Report PASS, FAIL, or MISSING for each item.
