@@ -154,22 +154,27 @@ Friday May 16
 
 ### WEEK 5: Jun 7-14 — Launch Prep
 - [ ] Clerk production keys upgraded
-- [ ] Both test agencies onboarded
+- [ ] Canadian test agency onboarded
 - [ ] Canadian agency account created on careified.ca
-- [ ] Texas agency account created on careified.com
 - [ ] First caregiver profiles seeded (agency roster)
 - [ ] AIRecruit test call completed end to end
 - [ ] Full regression test — every page, every flow
 - [ ] June 15 go/no-go checklist reviewed
 - [ ] Rollback plan confirmed
 
-### JUNE 15 — SOFT LAUNCH DAY
-- [ ] Both agencies live and active
+### JUNE 15 — CANADA LAUNCH (Phase 1A)
+- [ ] Canadian agency live and active
 - [ ] Real caregivers on platform
+- [ ] careified.ca live and resolving
 - [ ] First AI screening call completed
 - [ ] No placeholder copy anywhere
 - [ ] No critical security issues open
 - [ ] Monitoring active (Clarity, error tracking)
+
+### US LAUNCH (Phase 1B) — Target: Within 30 days of June 15
+- [ ] Texas test agency onboarded
+- [ ] careified.com live and resolving
+- [ ] locale=en-US enforcement verified
 
 ---
 
