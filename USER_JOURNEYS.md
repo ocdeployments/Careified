@@ -1,8 +1,9 @@
 # USER_JOURNEYS.md — Careified End-to-End User Flows
-# Every journey from discovery to success state
-# Last updated: May 9 2026
-# Rule: Every new feature must map to a journey before building
-# Rule: Every journey must have a failure state and recovery path
+# Purpose: Every journey from discovery to success state
+# Updated: May 9 2026
+# Update trigger: When new user flows are built or discovered
+# Owner: Both
+# DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), status (CAREIFIED_STATUS.md)
 
 ---
 

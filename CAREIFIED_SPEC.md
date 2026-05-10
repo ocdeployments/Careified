@@ -1,8 +1,9 @@
 # CAREIFIED_SPEC.md
-# Living QA spec — single source of truth for expected behaviour
-# Generated: May 5 2026 | Updated: May 9 2026 | Pages audited: 53 | Components: 102
-# Rule: Update this file at END of every build session
-# Rule: Audit against this file at START of every build session
+# Purpose: Expected behaviour for every page, component, and API route — QA source of truth
+# Updated: May 9 2026
+# Update trigger: Every session — new pages added, resolved issues moved to RESOLVED
+# Owner: Claude
+# DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), roadmap (ROADMAP.md)
 
 ---
 
@@ -49,10 +50,10 @@ These are active failures as of May 9 2026. Fix before launch.
 - [x] /agency/* requires agency auth — ✅ FIXED May 6 2026 (app/agency/layout.tsx)
 - [x] Reference tokens are UUID — ✅ FIXED May 9 2026 (DB default gen_random_uuid())
 - [x] SSL cert for Render DB — ✅ FIXED (lib/db.ts conditional)
-- [ ] Vapi webhook HMAC signature verification — NOT BUILT (HIGH) ❌
-- [ ] No rate limiting on any API route — NOT BUILT (HIGH) ❌
-- [ ] SQL injection risk in lib/db.ts lines 56-68 — NOT FIXED (HIGH) ❌
-- [ ] XSS via dangerouslySetInnerHTML in admin/caregivers line 217 (HIGH) ❌
+- [x] Vapi webhook HMAC signature verification — ✅ FIXED May 9 2026
+- [x] Rate limiting on API routes — ✅ FIXED May 9 2026 (lib/rateLimit.ts)
+- [x] SQL injection risk in lib/db.ts lines 56-68 — ✅ FIXED May 9 2026 (allowlist validation)
+- [x] dangerouslySetInnerHTML removed — ✅ FIXED May 9 2026
 - [ ] Gold hex #C9A84C inconsistency — 30 files use wrong hex (MEDIUM) ❌
 
 ---

@@ -1,6 +1,9 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 9 2026
-# Safe revert: 97a95ad
+# Purpose: Current build state — what is done, what is pending, what is broken
+# Updated: May 9 2026
+# Update trigger: Every session — mandatory
+# Owner: Claude
+# DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
 
 ---
 
@@ -167,28 +170,28 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ---
 
-## SECURITY AUDIT FINDINGS (May 4 2026)
+## SECURITY AUDIT FINDINGS (May 4 2026) — ALL FIXED MAY 9
 
-### Critical Issues
-| Issue | File | Fix |
-|-------|------|-----|
-| Admin pages completely unprotected | `app/admin/*` | Add Clerk auth + ADMIN_CLERK_USER_ID check |
-| No webhook signature verification | `app/api/airecruit/webhook/route.ts` | Add HMAC validation for Vapi webhooks |
-| SQL injection risk in lib/db.ts | `lib/db.ts` lines 56-68 | Validate keys against column allowlist |
+### Critical Issues — FIXED
+| Issue | File | Status |
+|-------|------|---------|
+| Admin pages completely unprotected | `app/admin/*` | ✅ FIXED May 9 |
+| No webhook signature verification | `app/api/airecruit/webhook/route.ts` | ✅ FIXED May 9 |
+| SQL injection risk in lib/db.ts | `lib/db.ts` lines 56-68 | ✅ FIXED May 9 |
 
-### High Priority
-| Issue | File | Fix |
-|-------|------|-----|
-| Reference tokens not UUID | `app/api/references/invite/route.ts` | Use gen_random_uuid() |
-| No rate limiting | All API routes | Add rate limiting middleware |
-| XSS: dangerouslySetInnerHTML | `app/admin/caregivers/page.tsx` line 217 | Remove or sanitize |
+### High Priority — FIXED
+| Issue | File | Status |
+|-------|------|---------|
+| Reference tokens not UUID | `app/api/references/invite/route.ts` | ✅ FIXED May 9 |
+| No rate limiting | All API routes | ✅ FIXED May 9 |
+| XSS: dangerouslySetInnerHTML | `app/admin/caregivers/page.tsx` line 217 | ✅ FIXED May 9 |
 
 ### Medium Priority
-| Issue | File | Fix |
-|-------|------|-----|
-| 404 leaks existence of protected pages | `/agency/*` when not agency | Return 403 instead |
-| Tier parameter accepts user input | `lib/attributes/index.ts` | Ensure only admin can set tiers |
-| Missing SSL on Render DB | `lib/db.ts` | Set rejectUnauthorized: true in prod |
+| Issue | File | Status |
+|-------|------|---------|
+| 404 leaks existence of protected pages | `/agency/*` when not agency | Pending |
+| Tier parameter accepts user input | `lib/attributes/index.ts` | Pending |
+| Missing SSL on Render DB | `lib/db.ts` | ✅ CONDITIONAL FIX May 9 |
 
 ---
 

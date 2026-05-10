@@ -1,10 +1,9 @@
 # PRODUCTION_CHECKLIST.md
-# Careified — Production Readiness Tracker
-# Created: May 8 2026
-# Rule: Review at START of every session. Update at END of every session.
-# Rule: One checkbox per item. Check off only when verified live — not just committed.
-
----
+# Purpose: Every item required to go live — technical, security, legal, content, ops
+# Updated: May 9 2026
+# Update trigger: Every session — tick completed items, add new requirements discovered
+# Owner: Both
+# DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), specs (CAREIFIED_SPEC.md)
 
 ## 🔴 CRITICAL — Launch Blockers
 

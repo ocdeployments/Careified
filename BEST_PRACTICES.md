@@ -1,10 +1,10 @@
 ---
 # BEST_PRACTICES.md
-# Careified — Engineering & Product Best Practices
-# Created: May 8 2026
-# Rule: Read at START of every session
-# Rule: Update when a new pattern is established
-# Source: Derived from LESSONS_LEARNED.md — every entry here has a real failure behind it
+# Purpose: Engineering and product standards — the HOW behind every build decision
+# Updated: May 9 2026
+# Update trigger: When a new pattern is established or an old one proven wrong
+# Owner: Both
+# DO NOT DUPLICATE: Rules (CLAUDE.md), decisions (CONTEXT.md)
 
 ---
 

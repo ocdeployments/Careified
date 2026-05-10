@@ -1,11 +1,9 @@
 # FOUNDER.md — Romy's Vision for Careified
-# This is the founder's brain on paper
-# Read this before SOUL.md, before CLAUDE.md, before everything
-# Last updated: May 9 2026
-# Rule: Never make a product decision that contradicts this document
-#        without explicit founder approval
-
----
+# Purpose: Founder's vision, mission, non-negotiables, user profiles, and revenue model
+# Updated: May 9 2026
+# Update trigger: When vision, pricing, or user understanding changes
+# Owner: Romy
+# DO NOT DUPLICATE: Technical decisions (CONTEXT.md), build status (CAREIFIED_STATUS.md)
 
 ## THE ONE SENTENCE
 

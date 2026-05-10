@@ -1,12 +1,9 @@
 # ROADMAP.md — Careified Build Roadmap
-# Single source of truth for what gets built, when, and why
-# Read this before making any feature decision
-# Last updated: May 9 2026
-# Rule: No feature gets built that isn't in the current phase
-#        without explicit founder approval
-# Rule: Update this file at the end of every session
-
----
+# Purpose: Phased build plan, weekly schedule, scope gates, and feature parking lot
+# Updated: May 9 2026
+# Update trigger: Every session — tick completed items, add new features discovered
+# Owner: Both
+# DO NOT DUPLICATE: Page specs (CAREIFIED_SPEC.md), build status (CAREIFIED_STATUS.md)
 
 ## NORTH STAR
 
