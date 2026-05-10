@@ -111,6 +111,14 @@ Do instead: Always push to main branch — Vercel auto-deploys. Never run npx ve
 
 ---
 
+### May 9 2026
+
+**PROCESS — Documentation drift across files**
+What happened: Docs accumulated contradictions over multiple sessions. PRICING/CLAUDE/CONTEXT disagreed on pricing visibility. MASTER_DOCS.md and HANDOFF.md were referenced but didn't exist. PHI encryption was mis-categorised. Locale migration had no backfill plan. Email provider was missing entirely. Demo data hygiene wasn't planned.
+Do instead: At end of every session, run grep against all .md files for the topic touched that day. If two files mention the same fact, verify they say the same thing. DOC_INDEX.md is now the source-of-truth map — consult before adding new content to any doc.
+
+---
+
 ## PATTERNS TO WATCH
 
 These mistakes happen repeatedly — extra vigilance needed:
