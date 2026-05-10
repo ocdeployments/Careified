@@ -79,7 +79,7 @@ const CARDS: Card[] = [
   },
 ]
 
-const GOLD = '#C9A84C'
+const GOLD = '#C9973A'
 const GOLD_SOFT = 'rgba(201, 168, 76, 0.5)'
 const NAVY = '#0D1B3E'
 const CREAM = '#F5F0E8'

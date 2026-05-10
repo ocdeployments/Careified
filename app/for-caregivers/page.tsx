@@ -61,8 +61,8 @@ export default function ForCaregiversPage() {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
           <div style={{
             display: 'inline-block',
-            border: '1px solid #C9A84C',
-            color: '#C9A84C',
+            border: '1px solid #C9973A',
+            color: '#C9973A',
             borderRadius: '9999px',
             padding: '6px 16px',
             fontSize: '11px',

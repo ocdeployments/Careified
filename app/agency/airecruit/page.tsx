@@ -70,11 +70,11 @@ export default async function AIRecruitPage() {
             <div style={{
               display: 'inline-block',
               background: 'rgba(201, 168, 76, 0.15)',
-              border: '1px solid #C9A84C',
+              border: '1px solid #C9973A',
               borderRadius: '99pxpx',
               padding: '4px 12px',
               fontSize: '11px',
-              color: '#C9A84C',
+              color: '#C9973A',
               fontWeight: 600,
               letterSpacing: '0.1em',
               marginBottom: '16px'
@@ -114,7 +114,7 @@ export default async function AIRecruitPage() {
               <div style={{
                 fontSize: '28px',
                 fontWeight: 700,
-                color: '#C9A84C',
+                color: '#C9973A',
                 marginBottom: '4px'
               }}>
                 {campaigns.length}
@@ -138,7 +138,7 @@ export default async function AIRecruitPage() {
               <div style={{
                 fontSize: '28px',
                 fontWeight: 700,
-                color: '#C9A84C',
+                color: '#C9973A',
                 marginBottom: '4px'
               }}>
                 {totalCalls}
@@ -179,7 +179,7 @@ export default async function AIRecruitPage() {
           <Link
             href="/agency/airecruit/new"
             style={{
-              background: '#C9A84C',
+              background: '#C9973A',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -213,7 +213,7 @@ export default async function AIRecruitPage() {
               justifyContent: 'center',
               margin: '0 auto 24px'
             }}>
-              <Phone size={32} color="#C9A84C" />
+              <Phone size={32} color="#C9973A" />
             </div>
             <h3 style={{
               fontFamily: "'DM Serif Display', Georgia, serif",
@@ -234,7 +234,7 @@ export default async function AIRecruitPage() {
               href="/agency/airecruit/new"
               style={{
                 display: 'inline-block',
-                background: '#C9A84C',
+                background: '#C9973A',
                 color: 'white',
                 borderRadius: '8px',
                 padding: '12px 24px',
@@ -405,9 +405,9 @@ export default async function AIRecruitPage() {
                             padding: '6px 14px',
                             fontSize: '13px',
                             fontWeight: 500,
-                            color: '#C9A84C',
+                            color: '#C9973A',
                             textDecoration: 'none',
-                            border: '1px solid #C9A84C',
+                            border: '1px solid #C9973A',
                             borderRadius: '6px'
                           }}
                         >
@@ -481,7 +481,7 @@ export default async function AIRecruitPage() {
 
             {/* Arrow */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-              <ArrowRight size={20} color="#C9A84C" />
+              <ArrowRight size={20} color="#C9973A" />
             </div>
 
             {/* Step 2 */}
@@ -520,7 +520,7 @@ export default async function AIRecruitPage() {
 
             {/* Arrow */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-              <ArrowRight size={20} color="#C9A84C" />
+              <ArrowRight size={20} color="#C9973A" />
             </div>
 
             {/* Step 3 */}
@@ -559,7 +559,7 @@ export default async function AIRecruitPage() {
 
             {/* Arrow */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-              <ArrowRight size={20} color="#C9A84C" />
+              <ArrowRight size={20} color="#C9973A" />
             </div>
 
             {/* Step 4 */}

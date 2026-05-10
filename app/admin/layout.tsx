@@ -43,7 +43,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             alignItems: 'center',
             gap: '8px',
             padding: '6px 12px',
-            background: '#C9A84C',
+            background: '#C9973A',
             borderRadius: '6px',
             marginBottom: '24px',
           }}>
