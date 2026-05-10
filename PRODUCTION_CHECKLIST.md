@@ -34,7 +34,9 @@
 - [ ] E&O insurance in place
 - [ ] Cyber liability insurance in place
 - [ ] General liability insurance in place
-- [ ] NEXT_PUBLIC_LOCALE=CA added to Vercel env vars
+- [x] NEXT_PUBLIC_LOCALE=CA added to Vercel env vars
+- [x] Locale column added to DB tables (caregivers, agencies, client_needs) — May 10 2026
+- [x] Locale scoping enforced in search/match APIs — May 10 2026
 
 ### Infrastructure
 - [ ] SSL cert for Render DB (rejectUnauthorized: true)
