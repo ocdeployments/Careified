@@ -287,9 +287,20 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 ## 12. Session Start Checklist
 
+### File Read Order
+1. **SOUL.md** — Identity, lenses, limits (read first always)
+2. **CONTEXT.md** — Decisions made and why
+3. **CLAUDE.md** — Technical rules and conventions
+4. **CAREIFIED_SPEC.md** — Expected page behaviour
+5. **CAREIFIED_STATUS.md** — Current build state
+6. **app/admin/status/page.tsx** — Verify it reflects current state
+
+### Session Start Commands
 ```bash
 # Step 0 — Always read SOUL.md first before any other file
 cd /Users/owner/careified
+git checkout develop
+git pull origin develop
 git status
 echo "--- Doc check ---"
 for doc in FOUNDER.md SOUL.md ROADMAP.md CONTEXT.md \
@@ -311,6 +322,21 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 npx tsc --noEmit 2>&1 | head -5
 ```
 
+### Git Rules at Session Start
+⛔ **At session start, Claude MUST NOT run any of the following:**
+- `git add`
+- `git commit`
+- `git push`
+- `git merge`
+- `git rebase`
+- `git reset`
+
+**Session start is READ ONLY.** The only git commands permitted are:
+- `git status` — to see local state
+- `git log --oneline -5` — to see recent history
+- `git diff --name-only` — to see what changed since last commit
+
+### Post-Checklist Actions
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
 - Read BEST_PRACTICES.md — confirm no rules are being violated before building
 - Read LESSONS_LEARNED.md — confirm no repeated mistakes from previous sessions
@@ -322,26 +348,7 @@ npx tsc --noEmit 2>&1 | head -5
 
 ## 12a. Session Start — Git Rules
 
-⛔ **At session start, Claude MUST NOT run any of the following:**
-
-- `git add`
-- `git commit`
-- `git push`
-- `git merge`
-- `git rebase`
-- `git reset`
-
-**Session start is READ ONLY.** The only git commands permitted are:
-
-- `git status` — to see local state
-- `git log --oneline -5` — to see recent history
-- `git diff --name-only` — to see what changed since last commit
-
-**If uncommitted files are found at session start, Claude should:**
-
-1. List them clearly in the session start report
-2. Ask: "There are uncommitted local changes from the previous session. Would you like to review them before we begin?"
-3. Wait for user direction — do NOT commit or discard anything automatically
+Session start: see §12 above.
 
 ---
 
@@ -416,45 +423,7 @@ npx tsc --noEmit 2>&1 | head -5
 ## 14. Session Commands
 
 ### When I say "start session" you will:
-1. Read these files in full — in this order:
-   - SOUL.md (identity, lenses, limits — read this first always)
-   - CONTEXT.md
-   - CLAUDE.md
-   - CAREIFIED_SPEC.md
-   - CAREIFIED_STATUS.md
-   - app/admin/status/page.tsx (to verify it reflects current state)
-
-2. Run the session start checklist:
-   Verify you are on the develop branch:
-   ```bash
-   cd /Users/owner/careified
-   git checkout develop
-   git pull origin develop
-   git status
-   git log --oneline -5
-   export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
-   node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
-   npx tsc --noEmit 2>&1 | head -5
-   ```
-
-3. Audit the codebase against CAREIFIED_SPEC.md
-   POST findings to /api/qa/report
-   Show me: PASS / FAIL / WARNING counts only
-
-4. Show this summary:
-   ```
-   SESSION STARTED — [date]
-   ─────────────────────────
-   Git: [last 3 commits]
-   TypeScript: ✅ clean / ❌ X errors
-   DB: ✅ [X caregivers]
-   QA: ❌ X failing  ⚠️ X warnings  ✅ X passing
-   Most critical open issue: [top item from spec]
-   Awaiting your instruction.
-   ```
-
-5. Do not build anything. Wait for my instruction.
-
+Session start: see §12 above.
 ---
 
 ### /end-session — Safe Stop (auto or manual)
