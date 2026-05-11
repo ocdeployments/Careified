@@ -510,7 +510,6 @@ Skips the TS check and pushes regardless. Use only when you know the errors are 
 The session limit auto-trigger only runs Step 1 (/end-session).
 /confirm-push is ALWAYS a manual human decision. No exceptions.
 
-## Last updated: May 6, 2026 — Phase 1 Complete
 
 ### Demo Environment
 - `/demo` — Landing page with feature tour
