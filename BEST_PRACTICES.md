@@ -232,8 +232,7 @@ Every session must update:
 
 ### Consent
 - Explicit, versioned, timestamped consent for all communication types
-- TCPA (US): 8am-9pm local time — enforced in calling-hours.ts
-- CRTC (Canada): 9am-9:30pm weekdays, 10am-6pm weekends — enforced
+- Compliance hours: see AI_PLAYBOOK.md
 - Never call without consent gate — lib/airecruit/consent-gate.ts
 - Age verification (18+) required at signup
 
