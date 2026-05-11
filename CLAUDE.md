@@ -389,8 +389,7 @@ Vapi config: see AI_PLAYBOOK.md
 - `match_time_calls`: PENDING
 
 ### Compliance
-- CRTC (Canada): 9am-9:30pm weekdays, 10am-6pm weekends
-- TCPA (US/Texas): 8am-9pm local time
+Compliance hours: see AI_PLAYBOOK.md
 - Calling hours enforced in lib/airecruit/calling-hours.ts
 - Suppression list checked before every call
 - Permission gate in every call — candidate must say yes
