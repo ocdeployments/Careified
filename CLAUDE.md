@@ -268,11 +268,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 ## 10. Verified Stats — Use Only These
 
-| Stat | Source |
-|------|--------|
-| 75% | Annual caregiver turnover (Activated Insights 2025) |
-| 4 in 5 | Leave within first 100 days (HCAOA 2024) |
-| 9.7M | Care jobs to fill by 2034 (PHI 2025) |
+Industry stats: see COPY.md
 
 ## 11. Messaging Rules
 

@@ -33,8 +33,7 @@ Launch currency: CAD first, USD second.
   leaves within 100 days → repeat
 - What they want: interview-ready professionals, faster placement,
   retention signals before hire, compliance confidence
-- Key stat: 75% annual caregiver turnover (Activated Insights 2025)
-- Key stat: 4 in 5 caregivers leave within first 100 days (HCAOA 2024)
+- Key stats: see COPY.md
 
 ### Supply Side — Professional Caregivers (Always Free)
 - PSWs (Personal Support Workers), HCAs, DSWs, companions, live-in
@@ -251,9 +250,8 @@ Never build against this table — it was never created.
 | "Recruit without the legwork." | Core agency value prop |
 
 ### Verified Stats Only (Do Not Fabricate)
-- 75% annual caregiver turnover — Activated Insights 2025
-- 4 in 5 leave within first 100 days — HCAOA 2024
-- 9.7M care jobs to fill by 2034 — PHI 2025
+
+Industry stats: see COPY.md
 
 ---
 

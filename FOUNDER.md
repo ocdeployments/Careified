@@ -93,9 +93,7 @@ Model: Two-sided marketplace — agencies pay, caregivers pay premium.
 ### The Market
 - Ontario home care market: $3.2B and growing
 - US home care market: $130B+
-- 75% annual caregiver turnover (Activated Insights 2025)
-- 4 in 5 caregivers leave within first 100 days (HCAOA 2024)
-- 9.7M care jobs to fill by 2034 (PHI 2025)
+- Caregiver turnover stats: see COPY.md (stat source)
 - Technology adoption in home care is 5-7 years behind 
   other sectors — this is the opportunity
 
