@@ -401,13 +401,13 @@ Steps 3-10 all rebuilt with Context pattern
 
 ---
 
-## 19. Client Intake System — DESIGNED (Legacy)
+## 15. Client Intake System — DESIGNED (Legacy)
 
 See CLIENT_INTAKE.md for full spec.
 
 ---
 
-## 17. Personality Assessment — Step 7 Design
+## 16. Personality Assessment — Step 7 Design
 
 7 forced-choice scenario questions (NOT rating scales):
 
@@ -445,13 +445,13 @@ Stored in personality_profile JSONB
 
 ---
 
-## 18. Rating System — NOT YET BUILT
+## 17. Rating System — NOT YET BUILT
 
 See RATING_SYSTEM.md for full spec.
 
 ---
 
-## 20. Session Etiquette
+## 18. Session Etiquette
 
 Claude reads this file at the start of every session.
 This gives Claude full product context before touching any code.
@@ -466,13 +466,13 @@ decision costs a session.
 
 ---
 
-## 15. Client Intake System — Architecture
+## 19. Client Intake System — Architecture
 
 See CLIENT_INTAKE.md for full spec.
 
 ---
 
-## 16. Rating System — Design
+## 20. Rating System — Design
 
 See RATING_SYSTEM.md for full spec.
 
