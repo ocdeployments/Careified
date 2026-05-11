@@ -330,25 +330,7 @@ Target: Ontario PSW community first.
 
 ## 11. What Success Looks Like
 
-### 30 days post-launch:
-- 100+ caregiver profiles built and verified
-- 5+ agencies signed up and active
-- 0 critical security incidents
-- Caregiver profile builder completion rate > 60%
-
-### 90 days post-launch:
-- 500+ caregivers
-- 20+ agencies
-- First placements made through the platform
-- AIRecruit reference calls running automatically
-- Rating system live (post-placement trust scores)
-
-### 1 year:
-- Ontario market established
-- US expansion launched (Texas, Florida, New York first)
-- Family portal live
-- Background check integration (Checkr)
-- PSV verification (Persona/Didit, Nursys)
+See FOUNDER.md → What Success Looks Like
 
 ---
 
