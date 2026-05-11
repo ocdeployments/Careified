@@ -132,36 +132,7 @@ Before adding the `locale` column to existing tables:
 
 ## 4. BRANCH STRATEGY
 
-### Branch Structure
-```
-main     — production only. NEVER commit here directly.
-develop  — all builds happen here. Your working branch.
-feature/xxx — one branch per large feature.
-hotfix/xxx   — emergency production fixes only.
-```
-
-### Workflow
-```bash
-# Always start here
-git checkout develop
-git pull origin develop
-
-# Build and commit
-git add .
-git commit -m "feat: what you built"
-git push origin develop
-
-# When ready for production
-git checkout main
-git merge develop
-git push origin main
-```
-
-### Rules
-- **NEVER** push directly to main
-- **NEVER** commit to main
-- Only human operator merges develop → main manually
-- Vercel auto-deploys on push to main
+Branch strategy: see CLAUDE.md §16
 
 ---
 
