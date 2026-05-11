@@ -168,15 +168,7 @@ git push origin main
 ## 5. AI ARCHITECTURE
 
 ### Vapi (Voice AI)
-| Component | Value |
-|-----------|-------|
-| Assistant ID | fdd84833-80ef-4c50-8391-2d7b38e56ead |
-| US Phone | +1 (518) 617-4826 (Vapi-provisioned) |
-| CA Phone | ❌ to be provisioned (Ontario DID) |
-| Locale routing | caregiver locale → number selection |
-| Provider | Vapi (Twilio internal, not Careified-accessible) |
-| Type | Outbound, warm leads |
-| Voice | ElevenLabs via Vapi TTS |
+Vapi config: see AI_PLAYBOOK.md
 | Model | openai/gpt-4o |
 
 ### OpenRouter (Scoring)

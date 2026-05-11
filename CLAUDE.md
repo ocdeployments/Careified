@@ -373,10 +373,7 @@ Session start: see §12 above.
 ## 14. AIRecruit — Vapi Configuration
 
 ### Current Vapi Setup
-- **Assistant ID:** fdd84833-80ef-4c50-8391-2d7b38e56ead
-- **Assistant name:** AIRecruit Screener
-- **US Phone Number ID:** efd1fdc0-6795-4d5f-a399-b95367bd88ff
-- **US phone:** +1 (518) 617-4826 (Vapi-provisioned)
+Vapi config: see AI_PLAYBOOK.md
 - **CA Phone Number ID:** ❌ TO BE PROVISIONED before June 15
 - **CA phone:** ❌ TO BE PROVISIONED (Ontario DID)
 - **Type:** Outbound, warm leads, empathetic + friendly

@@ -137,7 +137,7 @@ keys at launch.
 ### Why Vapi for AIRecruit
 Best-in-class voice AI with programmable agents, TCPA/CRTC
 compliance hooks, webhook support, and transcript access.
-Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
+Assistant ID: see AI_PLAYBOOK.md
 
 ### Why OpenRouter/Mistral for resume parsing
 Cost-effective, fast, good at structured extraction from unstructured

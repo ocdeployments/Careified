@@ -135,7 +135,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - DB: reference_verification_requests
 
 ### AIRecruit (Phases 1-6)
-- Vapi assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
+- Vapi config: see AI_PLAYBOOK.md
 - Campaign UI, Vapi integration, webhook, scoring, dashboard
 - TCPA/CRTC compliance, consent gate before any call
 
