@@ -583,5 +583,3 @@ selected, notified_filled
 ---
 
 Last updated: May 9 2026
-Vapi Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
-Phone Number: +1 (518) 617-4826
