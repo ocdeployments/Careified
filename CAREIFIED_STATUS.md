@@ -372,7 +372,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ## DESIGN SYSTEM
 
 Colors: Navy #0D1B3E, Gold #C9973A/#E8B86D, Royal #1E3A8A, Warm white #F7F4F0
-Font: Inter (site-wide), 16px base
+Font: DM Serif Display (headlines) + DM Sans (body), 16px base. Inter is legacy — being phased out.
 Cards: white, borderRadius 16px, border 1px solid #E2E8F0
 Inline styles only — no Tailwind classes (v4 prod issues)
 No green as primary. No emojis in UI.
