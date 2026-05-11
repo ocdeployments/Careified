@@ -336,16 +336,7 @@ See FOUNDER.md → What Success Looks Like
 
 ## 12. Pre-Launch Checklist (Not Done Yet)
 
-- [ ] NEXT_PUBLIC_LOCALE=CA added to Vercel
-- [ ] Clerk production upgrade (pk_test_ → pk_live_)
-- [ ] All page copy written (currently all placeholder)
-- [ ] Lawyer review of lib/legal/text.ts
-- [ ] E&O / Cyber / General Liability insurance
-- [ ] Apple Developer account ($99/yr) for Wallet passes
-- [ ] SSL cert for Render DB (rejectUnauthorized: true)
-- [ ] US Vercel deployment (second project)
-- [ ] Stripe account + pricing confirmed
-- [ ] Incident response runbook written
+See PRODUCTION_CHECKLIST.md for current launch status.
 
 ---
 
