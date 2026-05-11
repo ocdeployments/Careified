@@ -36,7 +36,8 @@ Prevents contradictions and clarifies source of truth.
 | Copy | COPY.md | |
 | Agency Roster | AGENCY_ROSTER_SPEC.md | |
 | Rating system | RATING_SYSTEM.md | |
-| Accessibility | ACCESSIBILITY.md | |
+| Client intake | CLIENT_INTAKE.md | |
+# ACCESSIBILITY.md — planned, not yet written
 
 ---
 
@@ -82,15 +83,15 @@ If two docs disagree on the same topic:
 
 ## 6. FILE INVENTORY
 
-Total: 20 .md files
+Total: 21 .md files
 ```
-ACCESSIBILITY.md      AI_PLAYBOOK.md          ARCHITECTURE.md
-BEST_PRACTICES.md      CAREIFIED_SPEC.md       CAREIFIED_STATUS.md
-CLAUDE.md             CONTEXT.md             COPY.md
-FOUNDER.md            INTEGRATIONS.md       LESSONS_LEARNED.md
-PRICING.md           PRODUCTION_CHECKLIST.md ROADMAP.md
-SECURITY_RUNBOOK.md   SOUL.md                USER_JOURNEYS.md
-AGENCY_ROSTER_SPEC.md RATING_SYSTEM.md      DOC_INDEX.md (this file)
+AI_PLAYBOOK.md          ARCHITECTURE.md        BEST_PRACTICES.md
+CAREIFIED_SPEC.md       CAREIFIED_STATUS.md   CLAUDE.md
+CLIENT_INTAKE.md        CONTEXT.md            COPY.md
+FOUNDER.md              INTEGRATIONS.md       LESSONS_LEARNED.md
+PRICING.md             PRODUCTION_CHECKLIST.md ROADMAP.md
+SECURITY_RUNBOOK.md    SOUL.md                USER_JOURNEYS.md
+AGENCY_ROSTER_SPEC.md RATING_SYSTEM.md       DOC_INDEX.md (this file)
 ```
 
 ---
