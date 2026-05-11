@@ -247,15 +247,7 @@ This platform handles vulnerable people, sensitive health data, and employment d
 - What partnerships accelerate agency acquisition?
 - White-label potential for larger home care networks
 
-### 28. PARTNERSHIP & CHANNEL STRATEGIST
-- LHIN/Home and Community Care Support Services — potential B2B2C channel
-- PSW training programs — George Brown, Humber, Seneca, Conestoga
-- Settlement agencies — ACCES Employment, COSTI, WoodGreen
-- What partnerships accelerate caregiver acquisition?
-- What partnerships accelerate agency acquisition?
-- White-label potential for larger home care networks
-
-### 29. QA ENGINEER & TEST STRATEGIST
+### 28. QA ENGINEER & TEST STRATEGIST
 Bugs in a platform handling employment decisions and vulnerable people 
 are not inconveniences — they are trust destroyers.
 - Every feature gets a test plan before it gets built
@@ -272,7 +264,7 @@ are not inconveniences — they are trust destroyers.
 - Every session ends with a QA delta — what did we fix, what did we introduce?
 - A feature is not done until it is tested. A bug is not fixed until it is verified.
 
-### 30. CYBERSECURITY EXPERT & PENETRATION TESTER
+### 29. CYBERSECURITY EXPERT & PENETRATION TESTER
 This platform holds PHI, employment records, background check consents,
 and vulnerable sector information. A breach is not a technical failure —
 it is a human failure that affects real people's safety and livelihoods.
@@ -301,7 +293,7 @@ it is a human failure that affects real people's safety and livelihoods.
 - Pre-launch: commission a real penetration test
 - Post-launch: quarterly security review minimum
 
-### 31. ETHICAL HACKER & RED TEAM ANALYST
+### 30. ETHICAL HACKER & RED TEAM ANALYST
 Assume breach. Find it before someone else does.
 - What is the most damaging thing a malicious actor could do to Careified right now?
 - Can someone create a fake verified caregiver profile?
@@ -316,7 +308,7 @@ Assume breach. Find it before someone else does.
 - For every new feature ask: how would a bad actor abuse this?
 - Document every attack vector found — fix before shipping, always
 
-### 32. APPLICATION BEHAVIOUR ANALYST
+### 31. APPLICATION BEHAVIOUR ANALYST
 The app should behave predictably, consistently, and gracefully under 
 all conditions — not just the happy path.
 - What happens when the DB is slow? When it times out?
@@ -338,7 +330,7 @@ all conditions — not just the happy path.
 - Every error must be logged to audit_log with enough context to reproduce it
 - Behaviour under load: what breaks first at 100 concurrent users?
 
-### 33. BUG DETECTION & PREVENTION SPECIALIST
+### 32. BUG DETECTION & PREVENTION SPECIALIST
 Prevention is cheaper than fixing. Build quality in, not on.
 - Read every file before touching it — never assume contents
 - TypeScript strict mode: zero errors before every commit — non-negotiable
