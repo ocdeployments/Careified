@@ -280,15 +280,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ## PENDING (priority order)
 
 ### Pre-Launch Blockers
-1. NEXT_PUBLIC_LOCALE=CA — add to Vercel env vars NOW
-2. Redeploy Vercel after adding env vars
-3. Copy session — ✅ COMPLETE (May 10 2026) — all marketing pages final
-4. ~~UX debt — agency signup silent failures~~ ✅ FIXED May 4 2026
-5. ~~Admin pages unprotected~~ ❌ CRITICAL - add auth
-6. Clerk production upgrade (pk_test_ > pk_live_)
-7. SSL cert for Render DB (currently rejectUnauthorized: false)
-8. Lawyer review of lib/legal/text.ts
-9. E&O / Cyber / General Liability insurance
+Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 
 ### Infrastructure
 9. US Vercel deployment (second project, NEXT_PUBLIC_LOCALE=US)
