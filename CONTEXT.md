@@ -428,7 +428,7 @@ Steps 3-10 all rebuilt with Context pattern
 
 ---
 
-## 15. Client Intake System — DESIGNED
+## 19. Client Intake System — DESIGNED (Legacy)
 
 ### Build Order
 Finish caregiver profile Steps 1-10 FIRST, then build client intake.
@@ -467,7 +467,7 @@ environment fit 5%, interests 2%
 
 ---
 
-## 16. Personality Assessment — Step 7 Design
+## 17. Personality Assessment — Step 7 Design
 
 7 forced-choice scenario questions (NOT rating scales):
 
@@ -505,7 +505,7 @@ Stored in personality_profile JSONB
 
 ---
 
-## 17. Rating System — NOT YET BUILT
+## 18. Rating System — NOT YET BUILT
 
 Four weighted sources: Caregiver → System → Agency → Admin
 Six categories: Reliability · Human qualities · Hygiene ·
@@ -515,7 +515,7 @@ Max with agency validation: 5.0
 
 ---
 
-## 18. Session Etiquette
+## 20. Session Etiquette
 
 Claude reads this file at the start of every session.
 This gives Claude full product context before touching any code.
@@ -530,7 +530,7 @@ decision costs a session.
 
 ---
 
-## 14. Client Intake System — Architecture
+## 15. Client Intake System — Architecture
 
 *From CLIENT_INTAKE.md — designed, not yet built*
 
@@ -631,7 +631,7 @@ Sections J, L — 20 fields — ~10 minutes
 
 ---
 
-## 15. Rating System — Design
+## 16. Rating System — Design
 
 *From RATING_SYSTEM.md — designed, not yet built*
 
@@ -716,7 +716,7 @@ Earned — not scored. Appear visibly on profile.
 
 ---
 
-## 17. End-of-Session QA Protocol
+## 21. End-of-Session QA Protocol
 
 Run this at the END of every session before closing, after all commits are pushed to main.
 
