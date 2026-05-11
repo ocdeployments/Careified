@@ -86,23 +86,9 @@ Timeline: Soft launch June 15 2026
 These are NOT the same launch. Treating them as one creates a double-feature scope on June 15.
 
 ### Revenue Streams
-
-AGENCIES (B2B subscription)
-- Starter $99 CAD/mo — search, profiles, shortlist, roster (20)
-- Growth $249 CAD/mo — AIRecruit, CSV import, family portal
-- Scale $499 CAD/mo — unlimited, AI assistant, white label
-- Enterprise — custom, API access, integrations
-
-CAREGIVERS (B2C freemium)
-- Free — basic profile, visible in search
-- Professional $9.99 CAD/mo — profile analytics, WhatsApp 
-  notifications, placement alerts, priority search
-- Elite $19.99 CAD/mo — AI career assistant, direct messaging,
-  credential reminders, shift management
-
-FAMILIES (future)
-- Premium family portal — via agency subscription
-- Potential direct tier post Phase 3
+See PRICING.md for full tier detail.
+Launch currency: CAD first, USD second.
+Model: Two-sided marketplace — agencies pay, caregivers pay premium.
 
 ### The Market
 - Ontario home care market: $3.2B and growing
