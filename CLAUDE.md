@@ -70,7 +70,7 @@ At 💀 (100%+): Do not attempt the task. Instead:
 **Repository:** https://github.com/ocdeployments/Careified (private)
 **Live URL:** https://careified.vercel.app
 **Local path:** /Users/owner/careified
-**Geography:** Canada-first (Ontario focus), US expansion planned. Texas mentioned only in AIRecruit Vapi config history.
+**Geography:** Canada-first (Ontario focus), US expansion parallel (Texas test agency). See FOUNDER.md for launch sequencing.
 **Core moat:** Two-sided verified reputation system.
 
 Platform serves ALL care backgrounds — never medical-only framing.
