@@ -1,10 +1,10 @@
 # PRICING.md — Careified Pricing Model
 # Purpose: Two-sided marketplace pricing — agencies and caregivers
-# Updated: May 9 2026
-# Update trigger: When pricing decisions are made
+# Updated: May 11 2026
 # Owner: Romy
-# STATUS: Internal working model. Not user-facing until Stripe live. Subject to change before launch.
-# DO NOT DUPLICATE: Revenue model (FOUNDER.md), billing (PRODUCTION_CHECKLIST.md)
+# DO NOT DUPLICATE: This file is canonical for all pricing.
+#   FOUNDER.md references this file — do not add pricing back there.
+#   Billing implementation: PRODUCTION_CHECKLIST.md
 
 ---
 
