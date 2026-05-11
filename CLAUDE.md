@@ -265,8 +265,6 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 - **Platform:** Vercel → GitHub (ocdeployments/Careified, branch: main)
 - **Trigger:** ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
-- **NEVER:** `npx vercel --prod`
-- **NEVER:** set env vars via CLI
 
 ## 10. Verified Stats — Use Only These
 
@@ -584,8 +582,6 @@ Or: Vercel Dashboard → Deployments → any previous deploy → Promote to Prod
 ### Never Do This
 - Never commit directly to main
 - Never push untested code to main
-- Never run npx vercel --prod
-- Never change Vercel env vars via CLI
 - Never run DB migrations without a backup
 - Never test new features on production
 - Never push to main under any circumstances
