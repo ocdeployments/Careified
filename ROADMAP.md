@@ -1,6 +1,6 @@
 # ROADMAP.md — Careified Build Roadmap
 # Purpose: Phased build plan, weekly schedule, scope gates, and feature parking lot
-# Updated: May 9 2026
+# Updated: May 11 2026
 # Update trigger: Every session — tick completed items, add new features discovered
 # Owner: Both
 # DO NOT DUPLICATE: Page specs (CAREIFIED_SPEC.md), build status (CAREIFIED_STATUS.md)
@@ -402,6 +402,26 @@ Review monthly.
 - QuickFill Full (Phase 3) — AI auto-dispatch,
    auto-schedule, family notification,
    reliability scoring from response patterns
+- Caregiver → Agency verification request flow
+  Caregiver submits supervisor name + email from Work History (Step 8).
+  Careified sends signed single-use token link directly to supervisor.
+  Supervisor fills 2-min verification form (no account required):
+    - Employment confirmed, role, dates, would re-engage, 1-5 rating,
+      optional 200-char strengths note
+  On submit: caregiver tier upgrades Tier 4 → Tier 3 (reference confirmed).
+  Bottom of form: "Find more caregivers like [Name] → Create agency account"
+  Pre-populates agency signup with supervisor name + email + agency name.
+  This is the warm agency acquisition mechanic.
+  Open decisions before building:
+    Q1: Free-email domains (gmail/hotmail) — block, flag, or warn?
+    Q2: Verification rating → feeds aggregate_score directly or via
+        separate verification_score dimension?
+    Q3: Agency CTA post-submit — pre-populate signup or clean form?
+  DB needed: caregiver_verification_requests, caregiver_verification_responses
+  Routes needed: POST /api/verify/request, GET+POST /api/verify/[token]
+  Pages needed: /verify/respond/[token], /verify/thank-you,
+    Step 8 profile builder "Request verification" button
+  Target phase: Phase 2 (post-launch) unless Q1-Q3 answered before June 15
 
 ---
 
