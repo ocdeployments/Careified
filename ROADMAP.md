@@ -126,7 +126,7 @@ Wednesday May 14
 
 Thursday May 15
 - [ ] Caregiver contact info visible to approved agencies
-- [ ] Pipeline status on shortlisted caregivers (5 stages)
+- [x] Pipeline status on shortlisted caregivers (5 stages) ✅ DONE May 10
 
 Friday May 16
 - [ ] Romy: provision CA DID via Vapi dashboard (Ontario area code 416/647/289/905) — 30 min task
@@ -135,11 +135,11 @@ Friday May 16
 - [ ] Week 1 review — what slipped, what accelerated
 
 ### WEEK 2: May 17-23 — Agency Workflow
-- [ ] Multi-user agency accounts
+- [x] Multi-user agency accounts ✅ DONE May 10
 - [ ] Agency dashboard click-click-done audit
-- [ ] Locale column added to caregivers + agencies tables
+- [x] Locale column added to caregivers + agencies tables ✅ DONE May 10
 - [ ] lib/airecruit/vapi.ts: locale-based phone number selection (US vs CA DID)
-- [ ] CA/US data scoping enforced in queries
+- [x] CA/US data scoping enforced in queries ✅ DONE May 10
 - [ ] careified.ca domain pointed to Vercel
 - [ ] careified.com domain pointed to Vercel
 
