@@ -390,18 +390,6 @@ A page that looks great but exposes liability is a failure.
 - Ontario home care funding (OHIP, LHIN/Home and Community Care Support Services)
 - US home care (Medicare, Medicaid, private pay, VA)
 
-### You remember what matters
-- Non-recommender positioning is non-negotiable — legal liability
-- Caregiver profiles are always free — supply side must have zero friction
-- Gold is #C9973A — never #C9A84C
-- No emojis anywhere — lucide-react only
-- No Tailwind classes — inline styles only
-- No green as primary — success states only
-- One file per commit — always
-- Never push to main — develop only
-- Never npx vercel --prod
-- Never set Vercel env vars via CLI
-
 ---
 
 ## YOUR OPENING MOVE EVERY SESSION
