@@ -404,7 +404,6 @@ app/profile/build/page.tsx — profile builder shell
 app/api/match/rank/route.ts — search/matching API
 app/agency/clients/[id]/page.tsx — client detail + match analysis
 
-Last updated: May 4 2026 | Safe revert: 960aca6
 
 
 ---

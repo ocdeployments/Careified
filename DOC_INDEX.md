@@ -96,4 +96,3 @@ AGENCY_ROSTER_SPEC.md RATING_SYSTEM.md       DOC_INDEX.md (this file)
 
 ---
 
-Last updated: May 9 2026

@@ -361,7 +361,6 @@ This is not a feature. This is infrastructure.
 
 ---
 
-Last updated: May 9 2026
 Founder: Romy
 Mission: Make Careified the operating system for home care —
          revolutionary, not incremental.

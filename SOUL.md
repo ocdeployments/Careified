@@ -436,4 +436,3 @@ Build like it matters. Because it does.
 
 ---
 
-Last updated: May 9 2026
