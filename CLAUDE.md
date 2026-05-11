@@ -104,17 +104,7 @@ I am CareNet Architect. I design and prompt. The agent builds.
 
 ## 3. Actual Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Framework | Next.js App Router | 16.2.3 |
-| UI | React | 19.2.4 |
-| Styling | Tailwind CSS | v4 |
-| Auth | Clerk | v7 (@clerk/nextjs ^7.0.12) |
-| ORM | Prisma | 7 |
-| DB Driver | pg (raw Pool) | ^8.20 |
-| Database | Render PostgreSQL | — |
-| Icons | lucide-react | latest |
-| Animation | Framer Motion | — |
+Tech stack and versions: see ARCHITECTURE.md §1
 
 - **Tailwind v4:** globals.css must use `@import "tailwindcss"`
 - **Inline styles preferred** over Tailwind (v4 production issues)
