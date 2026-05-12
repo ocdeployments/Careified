@@ -1,15 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { MessageCircle, Copy, Check } from 'lucide-react'
 
 interface LiveBannerProps {
   firstName?: string
+  userId?: string
 }
 
-export default function LiveBanner({ firstName }: LiveBannerProps) {
+export default function LiveBanner({ firstName, userId: propUserId }: LiveBannerProps) {
+  const { user } = useUser()
+  const userId = propUserId || user?.id
   const [copied, setCopied] = useState(false)
-  const shareUrl = 'https://careified.ca/for-caregivers'
+  const shareUrl = userId
+    ? `https://careified.ca/for-caregivers?ref=${userId}`
+    : 'https://careified.ca/for-caregivers'
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl)
@@ -42,7 +48,7 @@ export default function LiveBanner({ firstName }: LiveBannerProps) {
       </div>
       <div style={{ display: 'flex', gap: '12px' }}>
         <a
-          href={`https://wa.me/?text=I just built my professional profile on Careified — agencies can find and verify me now. You should get on it: ${shareUrl}`}
+          href={`https://wa.me/?text=I just built my professional profile on Careified — agencies can find and verify me now. You should get on it: ${userId ? `https://careified.ca/for-caregivers?ref=${userId}` : 'https://careified.ca/for-caregivers'}`}
           target="_blank"
           rel="noopener noreferrer"
           style={{

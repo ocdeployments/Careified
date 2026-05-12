@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const SERIF = "'DM Serif Display', Georgia, serif"
 const SANS = "'DM Sans', system-ui, -apple-system, sans-serif"
@@ -20,6 +21,15 @@ const C = {
 export default function ForCaregiversPage() {
   const [isDesktop, setIsDesktop] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+  const searchParams = useSearchParams()
+
+  // Capture referral param and store in localStorage
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) {
+      localStorage.setItem('careified_referral', ref)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 768)
