@@ -24,6 +24,7 @@
 | 3 (May 10) | Multi-user agency accounts, pipeline status, gold hex fix | DONE | Session 3 |
 | May 11 2026 | Agency Roster Phase 1 (DB + 7 APIs), ContactCard component, Clerk auth NEXT_REDIRECT fix, Phase 2 UI | DONE | 7 commits |
 | May 12 2026 | Verify page agency CTA, LiveBanner (Telegram/WhatsApp/Copy), referred_by referral tracking, /settings stub, agency signup UX fixes | DONE | 9 commits |
+| May 13 2026 | Support Ticketing System: DB tables (support_tickets, ticket_messages), lib/tickets.ts helpers, 3 API routes (create/list/[id]), /agency/support, /caregiver/support, /admin/tickets queue, /settings/data-rights wired to tickets | DONE | 14 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
