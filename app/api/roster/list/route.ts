@@ -5,10 +5,21 @@ import { Pool } from 'pg'
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
 async function checkApprovedAgency(): Promise<string | null> {
+  let userId: string | null | undefined
   try {
-    const { userId } = await auth()
-    if (!userId) return null
+    const authResult = await auth()
+    userId = authResult.userId
+  } catch (e: any) {
+    if (e?.message?.includes('NEXT_REDIRECT') || e?.code === 'NEXT_REDIRECT') {
+      return null
+    }
+    console.error('Auth error:', e)
+    return null
+  }
 
+  if (!userId) return null
+
+  try {
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
     const role = user.publicMetadata?.role as string
