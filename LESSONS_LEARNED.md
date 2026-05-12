@@ -35,6 +35,9 @@ Updated: May 11 2026 | Owner: Both | See BEST_PRACTICES.md, CLAUDE.md
 First autonomous session. Faster execution, no approval delays. One file per commit maintained. TypeScript check non-negotiable.
 Rule confirmed: Autonomous fine for building. Never for: pushing, DB destructive ops, deleting large features.
 
+### May 11 2026
+**TOOLING — Clerk 7 auth() throws NEXT_REDIRECT in API routes** → auth() returns null in pages but throws NEXT_REDIRECT in API routes when no session. Wrap in try/catch → return 403. See app/api/roster/add/route.ts for pattern.
+
 ## PATTERNS TO WATCH
 1. Auth gaps — check proxy.ts publicRoutes
 2. Silent failures — show inline errors
