@@ -114,7 +114,7 @@ Tech stack and versions: see ARCHITECTURE.md §1
 
 ### DO NOT TOUCH
 
-- `.env.local` (DATABASE_URL + Clerk keys)
+- `.env.local` (DATABASE_URL + Clerk keys + BLOB_READ_WRITE_TOKEN)
 - `middleware.ts` (Clerk auth — already configured with public routes)
 - `lib/airecruit/vapi.ts` (edit from Mac terminal only using bash heredoc)
 
