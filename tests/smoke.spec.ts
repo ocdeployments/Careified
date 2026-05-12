@@ -34,4 +34,26 @@ test.describe('Smoke Tests', () => {
     await page.goto('/admin')
     await expect(page).toHaveURL(/sign-in/)
   })
+
+  // Public route tests
+  test('reference page is public — no auth redirect', async ({ page }) => {
+    await page.goto('/reference/test-token')
+    expect(page.url()).not.toContain('/sign-in')
+  })
+
+  test('claim page is public — no auth redirect', async ({ page }) => {
+    await page.goto('/claim/test-token')
+    expect(page.url()).not.toContain('/sign-in')
+  })
+
+  test('sign-in button in navbar links to /sign-in', async ({ page }) => {
+    await page.goto('/')
+    const signInLink = page.locator('a[href="/sign-in"]').first()
+    await expect(signInLink).toBeVisible()
+  })
+
+  test('verify page is public', async ({ page }) => {
+    await page.goto('/verify/test-slug')
+    expect(page.url()).not.toContain('/sign-in')
+  })
 })
