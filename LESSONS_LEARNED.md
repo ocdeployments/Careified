@@ -38,6 +38,11 @@ Rule confirmed: Autonomous fine for building. Never for: pushing, DB destructive
 ### May 11 2026
 **TOOLING — Clerk 7 auth() throws NEXT_REDIRECT in API routes** → auth() returns null in pages but throws NEXT_REDIRECT in API routes when no session. Wrap in try/catch → return 403. See app/api/roster/add/route.ts for pattern.
 
+### May 12 2026
+**PROCESS — Multi-file commits happened twice** → Auth fix (6 files) and roster UI (4 files) committed together. One file per commit — no exceptions. → Rule: BEST_PRACTICES.md §1
+**TOOLING — Clerk 7 auth() throws NEXT_REDIRECT in API routes** → Wrap auth() in try/catch in all API routes. → Pattern: app/api/roster/add/route.ts
+**PROCESS — Tasks A and B already done in prior session** → Gold hex and /profile/start were already fixed. Verify before building — grep first, commit only if needed. → Rule: read actual file before writing prompt.
+
 ## PATTERNS TO WATCH
 1. Auth gaps — check proxy.ts publicRoutes
 2. Silent failures — show inline errors
