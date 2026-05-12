@@ -102,6 +102,23 @@ export default function ForAgenciesPage() {
         </div>
       </section>
 
+      {/* AI Assistant CTA */}
+      <div style={{ textAlign: 'center', padding: '32px 20px', background: N }}>
+        <Link
+          href="/demo/assistant"
+          style={{
+            color: '#C9973A',
+            fontSize: '16px',
+            fontWeight: 600,
+            textDecoration: 'none',
+            borderBottom: '2px solid #C9973A',
+            paddingBottom: '2px'
+          }}
+        >
+          See the AI assistant in action →
+        </Link>
+      </div>
+
       {/* Benefits */}
       <section style={{ padding: '80px 20px', background: 'white' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
