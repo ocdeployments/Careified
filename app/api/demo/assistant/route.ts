@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ''
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 const MODEL = 'minimax/minimax-m2.5'
 
@@ -34,6 +34,14 @@ export async function POST(request: NextRequest) {
 
     if (!message) {
       return NextResponse.json({ error: 'Message required' }, { status: 400 })
+    }
+
+    if (!OPENROUTER_API_KEY) {
+      console.error('Demo assistant error: OPENROUTER_API_KEY not configured')
+      return NextResponse.json(
+        { error: 'AI service not configured. Please contact support.' },
+        { status: 503 }
+      )
     }
 
     // Rate limiting
