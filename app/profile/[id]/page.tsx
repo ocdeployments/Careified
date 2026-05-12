@@ -2,11 +2,9 @@
 
 import { notFound } from 'next/navigation'
 import { auth, clerkClient } from '@clerk/nextjs/server'
-import { Pool } from 'pg'
+import { pool } from '@/lib/db'
 import CaregiverProfileDemo from '@/components/profile/CaregiverProfileDemo'
 import { deriveWorkingStyle } from '@/lib/personality/working-style'
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
 async function getCaregiver(id: string) {
   try {
