@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+import { useUser } from '@clerk/nextjs'
 import { Loader2 } from 'lucide-react'
 
 const N = '#0D1B3E'
@@ -12,30 +12,27 @@ export default function ClaimCompletePage() {
   const params = useParams()
   const router = useRouter()
   const token = params?.token as string
+  const { user, isLoaded } = useUser()
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(true)
 
   useEffect(() => {
+    if (!isLoaded) return
+
     const completeClaim = async () => {
+      if (!user) {
+        router.push(`/sign-up?redirect_url=/claim/${token}/complete`)
+        return
+      }
+
       try {
-        // Get Clerk user
-        const { userId } = await auth()
-
-        if (!userId) {
-          // Not signed in, redirect to sign up
-          router.push(`/sign-up?redirect_url=/claim/${token}/complete`)
-          return
-        }
-
-        // Submit claim
         const res = await fetch(`/api/claim/${token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clerk_user_id: userId }),
+          body: JSON.stringify({ clerk_user_id: user.id }),
         })
 
         if (res.ok || res.status === 409) {
-          // Success or already claimed - redirect to profile build
           router.push('/profile/build')
         } else {
           const data = await res.json()
@@ -48,12 +45,12 @@ export default function ClaimCompletePage() {
       }
     }
 
-    if (token) {
+    if (token && isLoaded) {
       completeClaim()
     }
-  }, [token, router])
+  }, [token, user, isLoaded, router])
 
-  if (processing) {
+  if (!isLoaded || processing) {
     return (
       <div style={{ minHeight: '100vh', background: '#F7F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
