@@ -48,6 +48,25 @@ export default function LiveBanner({ firstName, userId: propUserId }: LiveBanner
       </div>
       <div style={{ display: 'flex', gap: '12px' }}>
         <a
+          href={`https://t.me/share/url?url=${shareUrl}&text=I just built my professional profile on Careified — agencies can find and verify me now. You should get on it`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: '#2AABEE',
+            color: 'white',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: 500,
+            textDecoration: 'none',
+          }}
+        >
+          Share on Telegram
+        </a>
+        <a
           href={`https://wa.me/?text=I just built my professional profile on Careified — agencies can find and verify me now. You should get on it: ${userId ? `https://careified.ca/for-caregivers?ref=${userId}` : 'https://careified.ca/for-caregivers'}`}
           target="_blank"
           rel="noopener noreferrer"
