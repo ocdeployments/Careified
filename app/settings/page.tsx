@@ -61,6 +61,15 @@ export default async function SettingsPage() {
         <p style={{ fontSize: '16px', color: '#64748B', lineHeight: 1.6 }}>
           Settings are coming soon. You'll be able to manage your account, notifications, and preferences here.
         </p>
+        <div style={{ marginTop: '24px', padding: '20px', background: '#FDF6EC', borderRadius: '12px', border: '1px solid #C9973A' }}>
+          <p style={{ fontSize: '14px', color: '#0D1B3E', fontWeight: 500 }}>
+            Available now:
+          </p>
+          <ul style={{ marginTop: '12px', paddingLeft: '20px', color: '#64748B', fontSize: '14px', lineHeight: 1.8 }}>
+            <li><a href="/settings/data-rights" style={{ color: '#1E3A8A', textDecoration: 'none' }}>Data & Privacy</a></li>
+            <li><a href="/settings/communications" style={{ color: '#1E3A8A', textDecoration: 'none' }}>Communication preferences</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   )
