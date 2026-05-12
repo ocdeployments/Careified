@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { Upload, Users, RefreshCw, Trash2, Eye, Check, Clock, AlertCircle, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Users, Plus, Upload, RefreshCw, Eye, Loader2 } from 'lucide-react'
 
 interface Caregiver {
   id: string
@@ -9,477 +9,335 @@ interface Caregiver {
   last_name: string
   email: string
   phone?: string
-  city?: string
-  job_title?: string
-  years_experience?: number
-  profile_status: string
+  claim_status: string
   created_at: string
+  token?: string
+  expires_at?: string
+  claimed_at?: string
+  token_status?: string
 }
 
 interface RosterClientProps {
   agencyId: string
   agencyName: string
-  caregivers: Caregiver[]
-  totalCount: number
 }
 
 const N = '#0D1B3E'
 const G = '#C9973A'
+const G_LIGHT = '#E8B86D'
+const WHITE = '#FFFFFF'
+const GREY = '#6B7280'
+const GREEN = '#16A34A'
 const S = "'DM Sans', sans-serif"
 
-export default function RosterClient({ agencyId, agencyName, caregivers: initialCaregivers, totalCount }: RosterClientProps) {
-  const [caregivers, setCaregivers] = useState(initialCaregivers)
-  const [uploadMode, setUploadMode] = useState<'upload' | 'manual' | null>(null)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [parsing, setParsing] = useState(false)
-  const [parsedData, setParsedData] = useState<any>(null)
-  const [saving, setSaving] = useState(false)
+export default function RosterClient({ agencyId, agencyName }: RosterClientProps) {
+  const [caregivers, setCaregivers] = useState<Caregiver[]>([])
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    jobTitle: '',
-  })
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  useEffect(() => {
+    fetchRoster()
+  }, [agencyId])
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File too large — max 5MB')
-      return
-    }
-
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-    if (!allowedTypes.includes(file.type)) {
-      setError('Invalid file type — PDF, DOC, or DOCX only')
-      return
-    }
-
-    setUploadedFile(file)
-    setParsing(true)
-    setError(null)
-
+  const fetchRoster = async () => {
     try {
-      const formDataObj = new FormData()
-      formDataObj.append('resume', file)
-
-      const res = await fetch('/api/agency/roster/upload', {
-        method: 'POST',
-        body: formDataObj,
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to parse resume')
+      const res = await fetch('/api/roster/list')
+      if (res.ok) {
+        const data = await res.json()
+        setCaregivers(data.caregivers || [])
       }
-
-      setParsedData(data.data || data)
-    } catch (err: any) {
-      setError(err.message)
-      setUploadedFile(null)
+    } catch (err) {
+      console.error('Failed to fetch roster:', err)
     } finally {
-      setParsing(false)
-    }
-  }
-
-  const handleCreate = async () => {
-    const data = parsedData || formData
-    setSaving(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/api/agency/roster/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: data.firstName || data.first_name,
-          lastName: data.lastName || data.last_name,
-          email: data.email,
-          phone: data.phone,
-          city: data.city,
-          yearsExperience: data.yearsExperience || data.years_experience,
-          jobTitle: data.jobTitle || data.job_title,
-        }),
-      })
-
-      const result = await res.json()
-      if (!res.ok) {
-        throw new Error(result.error || 'Failed to create caregiver')
-      }
-
-      // Auto-invite after create
-      await fetch('/api/agency/roster/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caregiverId: result.caregiverId }),
-      })
-
-      const firstName = data.firstName || data.first_name || result.firstName
-      setSuccess(`${firstName} added. Invitation sent to ${result.email}`)
-
-      // Reset form
-      setUploadedFile(null)
-      setParsedData(null)
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', jobTitle: '' })
-      setUploadMode(null)
-
-      // Refresh page to show new caregiver
-      window.location.reload()
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setSaving(false)
+      setLoading(false)
     }
   }
 
   const handleResendInvite = async (caregiverId: string) => {
+    setActionLoading(caregiverId)
+    setSuccess(null)
     try {
-      const res = await fetch('/api/agency/roster/invite', {
+      const res = await fetch('/api/roster/regenerate-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caregiverId }),
+        body: JSON.stringify({ caregiver_id: caregiverId }),
       })
-
       if (res.ok) {
-        setSuccess('Invitation resent')
-        setTimeout(() => setSuccess(null), 3000)
+        setSuccess('Invite sent successfully')
+        fetchRoster()
+      } else {
+        const data = await res.json()
+        setSuccess(data.message || 'Failed to send invite')
       }
-    } catch {
-      setError('Failed to resend invitation')
+    } catch (err) {
+      setSuccess('Failed to send invite')
+    } finally {
+      setActionLoading(null)
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { bg: string, color: string, label: string }> = {
-      stub: { bg: '#E2E8F0', color: '#4A5568', label: 'Stub' },
-      invited: { bg: '#DBEAFE', color: '#1E40AF', label: 'Invited' },
-      incomplete: { bg: '#FEF3C7', color: '#92400E', label: 'Incomplete' },
-      complete: { bg: '#D1FAE5', color: '#065F46', label: 'Complete' },
-      active: { bg: '#FDE68A', color: '#92400E', label: 'Active' },
+  const getStatusBadge = (status: string, tokenStatus?: string) => {
+    const isPending = status === 'agency_built' || tokenStatus === 'pending'
+    const isClaimed = status === 'claimed'
+
+    if (isClaimed) {
+      return { label: 'Profile Claimed', bg: GREEN, color: WHITE }
     }
-    const b = badges[status] || badges.stub
+    if (isPending) {
+      return { label: 'Invite Sent', bg: G, color: WHITE }
+    }
+    return { label: 'Link Expired', bg: GREY, color: WHITE }
+  }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-CA', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
+  if (loading) {
     return (
-      <span style={{
-        background: b.bg,
-        color: b.color,
-        padding: '4px 10px',
-        borderRadius: 12,
-        fontSize: 12,
-        fontWeight: 600
-      }}>
-        {b.label}
-      </span>
+      <>
+        <div style={{ background: N, padding: '32px 24px' }}>
+          <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', margin: '0 0 8px' }}>
+              Your Roster
+            </h1>
+          </div>
+        </div>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}>
+          <Loader2 size={32} style={{ color: G, animation: 'spin 1s linear infinite' }} />
+          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-      {success && (
-        <div style={{
-          background: '#D1FAE5',
-          color: '#065F46',
-          padding: '16px 20px',
-          borderRadius: 8,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12
-        }}>
-          <Check size={20} />
-          {success}
-        </div>
-      )}
+    <>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } }
+      `}</style>
 
-      {error && (
-        <div style={{
-          background: '#FEE2E2',
-          color: '#991B1B',
-          padding: '16px 20px',
-          borderRadius: 8,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12
-        }}>
-          <AlertCircle size={20} />
-          {error}
-          <button onClick={() => setError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <X size={20} />
-          </button>
-        </div>
-      )}
-
-      <div style={{ background: 'white', borderRadius: 16, padding: 32, border: '1px solid #E2E8F0' }}>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 24, color: N, margin: '0 0 24px' }}>
-          Add caregiver
-        </h2>
-
-        {!uploadMode ? (
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <div
-              onClick={() => fileInputRef.current?.click()}
+      {/* Header */}
+      <div style={{ background: N, padding: '32px 24px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', margin: '0 0 8px' }}>
+            Your Roster
+          </h1>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', margin: '0 0 20px' }}>
+            Manage your caregivers and track their profile claims
+          </p>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <a
+              href="/agency/roster/add"
               style={{
-                flex: 1,
-                minWidth: 280,
-                border: '2px dashed #E2E8F0',
-                borderRadius: 12,
-                padding: 40,
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s, background 0.2s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 20px',
+                background: `linear-gradient(135deg, ${G}, ${G_LIGHT})`,
+                color: N,
+                textDecoration: 'none',
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 14,
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = G; e.currentTarget.style.background = '#FDF6EC' }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = 'white' }}
             >
-              <Upload size={40} color={G} style={{ marginBottom: 16 }} />
-              <p style={{ fontSize: 16, fontWeight: 600, color: N, margin: '0 0 8px' }}>
-                Upload resume
-              </p>
-              <p style={{ fontSize: 14, color: '#718096', margin: 0 }}>
-                PDF, DOC, DOCX — max 5MB
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', color: '#CBD5E0', fontSize: 14 }}>
-              or
-            </div>
-
-            <div
-              onClick={() => setUploadMode('manual')}
+              <Plus size={18} />
+              Add Caregiver
+            </a>
+            <a
+              href="/agency/roster/import"
               style={{
-                flex: 1,
-                minWidth: 280,
-                border: '2px solid #E2E8F0',
-                borderRadius: 12,
-                padding: 40,
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 20px',
+                background: 'transparent',
+                color: WHITE,
+                textDecoration: 'none',
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.3)',
+                fontWeight: 500,
+                fontSize: 14,
               }}
-              onMouseEnter={(e) => e.currentTarget.style.borderColor = G}
-              onMouseLeave={(e) => e.currentTarget.style.borderColor = '#E2E8F0'}
             >
-              <Users size={40} color={N} style={{ marginBottom: 16 }} />
-              <p style={{ fontSize: 16, fontWeight: 600, color: N, margin: '0 0 8px' }}>
-                Add manually
-              </p>
-              <p style={{ fontSize: 14, color: '#718096', margin: 0 }}>
-                No resume? Enter details manually
-              </p>
-            </div>
+              <Upload size={18} />
+              Import CSV
+            </a>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {parsing && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#718096' }}>
-                <RefreshCw size={20} className="animate-spin" />
-                Parsing resume...
-              </div>
-            )}
-
-            {parsedData && !parsing && (
-              <div style={{ background: '#FDF6EC', borderRadius: 12, padding: 24, border: '1px solid #E8B86D' }}>
-                <p style={{ fontSize: 14, fontWeight: 600, color: N, margin: '0 0 16px' }}>
-                  Review parsed data (edit if needed):
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                  {['firstName', 'lastName', 'email', 'phone', 'city', 'jobTitle', 'yearsExperience'].map(field => (
-                    <div key={field}>
-                      <label style={{ display: 'block', fontSize: 12, color: '#718096', marginBottom: 4, textTransform: 'capitalize' }}>
-                        {field.replace(/([A-Z])/g, ' $1').trim()}
-                      </label>
-                      <input
-                        type="text"
-                        value={parsedData[field] || ''}
-                        onChange={(e) => setParsedData({ ...parsedData, [field]: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: 8,
-                          fontSize: 14,
-                          fontFamily: S,
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {uploadMode === 'manual' && !parsedData && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                {['firstName', 'lastName', 'email', 'phone', 'jobTitle'].map(field => (
-                  <div key={field}>
-                    <label style={{ display: 'block', fontSize: 12, color: '#718096', marginBottom: 4, textTransform: 'capitalize' }}>
-                      {field.replace(/([A-Z])/g, ' $1').trim()} *
-                    </label>
-                    <input
-                      type={field === 'email' ? 'email' : 'text'}
-                      value={formData[field as keyof typeof formData]}
-                      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                      required={field === 'firstName' || field === 'lastName' || field === 'email'}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: 8,
-                        fontSize: 14,
-                        fontFamily: S,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button
-                onClick={handleCreate}
-                disabled={saving || (uploadMode === 'manual' && !formData.email)}
-                style={{
-                  padding: '14px 28px',
-                  background: saving ? '#CBD5E0' : `linear-gradient(135deg, ${G}, #E8B86D})`,
-                  color: N,
-                  fontWeight: 600,
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  fontSize: 16,
-                }}
-              >
-                {saving ? 'Adding...' : 'Add to roster and invite caregiver'}
-              </button>
-              <button
-                onClick={() => { setUploadMode(null); setUploadedFile(null); setParsedData(null); setFormData({ firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }) }}
-                style={{
-                  padding: '14px 28px',
-                  background: 'transparent',
-                  color: '#718096',
-                  fontWeight: 600,
-                  border: '1px solid #E2E8F0',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontSize: 16,
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      <div style={{ background: 'white', borderRadius: 16, padding: 32, border: '1px solid #E2E8F0' }}>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 24, color: N, margin: '0 0 24px' }}>
-          Current roster ({totalCount})
-        </h2>
+      {/* Main content */}
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px' }}>
+        {success && (
+          <div style={{
+            padding: '12px 16px',
+            background: GREEN,
+            color: WHITE,
+            borderRadius: 8,
+            marginBottom: 20,
+            fontSize: 14,
+          }}>
+            {success}
+          </div>
+        )}
 
         {caregivers.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <Users size={48} color="#CBD5E0" style={{ marginBottom: 16 }} />
-            <p style={{ fontSize: 16, color: '#718096', margin: '0 0 16px' }}>
-              Your roster is empty. Add your first caregiver to get started.
+          <div style={{
+            background: WHITE,
+            borderRadius: 16,
+            padding: '48px 24px',
+            textAlign: 'center',
+            border: '1px solid #E2E8F0',
+          }}>
+            <Users size={48} style={{ color: '#CBD5E1', marginBottom: 16 }} />
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, color: N, margin: '0 0 8px' }}>
+              No caregivers yet
+            </h2>
+            <p style={{ color: GREY, fontSize: 14, margin: '0 0 24px' }}>
+              Add your first caregiver or import your existing roster.
             </p>
-            <button
-              onClick={() => setUploadMode('upload')}
-              style={{
-                padding: '12px 24px',
-                background: `linear-gradient(135deg, ${G}, #E8B86D})`,
-                color: N,
-                fontWeight: 600,
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontSize: 16,
-              }}
-            >
-              Add caregiver →
-            </button>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <a
+                href="/agency/roster/add"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 20px',
+                  background: `linear-gradient(135deg, ${G}, ${G_LIGHT})`,
+                  color: N,
+                  textDecoration: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                }}
+              >
+                <Plus size={18} />
+                Add Caregiver
+              </a>
+              <a
+                href="/agency/roster/import"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 20px',
+                  background: 'transparent',
+                  color: N,
+                  textDecoration: 'none',
+                  borderRadius: 8,
+                  border: `1px solid ${N}`,
+                  fontWeight: 500,
+                  fontSize: 14,
+                }}
+              >
+                <Upload size={18} />
+                Import CSV
+              </a>
+            </div>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #E2E8F0' }}>
-                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 12, color: '#718096', textTransform: 'uppercase' }}>Name</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 12, color: '#718096', textTransform: 'uppercase' }}>Role</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 12, color: '#718096', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 12, color: '#718096', textTransform: 'uppercase' }}>Added</th>
-                <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 12, color: '#718096', textTransform: 'uppercase' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {caregivers.map((cg) => (
-                <tr key={cg.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 600, color: N }}>
-                      {cg.first_name} {cg.last_name}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#718096' }}>
-                      {cg.email}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px', color: '#4A5568' }}>
-                    {cg.job_title || '—'}
-                  </td>
-                  <td style={{ padding: '16px' }}>
-                    {getStatusBadge(cg.profile_status)}
-                  </td>
-                  <td style={{ padding: '16px', color: '#718096', fontSize: 14 }}>
-                    {new Date(cg.created_at).toLocaleDateString()}
-                  </td>
-                  <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      {(cg.profile_status === 'invited' || cg.profile_status === 'incomplete') && (
-                        <button
-                          onClick={() => handleResendInvite(cg.id)}
-                          title="Resend invite"
-                          style={{
-                            padding: 8,
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#718096',
-                          }}
-                        >
-                          <RefreshCw size={18} />
-                        </button>
-                      )}
-                      {(cg.profile_status === 'complete' || cg.profile_status === 'active') && (
-                        <a
-                          href={`/profile/${cg.id}`}
-                          target="_blank"
-                          title="View profile"
-                          style={{
-                            padding: 8,
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#718096',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <Eye size={18} />
-                        </a>
-                      )}
-                    </div>
-                  </td>
+          <div style={{ background: WHITE, borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Name</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Role</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Added</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {caregivers.map((cg) => {
+                  const badge = getStatusBadge(cg.claim_status, cg.token_status)
+                  return (
+                    <tr key={cg.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                      <td style={{ padding: '16px 20px' }}>
+                        <div style={{ fontWeight: 600, color: N, fontSize: 14 }}>
+                          {cg.first_name} {cg.last_name}
+                        </div>
+                        <div style={{ fontSize: 12, color: GREY }}>{cg.email}</div>
+                      </td>
+                      <td style={{ padding: '16px 20px', fontSize: 14, color: '#475569' }}>
+                        {cg.claim_status === 'claimed' ? 'Active' : 'Pending'}
+                      </td>
+                      <td style={{ padding: '16px 20px', fontSize: 14, color: GREY }}>
+                        {formatDate(cg.created_at)}
+                      </td>
+                      <td style={{ padding: '16px 20px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '4px 12px',
+                          borderRadius: 20,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          background: badge.bg,
+                          color: badge.color,
+                        }}>
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                        {cg.claim_status === 'claimed' ? (
+                          <a
+                            href={`/profile/${cg.id}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              padding: '6px 12px',
+                              fontSize: 13,
+                              color: N,
+                              textDecoration: 'none',
+                              fontWeight: 500,
+                            }}
+                          >
+                            <Eye size={16} />
+                            View Profile
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => handleResendInvite(cg.id)}
+                            disabled={actionLoading === cg.id}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              padding: '6px 12px',
+                              fontSize: 13,
+                              color: G,
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: actionLoading === cg.id ? 'not-allowed' : 'pointer',
+                              fontWeight: 500,
+                              opacity: actionLoading === cg.id ? 0.6 : 1,
+                            }}
+                          >
+                            {actionLoading === cg.id ? (
+                              <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                              <RefreshCw size={16} />
+                            )}
+                            Resend Invite
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
-    </div>
+    </>
   )
 }
