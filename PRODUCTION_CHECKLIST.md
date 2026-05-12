@@ -68,6 +68,13 @@
 - [ ] /profile/demo Maria Santos must remain — marketing page, not search data
 - [ ] Confirm: /demo/search uses mock data only (not shared with production search)
 
+### Email (Resend)
+- [ ] Resend domain verified (SPF + DKIM + DMARC)
+- [ ] RESEND_API_KEY added to Vercel dashboard
+- [ ] Sending domain updated in code (noreply@careified.ca)
+- [ ] Test claim email sends and lands in inbox (not spam)
+- [ ] Test claim email sends from careified domain (not onboarding@resend.dev)
+
 ---
 
 ## 🟠 HIGH — Must Build Before Launch
