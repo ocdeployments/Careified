@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
@@ -43,6 +44,15 @@ async function checkApprovedAgency(): Promise<{ agencyId: string; agencyName: st
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 30 requests per IP per hour (AI route)
+    const clientIp = getClientIp(request)
+    if (!checkRateLimit(clientIp, 30)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     // Auth check
     const agency = await checkApprovedAgency()
     if (!agency) {
