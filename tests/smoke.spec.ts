@@ -11,13 +11,13 @@ test.describe('Smoke Tests', () => {
   test('sign-in page renders with email and password fields', async ({ page }) => {
     await page.goto('/sign-in')
     await expect(page.getByLabel(/email/i)).toBeVisible()
-    await expect(page.getByLabel(/password/i)).toBeVisible()
+    await expect(page.locator('input[name="password"]').first()).toBeVisible()
   })
 
   test('sign-up page renders form fields', async ({ page }) => {
     await page.goto('/sign-up')
     await expect(page.getByLabel(/email/i)).toBeVisible()
-    await expect(page.getByLabel(/password/i)).toBeVisible()
+    await expect(page.locator('input[name="password"]').first()).toBeVisible()
   })
 
   test('agency dashboard redirects to sign-in when logged out', async ({ page }) => {

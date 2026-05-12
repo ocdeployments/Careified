@@ -14,7 +14,6 @@ const isPublicRoute = createRouteMatcher([
   '/for-caregivers',
   '/for-agencies',
   '/for-families',
-  '/profile/[id]',
   '/profile/demo-preview',
   '/api/health',
   '/agency/pending-approval',
@@ -26,15 +25,33 @@ const isPublicRoute = createRouteMatcher([
   // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
 ])
 
+// Explicitly protected profile routes (not in public list)
+const isProtectedProfileRoute = createRouteMatcher([
+  '/profile/build(.*)',
+])
+
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
 export default clerkMiddleware(async (auth, request) => {
+  // Get the pathname
+  const pathname = request.nextUrl.pathname
+
+  // Explicitly protect /profile/build routes
+  if (pathname.startsWith('/profile/build')) {
+    const { userId } = await auth()
+    if (!userId) {
+      // Use explicit redirect instead of auth.protect() to avoid NEXT_REDIRECT issues
+      return NextResponse.redirect(new URL('/sign-in?redirect_url=' + encodeURIComponent(pathname), request.url))
+    }
+  }
+
+  // Public routes - allow without auth
   if (isPublicRoute(request)) return
 
+  // All other routes require auth
   const { userId } = await auth()
   if (!userId) {
-    auth.protect()
-    return
+    return NextResponse.redirect(new URL('/sign-in?redirect_url=' + encodeURIComponent(pathname), request.url))
   }
 
   if (isAdminRoute(request)) {
