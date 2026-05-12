@@ -20,12 +20,9 @@ const isPublicRoute = createRouteMatcher([
   '/agency/pending-approval',
   '/api/onboarding/set-role(.*)',
   '/api/auth/role-redirect(.*)',
-  '/demo/assistant',
-  '/api/demo/assistant',
-  '/demo/login',
-  '/api/demo/session',
-  '/demo/airecruit',
-  '/api/demo/airecruit/results',
+  '/demo(.*)',
+  '/api/demo(.*)',
+  '/\\.well-known/.*',
   // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
 ])
 
