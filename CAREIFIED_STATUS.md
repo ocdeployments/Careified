@@ -25,6 +25,8 @@
 | May 11 2026 | Agency Roster Phase 1 (DB + 7 APIs), ContactCard component, Clerk auth NEXT_REDIRECT fix, Phase 2 UI | DONE | 7 commits |
 | May 12 2026 | Verify page agency CTA, LiveBanner (Telegram/WhatsApp/Copy), referred_by referral tracking, /settings stub, agency signup UX fixes | DONE | 9 commits |
 | May 13 2026 | Support Ticketing System: DB tables (support_tickets, ticket_messages), lib/tickets.ts helpers, 3 API routes (create/list/[id]), /agency/support, /caregiver/support, /admin/tickets queue, /settings/data-rights wired to tickets | DONE | 14 commits |
+| May 12 2026 PM | Demo System: /demo/login, /api/demo/session, /api/admin/demo/wipe, sunrise-demo seed script, demo accounts in admin, demo session in agency layout | DONE | 6 commits |
+| May 12 2026 PM | Demo AIRecruit: /demo/airecruit page with screening results, /api/demo/airecruit/results API | DONE | 1 commit |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -527,17 +529,24 @@ Goal: Let agencies try Careified before signing up — no login required
 
 Pages:
 - /demo — landing with "Try the platform" CTA
-- /demo/dashboard — agency dashboard with pre-loaded data
+- /demo/login — NEW (May 12 2026) demo entry with "Enter Demo" button
+- /demo/dashboard — agency dashboard with pre-loaded data (via cookie session)
 - /demo/search — search with 5 mock caregivers (client-side filtering) ✅ FIXED May 4 2026
 - /demo/clients — 5 demo clients with match results
 - /demo/clients/[id] — match analysis with gap list
-- /demo/airecruit — AIRecruit campaign demo (no real calls)
+- /demo/airecruit — NEW (May 12 2026) AI screening results demo
+- /api/demo/session — NEW creates demo session cookie (2-hour expiry)
+- /api/admin/demo/wipe/[id] — NEW admin wipe demo agency
 
-Demo data: Same 15 caregivers + 5 clients in DB (production). Demo search uses in-component mock data.
-Demo banner: "You are in demo mode — no real data · Sign up to get started"
-CTA on every page: "Start your free 30-day trial →"
-Session-based (no DB writes in demo mode)
-Guided tour option: step-by-step walkthrough of key features
+Demo data: Seeded via scripts/seed/sunrise-demo.ts
+- 1 demo agency: Sunrise Home Care (is_demo = true)
+- 4 rostered caregivers (agency_built)
+- 3 active clients
+- 2 shortlist entries
+- AIRecruit screening results
+
+Demo session: Cookie-based (careified_demo_session), bypasses Clerk auth via agency/layout.tsx
+Admin panel: Shows demo agencies with caregiver count and wipe button
 
 **BUG FIX (May 4 2026):** /demo/search was calling /api/match/rank which requires auth. Fixed by adding `isDemo` prop to ClientSearch component with 5 mock caregivers.
 
