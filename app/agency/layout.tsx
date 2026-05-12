@@ -1,8 +1,27 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { pool } from '@/lib/db'
 
 export default async function AgencyLayout({ children }: { children: React.ReactNode }) {
+  // Check for demo session first
+  const cookieStore = await cookies()
+  const demoSession = cookieStore.get('careified_demo_session')
+
+  if (demoSession) {
+    // Verify it's a demo agency
+    const { rows } = await pool.query(
+      "SELECT id, status, name FROM agencies WHERE id = $1 AND is_demo = true",
+      [demoSession.value]
+    )
+
+    if (rows.length > 0 && (rows[0].status === 'approved' || rows[0].status === 'active')) {
+      // Demo session valid - allow access
+      return <>{children}</>
+    }
+  }
+
+  // Normal Clerk auth flow
   const { userId } = await auth()
 
   if (!userId) {
