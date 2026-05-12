@@ -84,6 +84,7 @@ const FIELD_MAP: Record<string, string> = {
  openQ3: 'open_q3',
  willingLiveIn: 'willing_live_in',
  willingOvernight: 'willing_overnight',
+  referredBy: 'referred_by',
 }
 
 export async function POST(req: NextRequest) {
@@ -93,36 +94,50 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
  }
 
- const { field, value } = await req.json()
+ const { field, value, referredBy } = await req.json()
 
  const dbColumn = FIELD_MAP[field]
- if (!dbColumn) {
-  return NextResponse.json(
-   { error: `Unknown field: ${field}` },
-   { status: 400 }
-  )
+ // Don't allow direct saves to referred_by column
+ if (dbColumn === 'referred_by') {
+  return NextResponse.json({ error: 'Cannot set referred_by directly' }, { status: 400 })
  }
 
  // Get or create caregiver record for this user
  const { rows: existing } = await pool.query(
-  'SELECT id FROM caregivers WHERE user_id = $1 LIMIT 1',
+  'SELECT id, referred_by FROM caregivers WHERE user_id = $1 LIMIT 1',
   [userId]
  )
 
  if (existing.length === 0) {
-  // Create caregiver record
-  await pool.query(
-   `INSERT INTO caregivers (user_id, status, ${dbColumn}, updated_at)
- VALUES ($1, 'incomplete', $2, NOW())`,
-   [userId, value]
-  )
+  // Create caregiver record - include referred_by if provided
+  if (referredBy) {
+   await pool.query(
+    `INSERT INTO caregivers (user_id, status, ${dbColumn}, referred_by, updated_at)
+  VALUES ($1, 'incomplete', $2, $3, NOW())`,
+    [userId, value, referredBy]
+   )
+  } else {
+   await pool.query(
+    `INSERT INTO caregivers (user_id, status, ${dbColumn}, updated_at)
+  VALUES ($1, 'incomplete', $2, NOW())`,
+    [userId, value]
+   )
+  }
  } else {
-  // Update existing record
-  await pool.query(
-   `UPDATE caregivers SET ${dbColumn} = $1, updated_at = NOW()
- WHERE user_id = $2`,
-   [value, userId]
-  )
+  // Update existing record - only set referred_by if not already set and provided
+  if (referredBy && !existing[0].referred_by) {
+   await pool.query(
+    `UPDATE caregivers SET ${dbColumn} = $1, referred_by = $2, updated_at = NOW()
+  WHERE user_id = $3`,
+    [value, referredBy, userId]
+   )
+  } else {
+   await pool.query(
+    `UPDATE caregivers SET ${dbColumn} = $1, updated_at = NOW()
+  WHERE user_id = $2`,
+    [value, userId]
+   )
+  }
  }
 
  return NextResponse.json({ success: true })
