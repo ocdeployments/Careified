@@ -22,7 +22,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth/role-redirect(.*)',
   '/demo(.*)',
   '/api/demo(.*)',
-  '/\\.well-known/.*',
+  '/.well-known(.*)',
   // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
 ])
 
