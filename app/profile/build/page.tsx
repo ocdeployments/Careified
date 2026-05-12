@@ -22,6 +22,7 @@ import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 import GhostProfileModal from '@/components/profile/GhostProfileModal'
+import LiveBanner from '@/components/profile/LiveBanner'
 
 const FONT_SERIF = "'Inter', sans-serif"
 const FONT_SANS = "'Inter', sans-serif"
@@ -448,6 +449,9 @@ transition={{ duration: 0.15 }}
  </div>
  </div>
  )}
+
+ {/* Live banner - shows when profile goes live at Step 3 */}
+ {currentStep === 3 && <LiveBanner firstName={formData.firstName} />}
 
  {/* Step content with animation */}
  <div
