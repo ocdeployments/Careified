@@ -27,6 +27,8 @@
 | May 13 2026 | Support Ticketing System: DB tables (support_tickets, ticket_messages), lib/tickets.ts helpers, 3 API routes (create/list/[id]), /agency/support, /caregiver/support, /admin/tickets queue, /settings/data-rights wired to tickets | DONE | 14 commits |
 | May 12 2026 PM | Demo System: /demo/login, /api/demo/session, /api/admin/demo/wipe, sunrise-demo seed script, demo accounts in admin, demo session in agency layout | DONE | 6 commits |
 | May 12 2026 PM | Demo AIRecruit: /demo/airecruit page with screening results, /api/demo/airecruit/results API | DONE | 1 commit |
+| May 12 2026 PM | Photo Upload API: Vercel Blob storage, PhotoUpload component, Step1 wiring | DONE | 7 commits |
+| May 12 2026 PM | Security Hardening: SQL injection fix, rate limits on agency/signup/assistant/tickets, admin auth, confirmation dialogs | DONE | 6 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
