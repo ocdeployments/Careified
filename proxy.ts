@@ -22,6 +22,9 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth/role-redirect(.*)',
   '/demo/assistant',
   '/api/demo/assistant',
+  '/demo/login',
+  '/api/demo/session',
+  // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
 ])
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
