@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 10 requests per IP per hour
+    const clientIp = getClientIp(req)
+    if (!checkRateLimit(clientIp, 10)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const errors: Record<string, string> = {}
 
