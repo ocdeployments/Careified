@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch demo caregiver context
     const caregiverResult = await pool.query(`
-      SELECT first_name, last_name, city, province_state, years_experience,
+      SELECT first_name, last_name, city, state, years_experience,
              specializations, availability_status, aggregate_score, placement_types
       FROM caregivers
       WHERE availability_status = 'available'
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       first_name: c.first_name,
       last_name: c.last_name,
       city: c.city,
-      province_state: c.province_state,
+      state: c.state,
       years_experience: c.years_experience,
       specializations: c.specializations,
       availability_status: c.availability_status,
