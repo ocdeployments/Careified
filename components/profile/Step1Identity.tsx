@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
 import { useLocale } from '@/lib/locale/useLocale'
-import PhotoUploadEditor from './PhotoUploadEditor'
+import PhotoUpload from './PhotoUpload'
 
 // Design system colors
 const COLORS = {
@@ -107,11 +107,7 @@ export default function Step1Identity() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [zipLooking, setZipLooking] = useState(false)
   const [emergencyOpen, setEmergencyOpen] = useState(false)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(formData.photoUrl || null)
-  const [photoEditorOpen, setPhotoEditorOpen] = useState(false)
-  const [pendingPhoto, setPendingPhoto] = useState<string | null>(null)
   const [focused, setFocused] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const provinceLabel = config?.provinceStateLabel || 'Province/State'
   const postalPlaceholder = config?.postalCodePlaceholder || '75034'
@@ -165,47 +161,6 @@ export default function Step1Identity() {
       finally { setZipLooking(false) }
     }
   }, [saveField])
-
-  const handlePhotoClick = () => { fileInputRef.current?.click() }
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) { setErrors(prev => ({ ...prev, photo: 'Please upload an image file' })); return }
-    if (file.size < 10 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo too small — please use a clear headshot' })); return }
-    if (file.size > 5 * 1024 * 1024) { setErrors(prev => ({ ...prev, photo: 'Photo too large — maximum 5MB' })); return }
-    const img = new Image()
-    const objectUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      if (img.width < 200 || img.height < 200) {
-        setErrors(prev => ({ ...prev, photo: 'Photo too small — minimum 200x200 pixels' }))
-        return
-      }
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        const dataUrl = ev.target?.result as string
-        setPendingPhoto(dataUrl)
-        setPhotoEditorOpen(true)
-      }
-      reader.readAsDataURL(file)
-    }
-    img.src = objectUrl
-  }
-
-  const handlePhotoSave = (data: { url: string; x: number; y: number; scale: number }) => {
-    setPhotoPreview(data.url)
-    setPhotoEditorOpen(false)
-    setPendingPhoto(null)
-    saveField('photoUrl', data.url)
-    saveField('photoX', data.x)
-    saveField('photoY', data.y)
-    saveField('photoScale', data.scale)
-  }
-
-  const handlePhotoEditorCancel = () => {
-    setPhotoEditorOpen(false)
-    setPendingPhoto(null)
-  }
 
   const toggleLanguage = useCallback((lang: string) => {
     const current = formData.languages || []
@@ -314,51 +269,16 @@ export default function Step1Identity() {
       {/* SECTION: Photo */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Photo</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div
-            onClick={handlePhotoClick}
-            style={{
-              width: '96px',
-              height: '96px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#F8FAFC',
-              cursor: 'pointer',
-              overflow: 'hidden',
-              border: photoPreview ? '3px solid ' + COLORS.gold : '2px dashed #CBD5E1',
-            }}
-          >
-            {photoPreview ? (
-              <img src={photoPreview} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <span style={{ fontSize: '32px', color: '#94A3B8' }}>+</span>
-            )}
-          </div>
-          <div>
-            <button
-              type="button"
-              onClick={handlePhotoClick}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 500,
-                backgroundColor: 'white',
-                border: '1px solid #E2E8F0',
-                color: COLORS.navy,
-                cursor: 'pointer',
-                marginBottom: '4px',
-              }}
-            >
-              {photoPreview ? 'Change photo' : 'Upload photo'}
-            </button>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>JPG or PNG · Max 5MB</div>
-            {errors.photo && <div style={styles.errorText}>{errors.photo}</div>}
-          </div>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} style={{ display: 'none' }} />
-        </div>
+        <PhotoUpload
+          currentPhotoUrl={formData.photoUrl || null}
+          caregiverId={''}
+          onUploadComplete={(url) => {
+            saveField('photoUrl', url)
+          }}
+          onRemove={() => {
+            saveField('photoUrl', null)
+          }}
+        />
       </div>
 
       {/* SECTION: Contact & Location */}
@@ -612,17 +532,6 @@ export default function Step1Identity() {
           </div>
         )}
       </div>
-
-      {/* Photo Position Editor Modal */}
-      <PhotoUploadEditor
-        isOpen={photoEditorOpen}
-        imageUrl={pendingPhoto || ''}
-        initialX={formData.photoX || 0}
-        initialY={formData.photoY || 0}
-        initialScale={formData.photoScale || 1}
-        onSave={handlePhotoSave}
-        onCancel={handlePhotoEditorCancel}
-      />
     </div>
   )
 }
