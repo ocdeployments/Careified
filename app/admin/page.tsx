@@ -1,7 +1,20 @@
 import { pool } from '@/lib/db'
 import Link from 'next/link'
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
+
+async function checkAdmin() {
+  const { userId } = await auth()
+  if (!userId) {
+    redirect('/sign-in?redirect_url=/admin')
+  }
+  const adminId = process.env.ADMIN_CLERK_USER_ID
+  if (!adminId || userId !== adminId) {
+    redirect('/')
+  }
+}
 
 async function getAdminStats() {
   const [
@@ -71,6 +84,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default async function AdminDashboard() {
+  await checkAdmin()
   const s = await getAdminStats()
 
   const MODULE_LABELS: Record<string, string> = {
