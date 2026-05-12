@@ -52,8 +52,7 @@ export default function OnboardingPage() {
   const [otpLoading, setOtpLoading] = useState(false)
   const [resendTimer, setResendTimer] = useState(0)
   const [devCode, setDevCode] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const otpInputsRef: any = []
+  const otpInputsRef = useRef<(HTMLInputElement | null)[]>([])
 
   // Redirect if not logged in
   useEffect(() => {

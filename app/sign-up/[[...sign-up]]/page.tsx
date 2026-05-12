@@ -20,7 +20,7 @@ function SignUpContent() {
       padding: '40px 20px',
     }}>
       <SignUp
-        signInUrl="/sign-up"
+        signInUrl="/sign-in"
         forceRedirectUrl={redirectUrl}
         appearance={{
           variables: {
