@@ -17,6 +17,7 @@ import {
   User,
 } from 'lucide-react'
 import ProfilePhoto from './ProfilePhoto'
+import ContactCard from './ContactCard'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Careified — Caregiver Profile (Agency-facing hiring scorecard)
@@ -926,35 +927,10 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           </div>
         </Section>
 
-        {/* CONTACT INFO - Only shown to approved agencies */}
-        {(dm.contactPhone || dm.contactEmail) ? (
-          <Section title="Contact">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {dm.contactPhone && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: C.bgSubtle, borderRadius: 10, border: `1px solid ${C.borderSoft}` }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(30,58,138,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Shield size={18} color={C.royal} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: C.fg5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Phone</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: C.fg1 }}>{dm.contactPhone}</div>
-                  </div>
-                </div>
-              )}
-              {dm.contactEmail && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: C.bgSubtle, borderRadius: 10, border: `1px solid ${C.borderSoft}` }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(30,58,138,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Shield size={18} color={C.royal} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: C.fg5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: C.fg1 }}>{dm.contactEmail}</div>
-                </div>
-              </div>
-              )}
-            </div>
-          </Section>
-        ) : null}
+        {/* CONTACT INFO */}
+        {(dm.contactPhone || dm.contactEmail) && (
+          <ContactCard phone={dm.contactPhone} email={dm.contactEmail} />
+        )}
 
         {/* 5. AGENCY RATINGS (from placement reviews) */}
         {dm.placementRatings && parseInt(dm.placementRatings.review_count || '0') > 0 && (
