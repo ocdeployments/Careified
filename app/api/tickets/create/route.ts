@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
 import { generateTicketNumber, getSLADueDate, validateTicketType } from '@/lib/tickets'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -10,6 +11,15 @@ const pool = new Pool({
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 10 requests per IP per hour
+    const clientIp = getClientIp(req)
+    if (!checkRateLimit(clientIp, 10)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const { userId } = await auth()
 
     const { type, subject, description, email } = await req.json()
