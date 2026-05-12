@@ -24,6 +24,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/demo/assistant',
   '/demo/login',
   '/api/demo/session',
+  '/demo/airecruit',
+  '/api/demo/airecruit/results',
   // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
 ])
 
