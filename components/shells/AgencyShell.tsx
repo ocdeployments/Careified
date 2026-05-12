@@ -12,6 +12,7 @@ const NAV = [
   { href: '/agency/airecruit', label: 'AIRecruit',   icon: Phone    },
   { href: '/agency/pending-approval', label: 'Pending', icon: Clock },
   { href: '/opportunities',  label: 'Opportunities', icon: Users    },
+  { href: '/agency/support', label: 'Support',       icon: Phone    },
   { href: '/settings/data-rights', label: 'Settings', icon: Settings},
 ]
 
