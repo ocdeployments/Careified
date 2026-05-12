@@ -82,7 +82,7 @@ function AuthButton() {
   return (
     <>
       <Link
-        href="/sign-up"
+        href="/sign-in"
         style={{
           fontSize: '12px',
           fontWeight: 500,
