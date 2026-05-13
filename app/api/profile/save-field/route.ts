@@ -95,6 +95,7 @@ const ARRAY_COLUMNS = new Set([
  'placement_types', 'service_areas', 'client_types', 'unwilling_tasks',
  'dietary_cooking', 'preferred_settings', 'professional_memberships',
  'immunisation_records',
+ 'adls_performed',
 ])
 
 export async function POST(req: NextRequest) {
