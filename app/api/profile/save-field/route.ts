@@ -12,7 +12,7 @@ const pool = new Pool({
 })
 
 // Map form field names to DB column names
-const FIELD_MAP: Record<string, string> = {
+ const FIELD_MAP: Record<string, string> = {
  firstName: 'first_name',
  lastName: 'last_name',
  preferredName: 'preferred_name',
@@ -89,6 +89,14 @@ const FIELD_MAP: Record<string, string> = {
  adlsPerformed: 'adls_performed',
 }
 
+// PostgreSQL text[] array columns - pass JS arrays directly
+const ARRAY_COLUMNS = new Set([
+ 'services', 'specializations', 'credentials', 'languages',
+ 'placement_types', 'service_areas', 'client_types', 'unwilling_tasks',
+ 'dietary_cooking', 'preferred_settings', 'professional_memberships',
+ 'immunisation_records',
+])
+
 export async function POST(req: NextRequest) {
  try {
  const { userId } = await auth()
@@ -100,10 +108,22 @@ export async function POST(req: NextRequest) {
 
  const dbColumn = FIELD_MAP[field]
 
- // Serialize complex values (arrays, objects) for JSONB columns
- const serializedValue = typeof value === 'object' && value !== null
-   ? JSON.stringify(value)
-   : value
+ // Guard against unknown fields
+ if (!dbColumn) {
+   console.error('UNKNOWN FIELD:', field)
+   return NextResponse.json({ error: `Unknown field: ${field}` }, { status: 400 })
+ }
+
+ // Serialize values: JS arrays for text[] columns, JSON for jsonb columns
+ const serializedValue = (() => {
+   if (Array.isArray(value) && ARRAY_COLUMNS.has(dbColumn)) {
+     return value  // Pass as JS array — pg driver handles text[] correctly
+   }
+   if (typeof value === 'object' && value !== null) {
+     return JSON.stringify(value)  // jsonb columns
+   }
+   return value
+ })()
 
  // Don't allow direct saves to referred_by column
  if (dbColumn === 'referred_by') {
