@@ -1,8 +1,10 @@
 // Careified — Resume Parse API (LLM-powered)
-// Uses OpenRouter to extract structured ProfileFormData from resume text
+// Two-pass: Pass 1 = raw extraction, Pass 2 = schema translation
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse/lib/pdf-parse.js')
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -10,13 +12,156 @@ export const maxDuration = 30
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
-async function extractTextFromBuffer(buffer: Buffer, mimeType: string): Promise<string> {
-  const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
-  if (mimeType.includes('pdf')) {
-    const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
-    return strings.join(' ')
+const SERVICES_MAP: Record<string, string> = {
+  'medication': 'Medication Administration',
+  'med admin': 'Medication Administration',
+  'personal care': 'Personal Care',
+  'bathing': 'Personal Care',
+  'grooming': 'Personal Care',
+  'hygiene': 'Personal Care',
+  'meal prep': 'Meal Preparation',
+  'cooking': 'Meal Preparation',
+  'nutrition': 'Meal Preparation',
+  'companionship': 'Companionship',
+  'companion': 'Companionship',
+  'mobility': 'Mobility Assistance',
+  'transfer': 'Mobility Assistance',
+  'hoyer': 'Mobility Assistance',
+  'health monitor': 'Health Monitoring',
+  'vital signs': 'Health Monitoring',
+  'wound care': 'Wound Care',
+  'memory care': 'Memory Care Activities',
+  'care plan': 'Care Planning',
+  'documentation': 'Care Documentation',
+  'dressing': 'Personal Care',
+  'toileting': 'Continence Care',
+  'catheter': 'Catheter Care',
+  'ostomy': 'Ostomy Care',
+  'feeding': 'Feeding Assistance',
+  'exercise': 'Exercise Assistance',
+  'range of motion': 'Range of Motion',
+}
+
+const CERTIFICATIONS_MAP: Record<string, string> = {
+  'cpr': 'CPR',
+  'cardiopulmonary': 'CPR',
+  'basic life support': 'CPR',
+  'bls': 'CPR',
+  'first aid': 'First Aid',
+  'psw': 'PSW',
+  'personal support worker': 'PSW',
+  'hca': 'HCA',
+  'home care aide': 'HCA',
+  'home health aide': 'HHA',
+  'cna': 'CNA',
+  'certified nursing assistant': 'CNA',
+  'nurse aide': 'CNA',
+  'medication administration': 'Medication Administration Certificate',
+  'rn': 'RN',
+  'registered nurse': 'RN',
+  'rpn': 'RPN',
+  'registered practical nurse': 'RPN',
+  'lpn': 'LPN',
+  'dementia care certificate': 'Dementia Care Certificate',
+  'palliative care certificate': 'Palliative Care Certificate',
+}
+
+const SPECIALIZATIONS_MAP: Record<string, string> = {
+  'elder': 'Elderly Care',
+  'senior': 'Elderly Care',
+  'geriatric': 'Elderly Care',
+  'older adult': 'Elderly Care',
+  'dementia': 'Dementia Care',
+  'alzheimer': 'Dementia Care',
+  'memory loss': 'Dementia Care',
+  'cognitive': 'Dementia Care',
+  'palliative': 'Palliative Care',
+  'hospice': 'Palliative Care',
+  'end of life': 'Palliative Care',
+  'disability': 'Disability Support',
+  'pediatric': 'Pediatric Care',
+  'children': 'Pediatric Care',
+  'post-surg': 'Post-Surgical Care',
+  'rehabilitation': 'Rehabilitation Care',
+  'mental health': 'Mental Health Support',
+}
+
+const ADLS_MAP: Record<string, string> = {
+  'bath': 'Bathing',
+  'shower': 'Bathing',
+  'dress': 'Dressing',
+  'groom': 'Grooming',
+  'oral hygiene': 'Grooming',
+  'toilet': 'Toileting',
+  'continence': 'Toileting',
+  'feed': 'Feeding',
+  'eating': 'Feeding',
+  'transfer': 'Transfers',
+  'reposition': 'Transfers',
+  'lift': 'Transfers',
+  'ambulation': 'Ambulation',
+  'walking': 'Ambulation',
+}
+
+const DIAGNOSES = [
+  'Alzheimer', 'Dementia', 'Parkinson', 'Multiple Sclerosis',
+  'Stroke', 'COPD', 'Diabetes', 'Cancer', 'Heart Failure',
+  'Arthritis', 'Osteoporosis', 'Depression', 'Anxiety',
+  'Schizophrenia', 'Autism', 'Cerebral Palsy', 'ALS', 'Epilepsy',
+  'Hypertension', 'Traumatic Brain Injury', 'Spinal Cord Injury'
+]
+
+function mapToList(text: string, map: Record<string, string>): string[] {
+  const lower = text.toLowerCase()
+  const found = new Set<string>()
+  for (const [key, value] of Object.entries(map)) {
+    if (lower.includes(key)) found.add(value)
   }
-  return raw
+  return Array.from(found)
+}
+
+function extractDiagnoses(text: string): string[] {
+  return DIAGNOSES.filter(d => text.toLowerCase().includes(d.toLowerCase()))
+}
+
+function translateToSchema(raw: any, resumeText: string) {
+  const allText = JSON.stringify(raw) + ' ' + resumeText
+  const exp = raw.experience || raw.work_experience || raw.employment || raw.workExperience || []
+  return {
+    firstName: raw.firstName || raw.first_name || (raw.name?.split(' ')[0]) || null,
+    lastName: raw.lastName || raw.last_name || (raw.name?.split(' ').slice(1).join(' ')) || null,
+    email: raw.email || null,
+    phone: raw.phone || raw.phoneNumber || raw.phone_number || null,
+    city: raw.city || raw.location?.city || null,
+    state: raw.state || raw.location?.state || null,
+    jobTitle: raw.jobTitle || raw.job_title || raw.currentTitle || raw.title || null,
+    yearsExperience: raw.yearsExperience || raw.years_experience || raw.totalExperience || null,
+    bio: raw.bio || raw.summary || raw.professional_summary || raw.objective || null,
+    certifications: mapToList(allText, CERTIFICATIONS_MAP),
+    credentials: [
+      ...(raw.education || []).map((e: any) => e.degree || e.credential || e.qualification).filter(Boolean),
+    ],
+    services: mapToList(allText, SERVICES_MAP),
+    specializations: mapToList(allText, SPECIALIZATIONS_MAP),
+    diagnosisExperience: extractDiagnoses(allText),
+    adlsPerformed: mapToList(allText, ADLS_MAP),
+    languages: raw.languages || [],
+    employers: exp.map((e: any) => ({
+      organisation: e.company || e.employer || e.organisation || e.organization || '',
+      title: e.title || e.position || e.role || e.jobTitle || '',
+      startYear: parseInt(e.startYear || e.start_year || e.startDate?.split('-')[0] || e.from || '') || null,
+      endYear: parseInt(e.endYear || e.end_year || e.endDate?.split('-')[0] || e.to || '') || null,
+      current: !!(e.current || e.isCurrent || e.present || e.endDate === 'Present'),
+    })).filter((e: any) => e.organisation),
+  }
+}
+
+async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
+  if (mimeType === 'application/pdf') {
+    const data = await pdfParse(buffer)
+    return data.text.slice(0, 8000)
+  }
+  return buffer.toString('utf-8').slice(0, 8000)
 }
 
 export async function POST(req: NextRequest) {
@@ -30,45 +175,19 @@ export async function POST(req: NextRequest) {
     if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'File too large — max 5MB' }, { status: 400 })
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const text = await extractTextFromBuffer(buffer, file.type)
+    const resumeText = await extractText(buffer, file.type)
 
-    if (!text || text.trim().length < 50) {
+    if (!resumeText || resumeText.trim().length < 50) {
       return NextResponse.json({ error: 'Could not extract text from file' }, { status: 400 })
     }
 
-    const prompt = `You are a resume parser for a caregiving platform. Extract structured data from this resume text.
-
-Return ONLY valid JSON with these exact fields (use null for missing fields):
-{
-  "firstName": string | null,
-  "lastName": string | null,
-  "email": string | null,
-  "phone": string | null,
-  "city": string | null,
-  "state": string | null,
-  "jobTitle": string | null,
-  "yearsExperience": number | null,
-  "bio": string | null,
-  "languages": string[] | null,
-  "services": string[] | null,
-  "specializations": string[] | null,
-  "credentials": string[] | null,
-  "diagnosisExperience": string[] | null,
-  "adlsPerformed": string[] | null,
-  "certifications": string[] | null,
-  "employers": [{"organisation": string, "title": string, "startYear": string | null, "endYear": string | null, "current": boolean}] | null
-}
-
-Rules:
-- diagnosisExperience: only include from this list: ["Alzheimer's/Dementia","Parkinson's","Stroke Recovery","Diabetes","Mobility/Fall Risk","Hospice/Palliative","Post-Surgical","Incontinence Care","Mental Health","Spinal Cord Injury","Developmental Disability","Pediatric/Special Needs"]
-- adlsPerformed: only include from this list: ["Bathing","Dressing","Grooming","Toileting","Incontinence care","Transfers","Ambulation","Feeding","Meal preparation","Medication reminders","Repositioning","Range of motion","Wound care observation","Hoyer lift","Gait belt use"]
-- services: extract any caregiving services mentioned
-- credentials: extract certifications like PSW, RPN, RN, CNA, HHA etc
-- bio: write a 2-sentence professional summary from the resume content, or null if insufficient info
-- Return ONLY the JSON object, no markdown, no explanation
-
-Resume text:
-${text.slice(0, 8000)}`
+    // PASS 1 — Raw extraction prompt
+    const pass1Prompt = `You are an expert resume parser. Extract ALL information from this resume as JSON.
+Include everything: names, contact info, all jobs with dates, all skills,
+all certifications, education, languages, locations.
+Return ONLY valid JSON, no markdown, no explanation.
+Resume:
+${resumeText}`
 
     const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -79,10 +198,10 @@ ${text.slice(0, 8000)}`
         'X-Title': 'Careified Resume Parser',
       },
       body: JSON.stringify({
-        model: 'mistralai/mistral-7b-instruct',
-        max_tokens: 1000,
+        model: 'minimax/minimax-01',
+        max_tokens: 1500,
         temperature: 0.1,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: 'user', content: pass1Prompt }],
       }),
     })
 
@@ -95,19 +214,20 @@ ${text.slice(0, 8000)}`
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content || ''
 
-    let parsed: Record<string, any> = {}
+    let raw: any = {}
     try {
       const clean = content.replace(/```json|```/g, '').trim()
-      parsed = JSON.parse(clean)
+      raw = JSON.parse(clean)
+      console.log('RAW EXPERIENCE:', JSON.stringify(raw.experience || raw.work_experience || raw.employment || raw.workExperience || 'NONE').substring(0, 500))
     } catch {
       console.error('JSON parse failed:', content)
       return NextResponse.json({ error: 'Could not parse resume — try filling in manually' }, { status: 422 })
     }
 
-    // Filter out null values
-    const result = Object.fromEntries(
-      Object.entries(parsed).filter(([, v]) => v !== null && v !== undefined && v !== '')
-    )
+    // PASS 2 — Translate to Careified schema
+    const result = translateToSchema(raw, resumeText)
+
+    console.log('FINAL PARSED:', JSON.stringify(result).substring(0, 400))
 
     return NextResponse.json(result)
   } catch (err) {
