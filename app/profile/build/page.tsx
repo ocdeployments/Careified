@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, Suspense, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileFormProvider, useProfileForm } from '@/lib/context/ProfileFormContext'
@@ -99,6 +99,13 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
       adlsPerformed: parsedData.adlsPerformed,
       workHistory: parsedData.employers,
     }
+    console.log('APPLYING FIELDS:', JSON.stringify({
+      firstName: parsedData?.firstName,
+      lastName: parsedData?.lastName,
+      jobTitle: parsedData?.jobTitle,
+      yearsExperience: parsedData?.yearsExperience,
+      workHistory: parsedData?.employers,
+    }, null, 2))
     await Promise.all(
       Object.entries(fieldMap)
         .filter(([_, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0))
@@ -785,17 +792,7 @@ transition={{ duration: 0.15 }}
 export default function ProfileBuildPage() {
  return (
  <ProfileFormProvider>
- <Suspense fallback={
- <div style={{
- padding: '50px', textAlign: 'center',
- fontFamily: "'Inter', sans-serif",
- color: '#64748B', fontSize: '13px',
- }}>
- Loading...
- </div>
- }>
  <ProfileBuilderWrapper />
- </Suspense>
  </ProfileFormProvider>
  )
 }
