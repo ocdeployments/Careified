@@ -146,13 +146,26 @@ function translateToSchema(raw: any, resumeText: string) {
     diagnosisExperience: extractDiagnoses(allText),
     adlsPerformed: mapToList(allText, ADLS_MAP),
     languages: raw.languages || [],
-    employers: exp.map((e: any) => ({
-      organisation: e.company || e.employer || e.organisation || e.organization || '',
-      title: e.title || e.position || e.role || e.jobTitle || '',
-      startYear: parseInt(e.startYear || e.start_year || e.startDate?.split('-')[0] || e.from || '') || null,
-      endYear: parseInt(e.endYear || e.end_year || e.endDate?.split('-')[0] || e.to || '') || null,
-      current: !!(e.current || e.isCurrent || e.present || e.endDate === 'Present'),
-    })).filter((e: any) => e.organisation),
+    employers: exp.map((e: any) => {
+      // Parse dates field "08/2023 - Present" or "05/2021 - 08/2023"
+      let startYear = null, endYear = null, current = false
+      const datesStr = e.dates || e.date || e.period || ''
+      if (datesStr) {
+        const parts = datesStr.split(/[-–—]/).map((s: string) => s.trim())
+        const startMatch = parts[0]?.match(/\d{4}/)
+        const endMatch = parts[1]?.match(/\d{4}/)
+        startYear = startMatch ? parseInt(startMatch[0]) : null
+        current = parts[1]?.toLowerCase().includes('present') || false
+        endYear = endMatch ? parseInt(endMatch[0]) : null
+      }
+      return {
+        organisation: e.company || e.employer || e.organisation || e.organization || '',
+        title: e.position || e.title || e.role || e.jobTitle || '',
+        startYear,
+        endYear,
+        current,
+      }
+    }).filter((e: any) => e.organisation),
   }
 }
 
