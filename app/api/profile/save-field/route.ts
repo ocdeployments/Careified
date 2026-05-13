@@ -99,6 +99,12 @@ export async function POST(req: NextRequest) {
  const { field, value, referredBy } = await req.json()
 
  const dbColumn = FIELD_MAP[field]
+
+ // Serialize complex values (arrays, objects) for JSONB columns
+ const serializedValue = typeof value === 'object' && value !== null
+   ? JSON.stringify(value)
+   : value
+
  // Don't allow direct saves to referred_by column
  if (dbColumn === 'referred_by') {
   return NextResponse.json({ error: 'Cannot set referred_by directly' }, { status: 400 })
@@ -116,13 +122,13 @@ export async function POST(req: NextRequest) {
    await pool.query(
     `INSERT INTO caregivers (user_id, status, ${dbColumn}, referred_by, updated_at)
   VALUES ($1, 'incomplete', $2, $3, NOW())`,
-    [userId, value, referredBy]
+    [userId, serializedValue, referredBy]
    )
   } else {
    await pool.query(
     `INSERT INTO caregivers (user_id, status, ${dbColumn}, updated_at)
   VALUES ($1, 'incomplete', $2, NOW())`,
-    [userId, value]
+    [userId, serializedValue]
    )
   }
  } else {
@@ -131,13 +137,13 @@ export async function POST(req: NextRequest) {
    await pool.query(
     `UPDATE caregivers SET ${dbColumn} = $1, referred_by = $2, updated_at = NOW()
   WHERE user_id = $3`,
-    [value, referredBy, userId]
+    [serializedValue, referredBy, userId]
    )
   } else {
    await pool.query(
     `UPDATE caregivers SET ${dbColumn} = $1, updated_at = NOW()
   WHERE user_id = $2`,
-    [value, userId]
+    [serializedValue, userId]
    )
   }
  }
