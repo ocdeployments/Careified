@@ -1,37 +1,42 @@
-// TODO: replace with Resend when transactional email provider lands.
-// See PRODUCTION_CHECKLIST.md and INTEGRATIONS.md.
+import { Resend } from 'resend'
 
-interface SendClaimEmailParams {
+export async function sendClaimEmail(params: {
   to: string
   firstName: string
   agencyName: string
   token: string
-}
+}): Promise<{ sent: boolean; provider: string }> {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[sendClaimEmail] RESEND_API_KEY not set — skipping')
+    return { sent: false, provider: 'none' }
+  }
 
-/**
- * Send claim email to caregiver.
- *
- * Current implementation is a STUB that logs to console and writes to audit_log.
- * Replace with Resend integration when email provider is provisioned.
- */
-export async function sendClaimEmail(params: SendClaimEmailParams): Promise<{ sent: boolean; provider: string }> {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const claimUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://careified.vercel.app'}/claim/${params.token}`
 
-  console.log('[CLAIM EMAIL STUB]', {
+  const { error } = await resend.emails.send({
+    from: 'Careified <noreply@careified.vercel.app>',
     to: params.to,
     subject: `${params.agencyName} created a Careified profile for you — claim it now`,
-    claim_url: claimUrl,
-    expires_in: '30 days',
+    html: `
+      <p>Hi ${params.firstName},</p>
+      <p>${params.agencyName} added you to Careified — the reputation platform for professional caregivers.</p>
+      <p>We've created a basic profile for you with the information we have on file. Claim it now to:</p>
+      <ul>
+        <li>Add your own details and photo</li>
+        <li>Make your credentials visible to agencies</li>
+        <li>Build your portable professional reputation</li>
+      </ul>
+      <p><a href="${claimUrl}">Claim your profile</a></p>
+      <p>This link expires in 30 days.</p>
+      <p>The Careified Team</p>
+    `,
   })
 
-  // Audit so we can confirm sends happened in admin
-  // Note: This stub runs without a DB pool — audit is logged via console for now
-  // The confirm endpoint handles audit_log writes directly
-  console.log('[AUDIT STUB] claim_email_queued', {
-    to: params.to,
-    agency: params.agencyName,
-    token: params.token,
-  })
+  if (error) {
+    console.error('[sendClaimEmail] Resend error:', error)
+    return { sent: false, provider: 'resend' }
+  }
 
-  return { sent: true, provider: 'stub' }
+  return { sent: true, provider: 'resend' }
 }
