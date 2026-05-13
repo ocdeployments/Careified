@@ -12,162 +12,6 @@ export const maxDuration = 30
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
-const SERVICES_MAP: Record<string, string> = {
-  'medication': 'Medication Administration',
-  'med admin': 'Medication Administration',
-  'personal care': 'Personal Care',
-  'bathing': 'Personal Care',
-  'grooming': 'Personal Care',
-  'hygiene': 'Personal Care',
-  'meal prep': 'Meal Preparation',
-  'cooking': 'Meal Preparation',
-  'nutrition': 'Meal Preparation',
-  'companionship': 'Companionship',
-  'companion': 'Companionship',
-  'mobility': 'Mobility Assistance',
-  'transfer': 'Mobility Assistance',
-  'hoyer': 'Mobility Assistance',
-  'health monitor': 'Health Monitoring',
-  'vital signs': 'Health Monitoring',
-  'wound care': 'Wound Care',
-  'memory care': 'Memory Care Activities',
-  'care plan': 'Care Planning',
-  'documentation': 'Care Documentation',
-  'dressing': 'Personal Care',
-  'toileting': 'Continence Care',
-  'catheter': 'Catheter Care',
-  'ostomy': 'Ostomy Care',
-  'feeding': 'Feeding Assistance',
-  'exercise': 'Exercise Assistance',
-  'range of motion': 'Range of Motion',
-}
-
-const CERTIFICATIONS_MAP: Record<string, string> = {
-  'cpr': 'CPR',
-  'cardiopulmonary': 'CPR',
-  'basic life support': 'CPR',
-  'bls': 'CPR',
-  'first aid': 'First Aid',
-  'psw': 'PSW',
-  'personal support worker': 'PSW',
-  'hca': 'HCA',
-  'home care aide': 'HCA',
-  'home health aide': 'HHA',
-  'cna': 'CNA',
-  'certified nursing assistant': 'CNA',
-  'nurse aide': 'CNA',
-  'medication administration': 'Medication Administration Certificate',
-  'rn': 'RN',
-  'registered nurse': 'RN',
-  'rpn': 'RPN',
-  'registered practical nurse': 'RPN',
-  'lpn': 'LPN',
-  'dementia care certificate': 'Dementia Care Certificate',
-  'palliative care certificate': 'Palliative Care Certificate',
-}
-
-const SPECIALIZATIONS_MAP: Record<string, string> = {
-  'elder': 'Elderly Care',
-  'senior': 'Elderly Care',
-  'geriatric': 'Elderly Care',
-  'older adult': 'Elderly Care',
-  'dementia': 'Dementia Care',
-  'alzheimer': 'Dementia Care',
-  'memory loss': 'Dementia Care',
-  'cognitive': 'Dementia Care',
-  'palliative': 'Palliative Care',
-  'hospice': 'Palliative Care',
-  'end of life': 'Palliative Care',
-  'disability': 'Disability Support',
-  'pediatric': 'Pediatric Care',
-  'children': 'Pediatric Care',
-  'post-surg': 'Post-Surgical Care',
-  'rehabilitation': 'Rehabilitation Care',
-  'mental health': 'Mental Health Support',
-}
-
-const ADLS_MAP: Record<string, string> = {
-  'bath': 'Bathing',
-  'shower': 'Bathing',
-  'dress': 'Dressing',
-  'groom': 'Grooming',
-  'oral hygiene': 'Grooming',
-  'toilet': 'Toileting',
-  'continence': 'Toileting',
-  'feed': 'Feeding',
-  'eating': 'Feeding',
-  'transfer': 'Transfers',
-  'reposition': 'Transfers',
-  'lift': 'Transfers',
-  'ambulation': 'Ambulation',
-  'walking': 'Ambulation',
-}
-
-const DIAGNOSES = [
-  'Alzheimer', 'Dementia', 'Parkinson', 'Multiple Sclerosis',
-  'Stroke', 'COPD', 'Diabetes', 'Cancer', 'Heart Failure',
-  'Arthritis', 'Osteoporosis', 'Depression', 'Anxiety',
-  'Schizophrenia', 'Autism', 'Cerebral Palsy', 'ALS', 'Epilepsy',
-  'Hypertension', 'Traumatic Brain Injury', 'Spinal Cord Injury'
-]
-
-function mapToList(text: string, map: Record<string, string>): string[] {
-  const lower = text.toLowerCase()
-  const found = new Set<string>()
-  for (const [key, value] of Object.entries(map)) {
-    if (lower.includes(key)) found.add(value)
-  }
-  return Array.from(found)
-}
-
-function extractDiagnoses(text: string): string[] {
-  return DIAGNOSES.filter(d => text.toLowerCase().includes(d.toLowerCase()))
-}
-
-function translateToSchema(raw: any, resumeText: string) {
-  const allText = JSON.stringify(raw) + ' ' + resumeText
-  const exp = raw.experience || raw.work_experience || raw.employment || raw.workExperience || []
-  return {
-    firstName: raw.firstName || raw.first_name || (raw.name?.split(' ')[0]) || null,
-    lastName: raw.lastName || raw.last_name || (raw.name?.split(' ').slice(1).join(' ')) || null,
-    email: raw.email || null,
-    phone: raw.phone || raw.phoneNumber || raw.phone_number || null,
-    city: raw.city || raw.location?.city || null,
-    state: raw.state || raw.location?.state || null,
-    jobTitle: raw.jobTitle || raw.job_title || raw.currentTitle || raw.title || null,
-    yearsExperience: raw.yearsExperience || raw.years_experience || raw.totalExperience || null,
-    bio: raw.bio || raw.summary || raw.professional_summary || raw.objective || null,
-    certifications: mapToList(allText, CERTIFICATIONS_MAP),
-    credentials: [
-      ...(raw.education || []).map((e: any) => e.degree || e.credential || e.qualification).filter(Boolean),
-    ],
-    services: mapToList(allText, SERVICES_MAP),
-    specializations: mapToList(allText, SPECIALIZATIONS_MAP),
-    diagnosisExperience: extractDiagnoses(allText),
-    adlsPerformed: mapToList(allText, ADLS_MAP),
-    languages: raw.languages || [],
-    employers: exp.map((e: any) => {
-      // Parse dates field "08/2023 - Present" or "05/2021 - 08/2023"
-      let startYear = null, endYear = null, current = false
-      const datesStr = e.dates || e.date || e.period || ''
-      if (datesStr) {
-        const parts = datesStr.split(/[-–—]/).map((s: string) => s.trim())
-        const startMatch = parts[0]?.match(/\d{4}/)
-        const endMatch = parts[1]?.match(/\d{4}/)
-        startYear = startMatch ? parseInt(startMatch[0]) : null
-        current = parts[1]?.toLowerCase().includes('present') || false
-        endYear = endMatch ? parseInt(endMatch[0]) : null
-      }
-      return {
-        organisation: e.company || e.employer || e.organisation || e.organization || '',
-        title: e.position || e.title || e.role || e.jobTitle || '',
-        startYear,
-        endYear,
-        current,
-      }
-    }).filter((e: any) => e.organisation),
-  }
-}
 
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === 'application/pdf') {
@@ -195,12 +39,153 @@ export async function POST(req: NextRequest) {
     }
 
     // PASS 1 — Raw extraction prompt
-    const pass1Prompt = `You are an expert resume parser. Extract ALL information from this resume as JSON.
-Include everything: names, contact info, all jobs with dates, all skills,
-all certifications, education, languages, locations.
-Return ONLY valid JSON, no markdown, no explanation.
-Resume:
-${resumeText}`
+    const pass1Prompt = `You are an expert resume parser for a home care staffing platform.
+Your job is to extract and NORMALIZE all resume information into a precise JSON schema.
+
+CRITICAL RULES:
+- Return ONLY valid JSON. No markdown, no explanation, no extra text.
+- Normalize ALL data to match the exact field formats below.
+- If information is not present, use null for strings/numbers, [] for arrays.
+
+EXTRACTION AND NORMALIZATION RULES:
+
+NAME: Extract first and last name separately.
+- "ADDISON HARRIS", "Addison Harris", "Harris, Addison" → firstName: "Addison", lastName: "Harris"
+
+EMAIL: Extract from contact section or anywhere in resume.
+- Formats: name@domain.com, name [at] domain [dot] com
+
+PHONE: Handle all North American formats:
+- "(416) 835-0940", "416.835.0940", "416 835 0940",
+  "+1-(234)-555-1234", "234-555-1234"
+- Normalize all to +1XXXXXXXXXX
+
+LOCATION: Extract city and state/province separately.
+- "Charlotte, NC" → city: "Charlotte", state: "NC"
+- "Toronto, Ontario" → city: "Toronto", state: "ON"
+
+JOB TITLE: Use the most recent job title.
+
+YEARS EXPERIENCE: Extract as a number.
+- "5 years of experience", "5+ years" → 5
+- If not stated, calculate from work history dates.
+
+BIO: Use the professional summary or objective section verbatim.
+
+WORK HISTORY: Extract ALL positions. For dates:
+- "08/2023 - Present" → startYear: 2023, endYear: null, current: true
+- "May 2021 - Aug 2023" → startYear: 2021, endYear: 2023, current: false
+- "2019 – 2021" → startYear: 2019, endYear: 2021, current: false
+- Always extract the 4-digit year from any date format.
+- "Present", "Current", "Now", "—" in end date → current: true, endYear: null
+
+CERTIFICATIONS: Normalize to standard names. Look EVERYWHERE in the resume.
+- "CPR/AED", "CPR Certified", "Basic Life Support", "BLS" → "CPR"
+- "First Aid", "Emergency First Aid", "Standard First Aid" → "First Aid"
+- "Personal Support Worker", "PSW Certificate", "PSW" → "PSW"
+- "Home Care Aide", "HCA", "Home Health Aide", "HHA" → "HCA"
+- "Certified Nursing Assistant", "CNA", "Nurse Aide" → "CNA"
+- "Registered Nurse", "RN" → "RN"
+- "Registered Practical Nurse", "RPN" → "RPN"
+- "Licensed Practical Nurse", "LPN" → "LPN"
+- "Medication Administration Certificate" → "Medication Administration Certificate"
+
+CREDENTIALS: Academic degrees only.
+- "Bachelor of Science in Nursing", "BSN" → "BSN"
+- "Associate Degree Nursing", "ADN" → "ADN"
+- "Diploma in Personal Support Work" → "PSW Diploma"
+
+EDUCATION: Extract as object.
+- education: [{ institution, degree, field, startYear, endYear }]
+- e.g. { institution: "UNC Charlotte", degree: "BSN", field: "Nursing", startYear: 2018, endYear: 2021 }
+
+AWARDS: Extract any awards or recognition mentioned.
+- awards: [{ title, organisation, year }]
+
+VOLUNTEER: If volunteer or community work mentioned:
+- volunteerExperience: true
+- volunteerDescription: brief description
+
+SERVICES: Normalize care tasks to standard names. Scan the ENTIRE resume including job duties.
+- Any mention of giving/administering medications → "Medication Administration"
+- Bathing, showering, personal hygiene, hygiene assistance → "Personal Care"
+- Meal preparation, cooking, nutrition planning, meal planning → "Meal Preparation"
+- Companionship, social engagement, recreational activities → "Companionship"
+- Mobility assistance, transfers, walking assistance, ambulation → "Mobility Assistance"
+- Vital signs, health monitoring, documenting health → "Health Monitoring"
+- Wound care, dressing changes → "Wound Care"
+- Memory care activities, cognitive engagement → "Memory Care Activities"
+- Care planning, care documentation → "Care Planning"
+- Light housekeeping, cleaning, laundry → "Light Housekeeping"
+- Transportation, driving clients → "Transportation"
+- Grooming, hair care, oral hygiene → "Grooming Assistance"
+
+SPECIALIZATIONS: Patient populations. Infer from employer names and job duties.
+- Any mention of seniors, elderly, older adults, geriatric → "Elderly Care"
+- Dementia, Alzheimer's, memory care, cognitive decline → "Dementia Care"
+- Palliative, hospice, end of life → "Palliative Care"
+- Disability, disabled clients → "Disability Support"
+- Pediatric, children, pediatric care → "Pediatric Care"
+- Post-surgical, post-op, rehabilitation → "Post-Surgical Care"
+- Mental health → "Mental Health Support"
+- If employer is a "Senior Living" or "Senior Care" facility → add "Elderly Care"
+
+DIAGNOSIS EXPERIENCE: Medical conditions mentioned anywhere.
+- Look for: Alzheimer's, Dementia, Parkinson's, MS, Stroke, COPD, Diabetes,
+  Cancer, Heart Failure, Arthritis, Osteoporosis, Depression, Anxiety,
+  Autism, Cerebral Palsy, ALS, Epilepsy, Hypertension, TBI
+
+ADLS PERFORMED: Activities of daily living. Scan all job duties.
+- Bathing, showering → "Bathing"
+- Dressing, clothing → "Dressing"
+- Grooming, hair, oral hygiene → "Grooming"
+- Toileting, continence, incontinence → "Toileting"
+- Feeding, eating assistance → "Feeding"
+- Transfers, repositioning, hoyer lift → "Transfers"
+- Walking, ambulation → "Ambulation"
+
+LANGUAGES: Languages spoken. If not mentioned, do not guess.
+
+LINKEDIN: Extract LinkedIn URL if present.
+
+INFER FROM INTERESTS: If interests mention care-related topics:
+- "Elderly Care Advocacy" → add "Elderly Care" to specializations if not already there
+- "Cooking and Nutrition" → add "Meal Preparation" to services if not already there
+
+Resume text:
+${resumeText}
+
+Return ONLY this JSON object:
+{
+  "firstName": string | null,
+  "lastName": string | null,
+  "email": string | null,
+  "phone": string | null,
+  "city": string | null,
+  "state": string | null,
+  "jobTitle": string | null,
+  "yearsExperience": number | null,
+  "bio": string | null,
+  "certifications": string[],
+  "credentials": string[],
+  "awards": Array<{ title: string, organisation: string, year: number | null }>,
+  "volunteerExperience": boolean,
+  "volunteerDescription": string | null,
+  "education": Array<{ institution: string, degree: string, field: string, startYear: number | null, endYear: number | null }>,
+  "services": string[],
+  "specializations": string[],
+  "diagnosisExperience": string[],
+  "adlsPerformed": string[],
+  "languages": string[],
+  "linkedinUrl": string | null,
+  "employers": Array<{
+    "organisation": string,
+    "title": string,
+    "startYear": number | null,
+    "endYear": number | null,
+    "current": boolean
+  }>
+}`
 
     const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -237,8 +222,8 @@ ${resumeText}`
       return NextResponse.json({ error: 'Could not parse resume — try filling in manually' }, { status: 422 })
     }
 
-    // PASS 2 — Translate to Careified schema
-    const result = translateToSchema(raw, resumeText)
+    // Single-pass: prompt does all normalization
+    const result = raw
 
     console.log('FINAL PARSED:', JSON.stringify(result).substring(0, 400))
 
