@@ -196,7 +196,7 @@ Return ONLY this JSON object:
         'X-Title': 'Careified Resume Parser',
       },
       body: JSON.stringify({
-        model: 'minimax/minimax-01',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         max_tokens: 1500,
         temperature: 0.1,
         messages: [{ role: 'user', content: pass1Prompt }],
