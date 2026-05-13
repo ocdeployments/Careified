@@ -151,23 +151,135 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
       {error && <p style={{ color: '#DC2626', fontSize: '14px', marginTop: '16px' }}>{error}</p>}
       {parsedData && (
         <div style={{ marginTop: '24px' }}>
-          <p style={{ fontSize: '14px', color: '#16A34A', fontWeight: 600, marginBottom: '16px' }}>✓ Resume parsed successfully</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-            {([
-              ['First Name', parsedData.firstName],
-              ['Last Name', parsedData.lastName],
-              ['Email', parsedData.email],
-              ['Phone', parsedData.phone],
-              ['City', parsedData.city],
-              ['Job Title', parsedData.jobTitle],
-            ] as [string, string][]).filter(([_, v]) => v).map(([label, value]) => (
-              <div key={label} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '12px' }}>
-                <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '4px' }}>{label}</p>
-                <p style={{ fontSize: '14px', color: '#0D1B3E', fontWeight: 500 }}>{value}</p>
-              </div>
-            ))}
-          </div>
-          <button onClick={handleApply} style={{
+          <p style={{ fontSize: '15px', color: '#16A34A', fontWeight: 700, marginBottom: '20px' }}>✓ We extracted the following from your resume</p>
+
+{/* Personal Info Grid */}
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+  {([
+    ['First Name', parsedData.firstName],
+    ['Last Name', parsedData.lastName],
+    ['Email', parsedData.email],
+    ['Phone', parsedData.phone],
+    ['City', parsedData.city],
+    ['State', parsedData.state],
+    ['Job Title', parsedData.jobTitle],
+    ['Years Experience', parsedData.yearsExperience],
+  ] as [string, any][]).map(([label, value]) => (
+    <div key={label} style={{
+      background: value ? '#F0FDF4' : '#FFF7F7',
+      border: `1px solid ${value ? '#BBF7D0' : '#FEE2E2'}`,
+      borderRadius: '8px', padding: '10px'
+    }}>
+      <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '2px' }}>{label}</p>
+      <p style={{ fontSize: '13px', color: value ? '#15803D' : '#DC2626', fontWeight: 500 }}>
+        {value ? String(value) : '✗ Not found'}
+      </p>
+    </div>
+  ))}
+</div>
+
+{/* Bio */}
+{parsedData.bio && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Professional Summary</p>
+    <p style={{ fontSize: '13px', color: '#334155', lineHeight: 1.5, background: '#F8FAFC', borderRadius: '8px', padding: '12px' }}>{parsedData.bio}</p>
+  </div>
+)}
+
+{/* Work History */}
+{parsedData.employers?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Work History — {parsedData.employers.length} positions found</p>
+    {parsedData.employers.map((e: any, i: number) => (
+      <div key={i} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>{e.title}</p>
+        <p style={{ fontSize: '12px', color: '#64748B' }}>{e.organisation}{e.startYear && ` · ${e.startYear} – ${e.current ? 'Present' : e.endYear || '?'}`}</p>
+      </div>
+    ))}
+  </div>
+)}
+
+{/* Services */}
+{parsedData.services?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Services — {parsedData.services.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.services.map((s: string) => (
+        <span key={s} style={{ background: '#EFF6FF', color: '#1D4ED8', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{s}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Certifications */}
+{parsedData.certifications?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Certifications — {parsedData.certifications.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.certifications.map((c: string) => (
+        <span key={c} style={{ background: '#FEF9C3', color: '#854D0E', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{c}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Specializations */}
+{parsedData.specializations?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Specializations — {parsedData.specializations.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.specializations.map((s: string) => (
+        <span key={s} style={{ background: '#F0FDF4', color: '#15803D', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{s}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Education */}
+{parsedData.education?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Education</p>
+    {parsedData.education.map((e: any, i: number) => (
+      <div key={i} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>{e.degree}</p>
+        <p style={{ fontSize: '12px', color: '#64748B' }}>{e.institution}{e.startYear && ` · ${e.startYear} – ${e.endYear || '?'}`}</p>
+      </div>
+    ))}
+  </div>
+)}
+
+{/* ADLs */}
+{parsedData.adlsPerformed?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>ADLs Performed</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.adlsPerformed.map((a: string) => (
+        <span key={a} style={{ background: '#FDF4FF', color: '#7E22CE', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{a}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Awards */}
+{parsedData.awards?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Awards & Recognition</p>
+    {parsedData.awards.map((a: any, i: number) => (
+      <div key={i} style={{ background: '#FFFBEB', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px', fontSize: '13px' }}>
+        <span style={{ fontWeight: 600, color: '#92400E' }}>⭐ {a.title}</span>
+        {a.organisation && <span style={{ color: '#78716C' }}> · {a.organisation}</span>}
+        {a.year && <span style={{ color: '#A8A29E' }}> · {a.year}</span>}
+      </div>
+    ))}
+  </div>
+)}
+
+{/* Missing fields note */}
+<div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px', marginBottom: '20px', fontSize: '13px', color: '#64748B' }}>
+  ℹ Missing fields can be filled in manually in the next steps.
+</div>
+
+<button onClick={handleApply} style={{
             width: '100%', padding: '14px', borderRadius: '10px', border: 'none',
             background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: '#0D1B3E',
             fontSize: '15px', fontWeight: 600, cursor: 'pointer', marginBottom: '12px'
