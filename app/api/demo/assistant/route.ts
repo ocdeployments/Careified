@@ -3,7 +3,7 @@ import { pool } from '@/lib/db'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ''
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
-const MODEL = 'minimax/minimax-m2.5'
+const MODEL = 'upstage/ring-2.6-1t:free'
 
 // Rate limiting: Map<IP, timestamps[]>
 const rateLimitMap = new Map<string, number[]>()

@@ -196,7 +196,7 @@ Return ONLY this JSON object:
         'X-Title': 'Careified Resume Parser',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b:free',
+        model: 'upstage/ring-2.6-1t:free',
         max_tokens: 1500,
         temperature: 0.1,
         messages: [{ role: 'user', content: pass1Prompt }],

@@ -5,7 +5,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
-const MODEL = 'minimax/minimax-m2.5'
+const MODEL = 'upstage/ring-2.6-1t:free'
 
 async function checkApprovedAgency(): Promise<{ agencyId: string; agencyName: string } | null> {
   let userId: string | null | undefined
