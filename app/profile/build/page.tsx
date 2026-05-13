@@ -56,6 +56,134 @@ interface FormData {
  [key: string]: any
 }
 
+function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any>) => void }) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [parsedData, setParsedData] = useState<Record<string, any> | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFile = async (file: File) => {
+    if (!file) return
+    setIsUploading(true)
+    setError(null)
+    const formData = new FormData()
+    formData.append('resume', file)
+    try {
+      const res = await fetch('/api/profile/parse-resume', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (res.ok) setParsedData(data)
+      else setError('Could not parse resume. Try again or skip.')
+    } catch {
+      setError('Upload failed. Try again or skip.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleApply = async () => {
+    if (!parsedData) return
+    const fieldMap: Record<string, any> = {
+      first_name: parsedData.firstName,
+      last_name: parsedData.lastName,
+      email: parsedData.email,
+      phone: parsedData.phone,
+      city: parsedData.city,
+      state: parsedData.state,
+      job_title: parsedData.jobTitle,
+      years_experience: parsedData.yearsExperience,
+      bio: parsedData.bio,
+      services: parsedData.services,
+      credentials: parsedData.certifications,
+      specializations: parsedData.specializations,
+      diagnosis_experience: parsedData.diagnosisExperience,
+      adls_performed: parsedData.adlsPerformed,
+      work_history: parsedData.employers,
+    }
+    await Promise.all(
+      Object.entries(fieldMap)
+        .filter(([_, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0))
+        .map(([field, value]) =>
+          fetch('/api/profile/save-field', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ field, value })
+          })
+        )
+    )
+    onParsed(fieldMap)
+    window.location.href = '/profile/build?step=1'
+  }
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 24px' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px', fontFamily: "'DM Serif Display', serif" }}>
+        Let's build your profile
+      </h1>
+      <p style={{ fontSize: '15px', color: '#64748B', marginBottom: '32px' }}>
+        Upload your resume and we'll fill in your details automatically. Takes 2 minutes.
+      </p>
+      {!parsedData && !isUploading && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+          onClick={() => document.getElementById('resume-upload')?.click()}
+          style={{
+            border: `2px dashed ${isDragging ? '#C9973A' : '#CBD5E1'}`,
+            borderRadius: '12px', padding: '48px 24px', textAlign: 'center',
+            cursor: 'pointer', background: isDragging ? 'rgba(201,151,58,0.04)' : '#F8FAFC',
+            transition: 'all 0.2s'
+          }}
+        >
+          <input id="resume-upload" type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+          <p style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>
+            Drop your resume here or click to browse
+          </p>
+          <p style={{ fontSize: '13px', color: '#94A3B8', marginTop: '8px' }}>PDF, DOC, DOCX — max 5MB</p>
+        </div>
+      )}
+      {isUploading && (
+        <div style={{ textAlign: 'center', padding: '48px', color: '#64748B' }}>
+          Reading your resume...
+        </div>
+      )}
+      {error && <p style={{ color: '#DC2626', fontSize: '14px', marginTop: '16px' }}>{error}</p>}
+      {parsedData && (
+        <div style={{ marginTop: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#16A34A', fontWeight: 600, marginBottom: '16px' }}>✓ Resume parsed successfully</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+            {([
+              ['First Name', parsedData.firstName],
+              ['Last Name', parsedData.lastName],
+              ['Email', parsedData.email],
+              ['Phone', parsedData.phone],
+              ['City', parsedData.city],
+              ['Job Title', parsedData.jobTitle],
+            ] as [string, string][]).filter(([_, v]) => v).map(([label, value]) => (
+              <div key={label} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '12px' }}>
+                <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '4px' }}>{label}</p>
+                <p style={{ fontSize: '14px', color: '#0D1B3E', fontWeight: 500 }}>{value}</p>
+              </div>
+            ))}
+          </div>
+          <button onClick={handleApply} style={{
+            width: '100%', padding: '14px', borderRadius: '10px', border: 'none',
+            background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: '#0D1B3E',
+            fontSize: '15px', fontWeight: 600, cursor: 'pointer', marginBottom: '12px'
+          }}>
+            Apply to my profile →
+          </button>
+        </div>
+      )}
+      <button onClick={() => { window.location.href = '/profile/build?step=1' }}
+        style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '13px', cursor: 'pointer', marginTop: '8px' }}>
+        Skip for now
+      </button>
+    </div>
+  )
+}
+
 function SavedIndicator({ show }: { show: boolean }) {
  return (
  <div style={{
@@ -149,12 +277,8 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 )
 
  // Step 0 — redirect to Step 1 (consent now at Step 11)
-  if (currentStep === 0) {
-    router.replace('/profile/build?step=1')
-    return null
-  }
-
   switch (currentStep) {
+    case 0: return <Step0ResumeUpload onParsed={(fields) => { handleSave(fields) }} />
  case 1: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step1Identity /></motion.div></AnimatePresence>
  case 2: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step2Services /></motion.div></AnimatePresence>
  case 3: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step3Availability /></motion.div></AnimatePresence>
