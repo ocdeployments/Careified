@@ -84,7 +84,9 @@ const FIELD_MAP: Record<string, string> = {
  openQ3: 'open_q3',
  willingLiveIn: 'willing_live_in',
  willingOvernight: 'willing_overnight',
-  referredBy: 'referred_by',
+ referredBy: 'referred_by',
+ diagnosisExperience: 'diagnosis_experience',
+ adlsPerformed: 'adls_performed',
 }
 
 export async function POST(req: NextRequest) {
