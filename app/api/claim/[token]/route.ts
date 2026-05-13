@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -59,9 +60,18 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  // Rate limit: 5 requests per IP per hour
+  const clientIp = getClientIp(request)
+  if (!checkRateLimit(clientIp, 5)) {
+    return NextResponse.json(
+      { error: 'rate_limit_exceeded', message: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const { token } = await params
     const body = await request.json()
@@ -122,6 +132,17 @@ export async function POST(
     await pool.query(
       "UPDATE caregiver_claim_tokens SET status = 'claimed', claimed_at = NOW() WHERE token = $1",
       [token]
+    )
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO audit_log (action, actor_clerk_id, target_id, metadata)
+       VALUES ('profile_claimed', $1, $2, $3)`,
+      [
+        clerk_user_id,
+        record.caregiver_id,
+        JSON.stringify({ token, agency_id: record.agency_id, source: 'claim_link' })
+      ]
     )
 
     return NextResponse.json({
