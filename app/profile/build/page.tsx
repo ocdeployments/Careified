@@ -297,27 +297,6 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  return (
  <>
  {isClient && showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
- <style>{`
- @keyframes slideInForward {
- from { opacity: 0; transform: translateX(24px); }
- to { opacity: 1; transform: translateX(0); }
- }
- @keyframes slideInBack {
- from { opacity: 0; transform: translateX(-24px); }
- to { opacity: 1; transform: translateX(0); }
- }
- .step-content-forward { animation: slideInForward 0.28s ease forwards; }
- .step-content-back { animation: slideInBack 0.28s ease forwards; }
- .sidebar-step:hover { background: #F8FAFC !important; }
- .nav-btn-back:hover { color: #0D1B3E !important; }
- .nav-btn-next:hover { opacity: 0.88; }
- @media (max-width: 768px) {
- .pb-layout { grid-template-columns: 1fr !important; }
- .pb-sidebar { display: none !important; }
- .pb-mobile-steps { display: flex !important; }
- .pb-preview { display: none !important; }
- }
- `}</style>
 
  {/* Top bar */}
  <div style={{
