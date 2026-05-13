@@ -83,21 +83,21 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
   const handleApply = async () => {
     if (!parsedData) return
     const fieldMap: Record<string, any> = {
-      first_name: parsedData.firstName,
-      last_name: parsedData.lastName,
+      firstName: parsedData.firstName,
+      lastName: parsedData.lastName,
       email: parsedData.email,
       phone: parsedData.phone,
       city: parsedData.city,
       state: parsedData.state,
-      job_title: parsedData.jobTitle,
-      years_experience: parsedData.yearsExperience,
+      jobTitle: parsedData.jobTitle,
+      yearsExperience: parsedData.yearsExperience,
       bio: parsedData.bio,
       services: parsedData.services,
       credentials: parsedData.certifications,
       specializations: parsedData.specializations,
-      diagnosis_experience: parsedData.diagnosisExperience,
-      adls_performed: parsedData.adlsPerformed,
-      work_history: parsedData.employers,
+      diagnosisExperience: parsedData.diagnosisExperience,
+      adlsPerformed: parsedData.adlsPerformed,
+      workHistory: parsedData.employers,
     }
     await Promise.all(
       Object.entries(fieldMap)
