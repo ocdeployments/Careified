@@ -42,7 +42,7 @@ Rules:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'mistralai/mistral-7b-instruct',
+      model: 'upstage/ring-2.6-1t:free',
       max_tokens: 300,
       temperature: 0.1,
       messages: [{ role: 'user', content: prompt }],
