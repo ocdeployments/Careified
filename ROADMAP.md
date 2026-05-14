@@ -143,8 +143,8 @@ Friday May 16
 - [ ] careified.ca domain pointed to Vercel
 - [ ] careified.com domain pointed to Vercel
 
-### WEEK 3: May 24-30 — Caregiver Experience  
-- [ ] Caregiver claims agency-built profile flow
+### WEEK 3: May 24-30 — Caregiver Experience
+- [x] Caregiver claims agency-built profile flow ✅ DONE May 13
 - [ ] Mobile experience audit — PSW on phone test
 - [ ] Profile completion nudge emails
 - [ ] Empty states — every blank screen has message + CTA

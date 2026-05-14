@@ -326,6 +326,11 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | match_scores | LIVE | |
 | reference_verification_requests | LIVE | |
 | audit_log | LIVE | |
+| support_tickets | LIVE | Ticketing system |
+| ticket_messages | LIVE | Ticketing system |
+| caregiver_claim_tokens | LIVE | Claim flow tokens |
+| agency_team_members | LIVE | Multi-user agency accounts |
+| field_discovery | LIVE | CSV intelligence + unknown field capture |
 
 ---
 
@@ -343,6 +348,7 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | VAPI_ASSISTANT_ID | SET |
 | ADMIN_CLERK_USER_ID | SET |
 | BLOB_READ_WRITE_TOKEN | SET |
+| RESEND_API_KEY | SET |
 
 ---
 

@@ -1,6 +1,6 @@
 # AGENCY_ROSTER_SPEC.md — Agency Roster Specification
 # Purpose: Agency builds caregiver profiles on behalf of caregivers, caregiver claims ownership
-# Status: NOT BUILT — target May 13-14 2026
+# Status: ✅ BUILT — May 13 2026
 # Owner: Both
 
 ---
@@ -190,20 +190,20 @@ Agency can fix errors and re-upload.
 
 ## 11. STATUS
 
-- [ ] DB migration — add columns to caregivers
-- [ ] DB migration — create caregiver_claim_tokens table
-- [ ] /api/roster/import endpoint
-- [ ] /api/roster/add endpoint
-- [ ] /api/roster/list endpoint
-- [ ] /api/roster/regenerate-token endpoint
-- [ ] /api/claim/:token public page
-- [ ] CSV template + validation
-- [ ] Email template integration (via Resend)
-- [ ] UI: Agency roster dashboard
-- [ ] UI: Claim flow for caregiver
-- [ ] Test all conflict cases
+- [x] DB migration — add columns to caregivers ✅ Built May 13 2026
+- [x] DB migration — create caregiver_claim_tokens table ✅ Built May 13 2026
+- [x] /api/roster/import endpoint ✅ Built May 13 2026
+- [x] /api/roster/add endpoint ✅ Built May 13 2026
+- [x] /api/roster/list endpoint ✅ Built May 13 2026
+- [x] /api/roster/regenerate-token endpoint ✅ Built May 13 2026
+- [x] /api/claim/:token public page ✅ Built May 13 2026
+- [x] CSV template + validation ✅ Built May 13 2026
+- [x] Email template integration (via Resend) ✅ Built May 13 2026
+- [x] UI: Agency roster dashboard ✅ Built May 13 2026
+- [x] UI: Claim flow for caregiver ✅ Built May 13 2026
+- [x] Test all conflict cases ✅ Built May 13 2026
 
 ---
 
-Last updated: May 9 2026
-Target build: May 13-14 2026
+Last updated: May 13 2026
+Target build: May 13-14 2026 — COMPLETE
