@@ -61,6 +61,8 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
   const [isUploading, setIsUploading] = useState(false)
   const [parsedData, setParsedData] = useState<Record<string, any> | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const isClaimed = searchParams.get('claimed') === 'true'
 
   const handleFile = async (file: File) => {
     if (!file) return
@@ -124,10 +126,12 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 24px' }}>
       <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px', fontFamily: "'DM Serif Display', serif" }}>
-        Let's build your profile
+        {isClaimed ? "Your profile has a head start." : "Let's build your profile"}
       </h1>
       <p style={{ fontSize: '15px', color: '#64748B', marginBottom: '32px' }}>
-        Upload your resume and we'll fill in your details automatically. Takes 2 minutes.
+        {isClaimed
+          ? "Your agency gave us your basic details. Upload your resume and we'll fill in the rest automatically — credentials, work history, certifications. Takes 2 minutes."
+          : "Upload your resume and we'll fill in your details automatically. Takes 2 minutes."}
       </p>
       {!parsedData && !isUploading && (
         <div
@@ -297,7 +301,7 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
       )}
       <button onClick={() => { window.location.href = '/profile/build?step=1' }}
         style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '13px', cursor: 'pointer', marginTop: '8px' }}>
-        Skip for now
+        {isClaimed ? "Skip — I'll review what's already there" : "Skip for now"}
       </button>
     </div>
   )
