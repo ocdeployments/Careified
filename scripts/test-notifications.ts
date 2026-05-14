@@ -95,7 +95,7 @@ async function runTests() {
     process.exit(0)
 
   } catch (error) {
-    console.error('\n❌ TEST FAILED:', error.message)
+    console.error('\n❌ TEST FAILED:', error instanceof Error ? error.message : error)
     process.exit(1)
   } finally {
     pool.end()
