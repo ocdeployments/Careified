@@ -3,12 +3,11 @@
 
 import { Pool } from 'pg'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse')
+
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
-
-// pdfParse for PDF text extraction
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse/lib/pdf-parse.js')
 
 export interface ParsedResume {
   firstName?: string
@@ -42,10 +41,14 @@ export interface ParsedResume {
 }
 
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
-  if (mimeType === 'application/pdf') {
-    const data = await pdfParse(buffer)
-    return data.text.slice(0, 8000)
+  if (mimeType.includes('pdf')) {
+    // Simple text extraction from PDF binary without external dependencies
+    // Extract readable ASCII/UTF-8 strings from the buffer
+    const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
+    const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
+    return strings.join(' ').slice(0, 8000)
   }
+  // DOC/DOCX: utf-8 decode
   return buffer.toString('utf-8').slice(0, 8000)
 }
 

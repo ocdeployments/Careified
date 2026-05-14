@@ -106,9 +106,15 @@
 - [ ] /profile/start — linked in /for-caregivers, should be /profile/build
 
 ### AIRecruit
-- [ ] Session B — consent flow for reference_calls, regulatory_calls, match_time_calls
-- [ ] Session C — reference agent, profile analysis, campaign from profiles
-- [ ] Session D — SMS, retry logic, cron jobs, bulk actions
+- [x] Session B — consent flow for reference_calls, regulatory_calls, match_time_calls ✅ DONE May 14
+- [x] Session C — reference agent, profile analysis, campaign from profiles ✅ DONE May 14
+- [x] Session D — SMS, retry logic, cron jobs, bulk actions ✅ DONE May 14
+- [x] Notification system — in-app notifications ✅ DONE May 14
+
+### New Items (May 14 2026)
+- [ ] CRON_SECRET env var in Vercel dashboard (for cron job verification)
+- [ ] Clerk production keys (still on dev keys)
+- [ ] careified.vercel.app added to Clerk allowed domains
 
 ---
 
@@ -116,7 +122,7 @@
 
 ### UX Debt
 - [ ] Profile visibility toggle — caregiver can hide/show profile from search
-- [ ] Caregiver notification when agency views their profile
+- [x] Caregiver notification when agency views their profile ✅ DONE May 14
 - [ ] Profile completion celebration at Step 10
 - [ ] Empty state — search returns 0 results
 - [ ] Empty state — shortlist is empty
