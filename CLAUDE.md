@@ -500,7 +500,26 @@ Compliance hours: see AI_PLAYBOOK.md
 ## 14. Session Commands
 
 ### When I say "start session" you will:
-Session start: see §12 above.
+
+1. Read SESSION_CONTEXT.md — single compressed context
+   file covering platform, stack, rules, DB, built/not
+   built. This replaces reading 7 docs.
+
+2. Check SESSION_HANDOFF.md:
+   ls SESSION_HANDOFF.md 2>/dev/null
+   If exists and not CLEAN: execute pending prompts
+   in order before taking new instructions.
+
+3. Run model audit:
+   grep -r "minimax\|gpt-4\|openai/" lib/ app/api/ \
+   --include="*.ts" -l 2>/dev/null | grep -v airecruit
+   Flag anything found. Update to ring-2.6-1t:free.
+
+4. Run git log --oneline -5 to confirm repo state.
+
+5. Report session ready:
+   "Session ready. [summary of pending handoff if any,
+   or 'No pending items' if clean]"
 ---
 
 ### /end-session — Safe Stop (auto or manual)
@@ -510,7 +529,14 @@ Session is not complete until all items are checked.**
 
 Run in this order:
 
-0. **Write SESSION_HANDOFF.md:**
+0. **Regenerate SESSION_CONTEXT.md:**
+   Update the "WHAT'S BUILT" and "WHAT'S NOT BUILT"
+   sections to reflect this session's commits.
+   Update ENV VARS STATUS if anything changed.
+   Update SAFE REVERTS with latest stable commit.
+   Commit: "chore(session): regenerate SESSION_CONTEXT.md"
+
+0b. **Write SESSION_HANDOFF.md:**
    - If pending prompts exist (prompts discussed but not yet committed):
      Write each prompt in full, self-contained, in order.
      Format: ## Prompt [N] — [commit message] / [full prompt text]
