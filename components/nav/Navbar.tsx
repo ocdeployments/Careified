@@ -13,7 +13,41 @@ function AuthButton() {
   const { user } = useUser()
   const userRole = user?.publicMetadata?.role as string | undefined
 
-  if (!isLoaded) return null
+  if (!isLoaded) {
+    return (
+      <>
+        <Link
+          href="/sign-in"
+          style={{
+            fontSize: '12px',
+            fontWeight: 500,
+            padding: '6px 14px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.15)',
+            color: 'rgba(255,255,255,0.75)',
+            background: 'none',
+            textDecoration: 'none',
+          }}
+        >
+          Sign in
+        </Link>
+        <Link
+          href="/sign-up"
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            padding: '8px 16px',
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+            color: '#0D1B3E',
+            textDecoration: 'none',
+          }}
+        >
+          Get started
+        </Link>
+      </>
+    )
+  }
   if (userId) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
