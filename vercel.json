@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/process-call-queue",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/notifications/nudge",
