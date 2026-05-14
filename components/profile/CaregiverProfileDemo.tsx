@@ -553,6 +553,52 @@ export interface CaregiverProfileProps {
   contactEmail?: string | null
 }
 
+// Tooltip for alignment score explanation
+function TooltipInfo() {
+  const [show, setShow] = useState(false)
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <span
+        onClick={() => setShow(!show)}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        style={{
+          color: C.gold,
+          cursor: 'pointer',
+          marginLeft: 8,
+          fontSize: 16,
+          fontWeight: 400,
+        }}
+      >
+        ⓘ
+      </span>
+      {show && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          right: 0,
+          marginTop: 8,
+          background: C.navy,
+          border: '1px solid #C9973A',
+          borderRadius: 8,
+          padding: 16,
+          maxWidth: 320,
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: 'white',
+          zIndex: 100,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        }}>
+          <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>What is the Trust Score?</div>
+          <div style={{ opacity: 0.9 }}>
+            This score reflects how closely this caregiver's verified credentials, availability, experience, and working style align with your active client criteria. It is not a recommendation. Careified does not verify, endorse, or recommend any caregiver. All hiring decisions rest with your agency.
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
   // Merge real data with demo fallbacks
   const dm = props
@@ -751,12 +797,13 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 textAlign: 'center',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, position: 'relative' }}>
                 <Star size={22} fill={C.gold} color={C.gold} />
                 <span style={{ fontFamily: SERIF, fontSize: 32, color: '#F5F0E8', lineHeight: 1 }}>
                   {caregiver.trustScore.toFixed(1)}
                 </span>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>/ 5</span>
+                <TooltipInfo />
               </div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>
                 {dm.ratingCount || caregiver.reviewCount} verified reviews · Profile {dm.profileCompletion || caregiver.profileCompletion}% complete
