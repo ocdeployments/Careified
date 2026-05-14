@@ -157,6 +157,8 @@ Call ID: ${callId}`
         assistantId: VAPI_ASSISTANT_ID,
         assistantOverrides: {
           firstMessage,
+          silenceTimeoutSeconds: 8,
+          backgroundDenoisingEnabled: true,
           model: {
             provider: 'openai',
             model: 'gpt-4o',
