@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { clerkClient } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
 import { parse } from 'csv-parse/sync'
+import { mapCsvColumns, extractUnknownFields, CsvColumnMap } from '@/lib/resume/parse-csv'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -185,6 +186,35 @@ export async function POST(request: Request) {
       )
     }
 
+    // === COLUMN MAPPING & UNKNOWN FIELD DETECTION ===
+    const headers = Object.keys(records[0])
+    const sampleRows = records.slice(0, 3).map(row => headers.map(h => row[h] || ''))
+    let columnMapping: CsvColumnMap | null = null
+
+    try {
+      columnMapping = await mapCsvColumns(headers, sampleRows)
+    } catch (err) {
+      console.error('Column mapping failed:', err)
+      // Continue without mapping - use default behavior
+    }
+
+    // Collect unknown fields from all rows
+    const unknownFieldColumns = new Set<string>()
+    const unknownFieldSamples: Record<string, string[]> = {}
+
+    if (columnMapping) {
+      for (const row of records) {
+        const unknownFields = extractUnknownFields(row, columnMapping)
+        for (const [col, val] of Object.entries(unknownFields)) {
+          unknownFieldColumns.add(col)
+          if (!unknownFieldSamples[col]) unknownFieldSamples[col] = []
+          if (unknownFieldSamples[col].length < 3) {
+            unknownFieldSamples[col].push(val)
+          }
+        }
+      }
+    }
+
     // Track cross-row duplicates within CSV
     const csvEmails = new Set<string>()
     const csvPhones = new Set<string>()
@@ -356,7 +386,12 @@ export async function POST(request: Request) {
       valid_rows: validRows,
       invalid_rows: invalidRows,
       warnings,
-      message: 'Preview only. No profiles created. Confirm to write to database.'
+      message: 'Preview only. No profiles created. Confirm to write to database.',
+      column_mapping: columnMapping,
+      unknown_fields: {
+        columns: Array.from(unknownFieldColumns),
+        sample_data: unknownFieldSamples
+      }
     })
 
   } catch (err) {

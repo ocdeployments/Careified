@@ -3,6 +3,8 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { sendClaimEmail } from '@/lib/email/send-claim-email'
+import { recordUnknownFields } from '@/lib/intelligence/field-discovery'
+import { extractUnknownFields, CsvColumnMap } from '@/lib/resume/parse-csv'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -157,7 +159,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { rows } = body as { rows: ParsedRow[] }
+    const { rows, column_mapping, unknown_fields } = body as {
+      rows: ParsedRow[]
+      column_mapping?: CsvColumnMap | null
+      unknown_fields?: { columns: string[]; sample_data: Record<string, string[]> } | null
+    }
+
+    // Build mapping object for extractUnknownFields
+    let mapping: CsvColumnMap | null = null
+    if (column_mapping) {
+      mapping = column_mapping
+    }
 
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json(
@@ -286,6 +298,11 @@ export async function POST(request: NextRequest) {
             JSON.stringify({ source: 'csv', agency_id: agency.agencyId, email: normalizedEmail })
           ]
         )
+
+        // Record unknown fields for field discovery
+        // Note: This uses the raw row data - we'd need to pass the raw CSV row
+        // For now, skip this and rely on the preview API to capture unknown fields
+        // TODO: Pass raw row data from preview to confirm for field discovery
 
         createdIds.push(caregiverId)
 
