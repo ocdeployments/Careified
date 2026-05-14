@@ -333,6 +333,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const [showReveal, setShowReveal] = useState(false)
  const [showModal, setShowModal] = useState(false)
  const [isClient, setIsClient] = useState(false)
+ const [showLiveBanner, setShowLiveBanner] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
  const step = searchParams.get('step') || '0'
@@ -368,6 +369,20 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  return () => clearTimeout(t)
  }, [currentStep])
 
+ // Check for "went live" flag when entering step 4
+ useEffect(() => {
+ if (currentStep === 4) {
+ const wentLive = localStorage.getItem('careified_went_live')
+ if (wentLive === 'true') {
+ setShowLiveBanner(true)
+ localStorage.removeItem('careified_went_live')
+ // Auto-dismiss after 8 seconds
+ const t = setTimeout(() => setShowLiveBanner(false), 8000)
+ return () => clearTimeout(t)
+ }
+ }
+ }, [currentStep])
+
  const handleSave = (saveData: any) => {
  if (contextFormData) {
  // Context handles saving - just show indicator
@@ -381,6 +396,10 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const navigate = (dir: 'forward' | 'back') => {
  setAnimDir(dir)
  const next = dir === 'forward' ? currentStep + 1 : currentStep - 1
+ // Set "went live" flag when going from step 3 to step 4
+ if (dir === 'forward' && currentStep === 3) {
+ localStorage.setItem('careified_went_live', 'true')
+ }
  if (next >= 1 && next <= 11) router.push(`?step=${next}`)
  }
 
@@ -678,6 +697,62 @@ transition={{ duration: 0.15 }}
 
  {/* Live banner - shows when profile goes live at Step 3 */}
  {currentStep === 3 && <LiveBanner firstName={formData.firstName} />}
+
+ {/* You're live banner - shows on Step 4 after completing Step 3 */}
+ {showLiveBanner && currentStep === 4 && (
+ <div style={{
+ position: 'fixed',
+ bottom: 0,
+ left: 0,
+ right: 0,
+ zIndex: 50,
+ background: '#0D1B3E',
+ borderLeft: '4px solid #C9973A',
+ padding: '16px 24px',
+ display: 'flex',
+ alignItems: 'center',
+ justifyContent: 'space-between',
+ }}>
+ <style>{`
+ @keyframes pulse {
+ 0%, 100% { opacity: 1; transform: scale(1); }
+ 50% { opacity: 0.5; transform: scale(1.4); }
+ }
+ `}</style>
+ <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+   <div style={{
+     width: 8,
+     height: 8,
+     borderRadius: '50%',
+     background: '#C9973A',
+     animation: 'pulse 2s ease-in-out infinite',
+   }} />
+   <div>
+     <div style={{ color: 'white', fontSize: '14px', fontWeight: 600 }}>
+       You're now live in agency search.
+     </div>
+     <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>
+       Agencies can find you right now.
+     </div>
+   </div>
+ </div>
+ <button
+   onClick={() => setShowLiveBanner(false)}
+   style={{
+     padding: '8px 16px',
+     background: 'transparent',
+     border: '1px solid rgba(255,255,255,0.3)',
+     borderRadius: 6,
+     color: 'white',
+     fontSize: '13px',
+     fontWeight: 500,
+     cursor: 'pointer',
+   }}
+ >
+   Got it
+ </button>
+ </div>
+ )}
 
  {/* Step content with animation */}
  <div
