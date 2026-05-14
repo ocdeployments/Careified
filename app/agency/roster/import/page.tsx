@@ -36,6 +36,22 @@ interface Warning {
   message: string
 }
 
+interface RawRow {
+  _rowIndex: number
+  [key: string]: string | number
+}
+
+interface UnknownFields {
+  columns: string[]
+  sample_data: Record<string, string[]>
+}
+
+interface ColumnMapping {
+  mapping: Record<string, string | null>
+  confidence: Record<string, string>
+  unmapped: string[]
+}
+
 interface ConfirmResult {
   created: number
   caregiver_ids: string[]
@@ -53,6 +69,9 @@ export default function ImportPage() {
     invalid_rows: InvalidRow[]
     warnings: Warning[]
     total_rows: number
+    raw_rows?: RawRow[]
+    column_mapping?: ColumnMapping
+    unknown_fields?: UnknownFields
   } | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [confirmResult, setConfirmResult] = useState<ConfirmResult | null>(null)
@@ -100,10 +119,39 @@ export default function ImportPage() {
     setError(null)
 
     try {
+      // Build unknown fields per row for field discovery
+      const unknownFieldsPerRow: Record<number, Record<string, string>> = {}
+      if (previewResult.raw_rows && previewResult.column_mapping && previewResult.unknown_fields) {
+        const mapping = previewResult.column_mapping
+        const unknownColumns = previewResult.unknown_fields.columns
+
+        previewResult.valid_rows.forEach((row, idx) => {
+          const rawRow = previewResult.raw_rows?.find(r => r._rowIndex === idx)
+          if (rawRow && unknownColumns.length > 0) {
+            const unknowns: Record<string, string> = {}
+            for (const col of unknownColumns) {
+              const val = rawRow[col]
+              const strVal = typeof val === 'string' ? val : String(val || '')
+              if (strVal && strVal.toLowerCase() !== 'n/a' && strVal !== '-' && strVal.toLowerCase() !== 'none') {
+                unknowns[col] = strVal
+              }
+            }
+            if (Object.keys(unknowns).length > 0) {
+              unknownFieldsPerRow[idx] = unknowns
+            }
+          }
+        })
+      }
+
       const res = await fetch('/api/roster/import/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows: previewResult.valid_rows }),
+        body: JSON.stringify({
+          rows: previewResult.valid_rows,
+          column_mapping: previewResult.column_mapping || null,
+          unknown_fields: previewResult.unknown_fields || null,
+          unknown_fields_per_row: Object.keys(unknownFieldsPerRow).length > 0 ? unknownFieldsPerRow : undefined,
+        }),
       })
 
       const data = await res.json()

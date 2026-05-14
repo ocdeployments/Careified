@@ -159,10 +159,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { rows, column_mapping, unknown_fields } = body as {
+    const { rows, column_mapping, unknown_fields, unknown_fields_per_row } = body as {
       rows: ParsedRow[]
       column_mapping?: CsvColumnMap | null
       unknown_fields?: { columns: string[]; sample_data: Record<string, string[]> } | null
+      unknown_fields_per_row?: Record<number, Record<string, string>>
     }
 
     // Build mapping object for extractUnknownFields
@@ -300,9 +301,22 @@ export async function POST(request: NextRequest) {
         )
 
         // Record unknown fields for field discovery
-        // Note: This uses the raw row data - we'd need to pass the raw CSV row
-        // For now, skip this and rely on the preview API to capture unknown fields
-        // TODO: Pass raw row data from preview to confirm for field discovery
+        if (unknown_fields_per_row) {
+          const rowIndex = rows.indexOf(row)
+          if (rowIndex >= 0 && unknown_fields_per_row[rowIndex]) {
+            try {
+              await recordUnknownFields({
+                unknownFields: unknown_fields_per_row[rowIndex],
+                caregiverId: caregiverId,
+                agencyId: agency.agencyId,
+                source: 'csv',
+                db: client
+              })
+            } catch (fieldErr) {
+              console.error('Field discovery error:', fieldErr)
+            }
+          }
+        }
 
         createdIds.push(caregiverId)
 
