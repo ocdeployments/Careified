@@ -54,7 +54,7 @@ const CARDS: Card[] = [
     imageAlt: 'Agency staff in conversation',
     popup: {
       hook: 'Stop hiring blind.',
-      sub: 'Careified screens candidates, handles scheduling, and delivers interview-ready professionals — so your team focuses on people, not paperwork.',
+      sub: 'Careified presents information about candidates, handles scheduling, and delivers completed profiles — so your team focuses on people, not paperwork.',
       follow: 'Source. Screen. Schedule. Done.',
       cta: 'See how it works →',
     },

@@ -3,6 +3,7 @@ import { createHmac } from 'crypto'
 import { pool } from '@/lib/db'
 import { scoreTranscript } from '@/lib/airecruit/scoring'
 import { scoreReferenceCall } from '@/lib/airecruit/score-reference'
+import { scoreEmployerCall } from '@/lib/airecruit/score-employer'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { recomputeCaregiverScore } from '@/lib/ratings/recompute-caregiver-score'
 
@@ -300,6 +301,111 @@ export async function POST(req: NextRequest) {
         )
 
         console.log('REFERENCE CALL SCORED:', { refCallId: refCall.id, wouldReengage: score.would_reengage })
+      }
+    }
+
+    // Check if this is an employer verification call
+    const { rows: empCallRows } = await pool.query(
+      `SELECT id, caregiver_id, agency_id, employer_name, employment_record_id FROM employment_verifications WHERE vapi_call_id = $1 LIMIT 1`,
+      [vapiCallId]
+    )
+
+    if (empCallRows.length > 0) {
+      // Handle employer call completion
+      const empCall = empCallRows[0]
+
+      await pool.query(
+        `UPDATE employment_verifications
+         SET status = 'completed',
+             completed_at = NOW(),
+             duration_seconds = $1,
+             transcript = $2
+         WHERE id = $3`,
+        [duration, transcript, empCall.id]
+      )
+
+      // Get caregiver name for scoring
+      const { rows: cgRows } = await pool.query(
+        `SELECT first_name, last_name FROM caregivers WHERE id = $1`,
+        [empCall.caregiver_id]
+      )
+      const caregiverName = cgRows.length > 0
+        ? `${cgRows[0].first_name} ${cgRows[0].last_name}`
+        : 'the candidate'
+
+      // Score the employer call
+      if (transcript) {
+        const score = await scoreEmployerCall(transcript, caregiverName, empCall.employer_name)
+
+        await pool.query(
+          `UPDATE employment_verifications
+           SET employment_confirmed = $1,
+               re_engage = $2,
+               departure_reason = $3,
+               additional_notes = $4,
+               overall_sentiment = $5,
+               confidence = $6,
+               ai_summary = $7
+           WHERE id = $8`,
+          [
+            score.employment_confirmed,
+            score.re_engage,
+            score.departure_reason,
+            score.additional_notes,
+            score.overall_sentiment,
+            score.confidence,
+            score.ai_summary,
+            empCall.id
+          ]
+        )
+
+        // Recompute trust score
+        try {
+          await recomputeCaregiverScore(empCall.caregiver_id)
+        } catch (err) {
+          console.error('[webhook] recompute score failed:', err)
+        }
+
+        // Check for human handoff request
+        const handoffPhrases = [
+          'prefer to speak with a person',
+          'talk to a human',
+          "don't want to talk to",
+          'speak with someone directly',
+          'verify this',
+          'need to verify'
+        ]
+        const transcriptLower = transcript.toLowerCase()
+        const handoffRequested = handoffPhrases.some(phrase =>
+          transcriptLower.includes(phrase.toLowerCase())
+        )
+
+        if (handoffRequested) {
+          await pool.query(
+            `UPDATE employment_verifications SET status = 'declined' WHERE id = $1`,
+            [empCall.id]
+          )
+        }
+
+        // Audit log
+        await pool.query(
+          `INSERT INTO "AuditLog" (id, action, target_type, target_id, metadata, created_at)
+           VALUES (gen_random_uuid()::text, $1, $2, $3, $4, NOW())`,
+          [
+            'employer_call_completed',
+            'employment_verification',
+            empCall.id,
+            JSON.stringify({
+              caregiver_id: empCall.caregiver_id,
+              employer_name: empCall.employer_name,
+              employment_confirmed: score.employment_confirmed,
+              re_engage: score.re_engage,
+              agency_id: empCall.agency_id
+            })
+          ]
+        )
+
+        console.log('EMPLOYER CALL SCORED:', { empCallId: empCall.id, employmentConfirmed: score.employment_confirmed })
       }
     }
 
