@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown, Info, Briefcase, UserCheck, Building2, Presentation, Play, Heart, Users } from 'lucide-react'
 import { UserButton, useAuth, useUser } from '@clerk/nextjs'
 import BrandLogo from '../BrandLogo'
+import NotificationBell from '../notifications/NotificationBell'
 
 // ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
@@ -68,6 +69,7 @@ function AuthButton() {
         >
           Communications
         </Link>
+        <NotificationBell />
         <UserButton
           appearance={{
             elements: {
