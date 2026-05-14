@@ -4,8 +4,8 @@
 
 CREATE TABLE IF NOT EXISTS employment_verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  caregiver_id UUID NOT NULL REFERENCES caregivers(id),
-  agency_id UUID NOT NULL REFERENCES agencies(id),
+  caregiver_id VARCHAR(255) NOT NULL REFERENCES caregivers(id),
+  agency_id VARCHAR(255) NOT NULL REFERENCES agencies(id),
   employment_record_id UUID,
   employer_name VARCHAR(255) NOT NULL,
   supervisor_name VARCHAR(255),
