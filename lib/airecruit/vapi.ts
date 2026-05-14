@@ -130,8 +130,8 @@ Campaign ID: ${campaignId}
 Call ID: ${callId}`
 
   const firstMessage = candidateFullName
-    ? `Hello, may I please speak with ${candidateFullName}?`
-    : `Hello! My name is Alex. I am an AI recruiting assistant calling on behalf of ${callerAgency} through the Care-ih-fied platform. I am reaching out about a ${roleTitle} opportunity${locationText}. Do you have a moment?`
+    ? `Hi ${candidateFullName.split(' ')[0]}, this is an AI assistant calling on behalf of ${callerAgency} through Careified. Is now a good time for a quick conversation about a care opportunity${locationText}?`
+    : `Hello! This is an AI assistant calling on behalf of ${callerAgency} through Careified. Is now a good time for a quick conversation about a care opportunity${locationText}?`
 
   // Consent gate — block call if caregiver has not consented
   if (params.caregiverId) {
