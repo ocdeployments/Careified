@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import ProfilePhoto from './ProfilePhoto'
 import ContactCard from './ContactCard'
+import SuitabilityCard from '@/components/ratings/SuitabilityCard'
+import BadgeDisplay from '@/components/ratings/BadgeDisplay'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Careified — Caregiver Profile (Agency-facing hiring scorecard)
@@ -66,36 +68,33 @@ const C = {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Demo data (Maria Santos)
+// Empty fallback — real data only, no demo fallbacks
 // ──────────────────────────────────────────────────────────────────────────────
 
 const caregiver = {
-  firstName: 'Maria',
-  lastName: 'Santos',
-  jobTitle: 'Personal Support Worker',
-  credential: 'PSW',
-  city: 'Toronto',
-  state: 'ON',
-  yearsExperience: 8,
-  availability: 'Available now',
-  rateMin: 24,
-  rateMax: 28,
-  trustScore: 4.8,
-  reviewCount: 12,
-  reviewsTier: 'Elite',
-  profileCompletion: 94,
-  openToUrgent: true,
-  willingLiveIn: true,
-  hasVehicle: true,
-  avgTenureMonths: 14,
-  availableFrom: 'Immediately',
-  rateOvernight: 32,
-  rateLiveIn: 220,
-  rateHoliday: 36,
-  languages: [
-    { name: 'English', level: 'Native' },
-    { name: 'Portuguese', level: 'Fluent' },
-  ],
+  firstName: null,
+  lastName: null,
+  jobTitle: null,
+  credential: null,
+  city: null,
+  state: null,
+  yearsExperience: null,
+  availability: null,
+  rateMin: null,
+  rateMax: null,
+  trustScore: null,
+  reviewCount: 0,
+  reviewsTier: null,
+  profileCompletion: 0,
+  openToUrgent: null,
+  willingLiveIn: null,
+  hasVehicle: null,
+  avgTenureMonths: null,
+  availableFrom: null,
+  rateOvernight: null,
+  rateLiveIn: null,
+  rateHoliday: null,
+  languages: [],
 }
 
 const verification: { label: string; tier: TierLevel; meta?: string }[] = [
@@ -551,6 +550,16 @@ export interface CaregiverProfileProps {
   // Contact info (only shown to approved agencies)
   contactPhone?: string | null
   contactEmail?: string | null
+  // Rating system data
+  suitabilityData?: Record<string, unknown> | null
+  reviewCount?: number
+  ratingBadges?: Array<{
+    id: string
+    badge_name: string
+    trigger_condition: string
+    status: 'earned' | 'locked'
+    earned_at?: string
+  }>
 }
 
 // Tooltip for alignment score explanation
@@ -609,8 +618,8 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   const [openCredentials, setOpenCredentials] = useState(true)
   const [openOpenQs, setOpenOpenQs] = useState(true)
 
-  const initials = `${caregiver.firstName[0]}${caregiver.lastName[0]}`
-  const fullName = `${dm.firstName || caregiver.firstName} ${dm.lastName || caregiver.lastName}`
+  const initials = dm.firstName ? `${dm.firstName[0]}${dm.lastName?.[0] || ''}` : '?'
+  const fullName = dm.firstName ? `${dm.firstName} ${dm.lastName || ''}` : '—'
 
   return (
     <div
@@ -1013,10 +1022,10 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         )}
 
         {/* 6. BADGES */}
-        {dm.badges && dm.badges.length > 0 && (
+        {(dm.badges && dm.badges.length > 0) || (dm.ratingBadges && dm.ratingBadges.length > 0) ? (
           <Section title="Badges">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {dm.badges.map((badge) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: dm.ratingBadges && dm.ratingBadges.length > 0 ? 16 : 0 }}>
+              {dm.badges?.map((badge) => (
                 <div
                   key={badge.id}
                   title={badge.description}
@@ -1034,8 +1043,11 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 </div>
               ))}
             </div>
+            {dm.ratingBadges && dm.ratingBadges.length > 0 && (
+              <BadgeDisplay badges={dm.ratingBadges} />
+            )}
           </Section>
-        )}
+        ) : null}
 
         {/* 4. CLINICAL EXPERIENCE */}
         <Section title="Clinical experience">
@@ -1409,6 +1421,17 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             </div>
           </div>
         </Section>
+
+        {/* SUITABILITY ANALYSIS */}
+        {dm.suitabilityData && dm.reviewCount !== undefined && dm.reviewCount > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <SuitabilityCard
+              suitability={dm.suitabilityData as unknown as Parameters<typeof SuitabilityCard>[0]['suitability']}
+              reviewCount={dm.reviewCount}
+              caregiverFirstName={dm.firstName || 'This caregiver'}
+            />
+          </div>
+        )}
 
         {/* 8. WORKING STYLE */}
         <Section title="Working style">

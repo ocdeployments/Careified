@@ -5,6 +5,29 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
 import CaregiverProfileDemo from '@/components/profile/CaregiverProfileDemo'
 import { deriveWorkingStyle } from '@/lib/personality/working-style'
+import SuitabilityCard from '@/components/ratings/SuitabilityCard'
+import BadgeDisplay from '@/components/ratings/BadgeDisplay'
+
+interface ReviewData {
+  reviews: Array<Record<string, unknown>>
+  trust_score: { review_count: number; aggregate_score: number } | null
+  suitability: Record<string, unknown> | null
+  badge_triggers: Array<{ id: string; badge_name: string; trigger_condition: string; earned_at: string }>
+}
+
+async function fetchReviewData(caregiverId: string): Promise<ReviewData | null> {
+  try {
+    // Fetch from the API - this will handle auth check internally
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/reviews/caregiver/${caregiverId}`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data as ReviewData
+  } catch {
+    return null
+  }
+}
 
 async function getCaregiver(id: string) {
   try {
@@ -114,6 +137,9 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   const ratings = await getPlacementRatings(id)
   const badges = await getBadges(id)
 
+  // Fetch rating data (graceful - returns null if fails or not authorized)
+  const reviewData = await fetchReviewData(id)
+
   // Check if viewer is an approved agency
   const isApprovedAgency = await checkIsApprovedAgency()
   const contactInfo = isApprovedAgency ? await getContactInfo(id) : null
@@ -203,6 +229,15 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       badges={badges}
       contactPhone={contactInfo?.phone}
       contactEmail={contactInfo?.email}
+      suitabilityData={reviewData?.suitability ?? null}
+      reviewCount={reviewData?.trust_score?.review_count ?? 0}
+      ratingBadges={reviewData?.badge_triggers?.map(b => ({
+        id: b.id,
+        badge_name: b.badge_name,
+        trigger_condition: b.trigger_condition,
+        status: 'earned' as const,
+        earned_at: b.earned_at,
+      })) ?? []}
     />
   )
 }
