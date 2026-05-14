@@ -123,6 +123,8 @@ Empty states for search, shortlist, clients.
 "You're live" banner after Step 3 completion.
 Alignment score tooltip with non-recommender disclaimer.
 SESSION_CONTEXT.md: compressed session brain.
+QA audit (May 14): non-recommender language fixes,
+Resend singleton refactor (3 files → 1 shared client).
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
