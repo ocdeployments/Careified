@@ -101,13 +101,6 @@ function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any
       adlsPerformed: parsedData.adlsPerformed,
       workHistory: parsedData.employers,
     }
-    console.log('APPLYING FIELDS:', JSON.stringify({
-      firstName: parsedData?.firstName,
-      lastName: parsedData?.lastName,
-      jobTitle: parsedData?.jobTitle,
-      yearsExperience: parsedData?.yearsExperience,
-      workHistory: parsedData?.employers,
-    }, null, 2))
     await Promise.all(
       Object.entries(fieldMap)
         .filter(([_, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0))
