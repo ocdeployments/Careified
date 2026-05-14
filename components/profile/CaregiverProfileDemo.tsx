@@ -1867,6 +1867,30 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           )}
         </Section>
 
+        {/* Custom attributes from CSV */}
+        {dm.customAttributes && dm.customAttributes.length > 0 && (
+          <Section title="Additional Information">
+            <div style={{ fontSize: 12, color: '#64748B', marginBottom: 16 }}>
+              Agency-recorded details
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+              {dm.customAttributes.map((attr, i) => (
+                <div key={i} style={{ background: 'white', borderRadius: 8, padding: '12px 16px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+                    {attr.key.replace(/_/g, ' ')}
+                  </div>
+                  <div style={{ fontSize: 14, color: '#0D1B3E', fontWeight: 600 }}>
+                    {attr.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 16, textAlign: 'center' }}>
+              These details were recorded by the placing agency and are presented as reported. Careified does not verify this information.
+            </div>
+          </Section>
+        )}
+
         {/* 12. DISCLAIMER */}
         <div
           style={{
