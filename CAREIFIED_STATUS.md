@@ -33,6 +33,7 @@
 | May 13 2026 PM | Intelligence: CSV column mapping UI, unknown field capture, platform discovery loop, field recorder | DONE | 4 commits |
 | May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
 | May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
+| May 13 2026 PM | Rating System: DB tables (placement_reviews, caregiver_suitability, caregiver_badges), scoring engine, suitability analysis + LLM narrative, 4 API routes, agency rating form, self-assessment page, SuitabilityCard + BadgeDisplay components | DONE | 10 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -331,6 +332,9 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | caregiver_claim_tokens | LIVE | Claim flow tokens |
 | agency_team_members | LIVE | Multi-user agency accounts |
 | field_discovery | LIVE | CSV intelligence + unknown field capture |
+| placement_reviews | LIVE | Rating system - post-placement reviews |
+| caregiver_suitability | LIVE | Rating system - client type suitability |
+| caregiver_badges | LIVE | Rating system - earned badges |
 
 ---
 
