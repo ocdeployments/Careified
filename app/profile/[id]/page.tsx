@@ -108,6 +108,29 @@ async function getContactInfo(caregiverId: string) {
   } catch { return null }
 }
 
+async function getCustomAttributes(caregiverId: string) {
+  try {
+    const result = await pool.query(
+      `SELECT key, value FROM caregiver_attributes
+       WHERE caregiver_id = $1
+       ORDER BY key ASC`,
+      [caregiverId]
+    )
+    return result.rows
+  } catch { return [] }
+}
+
+async function getSourceAgencyName(agencyId: string | null) {
+  if (!agencyId) return null
+  try {
+    const result = await pool.query(
+      `SELECT name FROM agencies WHERE id = $1`,
+      [agencyId]
+    )
+    return result.rows[0]?.name || null
+  } catch { return null }
+}
+
 async function checkIsApprovedAgency(): Promise<boolean> {
   try {
     const { userId } = await auth()
@@ -143,6 +166,12 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   // Check if viewer is an approved agency
   const isApprovedAgency = await checkIsApprovedAgency()
   const contactInfo = isApprovedAgency ? await getContactInfo(id) : null
+
+  // Fetch custom attributes (agency-specific fields from CSV)
+  const customAttributes = await getCustomAttributes(id)
+
+  // Get source agency name for stub profile indicator
+  const sourceAgencyName = await getSourceAgencyName(caregiver.source_agency_id)
 
   // Map DB snake_case to component props
   const personality = caregiver.personality_profile || {}
@@ -238,6 +267,9 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
         status: 'earned' as const,
         earned_at: b.earned_at,
       })) ?? []}
+      customAttributes={customAttributes}
+      claimStatus={caregiver.claim_status}
+      sourceAgencyName={sourceAgencyName}
     />
   )
 }
