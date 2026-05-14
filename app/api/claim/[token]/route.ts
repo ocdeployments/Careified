@@ -14,10 +14,12 @@ export async function GET(
     // Look up token
     const tokenResult = await pool.query(
       `SELECT ct.caregiver_id, ct.agency_id, ct.expires_at, ct.status, ct.claimed_at,
-              c.first_name, c.last_name, c.email, a.name as agency_name
+              c.first_name, c.last_name, c.email, c.phone, c.city, c.province_state,
+              c.years_experience, c.claim_status, c.specializations,
+              a.name as agency_name
        FROM caregiver_claim_tokens ct
        JOIN caregivers c ON c.id = ct.caregiver_id
-       JOIN agencies a ON a.id = ct.agency_id
+       LEFT JOIN agencies a ON a.id = c.source_agency_id
        WHERE ct.token = $1`,
       [token]
     )
@@ -50,6 +52,17 @@ export async function GET(
       last_name: record.last_name,
       email: record.email,
       agency_name: record.agency_name,
+      caregiver: {
+        first_name: record.first_name,
+        last_name: record.last_name,
+        email: record.email,
+        phone: record.phone,
+        city: record.city,
+        province_state: record.province_state,
+        years_experience: record.years_experience,
+        role: record.specializations?.[0] || null,
+        agency_name: record.agency_name,
+      },
     })
   } catch (err) {
     console.error('Error in GET /api/claim/[token]:', err)
@@ -147,7 +160,7 @@ export async function POST(
 
     return NextResponse.json({
       caregiver_id: record.caregiver_id,
-      redirect: '/profile/build',
+      redirect: '/profile/build?step=0&claimed=true',
     })
   } catch (err) {
     console.error('Error in POST /api/claim/[token]:', err)
