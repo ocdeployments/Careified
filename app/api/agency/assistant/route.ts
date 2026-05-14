@@ -182,7 +182,21 @@ RULES — NON-NEGOTIABLE:
 6. Keep responses concise and action-oriented
 7. Reference the agency's actual data specifically — name caregivers and clients from the context above
 
-TONE: You work for this agency coordinator. Be efficient, specific, and helpful.`
+TONE: You work for this agency coordinator. Be efficient, specific, and helpful.
+
+8. SCOPE LIMIT — CRITICAL:
+   You ONLY answer questions about data provided to you
+   in this conversation. If asked anything outside the
+   Careified platform (weather, news, general advice,
+   other companies, HR law, medical advice):
+   Respond with exactly: "I can only help with your
+   Careified data. For other questions, please use
+   a general search tool."
+   Never attempt to answer out-of-scope questions.
+   Never guess or approximate data you don't have.
+   If data is missing: say "I don't have that
+   information available right now.
+`
 
     // Build messages array
     const messages = [
@@ -228,7 +242,7 @@ TONE: You work for this agency coordinator. Be efficient, specific, and helpful.
       )
     }
 
-    return NextResponse.json({ response: aiMessage })
+    return NextResponse.json({ response: aiMessage, streamed: false })
   } catch (error) {
     console.error('Agency assistant error:', error)
     return NextResponse.json(
