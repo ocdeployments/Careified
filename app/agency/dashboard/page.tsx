@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import CommandBar from '@/components/agency/CommandBar'
 import ProfileNudge from '@/components/agency/ProfileNudge'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -415,7 +416,9 @@ export default function AgencyDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
             {/* AI Assistant */}
-            <AiAssistantPanel />
+            <ErrorBoundary section="AiAssistantPanel">
+              <AiAssistantPanel />
+            </ErrorBoundary>
 
             {/* Recent clients */}
             <div style={{ background: 'white', borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
