@@ -131,23 +131,26 @@ async function getSourceAgencyName(agencyId: string | null) {
   } catch { return null }
 }
 
-async function checkIsApprovedAgency(): Promise<boolean> {
+async function checkIsApprovedAgency(): Promise<{ isApproved: boolean; agencyId?: string; agencyName?: string }> {
   try {
     const { userId } = await auth()
-    if (!userId) return false
+    if (!userId) return { isApproved: false }
 
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
     const role = user.publicMetadata?.role as string
 
-    if (role !== 'agency') return false
+    if (role !== 'agency') return { isApproved: false }
 
     const { rows } = await pool.query(
-      'SELECT status FROM agencies WHERE clerk_user_id = $1',
+      'SELECT id, name, status FROM agencies WHERE clerk_user_id = $1',
       [userId]
     )
-    return rows.length > 0 && rows[0].status === 'approved'
-  } catch { return false }
+    if (rows.length > 0 && rows[0].status === 'approved') {
+      return { isApproved: true, agencyId: rows[0].id, agencyName: rows[0].name }
+    }
+    return { isApproved: false }
+  } catch { return { isApproved: false } }
 }
 
 export default async function CaregiverProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -164,8 +167,24 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   const reviewData = await fetchReviewData(id)
 
   // Check if viewer is an approved agency
-  const isApprovedAgency = await checkIsApprovedAgency()
-  const contactInfo = isApprovedAgency ? await getContactInfo(id) : null
+  const agencyCheck = await checkIsApprovedAgency()
+  const contactInfo = agencyCheck.isApproved ? await getContactInfo(id) : null
+
+  // Track profile view for notifications (fire and forget)
+  if (agencyCheck.isApproved && agencyCheck.agencyId && agencyCheck.agencyName) {
+    // Don't track self-views (if the caregiver is viewing their own profile)
+    const viewerUserId = (await auth()).userId
+    if (viewerUserId !== caregiver.user_id) {
+      import('@/lib/notifications/create').then(({ createNotification, NotificationTemplates }) => {
+        createNotification({
+          caregiverId: id,
+          type: 'profile_viewed',
+          ...NotificationTemplates.profile_viewed(agencyCheck.agencyName!),
+          metadata: { agency_id: agencyCheck.agencyId, agency_name: agencyCheck.agencyName }
+        }).catch(err => console.error('[notifications] profile_viewed failed:', err))
+      })
+    }
+  }
 
   // Fetch custom attributes (agency-specific fields from CSV)
   const customAttributes = await getCustomAttributes(id)
