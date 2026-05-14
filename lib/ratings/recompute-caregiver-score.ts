@@ -111,5 +111,5 @@ export async function recomputeCaregiverScore(caregiverId: string): Promise<void
     ]
   )
 
-  console.log(`Recomputed score for caregiver ${caregiverId}: aggregate=${trustScore.aggregate_score}, review_count=${reviewCount}`)
+  console.warn(`[SCORE] Recomputed for caregiver ${caregiverId}: aggregate=${trustScore.aggregate_score}, review_count=${reviewCount}`)
 }

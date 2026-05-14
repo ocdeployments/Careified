@@ -4,6 +4,23 @@ import { Pool } from 'pg'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
+// Fire-and-forget notification helper
+async function sendShortlistNotification(caregiverId: string, type: 'shortlisted' | 'removed_from_shortlist', agencyId: string, agencyName: string) {
+  try {
+    const { createNotification, NotificationTemplates } = await import('@/lib/notifications/create')
+    await createNotification({
+      caregiverId,
+      type,
+      ...(type === 'shortlisted'
+        ? NotificationTemplates.shortlisted(agencyName)
+        : NotificationTemplates.removed_from_shortlist(agencyName)),
+      metadata: { agency_id: agencyId, agency_name: agencyName }
+    })
+  } catch (err) {
+    console.error('[notifications] shortlist notification failed:', err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -31,6 +48,15 @@ export async function POST(req: NextRequest) {
       [userId, caregiverId, notes || null]
     )
 
+    // Get agency name for notification
+    const agencyResult = await pool.query(
+      'SELECT id, name FROM agencies WHERE clerk_user_id = $1',
+      [userId]
+    )
+    if (agencyResult.rows.length > 0) {
+      sendShortlistNotification(caregiverId, 'shortlisted', agencyResult.rows[0].id, agencyResult.rows[0].name)
+    }
+
     return NextResponse.json({ success: true, message: 'Added to shortlist' })
   } catch (error) {
     console.error('Shortlist POST error:', error)
@@ -51,6 +77,16 @@ export async function DELETE(req: NextRequest) {
       'DELETE FROM agency_shortlist WHERE agency_clerk_id = $1 AND caregiver_id = $2',
       [userId, caregiverId]
     )
+
+    // Get agency name for notification
+    const agencyResult = await pool.query(
+      'SELECT id, name FROM agencies WHERE clerk_user_id = $1',
+      [userId]
+    )
+    if (agencyResult.rows.length > 0) {
+      sendShortlistNotification(caregiverId, 'removed_from_shortlist', agencyResult.rows[0].id, agencyResult.rows[0].name)
+    }
+
     return NextResponse.json({ success: true, message: 'Removed from shortlist' })
   } catch (error) {
     console.error('Shortlist DELETE error:', error)

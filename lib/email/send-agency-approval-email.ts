@@ -1,15 +1,15 @@
-import { Resend } from 'resend'
+import { getResendClient } from './resend-client'
 
 export async function sendAgencyApprovalEmail(params: {
   to: string
   agencyName: string
   contactName: string
 }): Promise<{ sent: boolean }> {
-  if (!process.env.RESEND_API_KEY) {
+  const resend = getResendClient()
+  if (!resend) {
     console.warn('[sendAgencyApprovalEmail] no key')
     return { sent: false }
   }
-  const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
     from: 'Careified <noreply@careified.vercel.app>',
     to: params.to,

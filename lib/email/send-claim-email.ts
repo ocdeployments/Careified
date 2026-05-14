@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import { getResendClient } from './resend-client'
 
 export async function sendClaimEmail(params: {
   to: string
@@ -6,12 +6,11 @@ export async function sendClaimEmail(params: {
   agencyName: string
   token: string
 }): Promise<{ sent: boolean; provider: string }> {
-  if (!process.env.RESEND_API_KEY) {
+  const resend = getResendClient()
+  if (!resend) {
     console.warn('[sendClaimEmail] RESEND_API_KEY not set — skipping')
     return { sent: false, provider: 'none' }
   }
-
-  const resend = new Resend(process.env.RESEND_API_KEY)
   const claimUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://careified.vercel.app'}/claim/${params.token}`
 
   const { error } = await resend.emails.send({

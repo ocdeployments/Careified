@@ -29,6 +29,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pdf-parse'],
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.vercel-storage.com' },
+      { protocol: 'https', hostname: '*.blob.vercel-storage.com' },
+    ],
+  },
   async headers() {
     return [
       {

@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Could not parse resume — try filling in manually' }, { status: 422 })
     }
 
-    console.log('FINAL PARSED:', JSON.stringify(result).substring(0, 400))
     return NextResponse.json(result)
   } catch (err) {
     console.error('parse-resume error:', err)

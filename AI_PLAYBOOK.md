@@ -25,8 +25,12 @@ The platform thinks ahead so humans do not have to.
 | System | Channel | Direction | Status |
 |--------|---------|-----------|--------|
 | AIRecruit Screener | Phone call | Outbound | ✅ Built |
-| Reference Caller | Phone call | Outbound | ❌ Session B |
-| Past Employer Verifier | Phone call | Outbound | ❌ Session C |
+| Reference Caller | Phone call | Outbound | ✅ Built Session B |
+| Past Employer Verifier | Phone call | Outbound | ✅ Built Session C |
+| Profile Analysis Engine | API | — | ✅ Built Session C |
+| Retry Queue + Cron | Scheduled | Outbound | ✅ Built Session D |
+| Bulk Campaign Actions | API | — | ✅ Built Session D |
+| QuickFill Alert Calls | Phone call | Outbound | ✅ Built Session D |
 | Family Schedule Check-in | Phone call | Outbound | ❌ Phase 3 |
 | Retention Check-in | Phone call | Outbound | ❌ Phase 3 |
 | Inbound Receptionist | Phone call | Inbound | ❌ Phase 3 |
@@ -34,11 +38,11 @@ The platform thinks ahead so humans do not have to.
 | Caregiver AI Assistant | WhatsApp | Two-way | ❌ Phase 3 |
 | Family Update Bot | WhatsApp | One-way | ❌ Phase 2 |
 | QuickFill broadcast | WhatsApp/SMS/In-app | Outbound | ❌ Phase 2 |
-| QuickFill confirmation | Phone call | Outbound | ❌ Phase 2 |
 | Family shift updates | WhatsApp | Outbound | ❌ Phase 2 |
 | Caregiver late alert | WhatsApp | Inbound triggered | ❌ Phase 3 |
 | Caregiver sick call | WhatsApp | Inbound triggered | ❌ Phase 3 |
 | AI Command Bar | In-platform | Two-way | ✅ Built |
+| In-App Notifications | In-app | One-way | ✅ Built May 14 |
 
 ---
 
@@ -86,11 +90,11 @@ Do NOT assume Vapi credentials grant SMS/WhatsApp access. They do not.
 | Type | Status | Phase | Feature Unlocked |
 |------|--------|-------|-------------------|
 | recruit_calls | ✅ Built | Launch (Phase 1) | AIRecruit screening calls |
-| reference_calls | ❌ Session B | Phase 2 (Aug) | Reference verification |
-| past_employer_calls | ❌ Session C | Phase 3 (Oct) | Employment verification |
+| reference_calls | ✅ BUILT | Session B | Reference verification |
+| past_employer_calls | ✅ BUILT | Session C | Employment verification |
 | current_employer_calls | DROPPED | — | Legal risk — intentional |
-| regulatory_calls | ❌ Pending | Phase 2 (Aug) | Credential verification |
-| match_time_calls | ❌ Pending | Phase 2 (Aug) | Powers QuickFill |
+| regulatory_calls | ✅ BUILT | Session B (consent) | Credential verification |
+| match_time_calls | ✅ BUILT | Session D | Powers QuickFill alerts |
 
 ### Phase Sequencing
 
@@ -98,12 +102,24 @@ Do NOT assume Vapi credentials grant SMS/WhatsApp access. They do not.
 - recruit_calls — ✅ built
 
 **Phase 2 (August 2026):**
-- reference_calls — Session B (unlocks reference verification)
-- regulatory_calls — Session B (unlocks credential verification)
-- match_time_calls — Session B (unlocks QuickFill)
+- reference_calls — ✅ BUILT Session B
+- regulatory_calls — ✅ BUILT Session B (consent type)
+- match_time_calls — ✅ BUILT Session D (QuickFill)
 
 **Phase 3 (October 2026):**
-- past_employer_calls — Session C (unlocks employment verification)
+- past_employer_calls — ✅ BUILT Session C
+
+### AIRecruit Sessions Roadmap
+
+**COMPLETE:**
+- Session A: Core recruitment calls (Phases 1-6) ✅
+- Session B: Reference verification calls ✅
+- Session C: Employer verification calls + profile analysis ✅
+- Session D: Retry logic + cron + bulk actions + QuickFill alerts ✅
+
+**PENDING:**
+- Session E: SMS/WhatsApp integration (Phase 2)
+- Session F: Family check-in calls (Phase 3)
 
 ---
 
