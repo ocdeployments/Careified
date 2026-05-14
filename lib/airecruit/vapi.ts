@@ -1,4 +1,5 @@
 import { checkCallAllowed } from './consent-gate'
+import { ConsentTypeId } from '@/lib/consent/types'
 const VAPI_API_KEY = process.env.VAPI_API_KEY!
 const VAPI_ASSISTANT_ID = process.env.VAPI_ASSISTANT_ID!
 const VAPI_PHONE_NUMBER_ID = process.env.VAPI_PHONE_NUMBER_ID!
@@ -16,6 +17,8 @@ export interface VapiCallParams {
   screeningQuestions: string[]
   agencyName?: string
   roleLocation?: string
+  jobDescription?: string
+  consentType?: ConsentTypeId
 }
 
 export interface VapiCallResult {
@@ -38,6 +41,8 @@ export async function initiateVapiCall(
     screeningQuestions,
     agencyName,
     roleLocation,
+    jobDescription,
+    consentType = 'recruit_calls',
   } = params
 
   const questionsText = screeningQuestions

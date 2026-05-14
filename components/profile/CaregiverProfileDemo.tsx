@@ -881,6 +881,31 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             8-year PSW with verified dementia and palliative depth &mdash; 3 confirmed references, current VSC, available immediately. Average placement tenure: 14 months.
           </p>
         </div>
+        {/* Profile completeness indicator */}
+        {dm.claimStatus === 'agency_built' && dm.sourceAgencyName && (
+          <div style={{ background: '#FDF6EC', border: '1px solid #C9973A', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: '#C9973A', fontSize: 16 }}>&#9432;</span>
+              <span style={{ fontSize: 13, color: '#0D1B3E', fontWeight: 600 }}>
+                This profile was created by {dm.sourceAgencyName}. The caregiver has been invited to claim and complete their profile.
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: '#64748B', marginTop: 6, marginLeft: 24 }}>
+              Information shown reflects what the agency provided.
+            </div>
+          </div>
+        )}
+        {dm.claimStatus === 'claimed' && (dm.profileCompletion ?? 0) < 50 && (
+          <div style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: '#64748B', fontSize: 16 }}>&#9432;</span>
+              <span style={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
+                This caregiver is still building their profile. More information will appear as they complete it.
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* 2. DISCLOSURE — moved to top for agency triage */}
         <Section title="Disclosure">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
