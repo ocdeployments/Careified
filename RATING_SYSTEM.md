@@ -170,20 +170,22 @@ Earned — not scored. Appear visibly on profile.
 
 ## 10. STATUS
 
-NOT BUILT — target Phase 3 (October 2026)
+✅ BUILT — May 13 2026
 
 Pre-launch:
-- [ ] DB migration: create placement_reviews table
-- [ ] DB migration: add badge trigger columns
-- [ ] Design: rating input forms (caregiver self, agency)
-- [ ] API: POST /api/reviews/submit
-- [ ] API: GET /api/reviews/caregiver/:id
-- [ ] UI: agency rating form post-placement
-- [ ] UI: caregiver self-assessment
-- [ ] Badge award logic
-- [ ] Dispute workflow
+- [x] DB migration: create placement_reviews table
+- [x] DB migration: caregiver_suitability table
+- [x] Design: rating input forms (caregiver self, agency)
+- [x] API: POST /api/reviews/submit
+- [x] API: GET /api/reviews/caregiver/:id
+- [x] API: POST /api/reviews/self (caregiver)
+- [x] API: POST /api/reviews/badges (admin)
+- [x] UI: agency rating form post-placement
+- [x] UI: caregiver self-assessment
+- [x] Badge award logic
+- [ ] Dispute workflow (PENDING)
 
 ---
 
-Last updated: May 9 2026
-Target build: Phase 3 (October 2026)
+Last updated: May 13 2026
+Built: May 13 2026
