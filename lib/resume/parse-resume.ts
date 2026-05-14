@@ -3,6 +3,9 @@
 
 import { Pool } from 'pg'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse')
+
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
