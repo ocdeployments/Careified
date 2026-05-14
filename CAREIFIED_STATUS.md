@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Purpose: Current build state — what is done, what is pending, what is broken
-# Updated: May 10 2026
+# Updated: May 13 2026
 # Update trigger: Every session — mandatory
 # Owner: Claude
 # DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
@@ -29,6 +29,10 @@
 | May 12 2026 PM | Demo AIRecruit: /demo/airecruit page with screening results, /api/demo/airecruit/results API | DONE | 1 commit |
 | May 12 2026 PM | Photo Upload API: Vercel Blob storage, PhotoUpload component, Step1 wiring | DONE | 7 commits |
 | May 12 2026 PM | Security Hardening: SQL injection fix, rate limits on agency/signup/assistant/tickets, admin auth, confirmation dialogs | DONE | 6 commits |
+| May 13 2026 PM | Agency Roster bulk import: CSV upload, preview, confirm, claim tokens, stub profiles, resume parsing | DONE | 8 commits |
+| May 13 2026 PM | Intelligence: CSV column mapping UI, unknown field capture, platform discovery loop, field recorder | DONE | 4 commits |
+| May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
+| May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -178,7 +182,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ## IN PROGRESS / PARTIALLY BUILT
 
-- LiveProfilePreview: component exists but not built (must build with Romy)
+- LiveProfilePreview (ghost-to-live animation): NOT BUILT - decided to keep ghost profile for existing users
+- ProfilePreviewCard: FIXED May 13 2026 - now detects new profile (no localStorage) and shows empty state instead of ghost Maria Santos data
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
