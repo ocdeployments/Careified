@@ -1,16 +1,24 @@
 # CAREIFIED_SPEC.md
-# Living QA spec — single source of truth for expected behaviour
-# Generated: May 5 2026 | Pages audited: 53 | Components: 102
-# Rule: Update this file at END of every build session
-# Rule: Audit against this file at START of every build session
+# Purpose: Expected behaviour for every page, component, and API route — QA source of truth
+# Updated: May 10 2026
+# Update trigger: Every session — new pages added, resolved issues moved to RESOLVED
+# Owner: Claude
+# DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), roadmap (ROADMAP.md)
+
+## PAGE COUNT: 38 (target: under 40 at launch)
+Pages removed in May 10 refactor: /demo/* (5), /profile/demo, /agency/sitemap, /admin/sitemap, /agency/support (→/contact), /agency/billing (→/agency/settings), /admin/reviews (→/admin/caregivers), /admin/references (→/admin/caregivers)
 
 ---
 
 ## HOW TO USE THIS FILE
 
 ### Start of every session — paste this prompt to Claude:
-> "Read CAREIFIED_SPEC.md. Run a static audit against the current
-> codebase. Report PASS, FAIL, or MISSING for each item.
+> "Read SOUL.md first. Then read CAREIFIED_SPEC.md, CONTEXT.md,
+> CLAUDE.md, CAREIFIED_STATUS.md in full.
+> Apply all 33 lenses from SOUL.md.
+> Run a static audit against the current codebase.
+> Report PASS, FAIL, or MISSING for each item.
+> Come with a point of view on what matters most today.
 > Do not fix anything. Wait for my instruction."
 
 ### End of every session — paste this prompt to Claude:
@@ -38,21 +46,18 @@
 
 ## SECURITY — CURRENTLY FAILING ❌
 
-These are active failures as of May 6 2026. Fix before launch.
+These are active failures as of May 9 2026. Fix before launch.
 
 - [x] proxy.ts EXISTS (was middleware.ts — renamed May 6 2026) ✅ FIXED
-- [ ] /admin/* requires ADMIN_CLERK_USER_ID check — NOT ENFORCED (CRITICAL)
-- [ ] /agency/billing requires agency auth — NOT ENFORCED (HIGH)
-- [ ] /agency/clients requires agency auth — NOT ENFORCED (HIGH)
-- [ ] /agency/settings requires agency auth — NOT ENFORCED (HIGH)
-- [ ] /agency/shortlist requires agency auth — NOT ENFORCED (MEDIUM)
-- [ ] /agency/airecruit/new requires agency auth — NOT ENFORCED (HIGH)
-- [ ] Vapi webhook HMAC signature verification — NOT BUILT (HIGH)
-- [ ] Reference tokens are not UUID — NOT FIXED (HIGH)
-- [ ] No rate limiting on any API route — NOT BUILT (HIGH)
-- [ ] SQL injection risk in lib/db.ts lines 56-68 — NOT FIXED (HIGH)
-- [ ] XSS via dangerouslySetInnerHTML in admin/caregivers line 217 (HIGH)
-- [ ] SSL cert for Render DB — rejectUnauthorized: false (MEDIUM)
+- [x] /admin/* requires ADMIN_CLERK_USER_ID check — ✅ FIXED May 6 2026 (app/admin/layout.tsx)
+- [x] /agency/* requires agency auth — ✅ FIXED May 6 2026 (app/agency/layout.tsx)
+- [x] Reference tokens are UUID — ✅ FIXED May 9 2026 (DB default gen_random_uuid())
+- [x] SSL cert for Render DB — ✅ FIXED (lib/db.ts conditional)
+- [x] Vapi webhook HMAC signature verification — ✅ FIXED May 9 2026
+- [x] Rate limiting on API routes — ✅ FIXED May 9 2026 (lib/rateLimit.ts)
+- [x] SQL injection risk in lib/db.ts lines 56-68 — ✅ FIXED May 9 2026 (allowlist validation)
+- [x] dangerouslySetInnerHTML removed — ✅ FIXED May 9 2026
+- [ ] Gold hex #C9A84C inconsistency — 30 files use wrong hex (MEDIUM) ❌
 
 ---
 
@@ -186,6 +191,16 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Caregiver → /profile/build
 - Agency → /agency/signup or /agency/pending-approval
 
+### /claim/[token]
+- REACHABILITY: SYSTEM (email link from agency)
+- Public page — no auth required
+- Valid token → shows pre-filled profile data
+- Expired token → clear error message
+- Already claimed → redirect to /sign-in
+- T+C checkbox required before proceeding
+- Consent timestamped and stored
+- CTA routes to /sign-up with claim_token param
+
 ---
 
 ## CAREGIVER PAGES (Auth Required)
@@ -208,15 +223,23 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - "Skip" → saves resumeSkipped=true → ?step=1
 - Parse error → error message + "Try another file" + "Continue without resume"
 
-### /profile/build?step=1 through ?step=10
+### /profile/build?step=1 through ?step=11
 - REACHABILITY: ACTION (step navigation)
 - Each step renders correct form fields per STEPS array
-- Back button works on steps 2-10
+- Back button works on steps 2-11
 - Continue button advances to next step
 - Progress bar updates correctly per step
 - Sidebar shows completed steps with gold checkmarks
 - Locked steps (future steps) show at 0.4 opacity
-- Submit button only active at step 10
+- Submit button only active at step 11 (after Step 11 consent)
+
+### /profile/build?step=11
+- REACHABILITY: ACTION (from Step 10)
+- Communication consent preferences (6 types)
+- Each consent type has toggle control
+- Required: recruit_calls (for AIRecruit)
+- Optional: reference_calls, past_employer_calls, regulatory_calls, match_time_calls
+- Submit button activates after consent viewed
 
 ### /profile/[id]
 - REACHABILITY: DYNAMIC (from /agency/search results)
@@ -228,11 +251,10 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Verified reference badges with ratings visible
 - Non-recommender disclaimer present
 - Red flag disclosure section present
+- Working style tags displayed (behavioural tags from Step 7)
 
-### /profile/demo
-- REACHABILITY: ACTION (from /for-caregivers#why-build)
-- Demo page with Maria Santos renders
-- Same scorecard layout as /profile/[id]
+### /profile/demo (DELETED May 10 2026 — merged into /profile/[id])
+- Was: Demo page with Maria Santos
 
 ### /profile/strength
 - REACHABILITY: ACTION (navbar user menu)
@@ -313,6 +335,18 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Empty state handled gracefully
 - Remove from shortlist works
 
+### /agency/roster
+- REACHABILITY: ACTION (agency dashboard quick link)
+- Auth: approved agency required
+- Upload zone renders (PDF/DOC/DOCX, 5MB)
+- Resume parse returns editable fields
+- Manual entry option present
+- Create + invite flow works end to end
+- Roster table shows all agency caregivers
+- Status badges correct per caregiver state
+- Resend invite works
+- Empty state has CTA
+
 ### /agency/clients
 - REACHABILITY: ACTION (agency dashboard quick link)
 - Client list renders (5 demo clients)
@@ -365,61 +399,26 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Compliance section present
 - Changes save on blur
 
-### /agency/billing
-- REACHABILITY: ACTION (agency dashboard quick link)
-- Module pricing placeholder renders
-- Support link present (⚠️ /agency/support page not yet built)
+### /agency/billing (REDIRECTED May 10 2026 → /agency/settings)
+- Now redirects to /agency/settings
 
-### /agency/sitemap
-- REACHABILITY: ACTION (admin only)
-- All agency pages listed by access level
+### /agency/sitemap (DELETED May 10 2026 — use Next.js sitemap.ts)
 
 ---
 
 ## DEMO PAGES (Email + Phone Gate — No Auth)
 
-### /demo/gate
-- REACHABILITY: ACTION (auto-redirect from all /demo/* pages when not unlocked)
-- Headline: "See Careified in Action"
-- Subtext: "Enter your details to access the live demo."
-- Email field renders with Mail icon
-- Phone field renders with Phone icon
-- Submit button disabled until both fields valid
-- Invalid email → inline error message
-- Invalid phone (not 10 digits) → inline error message
-- On success → sessionStorage demo_unlocked=true → /demo
-- Fine print: "We'll never spam you."
+### /demo/gate (DELETED May 10 2026 — demo environment removed)
 
-### /demo
-- REACHABILITY: NAV (agencies dropdown "Try the Platform")
-- Gate check: sessionStorage demo_unlocked !== 'true' → /demo/gate
-- Demo landing renders with feature tour
-- Demo banner: "You are in demo mode"
-- CTA: "Start your free 30-day trial" → /agency/signup
+### /demo (DELETED May 10 2026 — platform now behind signup)
 
-### /demo/dashboard
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load → /demo/gate if not unlocked
-- Agency dashboard with pre-loaded demo data renders
-- Demo banner visible
+### /demo/dashboard (DELETED)
 
-### /demo/search
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load
-- Search with 15 demo caregivers renders
-- Demo banner visible
+### /demo/search (DELETED)
 
-### /demo/clients
-- REACHABILITY: ACTION (from /demo)
-- Gate check on load
-- 5 demo clients render
-- Demo banner visible
+### /demo/clients (DELETED)
 
-### /demo/clients/[id]
-- REACHABILITY: DYNAMIC (from /demo/clients)
-- Gate check on load
-- Client detail with match results renders
-- Demo banner visible
+### /demo/clients/[id] (DELETED)
 
 ---
 
@@ -460,21 +459,17 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 - Architecture Audit tab present
 - Build tracker visible
 
-### /admin/sitemap
-- REACHABILITY: ACTION (from /admin)
-- All pages listed by access level
+### /admin/sitemap (DELETED May 10 2026 — use Next.js sitemap.ts)
 
 ### /admin/badges
 - REACHABILITY: ACTION (from /admin quick links — fixed May 4)
 - Badges management renders
 
-### /admin/reviews
-- REACHABILITY: ACTION (from /admin quick links — fixed May 4)
-- Reviews management renders
+### /admin/reviews (REDIRECTED May 10 2026 → /admin/caregivers)
+- Now redirects to /admin/caregivers
 
-### /admin/references
-- REACHABILITY: ACTION (from /admin quick links — fixed May 4)
-- References management renders
+### /admin/references (REDIRECTED May 10 2026 → /admin/caregivers)
+- Now redirects to /admin/caregivers
 
 ---
 
@@ -605,6 +600,18 @@ A TRUE ORPHAN is a page with no reachability path at all — flag as CRITICAL.
 | Empty state — search 0 results | HIGH | |
 | Empty state — shortlist empty | HIGH | |
 | Empty state — clients empty | HIGH | |
+| Agency Roster | CRITICAL | Agency builds caregiver profiles on their behalf |
+| Caregiver profile claim | CRITICAL | Caregiver claims agency-built profile |
+| CSV caregiver import | HIGH | Agency uploads existing roster |
+| Caregiver contact info on profile | HIGH | Phone + email visible to approved agencies |
+| Pipeline status (5 stages) | HIGH | Discovered/Contacted/Interviewing/Placed/Inactive |
+| Multi-user agency accounts | HIGH | Coordinator + owner same account |
+| Locale scoping CA/US | CRITICAL | CA caregivers never visible to US agencies |
+| QuickFill Basic | MEDIUM | In-app shift blast to matched caregivers |
+| QuickFill Standard | PHASE 2 | WhatsApp + SMS blast |
+| QuickFill AI | PHASE 2 | AI confirmation call after YES response |
+| "You're live" banner | MEDIUM | After caregiver completes Step 3 |
+| Profile view notification | MEDIUM | In-app when agency views profile |
 
 ---
 

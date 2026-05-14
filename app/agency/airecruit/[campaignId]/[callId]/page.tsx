@@ -155,7 +155,7 @@ export default async function CallTranscriptPage({ params }: Props) {
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Score</div>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: '#C9A84C' }}>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: '#C9973A' }}>
                   {call.rawScore !== null ? `${Math.round(call.rawScore)}%` : '-'}
                 </div>
               </div>
@@ -273,7 +273,7 @@ export default async function CallTranscriptPage({ params }: Props) {
                   <div style={{
                     width: `${scoreData.confidence}%`,
                     height: '100%',
-                    background: '#C9A84C',
+                    background: '#C9973A',
                     borderRadius: '3px'
                   }} />
                 </div>

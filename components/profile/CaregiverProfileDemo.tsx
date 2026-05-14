@@ -17,6 +17,9 @@ import {
   User,
 } from 'lucide-react'
 import ProfilePhoto from './ProfilePhoto'
+import ContactCard from './ContactCard'
+import SuitabilityCard from '@/components/ratings/SuitabilityCard'
+import BadgeDisplay from '@/components/ratings/BadgeDisplay'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Careified — Caregiver Profile (Agency-facing hiring scorecard)
@@ -65,36 +68,33 @@ const C = {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Demo data (Maria Santos)
+// Empty fallback — real data only, no demo fallbacks
 // ──────────────────────────────────────────────────────────────────────────────
 
 const caregiver = {
-  firstName: 'Maria',
-  lastName: 'Santos',
-  jobTitle: 'Personal Support Worker',
-  credential: 'PSW',
-  city: 'Toronto',
-  state: 'ON',
-  yearsExperience: 8,
-  availability: 'Available now',
-  rateMin: 24,
-  rateMax: 28,
-  trustScore: 4.8,
-  reviewCount: 12,
-  reviewsTier: 'Elite',
-  profileCompletion: 94,
-  openToUrgent: true,
-  willingLiveIn: true,
-  hasVehicle: true,
-  avgTenureMonths: 14,
-  availableFrom: 'Immediately',
-  rateOvernight: 32,
-  rateLiveIn: 220,
-  rateHoliday: 36,
-  languages: [
-    { name: 'English', level: 'Native' },
-    { name: 'Portuguese', level: 'Fluent' },
-  ],
+  firstName: null,
+  lastName: null,
+  jobTitle: null,
+  credential: null,
+  city: null,
+  state: null,
+  yearsExperience: null,
+  availability: null,
+  rateMin: null,
+  rateMax: null,
+  trustScore: null,
+  reviewCount: 0,
+  reviewsTier: null,
+  profileCompletion: 0,
+  openToUrgent: null,
+  willingLiveIn: null,
+  hasVehicle: null,
+  avgTenureMonths: null,
+  availableFrom: null,
+  rateOvernight: null,
+  rateLiveIn: null,
+  rateHoliday: null,
+  languages: [],
 }
 
 const verification: { label: string; tier: TierLevel; meta?: string }[] = [
@@ -547,6 +547,70 @@ export interface CaregiverProfileProps {
     description: string
     earned_at: string
   }>
+  // Contact info (only shown to approved agencies)
+  contactPhone?: string | null
+  contactEmail?: string | null
+  // Rating system data
+  suitabilityData?: Record<string, unknown> | null
+  reviewCount?: number
+  ratingBadges?: Array<{
+    id: string
+    badge_name: string
+    trigger_condition: string
+    status: 'earned' | 'locked'
+    earned_at?: string
+  }>
+  // Custom attributes from CSV
+  customAttributes?: Array<{ key: string; value: string }>
+  // Profile completeness
+  claimStatus?: string
+  sourceAgencyName?: string | null
+}
+
+// Tooltip for alignment score explanation
+function TooltipInfo() {
+  const [show, setShow] = useState(false)
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <span
+        onClick={() => setShow(!show)}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        style={{
+          color: C.gold,
+          cursor: 'pointer',
+          marginLeft: 8,
+          fontSize: 16,
+          fontWeight: 400,
+        }}
+      >
+        ⓘ
+      </span>
+      {show && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          right: 0,
+          marginTop: 8,
+          background: C.navy,
+          border: '1px solid #C9973A',
+          borderRadius: 8,
+          padding: 16,
+          maxWidth: 320,
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: 'white',
+          zIndex: 100,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        }}>
+          <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>What is the Trust Score?</div>
+          <div style={{ opacity: 0.9 }}>
+            This score reflects how closely this caregiver's verified credentials, availability, experience, and working style align with your active client criteria. It is not a recommendation. Careified does not verify, endorse, or recommend any caregiver. All hiring decisions rest with your agency.
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
@@ -559,8 +623,8 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   const [openCredentials, setOpenCredentials] = useState(true)
   const [openOpenQs, setOpenOpenQs] = useState(true)
 
-  const initials = `${caregiver.firstName[0]}${caregiver.lastName[0]}`
-  const fullName = `${dm.firstName || caregiver.firstName} ${dm.lastName || caregiver.lastName}`
+  const initials = dm.firstName ? `${dm.firstName[0]}${dm.lastName?.[0] || ''}` : '?'
+  const fullName = dm.firstName ? `${dm.firstName} ${dm.lastName || ''}` : '—'
 
   return (
     <div
@@ -695,12 +759,12 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   margin: '4px 0 12px',
                 }}
               >
-                {dm.credential || caregiver.credential} — {dm.jobTitle || caregiver.jobTitle}
+                {dm.credential || '—'} — {dm.jobTitle || '—'}
               </div>
 
               {/* Meta row */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
-                <Meta icon={<MapPin size={13} />}>{dm.city || caregiver.city}, {dm.state || caregiver.state}</Meta>
+                <Meta icon={<MapPin size={13} />}>{dm.city || '—'}, {dm.state || '—'}</Meta>
                 <Meta icon={<Briefcase size={13} />}>{dm.yearsExperience ?? caregiver.yearsExperience} yrs experience</Meta>
                 <Meta icon={<Clock size={13} />}>Avg placement: 14 months</Meta>
                 <Meta icon={<Award size={13} />}>Available immediately</Meta>
@@ -712,7 +776,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   color={C.success}
                   bg={'rgba(22,163,74,0.18)'}
                   icon={<Clock size={11} />}
-                  label={dm.availabilityStatus === 'available_now' ? 'Available now' : dm.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' : caregiver.availability}
+                  label={dm.availabilityStatus === 'available_now' ? 'Available now' : dm.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' : dm.availabilityStatus || 'Not available'}
                   dot
                 />
                 {caregiver.openToUrgent && (
@@ -747,15 +811,16 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 textAlign: 'center',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, position: 'relative' }}>
                 <Star size={22} fill={C.gold} color={C.gold} />
                 <span style={{ fontFamily: SERIF, fontSize: 32, color: '#F5F0E8', lineHeight: 1 }}>
-                  {caregiver.trustScore.toFixed(1)}
+                  {(dm.aggregateScore ?? null) !== null ? dm.aggregateScore!.toFixed(1) : '—'}
                 </span>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>/ 5</span>
+                <TooltipInfo />
               </div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>
-                {dm.ratingCount || caregiver.reviewCount} verified reviews · Profile {dm.profileCompletion || caregiver.profileCompletion}% complete
+                {dm.ratingCount || 0} verified reviews · Profile {dm.profileCompletion || 0}% complete
               </div>
             </div>
 
@@ -816,6 +881,31 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             8-year PSW with verified dementia and palliative depth &mdash; 3 confirmed references, current VSC, available immediately. Average placement tenure: 14 months.
           </p>
         </div>
+        {/* Profile completeness indicator */}
+        {dm.claimStatus === 'agency_built' && dm.sourceAgencyName && (
+          <div style={{ background: '#FDF6EC', border: '1px solid #C9973A', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: '#C9973A', fontSize: 16 }}>&#9432;</span>
+              <span style={{ fontSize: 13, color: '#0D1B3E', fontWeight: 600 }}>
+                This profile was created by {dm.sourceAgencyName}. The caregiver has been invited to claim and complete their profile.
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: '#64748B', marginTop: 6, marginLeft: 24 }}>
+              Information shown reflects what the agency provided.
+            </div>
+          </div>
+        )}
+        {dm.claimStatus === 'claimed' && (dm.profileCompletion ?? 0) < 50 && (
+          <div style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: '#64748B', fontSize: 16 }}>&#9432;</span>
+              <span style={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
+                This caregiver is still building their profile. More information will appear as they complete it.
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* 2. DISCLOSURE — moved to top for agency triage */}
         <Section title="Disclosure">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -923,6 +1013,11 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
           </div>
         </Section>
 
+        {/* CONTACT INFO */}
+        {(dm.contactPhone || dm.contactEmail) && (
+          <ContactCard phone={dm.contactPhone} email={dm.contactEmail} />
+        )}
+
         {/* 5. AGENCY RATINGS (from placement reviews) */}
         {dm.placementRatings && parseInt(dm.placementRatings.review_count || '0') > 0 && (
           <Section title="Agency ratings">
@@ -957,10 +1052,10 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         )}
 
         {/* 6. BADGES */}
-        {dm.badges && dm.badges.length > 0 && (
+        {(dm.badges && dm.badges.length > 0) || (dm.ratingBadges && dm.ratingBadges.length > 0) ? (
           <Section title="Badges">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {dm.badges.map((badge) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: dm.ratingBadges && dm.ratingBadges.length > 0 ? 16 : 0 }}>
+              {dm.badges?.map((badge) => (
                 <div
                   key={badge.id}
                   title={badge.description}
@@ -978,8 +1073,11 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 </div>
               ))}
             </div>
+            {dm.ratingBadges && dm.ratingBadges.length > 0 && (
+              <BadgeDisplay badges={dm.ratingBadges} />
+            )}
           </Section>
-        )}
+        ) : null}
 
         {/* 4. CLINICAL EXPERIENCE */}
         <Section title="Clinical experience">
@@ -1226,7 +1324,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
               <Stat label="Languages" value="English (native) · Portuguese (fluent)" />
-              <Stat label="Hourly rate" value={`$${dm.hourlyRateMin || caregiver.rateMin}–$${dm.hourlyRateMax || caregiver.rateMax}/hr`} />
+              <Stat label="Hourly rate" value={`$${dm.hourlyRateMin || '—'}–$${dm.hourlyRateMax || '—'}/hr`} />
               <Stat label="Travel radius" value={`${travelRadius} km from ${dm.city || caregiver.city}`} />
               <Stat label="Vehicle" value="Yes — Class G license" />
               <Stat label="Drives clients" value="Yes — willing in own vehicle" />
@@ -1353,6 +1451,17 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             </div>
           </div>
         </Section>
+
+        {/* SUITABILITY ANALYSIS */}
+        {dm.suitabilityData && dm.reviewCount !== undefined && dm.reviewCount > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <SuitabilityCard
+              suitability={dm.suitabilityData as unknown as Parameters<typeof SuitabilityCard>[0]['suitability']}
+              reviewCount={dm.reviewCount}
+              caregiverFirstName={dm.firstName || 'This caregiver'}
+            />
+          </div>
+        )}
 
         {/* 8. WORKING STYLE */}
         <Section title="Working style">
@@ -1757,6 +1866,30 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             </div>
           )}
         </Section>
+
+        {/* Custom attributes from CSV */}
+        {dm.customAttributes && dm.customAttributes.length > 0 && (
+          <Section title="Additional Information">
+            <div style={{ fontSize: 12, color: '#64748B', marginBottom: 16 }}>
+              Agency-recorded details
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+              {dm.customAttributes.map((attr, i) => (
+                <div key={i} style={{ background: 'white', borderRadius: 8, padding: '12px 16px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+                    {attr.key.replace(/_/g, ' ')}
+                  </div>
+                  <div style={{ fontSize: 14, color: '#0D1B3E', fontWeight: 600 }}>
+                    {attr.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 16, textAlign: 'center' }}>
+              These details were recorded by the placing agency and are presented as reported. Careified does not verify this information.
+            </div>
+          </Section>
+        )}
 
         {/* 12. DISCLAIMER */}
         <div

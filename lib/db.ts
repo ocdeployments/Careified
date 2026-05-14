@@ -15,16 +15,27 @@ const pool = new Pool({
 
 // Column allowlist to prevent SQL injection
 const CAREGIVER_COLUMNS = new Set([
-  'id', 'user_id', 'first_name', 'last_name', 'email', 'phone', 'status',
+  'id', 'user_id', 'clerk_id', 'first_name', 'last_name', 'email', 'phone', 'status',
   'is_verified', 'created_at', 'updated_at', 'photo_url', 'bio', 'languages',
   'years_experience', 'hourly_rate', 'service_areas', 'travel_radius',
   'specializations', 'certifications', 'availability', 'personality_profile',
   'aggregate_score', 'trust_score', 'personality_score', 'credential_score',
-  'reference_score', 'availability_score', 'experience_score'
+  'reference_score', 'availability_score', 'experience_score',
+  'claim_status', 'source_agency_id', 'is_demo', 'referred_by',
+  'profile_status', 'placement_types', 'credentials', 'hourly_rate_min',
+  'hourly_rate_max', 'travel_radius_km', 'has_vehicle', 'license_class',
+  'photo_x', 'photo_y', 'photo_scale', 'locale', 'city', 'province_state', 'country'
 ]);
 
-function validateColumn(key: string): void {
-  if (!CAREGIVER_COLUMNS.has(key)) {
+const AGENCY_COLUMNS = new Set([
+  'id', 'clerk_user_id', 'name', 'email', 'phone', 'city',
+  'province_state', 'country', 'locale', 'status', 'tier', 'is_demo',
+  'created_at', 'updated_at', 'modules_enabled'
+]);
+
+function validateColumn(key: string, table: 'caregivers' | 'agencies' = 'caregivers'): void {
+  const allowlist = table === 'agencies' ? AGENCY_COLUMNS : CAREGIVER_COLUMNS
+  if (!allowlist.has(key)) {
     throw new Error(`Invalid column name: ${key}`);
   }
 }

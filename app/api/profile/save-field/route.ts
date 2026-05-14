@@ -12,7 +12,7 @@ const pool = new Pool({
 })
 
 // Map form field names to DB column names
-const FIELD_MAP: Record<string, string> = {
+ const FIELD_MAP: Record<string, string> = {
  firstName: 'first_name',
  lastName: 'last_name',
  preferredName: 'preferred_name',
@@ -84,7 +84,19 @@ const FIELD_MAP: Record<string, string> = {
  openQ3: 'open_q3',
  willingLiveIn: 'willing_live_in',
  willingOvernight: 'willing_overnight',
+ referredBy: 'referred_by',
+ diagnosisExperience: 'diagnosis_experience',
+ adlsPerformed: 'adls_performed',
 }
+
+// PostgreSQL text[] array columns - pass JS arrays directly
+const ARRAY_COLUMNS = new Set([
+ 'services', 'specializations', 'credentials', 'languages',
+ 'placement_types', 'service_areas', 'client_types', 'unwilling_tasks',
+ 'dietary_cooking', 'preferred_settings', 'professional_memberships',
+ 'immunisation_records',
+ 'adls_performed',
+])
 
 export async function POST(req: NextRequest) {
  try {
@@ -93,36 +105,68 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
  }
 
- const { field, value } = await req.json()
+ const { field, value, referredBy } = await req.json()
 
  const dbColumn = FIELD_MAP[field]
+
+ // Guard against unknown fields
  if (!dbColumn) {
-  return NextResponse.json(
-   { error: `Unknown field: ${field}` },
-   { status: 400 }
-  )
+   console.error('UNKNOWN FIELD:', field)
+   return NextResponse.json({ error: `Unknown field: ${field}` }, { status: 400 })
+ }
+
+ // Serialize values: JS arrays for text[] columns, JSON for jsonb columns
+ const serializedValue = (() => {
+   if (Array.isArray(value) && ARRAY_COLUMNS.has(dbColumn)) {
+     return value  // Pass as JS array — pg driver handles text[] correctly
+   }
+   if (typeof value === 'object' && value !== null) {
+     return JSON.stringify(value)  // jsonb columns
+   }
+   return value
+ })()
+
+ // Don't allow direct saves to referred_by column
+ if (dbColumn === 'referred_by') {
+  return NextResponse.json({ error: 'Cannot set referred_by directly' }, { status: 400 })
  }
 
  // Get or create caregiver record for this user
  const { rows: existing } = await pool.query(
-  'SELECT id FROM caregivers WHERE user_id = $1 LIMIT 1',
+  'SELECT id, referred_by FROM caregivers WHERE user_id = $1 LIMIT 1',
   [userId]
  )
 
  if (existing.length === 0) {
-  // Create caregiver record
-  await pool.query(
-   `INSERT INTO caregivers (user_id, status, ${dbColumn}, updated_at)
- VALUES ($1, 'incomplete', $2, NOW())`,
-   [userId, value]
-  )
+  // Create caregiver record - include referred_by if provided
+  if (referredBy) {
+   await pool.query(
+    `INSERT INTO caregivers (user_id, status, ${dbColumn}, referred_by, updated_at)
+  VALUES ($1, 'incomplete', $2, $3, NOW())`,
+    [userId, serializedValue, referredBy]
+   )
+  } else {
+   await pool.query(
+    `INSERT INTO caregivers (user_id, status, ${dbColumn}, updated_at)
+  VALUES ($1, 'incomplete', $2, NOW())`,
+    [userId, serializedValue]
+   )
+  }
  } else {
-  // Update existing record
-  await pool.query(
-   `UPDATE caregivers SET ${dbColumn} = $1, updated_at = NOW()
- WHERE user_id = $2`,
-   [value, userId]
-  )
+  // Update existing record - only set referred_by if not already set and provided
+  if (referredBy && !existing[0].referred_by) {
+   await pool.query(
+    `UPDATE caregivers SET ${dbColumn} = $1, referred_by = $2, updated_at = NOW()
+  WHERE user_id = $3`,
+    [serializedValue, referredBy, userId]
+   )
+  } else {
+   await pool.query(
+    `UPDATE caregivers SET ${dbColumn} = $1, updated_at = NOW()
+  WHERE user_id = $2`,
+    [serializedValue, userId]
+   )
+  }
  }
 
  return NextResponse.json({ success: true })

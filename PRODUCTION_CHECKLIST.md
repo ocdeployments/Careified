@@ -1,10 +1,9 @@
 # PRODUCTION_CHECKLIST.md
-# Careified — Production Readiness Tracker
-# Created: May 8 2026
-# Rule: Review at START of every session. Update at END of every session.
-# Rule: One checkbox per item. Check off only when verified live — not just committed.
-
----
+# Purpose: Every item required to go live — technical, security, legal, content, ops
+# Updated: May 13 2026
+# Update trigger: Every session — tick completed items, add new requirements discovered
+# Owner: Both
+# DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), specs (CAREIFIED_SPEC.md)
 
 ## 🔴 CRITICAL — Launch Blockers
 
@@ -19,6 +18,12 @@
 - [ ] UUID reference tokens — app/api/references/invite/route.ts
 - [ ] SQL injection fix — lib/db.ts lines 56-68 (validate keys against column allowlist)
 - [x] Remove dangerouslySetInnerHTML — app/admin/caregivers/page.tsx line 217
+- [ ] PHI encryption migration — columns currently plain text, need AES-256-GCM before launch
+  - [ ] Identify every PHI column (client_medical, client_cognitive, diagnosis_experience, free-text observation fields)
+  - [ ] Write encrypt-at-rest migration using PHI_ENCRYPTION_KEY
+  - [ ] Write decrypt-on-read in lib/db.ts query helpers
+  - [ ] Test: encrypt, read back, confirm decryption matches original
+  - [ ] Document encryption pattern in BEST_PRACTICES.md
 
 ### Legal / Compliance
 - [ ] Lawyer review lib/legal/text.ts
@@ -29,7 +34,9 @@
 - [ ] E&O insurance in place
 - [ ] Cyber liability insurance in place
 - [ ] General liability insurance in place
-- [ ] NEXT_PUBLIC_LOCALE=CA added to Vercel env vars
+- [x] NEXT_PUBLIC_LOCALE=CA added to Vercel env vars
+- [x] Locale column added to DB tables (caregivers, agencies, client_needs) — May 10 2026
+- [x] Locale scoping enforced in search/match APIs — May 10 2026
 
 ### Infrastructure
 - [ ] SSL cert for Render DB (rejectUnauthorized: true)
@@ -39,6 +46,34 @@
 - [ ] Uptime monitoring configured (Render + Vercel)
 - [ ] Error tracking configured (Sentry — SENTRY_DSN env var)
 - [ ] Staging environment created (separate Vercel project + DB)
+- [ ] careified.ca domain purchased | ❌ | Romy | Namecheap/GoDaddy |
+- [ ] careified.com domain purchased | ❌ | Romy | Namecheap/GoDaddy |
+- [ ] careified.ca pointed to Vercel CA project | ❌ | Romy | |
+- [ ] careified.com pointed to Vercel US project | ❌ | Romy | |
+- [ ] GitHub branch protection on `main` — REQUIRED before launch:
+  - [ ] Require pull request before merging
+  - [ ] Require status checks to pass (npx tsc --noEmit)
+  - [ ] Restrict who can push to: Romy only
+  - [ ] Block force pushes
+  - [ ] Restrict deletions
+  - Owner: Romy
+  - Reason: Vercel auto-deploys main. Without this, a single bad push crashes production.
+
+### Demo Data Hygiene
+- [ ] Decision: wipe / quarantine / convert demo caregivers before launch
+- [ ] Decision: wipe / quarantine / convert demo agencies before launch
+- [ ] Decision: wipe / quarantine demo clients before launch
+- [ ] If quarantining: add is_demo boolean column, exclude from production queries, keep accessible at /demo/* only
+- [ ] If wiping: scripts/wipe-demo-data.ts, run on launch day with backup
+- [ ] /profile/demo Maria Santos must remain — marketing page, not search data
+- [ ] Confirm: /demo/search uses mock data only (not shared with production search)
+
+### Email (Resend)
+- [x] Resend domain verified (SPF + DKIM + DMARC) ✅ May 13 2026
+- [x] RESEND_API_KEY added to Vercel dashboard ✅ May 13 2026
+- [x] Sending domain updated in code (noreply@careified.ca) ✅ May 13 2026
+- [x] Test claim email sends and lands in inbox (not spam) ✅ May 13 2026
+- [x] Test claim email sends from careified domain (not onboarding@resend.dev) ✅ May 13 2026
 
 ---
 
@@ -56,9 +91,17 @@
 - [ ] demo_leads DB table — capture and store demo gate submissions
 - [ ] Stripe integration — PAYMENTS_ENABLED=false currently, no revenue collection
 - [ ] Module pricing confirmed and wired to Stripe
+- [x] Agency Roster | ✅ | DONE May 13 | Critical — enables cold start |
+- [x] Caregiver claims agency-built profile | ✅ | DONE May 13 | Viral loop |
+- [x] CSV caregiver import | ✅ | DONE May 13 | Cold start solver |
+- [x] Caregiver contact info visible to agencies | ✅ | DONE May 13 | Dead end fix |
+- [x] Pipeline status (5 stages) | ✅ | DONE May 10 | Agency workflow |
+- [x] Multi-user agency accounts | ✅ | DONE May 10 | |
+- [x] Locale column + CA/US data scoping | ✅ | DONE May 10 | Critical |
+- [ ] QuickFill Basic (in-app only) | ❌ | Week 3 | If time allows |
 
 ### Broken Links (404s)
-- [ ] /agency/support — linked from /agency/billing, page not built
+- [x] /agency/support — linked from /agency/billing, now redirects to /contact ✅
 - [ ] /settings — no index page, linked from multiple places
 - [ ] /profile/start — linked in /for-caregivers, should be /profile/build
 
@@ -80,7 +123,7 @@
 - [ ] Empty state — clients list is empty
 - [ ] Agency signup — highlight required fields red on submit, scroll to first error, inline errors
 - [ ] Agency signup — phone field silently rejects invalid numbers (show error instead)
-- [ ] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files
+- [x] Gold hex inconsistency — audit and standardise #C9973A vs #C9A84C across all files | ✅ DONE May 10
 - [ ] Agency card copy — fix non-recommender liability language ("screens candidates" / "delivers interview-ready professionals")
 - [ ] Rename "matching engine" → "Careified Engine" across all UI copy, comments, and lib/matching/ references
 - [ ] Profile builder — add completion celebration / confirmation at Step 10
@@ -88,7 +131,6 @@
 - [ ] Mobile responsiveness audit — all 36 pages
 
 ### Data Integrity
-- [ ] PHI encryption migration — columns currently plain text, need AES-256-GCM before launch
 - [ ] aggregate_score wiring — CTS engine exists but not triggered by anything
 - [ ] caregiver_attributes table seeding — empty, graceful fallback exists
 
@@ -166,6 +208,11 @@
 - [ ] US demo caregivers seeded (TX, FL, NY)
 - [ ] US demo clients seeded
 
+### Agency Onboarding
+- [ ] Ontario agency early adopter agreement | ❌ | Romy | 3 months free |
+- [ ] Texas agency early adopter agreement | ❌ | Romy | 3 months free |
+- [ ] Both agencies on Growth tier (free) | ❌ | Romy | Early adopter |
+
 ### QA Automation
 - [ ] Playwright E2E suite — full 36-page coverage
 - [ ] Link audit script — scripts/audit-links.ts
@@ -205,7 +252,9 @@
 |------|------------------|-------------|
 | May 8 2026 | — | Initial checklist created |
 | May 8 2026 | — | Rename "matching engine" → "Careified Engine" checklist item |
-| May 8 2026 | Admin sitemap auto-gen, agency sitemap, brand animation strip, flywheel section, profile demo photo, consolidated auth, /profile/build protected, Try Demo removed, demo gated behind signup, MASTER_DOCS.md created | QA automation suite, custom auth form, profile visibility toggle, admin soft delete, empty states |
+| May 8 2026 | Admin sitemap auto-gen, agency sitemap, brand animation strip, flywheel section, profile demo photo, consolidated auth, /profile/build protected, Try Demo removed, demo gated behind signup | QA automation suite, custom auth form, profile visibility toggle, admin soft delete, empty states |
+| May 11 2026 | — | Resend email checklist (domain verified, API key, sending domain, inbox test) |
+| May 13 2026 | Agency Roster CSV import ✅, Claim flow ✅, ProfilePreviewCard new profile fix ✅ | — |
 
 ---
 _Update this table at the end of every session._

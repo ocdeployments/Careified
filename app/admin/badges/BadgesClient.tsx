@@ -30,6 +30,9 @@ export default function BadgesClient({ caregivers }: { caregivers: CaregiverBadg
   })
 
   async function removeBadge(caregiverId: string, badgeId: string) {
+    if (!window.confirm('Are you sure you want to remove this badge?')) {
+      return
+    }
     const caregiver = caregivers.find(c => c.id === caregiverId)
     if (!caregiver) return
 

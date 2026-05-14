@@ -174,7 +174,7 @@ export default async function CampaignDetailPage({ params }: Props) {
             padding: '20px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: '#C9A84C', marginBottom: '4px' }}>
+            <div style={{ fontSize: '28px', fontWeight: 700, color: '#C9973A', marginBottom: '4px' }}>
               {completionRate}%
             </div>
             <div style={{ fontSize: '12px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -295,7 +295,7 @@ export default async function CampaignDetailPage({ params }: Props) {
                       <td style={{ padding: '16px 20px', fontSize: '14px', color: '#64748B' }}>
                         {call.callbackRequestedAt ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Clock size={14} color="#C9A84C" />
+                            <Clock size={14} color="#C9973A" />
                             {formatDate(call.callbackRequestedAt)}
                           </div>
                         ) : '-'}
@@ -311,9 +311,9 @@ export default async function CampaignDetailPage({ params }: Props) {
                               padding: '6px 14px',
                               fontSize: '13px',
                               fontWeight: 500,
-                              color: '#C9A84C',
+                              color: '#C9973A',
                               textDecoration: 'none',
-                              border: '1px solid #C9A84C',
+                              border: '1px solid #C9973A',
                               borderRadius: '6px'
                             }}
                           >

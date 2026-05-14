@@ -1,10 +1,33 @@
 ---
 # BEST_PRACTICES.md
-# Careified — Engineering & Product Best Practices
-# Created: May 8 2026
-# Rule: Read at START of every session
-# Rule: Update when a new pattern is established
-# Source: Derived from LESSONS_LEARNED.md — every entry here has a real failure behind it
+# Purpose: Engineering and product standards — the HOW behind every build decision
+# Updated: May 9 2026
+# Update trigger: When a new pattern is established or an old one proven wrong
+# Owner: Both
+# DO NOT DUPLICATE: Rules (CLAUDE.md), decisions (CONTEXT.md)
+
+---
+
+## 0. SESSION IDENTITY — READ FIRST
+
+- **SOUL.md is the first file read every session — no exceptions**
+- SOUL.md defines who Claude is, how it thinks, and what lenses it applies
+- 33 lenses cover: technical, product, legal, agency, caregiver, family,
+  growth, UX, brand, copy, market, QA, security, behaviour analysis
+- If SOUL.md does not exist in the repo — stop and ask Romy before proceeding
+- Every decision made during a session should be defensible through 
+  at least one of the 33 lenses
+- Claude is a co-founder, not an assistant — proactive, opinionated, rigorous
+- Stale docs = degraded performance — update all .md files every session end
+
+### Claude's Real Limits (Know These)
+- No memory between sessions — docs ARE the memory — keep them current
+- Cannot see the screen, browse the live site, or feel what feels wrong
+- Cannot replace: real lawyer, real penetration tester, real accountant, 
+  real insurance broker, real user interviews
+- Can be wrong on: Ontario-specific regulations, Clerk/Vapi/Vercel specifics 
+  that changed post-training, anything not visible in the codebase
+- When uncertain: search first, flag uncertainty, never fabricate
 
 ---
 
@@ -60,7 +83,7 @@
 - Commit message format: `feat:` / `fix:` / `chore:` / `docs:` / `copy:`
 - Never commit directly to main — use develop branch
 - ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
-- Safe revert point updated in HANDOFF.md and STATUS.md after every session
+- Safe revert point updated in CAREIFIED_STATUS.md after every session
 
 ---
 
@@ -191,10 +214,9 @@ Every session must update:
 1. CAREIFIED_STATUS.md — what was done
 2. PRODUCTION_CHECKLIST.md — what was completed/added
 3. CAREIFIED_SPEC.md — new pages, resolved issues
-4. MASTER_DOCS.md — new decisions, security updates
-5. LESSONS_LEARNED.md — at least one entry
-6. BEST_PRACTICES.md — if new pattern established
-7. CONTEXT.md — significant decisions only
+4. LESSONS_LEARNED.md — at least one entry
+5. BEST_PRACTICES.md — if new pattern established
+6. CONTEXT.md — significant decisions only
 
 ---
 
@@ -210,8 +232,7 @@ Every session must update:
 
 ### Consent
 - Explicit, versioned, timestamped consent for all communication types
-- TCPA (US): 8am-9pm local time — enforced in calling-hours.ts
-- CRTC (Canada): 9am-9:30pm weekdays, 10am-6pm weekends — enforced
+- Compliance hours: see AI_PLAYBOOK.md
 - Never call without consent gate — lib/airecruit/consent-gate.ts
 - Age verification (18+) required at signup
 

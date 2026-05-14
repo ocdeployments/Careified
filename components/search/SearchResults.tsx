@@ -9,10 +9,11 @@ interface SearchResultsProps {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
+  onClearFilters?: () => void
 }
 
 export function SearchResults({
-  results, loading, page, totalPages, onPageChange
+  results, loading, page, totalPages, onPageChange, onClearFilters
 }: SearchResultsProps) {
 
   if (loading) {
@@ -31,12 +32,60 @@ export function SearchResults({
 
   if (!results || results.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-          <Search size={28} className="text-slate-400" />
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px 24px',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          width: 64,
+          height: 64,
+          borderRadius: '50%',
+          background: '#F1F5F9',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 16,
+        }}>
+          <Search size={28} color="#94A3B8" />
         </div>
-        <h3 className="text-base font-bold text-navy mb-2">No caregivers match your filters</h3>
-        <p className="text-sm text-slate-500">Try expanding your search criteria</p>
+        <h3 style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: '#0D1B3E',
+          marginBottom: 8,
+        }}>
+          No caregivers match those filters.
+        </h3>
+        <p style={{
+          fontSize: 14,
+          color: '#64748B',
+          marginBottom: 24,
+          maxWidth: 320,
+          lineHeight: 1.6,
+        }}>
+          Try widening your search area or adjusting availability requirements.
+        </p>
+        {onClearFilters && (
+          <button
+            onClick={onClearFilters}
+            style={{
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+              color: '#0D1B3E',
+              border: 'none',
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
     )
   }

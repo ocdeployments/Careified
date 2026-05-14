@@ -1,126 +1,52 @@
----
-# LESSONS_LEARNED.md
-# Careified — Lessons Learned Log
-# Created: May 8 2026
-# Rule: Add entry at END of every session — no matter how small
-# Rule: Read at START of every session — don't repeat mistakes
-# Format: Date | Category | What happened | What to do instead
-
----
-
-## HOW TO ADD AN ENTRY
-
-At end of every session, paste this prompt to Claude:
-> "Add to LESSONS_LEARNED.md: [what happened] — [what to do instead]"
-
-Categories: CODE | UX | SECURITY | PROCESS | COPY | ARCHITECTURE | TOOLING | LEGAL
-
----
+# LESSONS_LEARNED.md — Institutional memory
+Updated: May 11 2026 | Owner: Both | See BEST_PRACTICES.md, CLAUDE.md
 
 ## LOG
 
 ### May 8 2026
+**CODE — Duplicate merges on large files** → Use bash heredoc. See BEST_PRACTICES.md.
+**CODE — Case-sensitive filesystem broke production** → Verify exact filenames. See CLAUDE.md §3.
+**CODE — Tailwind v4 breaks on Vercel** → Inline styles only. See CLAUDE.md §7.
+**CODE — pg Pool in middleware.ts crashes** → Never in middleware. See CLAUDE.md §3.
+**CODE — /profile/build in public routes** → Remove from publicRoutes. See CLAUDE.md §12.
+**SECURITY — ADMIN_CLERK_USER_ID not set locally** → Add to .env.local. See CLAUDE.md §12.
+**SECURITY — dangerouslySetInnerHTML in production** → Never use it. See CLAUDE.md §30.
+**PROCESS — Agent completion cannot be trusted** → Verify via raw output. See BEST_PRACTICES.md.
+**PROCESS — Multi-file prompts cause compound errors** → One file per commit. See CLAUDE.md §5.
+**PROCESS — Not running Playwright consistently** → Run at session end. See CLAUDE.md §13.
+**PROCESS — QA gaps discovered manually** → Run auth + link audits. See CLAUDE.md §13.
+**UX — Phone field silently rejects invalid numbers** → Show inline errors. See BEST_PRACTICES.md.
+**UX — Email collected redundantly before Clerk** → Let Clerk handle. See BEST_PRACTICES.md.
+**UX — Separate sign-in and sign-up pages** → Single auth entry. See CONTEXT.md §18.
+**COPY — Non-recommender language violations** → Use alignment_score. See CLAUDE.md §11.
+**COPY — Weak value proposition** → Lead with pain. See BEST_PRACTICES.md.
+**COPY — "Matching Engine" generic** → Use "Careified Engine". See FOUNDER.md.
+**ARCHITECTURE — Demo search called authenticated API** → Use mock data. See CLAUDE.md §15.
+**ARCHITECTURE — LiveProfilePreview deferred** → Build user-visible first. See BEST_PRACTICES.md.
+**LEGAL — Gold hex inconsistency** → Single design token source. See CLAUDE.md §8.
+**TOOLING — Vercel env vars via CLI break** → Dashboard only. See CLAUDE.md §9.
+**TOOLING — Never npx vercel --prod** → Push to main branch. See CLAUDE.md §16.
 
-**CODE — Duplicate merges on large files**
-What happened: Cline str_replace and write_file caused duplicate content merges on files over 200 lines. Multiple debugging sessions lost.
-Do instead: Always use bash heredoc (cat > file << 'EOF') for full file rewrites. str_replace only for targeted single changes under 20 lines.
+### May 9 2026
+**PROCESS — Documentation drift** → Run grep on .md files. See DOC_INDEX.md.
+**ARCHITECTURE — Vapi/Twilio confusion** → Document OWNED vs ABSTRACTED. See CLAUDE.md §14.
 
-**CODE — Case-sensitive filesystem broke production**
-What happened: Logo filename was Carefied-logo.png (missing 'i') — worked locally on Mac (case-insensitive) but broke on Vercel (case-sensitive Linux).
-Do instead: Always verify exact filenames including case before committing. grep for the filename in code before pushing.
+### May 10 2026 — Autonomous build mode
+First autonomous session. Faster execution, no approval delays. One file per commit maintained. TypeScript check non-negotiable.
+Rule confirmed: Autonomous fine for building. Never for: pushing, DB destructive ops, deleting large features.
 
-**CODE — Tailwind v4 breaks on Vercel**
-What happened: Tailwind v4 production build failures on Vercel caused multiple rollbacks early in development.
-Do instead: Inline styles only. Never introduce Tailwind classes. This is permanent.
+### May 11 2026
+**TOOLING — Clerk 7 auth() throws NEXT_REDIRECT in API routes** → auth() returns null in pages but throws NEXT_REDIRECT in API routes when no session. Wrap in try/catch → return 403. See app/api/roster/add/route.ts for pattern.
 
-**CODE — pg Pool in middleware.ts crashes**
-What happened: Using pg Pool in middleware.ts caused Edge Runtime incompatibility — crashed the entire app.
-Do instead: Never use pg Pool in middleware files. Use only in API routes and server components. Renamed to proxy.ts to avoid confusion.
-
-**CODE — /profile/build in public routes**
-What happened: /profile/build was added to publicRoutes in proxy.ts — allowed unauthenticated access to the profile builder. Discovered manually by clicking links.
-Do instead: Every new protected route must be explicitly removed from publicRoutes. Run auth audit script at end of every session.
-
-**SECURITY — ADMIN_CLERK_USER_ID not set locally**
-What happened: Admin pages appeared protected in code but env var was missing from .env.local — anyone could access /admin in development.
-Do instead: After adding any new env var to Vercel dashboard, immediately add to .env.local. Run env var audit at session start.
-
-**SECURITY — dangerouslySetInnerHTML left in production code**
-What happened: dangerouslySetInnerHTML used in admin/caregivers/page.tsx line 217 — XSS vulnerability present for multiple sessions.
-Do instead: Never use dangerouslySetInnerHTML. Use plain text rendering or <pre> tags. Security regression check catches this at session end.
-
-**PROCESS — Agent completion cannot be trusted**
-What happened: Build agent reported tasks complete that weren't. Code changes described in summary didn't match actual file contents.
-Do instead: Always verify via raw command output — git log --oneline, grep results, cat file. Never trust agent narrative summary alone.
-
-**PROCESS — Multi-file prompts cause compound errors**
-What happened: Prompting agent to change multiple files in one commit made it impossible to identify which file caused a bug.
-Do instead: One file per commit. Always. Non-negotiable.
-
-**PROCESS — Not running Playwright consistently**
-What happened: Playwright E2E tests configured and working but never run consistently — broken links and auth gaps slipped through to be discovered manually.
-Do instead: Run Playwright at end of every session as mandatory step. No exceptions.
-
-**PROCESS — QA gaps discovered by manual clicking**
-What happened: /profile/build bypassed auth, /for-caregivers CTA went directly to form — discovered by manually clicking links, not automated testing.
-Do instead: Auth audit script + link audit script run at every session end. Build QA automation session before adding more features.
-
-**UX — Phone field silently rejects invalid numbers**
-What happened: Agency signup phone field showed no error on invalid input — user had no feedback, form appeared broken.
-Do instead: Always show inline errors on blur for all form fields. Never silent rejection. UX debt tracked in PRODUCTION_CHECKLIST.md.
-
-**UX — Email collected redundantly before Clerk signup**
-What happened: /profile/start collected email + phone before Clerk signup — data never used, Clerk collected it again anyway.
-Do instead: Don't collect data that Clerk will collect during auth. Gate with age confirmation only. Let Clerk handle identity fields.
-
-**UX — Separate sign-in and sign-up pages caused confusion**
-What happened: Two separate auth pages with different styling and different field configurations. Users directed to wrong page by different CTAs.
-Do instead: Single auth entry point. Clerk handles new vs existing users inline. One page, one flow.
-
-**COPY — Non-recommender language violations**
-What happened: Agency card copy contained "screens candidates" and "delivers interview-ready professionals" — implies Careified vouches for caregivers, creating liability.
-Do instead: All copy must use alignment_score, criteria_aligned language. Never imply Careified certifies or recommends anyone. Flag for lawyer review.
-
-**COPY — Weak value proposition messaging**
-What happened: "Your name. Your credentials. Your working style. Your trust score. All verified. All in one place." — flat feature list, not a value statement.
-Do instead: Lead with the pain (every agency move resets everything), then the solution. Test copy against: does this speak to the specific frustration?
-
-**COPY — "Matching Engine" is generic**
-What happened: Used "Matching Engine" throughout — forgettable, sounds like every other SaaS tool.
-Do instead: "Careified Engine" — ownable, branded, reinforces platform name. Apply consistently everywhere.
-
-**ARCHITECTURE — Demo search called authenticated API**
-What happened: /demo/search called /api/match/rank which requires Clerk auth — returned 401 for all demo users.
-Do instead: Demo routes must use mock data only. Never call authenticated APIs from public demo pages. isDemo prop pattern established.
-
-**ARCHITECTURE — LiveProfilePreview deferred too long**
-What happened: LiveProfilePreview was the most important caregiver-facing feature but was deferred for multiple sessions — ghost profile was confusing without it.
-Do instead: Build the most user-visible features first. Don't defer what the user sees first.
-
-**LEGAL — Gold hex inconsistency**
-What happened: #C9A84C and #C9973A used interchangeably across files — brand inconsistency flagged 3+ times, still unresolved.
-Do instead: Design tokens session needed. Single source of truth for all colour values. Grep before using any hex value.
-
-**TOOLING — Vercel env vars via CLI add newline characters**
-What happened: Setting env vars via CLI (vercel env add) appended \n to values — broke Clerk auth in production silently.
-Do instead: NEVER set Vercel env vars via CLI. Dashboard only. Non-negotiable.
-
-**TOOLING — Never npx vercel --prod**
-What happened: Direct Vercel CLI deploys bypass GitHub integration and can push untested code directly to production.
-Do instead: Always push to main branch — Vercel auto-deploys. Never run npx vercel --prod.
-
----
+### May 12 2026
+**PROCESS — Multi-file commits happened twice** → Auth fix (6 files) and roster UI (4 files) committed together. One file per commit — no exceptions. → Rule: BEST_PRACTICES.md §1
+**TOOLING — Clerk 7 auth() throws NEXT_REDIRECT in API routes** → Wrap auth() in try/catch in all API routes. → Pattern: app/api/roster/add/route.ts
+**PROCESS — Tasks A and B already done in prior session** → Gold hex and /profile/start were already fixed. Verify before building — grep first, commit only if needed. → Rule: read actual file before writing prompt.
 
 ## PATTERNS TO WATCH
-
-These mistakes happen repeatedly — extra vigilance needed:
-
-1. **Auth gaps** — new routes added without checking proxy.ts publicRoutes
-2. **Silent failures** — form fields that reject input without showing errors
-3. **Agent trust** — accepting agent summary without verifying raw output
-4. **Copy liability** — recommender language slipping into UI copy
-5. **Env var drift** — new vars added to Vercel but not .env.local or vice versa
-6. **One file rule** — temptation to batch multiple files in one commit
-
----
-_Add new entries at the end of every session. Never delete old entries._
+1. Auth gaps — check proxy.ts publicRoutes
+2. Silent failures — show inline errors
+3. Agent trust — verify raw output
+4. Copy liability — avoid recommender language
+5. Env var drift — sync Vercel and .env.local
+6. One file rule — never batch commits

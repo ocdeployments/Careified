@@ -27,11 +27,17 @@ export function useProfileSave() {
 
  saveTimerRef.current = setTimeout(async () => {
   setSaveStatus('saving')
+  // Get referral from localStorage if present
+  const referral = typeof window !== 'undefined' ? localStorage.getItem('careified_referral') : null
+  const payload: Record<string, any> = { field, value }
+  if (referral) {
+    payload.referredBy = referral
+  }
   try {
    const response = await fetch('/api/profile/save-field', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ field, value }),
+    body: JSON.stringify(payload),
    })
    if (!response.ok) throw new Error('Save failed')
    setSaveStatus('saved')
@@ -51,11 +57,17 @@ export function useProfileSave() {
  ) => {
   updateFields(data)
   setSaveStatus('saving')
+  // Get referral from localStorage if present
+  const referral = typeof window !== 'undefined' ? localStorage.getItem('careified_referral') : null
+  const payload = { step, data }
+  if (referral) {
+    (payload as any).referredBy = referral
+  }
   try {
    const response = await fetch('/api/profile/save-step', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ step, data }),
+    body: JSON.stringify(payload),
    })
    if (!response.ok) throw new Error('Step save failed')
    setSaveStatus('saved')
