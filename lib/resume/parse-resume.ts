@@ -45,6 +45,7 @@ async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
     const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
     return strings.join(' ').slice(0, 8000)
   }
+  // DOC/DOCX: utf-8 decode
   return buffer.toString('utf-8').slice(0, 8000)
 }
 
