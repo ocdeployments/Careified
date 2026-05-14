@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-call-queue",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/notifications/nudge",
+      "schedule": "0 10 * * 1"
+    }
+  ]
+}
