@@ -33,7 +33,8 @@ export default function ClaimCompletePage() {
         })
 
         if (res.ok || res.status === 409) {
-          router.push('/profile/build')
+          const data = await res.json()
+          router.push(data.redirect || '/profile/build?step=0')
         } else {
           const data = await res.json()
           setError(data.message || 'Something went wrong')

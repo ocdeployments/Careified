@@ -1,6 +1,6 @@
 # PRODUCTION_CHECKLIST.md
 # Purpose: Every item required to go live — technical, security, legal, content, ops
-# Updated: May 9 2026
+# Updated: May 13 2026
 # Update trigger: Every session — tick completed items, add new requirements discovered
 # Owner: Both
 # DO NOT DUPLICATE: Build status (CAREIFIED_STATUS.md), specs (CAREIFIED_SPEC.md)
@@ -69,11 +69,11 @@
 - [ ] Confirm: /demo/search uses mock data only (not shared with production search)
 
 ### Email (Resend)
-- [ ] Resend domain verified (SPF + DKIM + DMARC)
-- [ ] RESEND_API_KEY added to Vercel dashboard
-- [ ] Sending domain updated in code (noreply@careified.ca)
-- [ ] Test claim email sends and lands in inbox (not spam)
-- [ ] Test claim email sends from careified domain (not onboarding@resend.dev)
+- [x] Resend domain verified (SPF + DKIM + DMARC) ✅ May 13 2026
+- [x] RESEND_API_KEY added to Vercel dashboard ✅ May 13 2026
+- [x] Sending domain updated in code (noreply@careified.ca) ✅ May 13 2026
+- [x] Test claim email sends and lands in inbox (not spam) ✅ May 13 2026
+- [x] Test claim email sends from careified domain (not onboarding@resend.dev) ✅ May 13 2026
 
 ---
 
@@ -91,10 +91,10 @@
 - [ ] demo_leads DB table — capture and store demo gate submissions
 - [ ] Stripe integration — PAYMENTS_ENABLED=false currently, no revenue collection
 - [ ] Module pricing confirmed and wired to Stripe
-- [ ] Agency Roster | ❌ | Week 1 | Critical — enables cold start |
-- [ ] Caregiver claims agency-built profile | ❌ | Week 1 | Viral loop |
-- [ ] CSV caregiver import | ❌ | Week 1 | Cold start solver |
-- [ ] Caregiver contact info visible to agencies | ❌ | Week 1 | Dead end fix |
+- [x] Agency Roster | ✅ | DONE May 13 | Critical — enables cold start |
+- [x] Caregiver claims agency-built profile | ✅ | DONE May 13 | Viral loop |
+- [x] CSV caregiver import | ✅ | DONE May 13 | Cold start solver |
+- [x] Caregiver contact info visible to agencies | ✅ | DONE May 13 | Dead end fix |
 - [x] Pipeline status (5 stages) | ✅ | DONE May 10 | Agency workflow |
 - [x] Multi-user agency accounts | ✅ | DONE May 10 | |
 - [x] Locale column + CA/US data scoping | ✅ | DONE May 10 | Critical |
@@ -254,6 +254,7 @@
 | May 8 2026 | — | Rename "matching engine" → "Careified Engine" checklist item |
 | May 8 2026 | Admin sitemap auto-gen, agency sitemap, brand animation strip, flywheel section, profile demo photo, consolidated auth, /profile/build protected, Try Demo removed, demo gated behind signup | QA automation suite, custom auth form, profile visibility toggle, admin soft delete, empty states |
 | May 11 2026 | — | Resend email checklist (domain verified, API key, sending domain, inbox test) |
+| May 13 2026 | Agency Roster CSV import ✅, Claim flow ✅, ProfilePreviewCard new profile fix ✅ | — |
 
 ---
 _Update this table at the end of every session._

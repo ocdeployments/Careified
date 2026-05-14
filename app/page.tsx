@@ -11,6 +11,23 @@ export default function HomePage() {
         {/* ── Hero (dark navy) ── */}
         <CareifiedHero />
 
+        {/* AI Assistant CTA */}
+        <div style={{ textAlign: 'center', padding: '8px 0 32px', background: '#F7F4F0' }}>
+          <Link
+            href="/demo/assistant"
+            style={{
+              color: '#C9973A',
+              fontSize: '16px',
+              fontWeight: 600,
+              textDecoration: 'none',
+              borderBottom: '2px solid #C9973A',
+              paddingBottom: '2px'
+            }}
+          >
+            Try our AI assistant →
+          </Link>
+        </div>
+
         {/* ── The Careified Engine (warm white) ── */}
         <section
           style={{ background: '#F7F4F0', padding: '80px 24px' }}

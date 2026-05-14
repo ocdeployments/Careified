@@ -10,7 +10,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { firstName, lastName, phoneNumber, phoneVerified, ageConfirmed } = body
+    const { firstName, lastName, ageConfirmed } = body
 
     // Find or create caregiver record
     let caregiver = await pool.query(
@@ -19,18 +19,18 @@ export async function PATCH(request: NextRequest) {
     )
 
     if (caregiver.rows.length === 0) {
-      // Create new caregiver record
+      // Create new caregiver record (phone collected in profile builder Step 1)
       const newCaregiver = await pool.query(
-        `INSERT INTO caregivers (user_id, first_name, last_name, phone, phone_verified, age_confirmed, status, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, 'incomplete', NOW(), NOW()) RETURNING id`,
-        [userId, firstName, lastName, phoneNumber, phoneVerified, ageConfirmed]
+        `INSERT INTO caregivers (user_id, first_name, last_name, age_confirmed, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, 'incomplete', NOW(), NOW()) RETURNING id`,
+        [userId, firstName, lastName, ageConfirmed]
       )
 
       return NextResponse.json({ success: true, caregiverId: newCaregiver.rows[0].id })
     } else {
       // Update existing caregiver
       const updates: string[] = []
-      const values: any[] = []
+      const values: (string | boolean | null)[] = []
       let paramIndex = 1
 
       if (firstName !== undefined) {
@@ -40,14 +40,6 @@ export async function PATCH(request: NextRequest) {
       if (lastName !== undefined) {
         updates.push(`last_name = $${paramIndex++}`)
         values.push(lastName)
-      }
-      if (phoneNumber !== undefined) {
-        updates.push(`phone = $${paramIndex++}`)
-        values.push(phoneNumber)
-      }
-      if (phoneVerified !== undefined) {
-        updates.push(`phone_verified = $${paramIndex++}`)
-        values.push(phoneVerified)
       }
       if (ageConfirmed !== undefined) {
         updates.push(`age_confirmed = $${paramIndex++}`)

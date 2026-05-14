@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
+import { sendClaimEmail } from '@/lib/email/send-claim-email'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -51,39 +52,6 @@ async function checkApprovedAgency(): Promise<{ agencyId: string; agencyName: st
     return { agencyId: result.rows[0].id, agencyName: result.rows[0].name }
   } catch {
     return null
-  }
-}
-
-async function sendClaimEmail(email: string, claimUrl: string, firstName: string, agencyName: string) {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set — email skipped')
-    return
-  }
-
-  try {
-    const { Resend } = require('resend')
-    const resend = new Resend(process.env.RESEND_API_KEY)
-
-    await resend.emails.send({
-      from: 'Careified <noreply@careified.vercel.app>',
-      to: email,
-      subject: `${agencyName} created a Careified profile for you — claim it now`,
-      html: `
-        <p>Hi ${firstName},</p>
-        <p>${agencyName} added you to Careified — the reputation platform for professional caregivers.</p>
-        <p>We've created a basic profile for you with the information we have on file. Claim it now to:</p>
-        <ul>
-          <li>Add your own details and photo</li>
-          <li>Make your credentials visible to agencies</li>
-          <li>Build your portable professional reputation</li>
-        </ul>
-        <p><a href="${claimUrl}">Claim your profile</a></p>
-        <p>This link expires in 30 days.</p>
-        <p>The Careified Team</p>
-      `,
-    })
-  } catch (err) {
-    console.error('Failed to send claim email:', err)
   }
 }
 
@@ -166,10 +134,7 @@ export async function POST(request: Request) {
     const token = tokenResult.rows[0].token
 
     // Send claim email
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const claimUrl = `${appUrl}/claim/${token}`
-
-    await sendClaimEmail(email, claimUrl, first_name, agency.agencyName)
+    await sendClaimEmail({ to: email, firstName: first_name, agencyName: agency.agencyName, token })
 
     return NextResponse.json(
       { caregiver_id: caregiverId, token, email_sent_to: email },

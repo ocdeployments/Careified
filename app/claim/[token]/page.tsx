@@ -18,6 +18,17 @@ interface ClaimInfo {
   last_name: string
   email: string
   agency_name: string
+  caregiver?: {
+    first_name: string
+    last_name: string
+    email: string
+    phone: string | null
+    city: string | null
+    province_state: string | null
+    years_experience: number | null
+    role: string | null
+    agency_name: string | null
+  }
 }
 
 export default function ClaimPage() {
@@ -153,6 +164,57 @@ export default function ClaimPage() {
         </h1>
         <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', margin: '0 0 32px' }}>
           Claim it now to start building your professional reputation.
+        </p>
+
+        {/* Pre-filled data card */}
+        {claimInfo?.caregiver && (
+          <div style={{
+            borderLeft: '3px solid #C9973A',
+            background: '#FDFBF7',
+            borderRadius: 8,
+            padding: '20px 24px',
+            margin: '24px 0',
+            fontFamily: "'DM Sans', sans-serif",
+            textAlign: 'left',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: G, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
+              Already on your profile
+            </div>
+            {claimInfo.caregiver.first_name && claimInfo.caregiver.last_name && (
+              <div style={{ fontSize: 14, color: N, marginBottom: 8 }}>
+                <span style={{ color: GREY }}>Full name: </span>
+                {claimInfo.caregiver.first_name} {claimInfo.caregiver.last_name}
+              </div>
+            )}
+            {claimInfo.caregiver.role && (
+              <div style={{ fontSize: 14, color: N, marginBottom: 8 }}>
+                <span style={{ color: GREY }}>Role: </span>
+                {claimInfo.caregiver.role}
+              </div>
+            )}
+            {(claimInfo.caregiver.city || claimInfo.caregiver.province_state) && (
+              <div style={{ fontSize: 14, color: N, marginBottom: 8 }}>
+                <span style={{ color: GREY }}>Location: </span>
+                {[claimInfo.caregiver.city, claimInfo.caregiver.province_state].filter(Boolean).join(', ')}
+              </div>
+            )}
+            {claimInfo.caregiver.years_experience && (
+              <div style={{ fontSize: 14, color: N, marginBottom: 8 }}>
+                <span style={{ color: GREY }}>Experience: </span>
+                {claimInfo.caregiver.years_experience} years
+              </div>
+            )}
+            {claimInfo.caregiver.phone && (
+              <div style={{ fontSize: 14, color: N, marginBottom: 0 }}>
+                <span style={{ color: GREY }}>Phone: </span>
+                {claimInfo.caregiver.phone}
+              </div>
+            )}
+          </div>
+        )}
+
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>
+          Claim your profile to confirm these details, add your photo and credentials, and go live in agency search.
         </p>
 
         {claimInfo && (

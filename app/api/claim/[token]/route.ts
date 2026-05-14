@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
 
@@ -13,10 +14,12 @@ export async function GET(
     // Look up token
     const tokenResult = await pool.query(
       `SELECT ct.caregiver_id, ct.agency_id, ct.expires_at, ct.status, ct.claimed_at,
-              c.first_name, c.last_name, c.email, a.name as agency_name
+              c.first_name, c.last_name, c.email, c.phone, c.city, c.province_state,
+              c.years_experience, c.claim_status, c.specializations,
+              a.name as agency_name
        FROM caregiver_claim_tokens ct
        JOIN caregivers c ON c.id = ct.caregiver_id
-       JOIN agencies a ON a.id = ct.agency_id
+       LEFT JOIN agencies a ON a.id = c.source_agency_id
        WHERE ct.token = $1`,
       [token]
     )
@@ -49,6 +52,17 @@ export async function GET(
       last_name: record.last_name,
       email: record.email,
       agency_name: record.agency_name,
+      caregiver: {
+        first_name: record.first_name,
+        last_name: record.last_name,
+        email: record.email,
+        phone: record.phone,
+        city: record.city,
+        province_state: record.province_state,
+        years_experience: record.years_experience,
+        role: record.specializations?.[0] || null,
+        agency_name: record.agency_name,
+      },
     })
   } catch (err) {
     console.error('Error in GET /api/claim/[token]:', err)
@@ -59,9 +73,18 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  // Rate limit: 5 requests per IP per hour
+  const clientIp = getClientIp(request)
+  if (!checkRateLimit(clientIp, 5)) {
+    return NextResponse.json(
+      { error: 'rate_limit_exceeded', message: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const { token } = await params
     const body = await request.json()
@@ -124,9 +147,20 @@ export async function POST(
       [token]
     )
 
+    // Audit log
+    await pool.query(
+      `INSERT INTO audit_log (action, actor_clerk_id, target_id, metadata)
+       VALUES ('profile_claimed', $1, $2, $3)`,
+      [
+        clerk_user_id,
+        record.caregiver_id,
+        JSON.stringify({ token, agency_id: record.agency_id, source: 'claim_link' })
+      ]
+    )
+
     return NextResponse.json({
       caregiver_id: record.caregiver_id,
-      redirect: '/profile/build',
+      redirect: '/profile/build?step=0&claimed=true',
     })
   } catch (err) {
     console.error('Error in POST /api/claim/[token]:', err)
