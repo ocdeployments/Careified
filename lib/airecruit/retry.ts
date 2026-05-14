@@ -28,7 +28,7 @@ export async function scheduleRetry(
 
   // Validate attempt number
   if (attemptNumber > maxAttempts) {
-    console.log('MAX RETRY ATTEMPTS REACHED:', { callType, targetId, attemptNumber })
+    console.warn('[RETRY] Max attempts reached:', { callType, targetId, attemptNumber })
     await pool.query(
       `UPDATE call_retry_queue
        SET status = 'failed', last_error = 'Max attempts reached'
@@ -69,7 +69,7 @@ export async function scheduleRetry(
     [callType, targetPhone, targetId, caregiverId, agencyId, JSON.stringify(callParams), attemptNumber, maxAttempts, scheduledFor]
   )
 
-  console.log('RETRY SCHEDULED:', { callType, targetId, attemptNumber, scheduledFor: scheduledFor.toISOString() })
+  console.warn('[RETRY] Scheduled:', { callType, targetId, attemptNumber, scheduledFor: scheduledFor.toISOString() })
 }
 
 export async function cancelRetries(caregiverId: string, callType: string): Promise<void> {

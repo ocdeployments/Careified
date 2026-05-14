@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
     if (existingPhotoUrl && (existingPhotoUrl.includes('blob.vercel-storage.com') || existingPhotoUrl.includes('public.blob.vercel-storage.com'))) {
       try {
         await del(existingPhotoUrl)
-        console.log('Deleted old photo:', existingPhotoUrl)
       } catch (delError) {
         console.warn('Failed to delete old photo:', delError)
         // Continue anyway - don't fail upload over old cleanup
