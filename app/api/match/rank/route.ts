@@ -11,12 +11,26 @@ import {
 import type { MatchNeed } from '@/lib/matching'
 import { generateGapAnalysis } from '@/lib/matching/gap-analysis'
 import { getLocale } from '@/lib/locale/get-locale'
+import crypto from 'crypto'
+
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const MAX_CACHE_SIZE = 100
+
+interface CacheEntry {
+  data: unknown
+  expires: number
+}
+
+const responseCache = new Map<string, CacheEntry>()
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
+
+  const url = new URL(req.url)
+  const refresh = url.searchParams.get('refresh') === 'true'
 
   let body: {
     need: MatchNeed
@@ -32,6 +46,22 @@ export async function POST(req: NextRequest) {
   }
 
   const { need, clientNeedsId, minScore = 0, page = 1, limit = 20 } = body
+
+  // Generate cache key from request body (exclude clientNeedsId for caching)
+  const cacheKey = crypto.createHash('md5')
+    .update(JSON.stringify({ need, minScore, page, limit }))
+    .digest('hex')
+
+  // Check cache first (skip if refresh=true)
+  if (!refresh && responseCache.has(cacheKey)) {
+    const cached = responseCache.get(cacheKey)!
+    if (cached.expires > Date.now()) {
+      return NextResponse.json(cached.data, {
+        headers: { 'X-Cache': 'HIT' }
+      })
+    }
+    responseCache.delete(cacheKey)
+  }
   const validLimit = Math.min(Math.max(1, limit), 50)
   const validPage = Math.max(1, page)
   const offset = (validPage - 1) * validLimit
@@ -108,7 +138,7 @@ export async function POST(req: NextRequest) {
   // Count excluded (gates_failed) for transparency
   const excludedCount = caregivers.length - totalMatched
 
-  return NextResponse.json({
+  const responseData = {
     scope: paginatedResults[0]?.result.scope ?? 'partial_filter_match',
     disclaimer: paginatedResults[0]?.result.disclaimer ?? ALIGNMENT_DISCLAIMER,
     total_caregivers: caregivers.length,
@@ -130,9 +160,25 @@ export async function POST(req: NextRequest) {
       alignment_score: r.result.alignment_score,
       overall_confidence: r.result.overall_confidence,
       alignment: r.result,
-      match: r.result, // deprecated alias for UI backcompat
+      match: r.result,
       gap_analysis: generateGapAnalysis(r.caregiver as any, need as any),
     })),
+  }
+
+  // Store in cache (skip if clientNeedsId was provided - those are unique per client)
+  if (!clientNeedsId) {
+    if (responseCache.size > MAX_CACHE_SIZE) {
+      const firstKey = responseCache.keys().next().value
+      if (firstKey) responseCache.delete(firstKey)
+    }
+    responseCache.set(cacheKey, {
+      data: responseData,
+      expires: Date.now() + CACHE_TTL
+    })
+  }
+
+  return NextResponse.json(responseData, {
+    headers: { 'X-Cache': 'MISS' }
   })
 }
 
