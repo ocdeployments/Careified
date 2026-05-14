@@ -81,6 +81,7 @@ ADMIN_CLERK_USER_ID ✅ | BLOB_READ_WRITE_TOKEN ✅
 NEXT_PUBLIC_LOCALE ❌ missing from Vercel
 Vapi CA phone number ❌ not provisioned
 CRON_SECRET ❌ needs to be set in Vercel dashboard
+CLERK_PROXY_URL ✅ (added this session)
 
 ## WHAT'S BUILT (summary)
 Auth, agency approval, search (20+ filters, 15 demo),
@@ -122,9 +123,10 @@ Contact info visible to approved agencies only.
 Empty states for search, shortlist, clients.
 "You're live" banner after Step 3 completion.
 Alignment score tooltip with non-recommender disclaimer.
-SESSION_CONTEXT.md: compressed session brain.
-QA audit (May 14): non-recommender language fixes,
-Resend singleton refactor (3 files → 1 shared client).
+Test suite: 40 vitest unit/component/integration tests.
+NavBar: shows Sign in/Get started while Clerk loads.
+Clerk proxy: /__clerk rewrite + proxyUrl config.
+Cron: daily process-call-queue at 9am.
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
@@ -135,7 +137,7 @@ Resend singleton refactor (3 files → 1 shared client).
 - AIRecruit CA phone number (Romy provisions in Vapi)
 
 ## SAFE REVERTS
-8708d15 (May 14 - Session C/D) | 2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
+2175f20 (Clerk proxy config) | 16c41bd (test suite) | 8708d15 (May 14 - Session C/D) | 2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
 
 ## PATTERNS TO REUSE
 Auth: sessionClaims.role === 'agency' from Clerk
