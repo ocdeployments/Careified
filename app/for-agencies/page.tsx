@@ -15,7 +15,7 @@ export default function ForAgenciesPage() {
   const benefits = [
     { title: 'Alignment-Based Search', desc: 'Filter by 20+ criteria. See alignment scores instantly. Every caregiver profile is a complete professional record.', icon: Search },
     { title: 'Agency Roster', desc: 'Add your existing caregivers to the platform. They claim their profiles. You own your bench.', icon: Users },
-    { title: 'AIRecruit', desc: 'AI calls and screens candidates automatically. Reference checks done while you sleep. Only interview-ready candidates reach your desk.', icon: Shield },
+    { title: 'AIRecruit', desc: 'AI calls candidates automatically. Reference checks done while you sleep. Only candidates who complete screening reach your desk.', icon: Shield },
     { title: 'Verified Credentials', desc: 'Every caregiver is verified — background checks, certifications, and references confirmed.', icon: CheckCircle },
     { title: 'Placement Ratings', desc: 'See performance ratings from past placements to make informed hiring decisions.', icon: Star },
     { title: 'Dedicated Support', desc: 'Our team is available to help you find the right fit for your agency.', icon: Headphones },
