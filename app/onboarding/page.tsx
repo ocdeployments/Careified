@@ -101,7 +101,7 @@ export default function OnboardingPage() {
         throw new Error('Failed to save')
       }
 
-      router.push('/profile/build?step=1')
+      router.push('/profile/build?step=0')
     } catch {
       setErrors(prev => ({ ...prev, ageConfirmed: 'Failed to save. Please try again.' }))
     } finally {
