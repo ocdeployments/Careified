@@ -69,8 +69,7 @@ Related tables: caregiver_certifications(caregiver_id),
   caregiver_claim_tokens(caregiver_id, agency_id, token),
   caregiver_attributes(caregiver_id, key, value),
   field_discovery(field_name, agency_count, status),
-  placement_reviews (not yet built),
-  agency_shortlist(pipeline_stage).
+  placement_reviews, agency_shortlist(pipeline_stage).
 No caregiver_security table.
 
 ## ENV VARS STATUS
@@ -99,18 +98,18 @@ Resend email: sendClaimEmail + sendAgencyApprovalEmail.
 Shared resume parser: lib/resume/parse-resume.ts (20 fields).
 CSV LLM column mapping: lib/resume/parse-csv.ts.
 Field discovery: lib/intelligence/field-discovery.ts.
-CLAUDE.md: SESSION_HANDOFF.md convention, context limit
-  protocol, tiered model config.
+Rating system: placement_reviews, caregiver_suitability,
+  SuitabilityCard, BadgeDisplay components.
 Contact info visible to approved agencies only.
 Empty states for search, shortlist, clients.
-"You're live" banner after Step 3.
-Alignment score tooltip with disclaimer.
+"You're live" banner after Step 3 completion.
+Alignment score tooltip with non-recommender disclaimer.
+SESSION_CONTEXT.md: compressed session brain.
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
 - Clerk production keys (needs upgrade before June 15)
 - careified.ca domain (not pointed to Vercel)
-- Rating system (RATING_SYSTEM.md spec exists)
 - Family portal Phase 1
 - Copy session (all placeholder copy)
 - AIRecruit CA phone number (Romy provisions in Vapi)
