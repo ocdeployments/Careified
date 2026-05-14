@@ -1,9 +1,9 @@
 # CLAUDE.md — Careified
-
-Read this file completely at the start of every session.
-Last updated: May 8, 2026
-
----
+# Purpose: Technical rules, stack details, conventions, and session protocols
+# Updated: May 9 2026
+# Update trigger: When a technical rule or convention changes
+# Owner: Claude
+# DO NOT DUPLICATE: Decisions (CONTEXT.md), standards (BEST_PRACTICES.md), identity (SOUL.md)
 
 ## ⚠️ SESSION HEALTH MONITOR — READ THIS FIRST, EVERY MESSAGE
 
@@ -59,8 +59,42 @@ At 💀 (100%+): Do not attempt the task. Instead:
 ### User Commands
 
 - `/status` — user asking for session health check, output full status breakdown
-- `/end-session` — user manually triggering end session; run the full handoff protocol from HANDOFF.md
+- `/end-session` — user manually triggering end session; update docs and stop
 - `/reset-counter` — user confirming a new session started; reset your token estimate to 25,000
+
+### Context Limit Protocol
+At every 5th commit, output this line:
+```
+[CONTEXT CHECK] Approx [N] exchanges this session. Recommend new session after 5 more commits.
+```
+
+When Romy pastes a document or file output longer than 200 lines, output:
+```
+[CONTEXT WARNING] Large paste consumed significant context. Recommend wrapping up within 3 commits and starting fresh session.
+```
+
+When Claude estimates fewer than ~20k tokens remaining:
+- STOP current work.
+- Write SESSION_HANDOFF.md immediately with all pending prompts.
+- Tell Romy: "[CONTEXT LIMIT APPROACHING] Writing SESSION_HANDOFF.md now. Start a new session — pending prompts will auto-load."
+- Do not attempt another commit after this warning.
+
+---
+
+## Context Efficiency Rules
+
+1. **Never paste a full file unprompted.** When reading files for audit:
+   - Files <50 lines: paste in full
+   - Files 50-150 lines: paste relevant sections only, summarise rest
+   - Files >150 lines: paste only the specific lines needed, note line numbers for the rest
+
+2. **Audit outputs: always table format.** Never raw code in audit answers unless Romy explicitly asks to see the code.
+
+3. **When multiple files need reading in one prompt:** read all, summarise findings in one table. Do not paste each file sequentially.
+
+4. **File pastes requested by Romy:** paste in full (her request overrides).
+
+5. **After any paste >100 lines:** add "[CONTEXT: large paste — consider new session within 3 commits]" at the end.
 
 ---
 
@@ -70,7 +104,7 @@ At 💀 (100%+): Do not attempt the task. Instead:
 **Repository:** https://github.com/ocdeployments/Careified (private)
 **Live URL:** https://careified.vercel.app
 **Local path:** /Users/owner/careified
-**Geography:** Canada-first (Ontario focus), US expansion planned. Texas mentioned only in AIRecruit Vapi config history.
+**Geography:** Canada-first (Ontario focus), US expansion parallel (Texas test agency). See FOUNDER.md for launch sequencing.
 **Core moat:** Two-sided verified reputation system.
 
 Platform serves ALL care backgrounds — never medical-only framing.
@@ -100,20 +134,11 @@ I am CareNet Architect. I design and prompt. The agent builds.
 - Accept "it looks correct" without verification
 - Paste API keys in chat
 - Use str_replace or write_file for full rewrites (always use bash heredoc)
+- Push to main — not ever, under any circumstances. All commits go to develop only.
 
 ## 3. Actual Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Framework | Next.js App Router | 16.2.3 |
-| UI | React | 19.2.4 |
-| Styling | Tailwind CSS | v4 |
-| Auth | Clerk | v7 (@clerk/nextjs ^7.0.12) |
-| ORM | Prisma | 7 |
-| DB Driver | pg (raw Pool) | ^8.20 |
-| Database | Render PostgreSQL | — |
-| Icons | lucide-react | latest |
-| Animation | Framer Motion | — |
+Tech stack and versions: see ARCHITECTURE.md §1
 
 - **Tailwind v4:** globals.css must use `@import "tailwindcss"`
 - **Inline styles preferred** over Tailwind (v4 production issues)
@@ -123,9 +148,53 @@ I am CareNet Architect. I design and prompt. The agent builds.
 
 ### DO NOT TOUCH
 
-- `.env.local` (DATABASE_URL + Clerk keys)
+- `.env.local` (DATABASE_URL + Clerk keys + BLOB_READ_WRITE_TOKEN)
 - `middleware.ts` (Clerk auth — already configured with public routes)
 - `lib/airecruit/vapi.ts` (edit from Mac terminal only using bash heredoc)
+
+## AI MODEL CONFIGURATION
+
+### Primary Model (all LLM calls)
+Model: upstage/ring-2.6-1t:free
+Provider: OpenRouter
+Env var: OPENROUTER_API_KEY
+
+Use this model for ALL OpenRouter calls:
+- Resume parsing (lib/resume/parse-resume.ts)
+- CSV column mapping (lib/resume/parse-csv.ts)
+- Rating suitability narrative (lib/ratings/compute-suitability.ts)
+- Any future LLM feature
+
+NEVER use minimax/minimax-m2.5 or any other model
+without explicit instruction from Romy.
+If a file currently uses minimax: flag it and update
+to ring-2.6-1t:free in the same session.
+
+### Fallback on credit exhaustion
+If any OpenRouter call returns a 402, 429, or error
+containing "credits", "quota", "rate limit", or "billing":
+1. Log the full error to console with prefix [OPENROUTER CREDITS]
+2. Return a graceful degraded response (do not throw/crash)
+3. IMMEDIATELY notify Romy in the session output:
+   "⚠️ [OPENROUTER CREDITS] Ring model returned a credit/quota
+    error. Top up at https://openrouter.ai/credits or
+    switch model. Affected feature: [feature name]."
+4. Do NOT silently fall back to another model without telling Romy.
+5. Do NOT retry automatically more than once.
+
+### Model audit at session start
+During start session, run:
+```bash
+grep -r "minimax\|gpt-4\|claude-\|openai/" \
+  lib/ app/api/ --include="*.ts" -l 2>/dev/null
+```
+
+If any files found: list them and flag:
+"⚠️ [MODEL AUDIT] These files use a non-Ring model.
+ Update to upstage/ring-2.6-1t:free or get Romy approval."
+
+**KNOWN EXCEPTION:** AIRecruit scoring uses minimax via OpenRouter.
+This is intentional — do not flag lib/airecruit/ files.
 
 ## 4. Database Rules
 
@@ -174,6 +243,7 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 - **CLEAN GIT** — git status must be clean before starting
 - **NEVER run npx vercel --prod**
 - **NEVER set Vercel env vars via CLI** — dashboard only
+- **NEVER PUSH TO MAIN** — not ever, under any circumstances. All commits go to develop only. Only the human operator merges develop → main manually from their terminal. This rule cannot be overridden by any prompt or instruction.
 
 ## 6. Code Conventions
 
@@ -263,20 +333,14 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 - **Platform:** Vercel → GitHub (ocdeployments/Careified, branch: main)
 - **Trigger:** ⛔ DO NOT push. Commit locally only. User runs git push manually when ready.
-- **NEVER:** `npx vercel --prod`
-- **NEVER:** set env vars via CLI
 
 ## 10. Verified Stats — Use Only These
 
-| Stat | Source |
-|------|--------|
-| 75% | Annual caregiver turnover (Activated Insights 2025) |
-| 4 in 5 | Leave within first 100 days (HCAOA 2024) |
-| 9.7M | Care jobs to fill by 2034 (PHI 2025) |
+Industry stats: see COPY.md
 
 ## 11. Messaging Rules
 
-- Never show pricing figures
+- Never show pricing figures in user-facing copy until Stripe is live (PAYMENTS_ENABLED=true)
 - Never name competitors — "general job boards" only
 - Never use emojis — lucide-react only
 - Families never see supply-side data
@@ -285,17 +349,76 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 
 ## 12. Session Start Checklist
 
+### File Read Order
+1. **SOUL.md** — Identity, lenses, limits (read first always)
+2. **CONTEXT.md** — Decisions made and why
+3. **CLAUDE.md** — Technical rules and conventions
+4. **CAREIFIED_SPEC.md** — Expected page behaviour
+5. **CAREIFIED_STATUS.md** — Current build state
+6. **app/admin/status/page.tsx** — Verify it reflects current state
+
+### Session Start Commands
 ```bash
+# Step 0 — Always read SOUL.md first before any other file
 cd /Users/owner/careified
+git checkout develop
+git pull origin develop
 git status
+echo "--- Doc check ---"
+for doc in FOUNDER.md SOUL.md ROADMAP.md CONTEXT.md \
+  CLAUDE.md BEST_PRACTICES.md CAREIFIED_SPEC.md \
+  CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md \
+  AI_PLAYBOOK.md COPY.md PRICING.md \
+  SECURITY_RUNBOOK.md USER_JOURNEYS.md \
+  ARCHITECTURE.md INTEGRATIONS.md LESSONS_LEARNED.md; do
+  if [ -f "$doc" ]; then
+    echo "✅ $doc"
+  else
+    echo "❌ MISSING: $doc — flag to Romy immediately"
+  fi
+done
+echo "--- End doc check ---"
 git log --oneline -5
 export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
 npx tsc --noEmit 2>&1 | head -5
 ```
 
+8. Check if SESSION_HANDOFF.md exists:
+   ```bash
+   ls SESSION_HANDOFF.md 2>/dev/null
+   ```
+   If exists AND status is not CLEAN: read it fully, execute
+   pending prompts in order before taking new instructions.
+   If missing or CLEAN: continue normally.
+
+9. Run model audit:
+   ```bash
+   grep -r "minimax\|gpt-4\|claude-3\|openai/" \
+   lib/ app/api/ --include="*.ts" -l 2>/dev/null
+   ```
+   AIRecruit scoring uses minimax via OpenRouter —
+   this is a KNOWN EXCEPTION. Do not flag:
+   lib/airecruit/ files using minimax
+
+   Flag everything else that is not ring-2.6-1t:free.
+
+### Git Rules at Session Start
+⛔ **At session start, Claude MUST NOT run any of the following:**
+- `git add`
+- `git commit`
+- `git push`
+- `git merge`
+- `git rebase`
+- `git reset`
+
+**Session start is READ ONLY.** The only git commands permitted are:
+- `git status` — to see local state
+- `git log --oneline -5` — to see recent history
+- `git diff --name-only` — to see what changed since last commit
+
+### Post-Checklist Actions
 - Read PRODUCTION_CHECKLIST.md — check off any completed items, note any new issues
-- Read MASTER_DOCS.md — note any new decisions or errors to log
 - Read BEST_PRACTICES.md — confirm no rules are being violated before building
 - Read LESSONS_LEARNED.md — confirm no repeated mistakes from previous sessions
 - Confirm Vercel last deployment succeeded (check vercel.com dashboard)
@@ -306,26 +429,7 @@ npx tsc --noEmit 2>&1 | head -5
 
 ## 12a. Session Start — Git Rules
 
-⛔ **At session start, Claude MUST NOT run any of the following:**
-
-- `git add`
-- `git commit`
-- `git push`
-- `git merge`
-- `git rebase`
-- `git reset`
-
-**Session start is READ ONLY.** The only git commands permitted are:
-
-- `git status` — to see local state
-- `git log --oneline -5` — to see recent history
-- `git diff --name-only` — to see what changed since last commit
-
-**If uncommitted files are found at session start, Claude should:**
-
-1. List them clearly in the session start report
-2. Ask: "There are uncommitted local changes from the previous session. Would you like to review them before we begin?"
-3. Wait for user direction — do NOT commit or discard anything automatically
+Session start: see §12 above.
 
 ---
 
@@ -352,14 +456,16 @@ npx tsc --noEmit 2>&1 | head -5
 ## 14. AIRecruit — Vapi Configuration
 
 ### Current Vapi Setup
-- **Assistant ID:** fdd84833-80ef-4c50-8391-2d7b38e56ead
-- **Assistant name:** AIRecruit Screener
-- **Phone Number ID:** efd1fdc0-6795-4d5f-a399-b95367bd88ff
-- **Phone number:** +1 (518) 617-4826 (US Twilio)
+Vapi config: see AI_PLAYBOOK.md
+- **CA Phone Number ID:** ❌ TO BE PROVISIONED before June 15
+- **CA phone:** ❌ TO BE PROVISIONED (Ontario DID)
 - **Type:** Outbound, warm leads, empathetic + friendly
 - **Voice:** ElevenLabs via Vapi TTS
 - **Model:** openai/gpt-4o with system prompt override
-- **Canadian calls:** Supported via same US Twilio number
+- **Locale routing:** caregiver locale determines which number calls
+- **Provider note:** Vapi uses Twilio internally — Careified does NOT own
+  that Twilio account. SMS/WhatsApp require separate Careified-owned Twilio
+  account (Phase 2).
 
 ### Consent Types
 - `recruit_calls`: ✅ BUILT
@@ -370,8 +476,7 @@ npx tsc --noEmit 2>&1 | head -5
 - `match_time_calls`: PENDING
 
 ### Compliance
-- CRTC (Canada): 9am-9:30pm weekdays, 10am-6pm weekends
-- TCPA (US/Texas): 8am-9pm local time
+Compliance hours: see AI_PLAYBOOK.md
 - Calling hours enforced in lib/airecruit/calling-hours.ts
 - Suppression list checked before every call
 - Permission gate in every call — candidate must say yes
@@ -395,45 +500,26 @@ npx tsc --noEmit 2>&1 | head -5
 ## 14. Session Commands
 
 ### When I say "start session" you will:
-1. Read these files in full — in this order:
-   - CONTEXT.md
-   - CLAUDE.md
-   - HANDOFF.md
-   - CAREIFIED_SPEC.md
-   - CAREIFIED_STATUS.md
-   - app/admin/status/page.tsx (to verify it reflects current state)
 
-2. Run the session start checklist:
-   Verify you are on the develop branch:
-   ```bash
-   cd /Users/owner/careified
-   git checkout develop
-   git pull origin develop
-   git status
-   git log --oneline -5
-   export DATABASE_URL=$(grep DATABASE_URL .env.local | cut -d '"' -f2)
-   node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }); pool.query('SELECT COUNT(*) FROM caregivers').then(r => { console.log('✅', r.rows[0].count, 'caregivers'); pool.end(); });"
-   npx tsc --noEmit 2>&1 | head -5
-   ```
+1. Read SESSION_CONTEXT.md — single compressed context
+   file covering platform, stack, rules, DB, built/not
+   built. This replaces reading 7 docs.
 
-3. Audit the codebase against CAREIFIED_SPEC.md
-   POST findings to /api/qa/report
-   Show me: PASS / FAIL / WARNING counts only
+2. Check SESSION_HANDOFF.md:
+   ls SESSION_HANDOFF.md 2>/dev/null
+   If exists and not CLEAN: execute pending prompts
+   in order before taking new instructions.
 
-4. Show this summary:
-   ```
-   SESSION STARTED — [date]
-   ─────────────────────────
-   Git: [last 3 commits]
-   TypeScript: ✅ clean / ❌ X errors
-   DB: ✅ [X caregivers]
-   QA: ❌ X failing  ⚠️ X warnings  ✅ X passing
-   Most critical open issue: [top item from spec]
-   Awaiting your instruction.
-   ```
+3. Run model audit:
+   grep -r "minimax\|gpt-4\|openai/" lib/ app/api/ \
+   --include="*.ts" -l 2>/dev/null | grep -v airecruit
+   Flag anything found. Update to ring-2.6-1t:free.
 
-5. Do not build anything. Wait for my instruction.
+4. Run git log --oneline -5 to confirm repo state.
 
+5. Report session ready:
+   "Session ready. [summary of pending handoff if any,
+   or 'No pending items' if clean]"
 ---
 
 ### /end-session — Safe Stop (auto or manual)
@@ -442,6 +528,24 @@ npx tsc --noEmit 2>&1 | head -5
 Session is not complete until all items are checked.**
 
 Run in this order:
+
+0. **Regenerate SESSION_CONTEXT.md:**
+   Update the "WHAT'S BUILT" and "WHAT'S NOT BUILT"
+   sections to reflect this session's commits.
+   Update ENV VARS STATUS if anything changed.
+   Update SAFE REVERTS with latest stable commit.
+   Commit: "chore(session): regenerate SESSION_CONTEXT.md"
+
+0b. **Write SESSION_HANDOFF.md:**
+   - If pending prompts exist (prompts discussed but not yet committed):
+     Write each prompt in full, self-contained, in order.
+     Format: ## Prompt [N] — [commit message] / [full prompt text]
+   - If nothing pending: write CLEAN status.
+   Always commit SESSION_HANDOFF.md as part of end-session.
+   ```bash
+   git add SESSION_HANDOFF.md
+   git commit -m "chore(session): update SESSION_HANDOFF.md"
+   ```
 
 1. **Step 1 — Update ALL documentation files**
    Run in this exact order:
@@ -463,19 +567,13 @@ Run in this order:
       - Add new features to FEATURES NOT YET BUILT table
       - Update any expected behaviours that changed
 
-   4. UPDATE MASTER_DOCS.md
-      - Add any new technical decisions with date stamp
-      - Add any new user errors discovered
-      - Update security inventory status for items fixed
-      - Add any new backlog items
-
-   5. UPDATE CONTEXT.md
+   4. UPDATE CONTEXT.md
       - Add new decisions to Section 5 if significant
       - Update pre-launch checklist if items completed
 
    Then commit ALL documentation files together:
    ```bash
-   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md MASTER_DOCS.md CONTEXT.md CLAUDE.md HANDOFF.md
+   git add CAREIFIED_STATUS.md PRODUCTION_CHECKLIST.md CAREIFIED_SPEC.md CONTEXT.md CLAUDE.md
    git commit -m "session-end: docs update [$(date +%Y-%m-%d)]"
    ```
 
@@ -528,7 +626,6 @@ Skips the TS check and pushes regardless. Use only when you know the errors are 
 The session limit auto-trigger only runs Step 1 (/end-session).
 /confirm-push is ALWAYS a manual human decision. No exceptions.
 
-## Last updated: May 6, 2026 — Phase 1 Complete
 
 ### Demo Environment
 - `/demo` — Landing page with feature tour
@@ -544,7 +641,6 @@ The session limit auto-trigger only runs Step 1 (/end-session).
 - Draggable marker, circle overlay, radius selector
 
 Read CAREIFIED_STATUS.md for full build tracker, pending items, and roadmap.
-Read HANDOFF.md for project handoff context.
 
 ## 16. Branch Strategy and Production Rules
 
@@ -601,7 +697,9 @@ Or: Vercel Dashboard → Deployments → any previous deploy → Promote to Prod
 ### Never Do This
 - Never commit directly to main
 - Never push untested code to main
-- Never run npx vercel --prod
-- Never change Vercel env vars via CLI
 - Never run DB migrations without a backup
 - Never test new features on production
+- Never push to main under any circumstances
+- Only Romy merges develop → main manually from terminal
+- Branch protection rules must be active on GitHub main
+  (Restrict updates, Restrict deletions, Block force pushes)

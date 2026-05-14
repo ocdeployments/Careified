@@ -51,6 +51,11 @@ const inputStyle = {
   background: 'white',
 }
 
+const inputErrorStyle = {
+  ...inputStyle,
+  border: '1px solid #DC2626',
+}
+
 const labelStyle = {
   display: 'block' as const, fontSize: 13, fontWeight: 500,
   color: N, marginBottom: 6,
@@ -117,11 +122,15 @@ function Chip({ label, active, onClick, color = G }: { label: string; active: bo
   )
 }
 
-function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+function Field({ label, required, error, children, fieldKey }: { label: string; required?: boolean; error?: string; children: React.ReactNode; fieldKey?: string }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={labelStyle}>{label}{required && <span style={{ color: '#EF4444', marginLeft: 3 }}>*</span>}</label>
-      {children}
+      {fieldKey && error ? (
+        <div data-error="true">{children}</div>
+      ) : (
+        <>{children}</>
+      )}
       {error && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{error}</p>}
     </div>
   )
@@ -151,6 +160,13 @@ export function AgencySignupForm() {
       if (!form.contactEmail.trim()) e.contactEmail = 'Required'
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) e.contactEmail = 'Invalid email'
       if (!form.contactPhone.trim()) e.contactPhone = 'Required'
+      else {
+        // Phone validation - strip non-numeric and check 10 digits
+        const phoneDigits = form.contactPhone.replace(/\D/g, '')
+        if (phoneDigits.length !== 10) {
+          e.contactPhone = 'Please enter a valid 10-digit phone number'
+        }
+      }
       if (!form.streetAddress.trim()) e.streetAddress = 'Required'
       if (!form.city.trim()) e.city = 'Required'
       if (!form.province) e.province = 'Required'
@@ -163,6 +179,18 @@ export function AgencySignupForm() {
       if (!form.acceptedEmployer) e.acceptedEmployer = 'Required'
     }
     setErrors(e)
+
+    // Scroll to first error
+    if (Object.keys(e).length > 0) {
+      const firstErrorKey = Object.keys(e)[0]
+      setTimeout(() => {
+        const el = document.querySelector(`[data-error="true"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
+    }
+
     return Object.keys(e).length === 0
   }
 
@@ -273,14 +301,14 @@ export function AgencySignupForm() {
           {step === 1 && (
             <div>
               <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 24px' }}>Tell us about your agency</h2>
-              <Field label="Legal agency name" required error={errors.agencyName}>
-                <input style={inputStyle} value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="ABC Home Care Inc." />
+              <Field label="Legal agency name" required error={errors.agencyName} fieldKey="agencyName">
+                <input style={errors.agencyName ? inputErrorStyle : inputStyle} value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="ABC Home Care Inc." />
               </Field>
               <Field label="Display name (shown to caregivers)" error={errors.displayName}>
                 <input style={inputStyle} value={form.displayName} onChange={e => set('displayName', e.target.value)} placeholder="Same as legal name if blank" />
               </Field>
-              <Field label="Agency type" required error={errors.businessType}>
-                <select style={inputStyle} value={form.businessType} onChange={e => set('businessType', e.target.value)}>
+              <Field label="Agency type" required error={errors.businessType} fieldKey="businessType">
+                <select style={errors.businessType ? inputErrorStyle : inputStyle} value={form.businessType} onChange={e => set('businessType', e.target.value)}>
                   <option value="">Select...</option>
                   {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -306,34 +334,34 @@ export function AgencySignupForm() {
             <div>
               <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: N, margin: '0 0 24px' }}>Operations & contact</h2>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <Field label="First name" required error={errors.contactFirstName}>
-                  <input style={inputStyle} value={form.contactFirstName} onChange={e => set('contactFirstName', e.target.value)} />
+                <Field label="First name" required error={errors.contactFirstName} fieldKey="contactFirstName">
+                  <input style={errors.contactFirstName ? inputErrorStyle : inputStyle} value={form.contactFirstName} onChange={e => set('contactFirstName', e.target.value)} />
                 </Field>
-                <Field label="Last name" required error={errors.contactLastName}>
-                  <input style={inputStyle} value={form.contactLastName} onChange={e => set('contactLastName', e.target.value)} />
+                <Field label="Last name" required error={errors.contactLastName} fieldKey="contactLastName">
+                  <input style={errors.contactLastName ? inputErrorStyle : inputStyle} value={form.contactLastName} onChange={e => set('contactLastName', e.target.value)} />
                 </Field>
               </div>
-              <Field label="Contact email" required error={errors.contactEmail}>
-                <input style={inputStyle} type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} />
+              <Field label="Contact email" required error={errors.contactEmail} fieldKey="contactEmail">
+                <input style={errors.contactEmail ? inputErrorStyle : inputStyle} type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} />
               </Field>
-              <Field label="Contact phone" required error={errors.contactPhone}>
-                <input style={inputStyle} type="tel" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} placeholder="(416) 555-0100" />
+              <Field label="Contact phone" required error={errors.contactPhone} fieldKey="contactPhone">
+                <input style={errors.contactPhone ? inputErrorStyle : inputStyle} type="tel" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} placeholder="(416) 555-0100" />
               </Field>
-              <Field label="Street address" required error={errors.streetAddress}>
-                <input style={inputStyle} value={form.streetAddress} onChange={e => set('streetAddress', e.target.value)} />
+              <Field label="Street address" required error={errors.streetAddress} fieldKey="streetAddress">
+                <input style={errors.streetAddress ? inputErrorStyle : inputStyle} value={form.streetAddress} onChange={e => set('streetAddress', e.target.value)} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
-                <Field label="City" required error={errors.city}>
-                  <input style={inputStyle} value={form.city} onChange={e => set('city', e.target.value)} />
+                <Field label="City" required error={errors.city} fieldKey="city">
+                  <input style={errors.city ? inputErrorStyle : inputStyle} value={form.city} onChange={e => set('city', e.target.value)} />
                 </Field>
-                <Field label="Province" required error={errors.province}>
-                  <select style={inputStyle} value={form.province} onChange={e => set('province', e.target.value)}>
+                <Field label="Province" required error={errors.province} fieldKey="province">
+                  <select style={errors.province ? inputErrorStyle : inputStyle} value={form.province} onChange={e => set('province', e.target.value)}>
                     <option value="">Select...</option>
                     {CA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </Field>
-                <Field label="Postal code" required error={errors.postalCode}>
-                  <input style={inputStyle} value={form.postalCode} onChange={e => set('postalCode', e.target.value)} placeholder="M5V 2T6" />
+                <Field label="Postal code" required error={errors.postalCode} fieldKey="postalCode">
+                  <input style={errors.postalCode ? inputErrorStyle : inputStyle} value={form.postalCode} onChange={e => set('postalCode', e.target.value)} placeholder="M5V 2T6" />
                 </Field>
               </div>
               <Field label="Service areas — cities you place caregivers in" required error={errors.serviceAreas}>

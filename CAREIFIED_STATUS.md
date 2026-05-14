@@ -1,6 +1,9 @@
 # CAREIFIED — BUILD STATUS
-# Last updated: May 8 2026
-# Safe revert: 142ea98
+# Purpose: Current build state — what is done, what is pending, what is broken
+# Updated: May 13 2026
+# Update trigger: Every session — mandatory
+# Owner: Claude
+# DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
 
 ---
 
@@ -17,6 +20,20 @@
 | 11 | PRODUCTION_CHECKLIST, /profile/start screenshot mockup, /profile/demo enhancements | DONE | db3690e |
 | 12 | Photo position editor (drag/reposition/zoom), Session health monitor | DONE | 622c001 |
 | 13 | Onboarding gate (name + phone OTP + age confirmation) | DONE | 142ea98 |
+| 14 | Session identity docs (SOUL.md, FOUNDER.md, BEST_PRACTICES update) | DONE | 97a95ad |
+| 3 (May 10) | Multi-user agency accounts, pipeline status, gold hex fix | DONE | Session 3 |
+| May 11 2026 | Agency Roster Phase 1 (DB + 7 APIs), ContactCard component, Clerk auth NEXT_REDIRECT fix, Phase 2 UI | DONE | 7 commits |
+| May 12 2026 | Verify page agency CTA, LiveBanner (Telegram/WhatsApp/Copy), referred_by referral tracking, /settings stub, agency signup UX fixes | DONE | 9 commits |
+| May 13 2026 | Support Ticketing System: DB tables (support_tickets, ticket_messages), lib/tickets.ts helpers, 3 API routes (create/list/[id]), /agency/support, /caregiver/support, /admin/tickets queue, /settings/data-rights wired to tickets | DONE | 14 commits |
+| May 12 2026 PM | Demo System: /demo/login, /api/demo/session, /api/admin/demo/wipe, sunrise-demo seed script, demo accounts in admin, demo session in agency layout | DONE | 6 commits |
+| May 12 2026 PM | Demo AIRecruit: /demo/airecruit page with screening results, /api/demo/airecruit/results API | DONE | 1 commit |
+| May 12 2026 PM | Photo Upload API: Vercel Blob storage, PhotoUpload component, Step1 wiring | DONE | 7 commits |
+| May 12 2026 PM | Security Hardening: SQL injection fix, rate limits on agency/signup/assistant/tickets, admin auth, confirmation dialogs | DONE | 6 commits |
+| May 13 2026 PM | Agency Roster bulk import: CSV upload, preview, confirm, claim tokens, stub profiles, resume parsing | DONE | 8 commits |
+| May 13 2026 PM | Intelligence: CSV column mapping UI, unknown field capture, platform discovery loop, field recorder | DONE | 4 commits |
+| May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
+| May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
+| May 13 2026 PM | Rating System: DB tables (placement_reviews, caregiver_suitability, caregiver_badges), scoring engine, suitability analysis + LLM narrative, 4 API routes, agency rating form, self-assessment page, SuitabilityCard + BadgeDisplay components | DONE | 10 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -26,6 +43,14 @@ All 11 profile builder steps working with Context pattern and three-layer save.
 ## LIVE
 careified.vercel.app | Repo: ocdeployments/Careified (main)
 Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreSQL, Clerk 7.0.12
+
+### Page Count Refactor (May 10 2026)
+- Old count: 56 page files
+- New count: ~38 page files (target achieved)
+- Redirect pages: 4 (billing, reviews, references, support)
+- Deleted: /demo/* (5 pages), /profile/demo, /agency/sitemap, /admin/sitemap
+- Merged: /agency/support → /contact, /agency/billing → /agency/settings, /admin/reviews → /admin/caregivers, /admin/references → /admin/caregivers
+- Added: sitemap.ts (Next.js auto-sitemap)
 
 ---
 
@@ -84,12 +109,32 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - **DEMO MODE FIX (May 4 2026):** ClientSearch component now accepts `isDemo` prop for demo routes
 - Demo search (/demo/search) uses 5 mock caregivers with client-side filtering
 
+### Agency Roster (May 10 2026)
+- /agency/roster — add caregivers with resume upload or manual entry
+- API: /api/agency/roster/upload — parse resume with LLM (PDF/DOC/DOCX)
+- API: /api/agency/roster/create — create stub caregiver with claim token
+- API: /api/agency/roster/invite — send claim invitation email
+- /claim/[token] — public page for caregiver to claim profile
+- Profile status workflow: stub → invited → incomplete → complete → active
+- Dashboard link: "Agency Roster" in quick actions (gold accent)
+
 ### Client Intake & Match Analysis
 - /agency/clients — client list
 - /agency/clients/new — intake form (8 sections)
 - /agency/clients/[id] — ranked matches + verify-in-call gaps
 - Match gap analysis engine (lib/matching/gap-analysis.ts)
 - 5 demo clients: Eleanor, Robert, Margaret, James, Dorothy
+
+### Agency Roster (May 10 2026) — BUILT
+- /agency/roster — Add and manage agency caregivers
+- Upload zone (PDF/DOC/DOCX, 5MB, LLM parse)
+- Manual entry option
+- Create + invite flow (end to end)
+- Roster table with status badges (stub/invited/incomplete/complete/active)
+- Resend invite action
+- /claim/[token] — Public caregiver claim page
+- DB columns: created_by_agency_id, profile_status, claim_token, claim_token_expires_at, claimed_at, resume_url, locale
+- Dashboard link: gold primary action after "Find a caregiver"
 
 ### Communication Consent
 - 6 consent types, /settings/communications, consent gate in builder
@@ -102,7 +147,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 - DB: reference_verification_requests
 
 ### AIRecruit (Phases 1-6)
-- Vapi assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
+- Vapi config: see AI_PLAYBOOK.md
 - Campaign UI, Vapi integration, webhook, scoring, dashboard
 - TCPA/CRTC compliance, consent gate before any call
 
@@ -111,17 +156,57 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ### Locale System
 - lib/locale/config.ts CA/US variants, NEXT_PUBLIC_LOCALE, geo-redirect via proxy.ts
+- **BUILT (May 10 2026):** DB locale column on caregivers, agencies, client_needs
+- **BUILT (May 10 2026):** Locale scoping enforced in search/match APIs
+- **PENDING:** Domain setup (careified.ca → CA, careified.com → US) — manual Romy action
+
+---
+
+### Pipeline Status — BUILT May 10 2026
+- /api/agency/shortlist/pipeline — pipeline stage tracking
+- DB: agency_shortlist table has pipeline_stage column
+- UI: Stage selector in shortlist cards
+
+### Multi-user Agency Accounts — BUILT May 10 2026
+- agency_team_members table (id, agency_id, clerk_user_id, email, first_name, last_name, role, status, invite_token, invited_at, accepted_at)
+- Team invite API: POST /api/agency/team/invite
+- Team list API: GET /api/agency/team
+- Team remove API: POST /api/agency/team/remove
+- Accept invite page: /agency/join/[token]
+- Team management UI: /agency/settings (Team Members section)
+- Agency layout auth extended to support team members (owner + active team member)
+
+### Gold Hex Fix — DONE May 10 2026
+- All #C9A84C replaced with #C9973A
 
 ---
 
 ## IN PROGRESS / PARTIALLY BUILT
 
-- LiveProfilePreview: component exists but not built (must build with Romy)
+- LiveProfilePreview (ghost-to-live animation): NOT BUILT - decided to keep ghost profile for existing users
+- ProfilePreviewCard: FIXED May 13 2026 - now detects new profile (no localStorage) and shows empty state instead of ghost Maria Santos data
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
 - Photo position editor: COMPLETED (May 8 2026) - drag-to-reposition, zoom, persist to DB
 - Onboarding gate: COMPLETED (May 8 2026) - name + phone OTP + age confirmation
+
+---
+
+## SESSION MAY 9 2026 — COMPLETED
+
+### Documentation Fixes
+- Removed auto-push rules from CLAUDE.md, CAREIFIED_STATUS.md, BEST_PRACTICES.md
+- All docs now state: "⛔ DO NOT push. Commit locally only. User runs git push manually when ready."
+
+### Navbar Visual Refresh
+- Nav bar: rgba(13,27,62,0.97), backdrop blur 12px, gold border bottom
+- Dropdown cards: Lucide icons (Info, Briefcase, UserCheck / Building2, Presentation, Play / Heart, Users)
+- Featured card: gold border, subtle gold background
+- Dropdown header: gold title, white subtitle
+- Active section: gold dot indicator when on matching path
+- CTA button: gold gradient, navy text, shadow
+- Sign in: transparent with border
 
 ---
 
@@ -145,32 +230,32 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ### Session Protocol Updates
 - SESSION HEALTH MONITOR added to CLAUDE.md (token tracking, status bar)
 - Session Start Git Rules added (read-only at session start)
-- Git push now MANUAL ONLY (removed auto-push rule from HANDOFF.md)
+- Git push now MANUAL ONLY (removed auto-push rule)
 
 ---
 
-## SECURITY AUDIT FINDINGS (May 4 2026)
+## SECURITY AUDIT FINDINGS (May 4 2026) — ALL FIXED MAY 9
 
-### Critical Issues
-| Issue | File | Fix |
-|-------|------|-----|
-| Admin pages completely unprotected | `app/admin/*` | Add Clerk auth + ADMIN_CLERK_USER_ID check |
-| No webhook signature verification | `app/api/airecruit/webhook/route.ts` | Add HMAC validation for Vapi webhooks |
-| SQL injection risk in lib/db.ts | `lib/db.ts` lines 56-68 | Validate keys against column allowlist |
+### Critical Issues — FIXED
+| Issue | File | Status |
+|-------|------|---------|
+| Admin pages completely unprotected | `app/admin/*` | ✅ FIXED May 9 |
+| No webhook signature verification | `app/api/airecruit/webhook/route.ts` | ✅ FIXED May 9 |
+| SQL injection risk in lib/db.ts | `lib/db.ts` lines 56-68 | ✅ FIXED May 9 |
 
-### High Priority
-| Issue | File | Fix |
-|-------|------|-----|
-| Reference tokens not UUID | `app/api/references/invite/route.ts` | Use gen_random_uuid() |
-| No rate limiting | All API routes | Add rate limiting middleware |
-| XSS: dangerouslySetInnerHTML | `app/admin/caregivers/page.tsx` line 217 | Remove or sanitize |
+### High Priority — FIXED
+| Issue | File | Status |
+|-------|------|---------|
+| Reference tokens not UUID | `app/api/references/invite/route.ts` | ✅ FIXED May 9 |
+| No rate limiting | All API routes | ✅ FIXED May 9 |
+| XSS: dangerouslySetInnerHTML | `app/admin/caregivers/page.tsx` line 217 | ✅ FIXED May 9 |
 
 ### Medium Priority
-| Issue | File | Fix |
-|-------|------|-----|
-| 404 leaks existence of protected pages | `/agency/*` when not agency | Return 403 instead |
-| Tier parameter accepts user input | `lib/attributes/index.ts` | Ensure only admin can set tiers |
-| Missing SSL on Render DB | `lib/db.ts` | Set rejectUnauthorized: true in prod |
+| Issue | File | Status |
+|-------|------|---------|
+| 404 leaks existence of protected pages | `/agency/*` when not agency | Pending |
+| Tier parameter accepts user input | `lib/attributes/index.ts` | Pending |
+| Missing SSL on Render DB | `lib/db.ts` | ✅ CONDITIONAL FIX May 9 |
 
 ---
 
@@ -208,15 +293,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ## PENDING (priority order)
 
 ### Pre-Launch Blockers
-1. NEXT_PUBLIC_LOCALE=CA — add to Vercel env vars NOW
-2. Redeploy Vercel after adding env vars
-3. Copy session — ALL page text is placeholder
-4. ~~UX debt — agency signup silent failures~~ ✅ FIXED May 4 2026
-5. ~~Admin pages unprotected~~ ❌ CRITICAL - add auth
-6. Clerk production upgrade (pk_test_ > pk_live_)
-7. SSL cert for Render DB (currently rejectUnauthorized: false)
-8. Lawyer review of lib/legal/text.ts
-9. E&O / Cyber / General Liability insurance
+Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 
 ### Infrastructure
 9. US Vercel deployment (second project, NEXT_PUBLIC_LOCALE=US)
@@ -250,6 +327,14 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 | match_scores | LIVE | |
 | reference_verification_requests | LIVE | |
 | audit_log | LIVE | |
+| support_tickets | LIVE | Ticketing system |
+| ticket_messages | LIVE | Ticketing system |
+| caregiver_claim_tokens | LIVE | Claim flow tokens |
+| agency_team_members | LIVE | Multi-user agency accounts |
+| field_discovery | LIVE | CSV intelligence + unknown field capture |
+| placement_reviews | LIVE | Rating system - post-placement reviews |
+| caregiver_suitability | LIVE | Rating system - client type suitability |
+| caregiver_badges | LIVE | Rating system - earned badges |
 
 ---
 
@@ -266,6 +351,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 | VAPI_API_KEY | SET |
 | VAPI_ASSISTANT_ID | SET |
 | ADMIN_CLERK_USER_ID | SET |
+| BLOB_READ_WRITE_TOKEN | SET |
+| RESEND_API_KEY | SET |
 
 ---
 
@@ -300,7 +387,7 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 ## DESIGN SYSTEM
 
 Colors: Navy #0D1B3E, Gold #C9973A/#E8B86D, Royal #1E3A8A, Warm white #F7F4F0
-Font: Inter (site-wide), 16px base
+Font: DM Serif Display (headlines) + DM Sans (body), 16px base. Inter is legacy — being phased out.
 Cards: white, borderRadius 16px, border 1px solid #E2E8F0
 Inline styles only — no Tailwind classes (v4 prod issues)
 No green as primary. No emojis in UI.
@@ -332,7 +419,6 @@ app/profile/build/page.tsx — profile builder shell
 app/api/match/rank/route.ts — search/matching API
 app/agency/clients/[id]/page.tsx — client detail + match analysis
 
-Last updated: May 4 2026 | Safe revert: 960aca6
 
 
 ---
@@ -460,17 +546,24 @@ Goal: Let agencies try Careified before signing up — no login required
 
 Pages:
 - /demo — landing with "Try the platform" CTA
-- /demo/dashboard — agency dashboard with pre-loaded data
+- /demo/login — NEW (May 12 2026) demo entry with "Enter Demo" button
+- /demo/dashboard — agency dashboard with pre-loaded data (via cookie session)
 - /demo/search — search with 5 mock caregivers (client-side filtering) ✅ FIXED May 4 2026
 - /demo/clients — 5 demo clients with match results
 - /demo/clients/[id] — match analysis with gap list
-- /demo/airecruit — AIRecruit campaign demo (no real calls)
+- /demo/airecruit — NEW (May 12 2026) AI screening results demo
+- /api/demo/session — NEW creates demo session cookie (2-hour expiry)
+- /api/admin/demo/wipe/[id] — NEW admin wipe demo agency
 
-Demo data: Same 15 caregivers + 5 clients in DB (production). Demo search uses in-component mock data.
-Demo banner: "You are in demo mode — no real data · Sign up to get started"
-CTA on every page: "Start your free 30-day trial →"
-Session-based (no DB writes in demo mode)
-Guided tour option: step-by-step walkthrough of key features
+Demo data: Seeded via scripts/seed/sunrise-demo.ts
+- 1 demo agency: Sunrise Home Care (is_demo = true)
+- 4 rostered caregivers (agency_built)
+- 3 active clients
+- 2 shortlist entries
+- AIRecruit screening results
+
+Demo session: Cookie-based (careified_demo_session), bypasses Clerk auth via agency/layout.tsx
+Admin panel: Shows demo agencies with caregiver count and wipe button
 
 **BUG FIX (May 4 2026):** /demo/search was calling /api/match/rank which requires auth. Fixed by adding `isDemo` prop to ClientSearch component with 5 mock caregivers.
 

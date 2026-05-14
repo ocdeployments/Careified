@@ -2,16 +2,18 @@
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Bookmark, Users, Briefcase, Settings, ChevronRight, Menu, X, Phone, Clock, Home } from 'lucide-react'
+import { Search, Bookmark, Users, Briefcase, Settings, ChevronRight, Menu, X, Phone, Clock, Home, Sparkles } from 'lucide-react'
 
 const NAV = [
   { href: '/',               label: 'Dashboard',      icon: Home     },
   { href: '/agency/search',  label: 'Search',        icon: Search   },
+  { href: '/agency/assistant', label: 'AI Assistant', icon: Sparkles},
   { href: '/agency/clients', label: 'Clients',       icon: Briefcase},
   { href: '/agency/shortlist', label: 'Shortlist',  icon: Bookmark },
   { href: '/agency/airecruit', label: 'AIRecruit',   icon: Phone    },
   { href: '/agency/pending-approval', label: 'Pending', icon: Clock },
   { href: '/opportunities',  label: 'Opportunities', icon: Users    },
+  { href: '/agency/support', label: 'Support',       icon: Phone    },
   { href: '/settings/data-rights', label: 'Settings', icon: Settings},
 ]
 

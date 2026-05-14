@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const SERIF = "'DM Serif Display', Georgia, serif"
 const SANS = "'DM Sans', system-ui, -apple-system, sans-serif"
@@ -17,9 +18,18 @@ const C = {
   fg: '#4A5568',
 }
 
-export default function ForCaregiversPage() {
+function CaregiversContent() {
   const [isDesktop, setIsDesktop] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+  const searchParams = useSearchParams()
+
+  // Capture referral param and store in localStorage
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) {
+      localStorage.setItem('careified_referral', ref)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 768)
@@ -61,8 +71,8 @@ export default function ForCaregiversPage() {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
           <div style={{
             display: 'inline-block',
-            border: '1px solid #C9A84C',
-            color: '#C9A84C',
+            border: '1px solid #C9973A',
+            color: '#C9973A',
             borderRadius: '9999px',
             padding: '6px 16px',
             fontSize: '11px',
@@ -98,7 +108,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/sign-up?role=caregiver&redirect_url=/profile/start"
+            href="/sign-up?role=caregiver&redirect_url=/profile/build"
             style={{
               display: 'inline-block',
               marginTop: '32px',
@@ -473,7 +483,7 @@ export default function ForCaregiversPage() {
           </p>
 
           <Link
-            href="/sign-up?role=caregiver&redirect_url=/profile/start"
+            href="/sign-up?role=caregiver&redirect_url=/profile/build"
             style={{
               display: 'inline-block',
               padding: '16px 40px',
@@ -500,5 +510,13 @@ export default function ForCaregiversPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+export default function ForCaregiversPage() {
+  return (
+    <Suspense fallback={null}>
+      <CaregiversContent />
+    </Suspense>
   )
 }

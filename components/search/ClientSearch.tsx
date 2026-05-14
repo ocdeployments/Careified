@@ -410,6 +410,7 @@ export function ClientSearch({ initialFilters, isDemo = false }: ClientSearchPro
                 page={filters.page}
                 totalPages={searchResponse?.totalPages || 1}
                 onPageChange={handlePageChange}
+                onClearFilters={() => setFilters({ ...initialFilters, page: 1 })}
               />
             )}
           </div>

@@ -71,7 +71,7 @@ export default function PendingApprovalPage() {
             See exactly what you'll have access to once approved.
           </p>
           <Link
-            href="/demo"
+            href="/agency/signup"
             className="inline-block px-4 py-2 rounded-lg border border-[#C9973A] text-[#C9973A] text-sm font-semibold bg-transparent hover:bg-[#C9973A] hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
           >
             Launch Preview

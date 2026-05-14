@@ -1,9 +1,9 @@
 # CONTEXT.md — Careified
-# The "why" behind every decision
-# Read this before CLAUDE.md, SPEC.md, and HANDOFF.md
-# Last updated: May 5 2026
-
----
+# Purpose: Every product and technical decision with the reasoning behind it
+# Updated: May 9 2026
+# Update trigger: Every session a decision is made
+# Owner: Both
+# DO NOT DUPLICATE: Rules (CLAUDE.md), status (CAREIFIED_STATUS.md), vision (FOUNDER.md)
 
 ## 1. What Careified Is
 
@@ -33,8 +33,7 @@ Launch currency: CAD first, USD second.
   leaves within 100 days → repeat
 - What they want: interview-ready professionals, faster placement,
   retention signals before hire, compliance confidence
-- Key stat: 75% annual caregiver turnover (Activated Insights 2025)
-- Key stat: 4 in 5 caregivers leave within first 100 days (HCAOA 2024)
+- Key stats: see COPY.md
 
 ### Supply Side — Professional Caregivers (Always Free)
 - PSWs (Personal Support Workers), HCAs, DSWs, companions, live-in
@@ -137,7 +136,7 @@ keys at launch.
 ### Why Vapi for AIRecruit
 Best-in-class voice AI with programmable agents, TCPA/CRTC
 compliance hooks, webhook support, and transcript access.
-Assistant ID: fdd84833-80ef-4c50-8391-2d7b38e56ead
+Assistant ID: see AI_PLAYBOOK.md
 
 ### Why OpenRouter/Mistral for resume parsing
 Cost-effective, fast, good at structured extraction from unstructured
@@ -187,6 +186,30 @@ Separate sign-in and sign-up pages created confusion and split the
 Clerk configuration. Single /sign-up entry point with Clerk handling
 new vs existing users inline. Simpler, less fragile.
 
+### Why Next.js App Router (Early 2026)
+SSR + RSC for SEO and auth. Pages router was too legacy.
+App Router provides better performance and modern patterns.
+
+### Why Render PostgreSQL (Early 2026)
+Cost-effective, simplicity, managed backups.
+PlanetScale and Supabase were considered but rejected.
+
+### Why pg Pool + Prisma hybrid (Early 2026)
+Raw SQL for complex match queries, Prisma for schema.
+ORM-only was too slow for match ranking queries.
+
+### Why non-recommender positioning (May 4 2026)
+Liability protection — platform presents, agency decides.
+Recommender model created legal risk.
+
+### Why verification tiers 1-4 with confidence multipliers (May 4 2026)
+Honest signal weighting vs binary verified/unverified.
+Binary was too simplistic for reliability assessment.
+
+### Why proxy.ts renamed from middleware.ts (May 4 2026)
+Next.js 16 Edge Runtime incompatible with pg Pool.
+Keep as middleware.ts broke DB connections.
+
 ---
 
 ## 6. What We Tried That Didn't Work
@@ -227,9 +250,8 @@ Never build against this table — it was never created.
 | "Recruit without the legwork." | Core agency value prop |
 
 ### Verified Stats Only (Do Not Fabricate)
-- 75% annual caregiver turnover — Activated Insights 2025
-- 4 in 5 leave within first 100 days — HCAOA 2024
-- 9.7M care jobs to fill by 2034 — PHI 2025
+
+Industry stats: see COPY.md
 
 ---
 
@@ -271,8 +293,10 @@ Never build against this table — it was never created.
 | white_label | Agency branding, custom domain | Add-on |
 | enterprise | API access, custom integrations | Custom |
 
-Pricing figures: TBD — Stripe session pending.
-PAYMENTS_ENABLED=false until Stripe account confirmed.
+### Pricing Status
+Internal pricing model lives in PRICING.md.
+User-facing pricing suppressed until Stripe is live (PAYMENTS_ENABLED=false).
+Pricing page shows "contact us" until then.
 Launch currency: CAD. USD second.
 
 ---
@@ -304,43 +328,13 @@ Target: Ontario PSW community first.
 
 ## 11. What Success Looks Like
 
-### 30 days post-launch:
-- 100+ caregiver profiles built and verified
-- 5+ agencies signed up and active
-- 0 critical security incidents
-- Caregiver profile builder completion rate > 60%
-
-### 90 days post-launch:
-- 500+ caregivers
-- 20+ agencies
-- First placements made through the platform
-- AIRecruit reference calls running automatically
-- Rating system live (post-placement trust scores)
-
-### 1 year:
-- Ontario market established
-- US expansion launched (Texas, Florida, New York first)
-- Family portal live
-- Background check integration (Checkr)
-- PSV verification (Persona/Didit, Nursys)
+See FOUNDER.md → What Success Looks Like
 
 ---
 
 ## 12. Pre-Launch Checklist (Not Done Yet)
 
-- [ ] NEXT_PUBLIC_LOCALE=CA added to Vercel
-- [ ] Clerk production upgrade (pk_test_ → pk_live_)
-- [ ] All page copy written (currently all placeholder)
-- [ ] Lawyer review of lib/legal/text.ts
-- [ ] E&O / Cyber / General Liability insurance
-- [ ] Apple Developer account ($99/yr) for Wallet passes
-- [ ] SSL cert for Render DB (rejectUnauthorized: true)
-- [ ] US Vercel deployment (second project)
-- [ ] Stripe account + pricing confirmed
-- [ ] Incident response runbook written
-- [ ] MASTER_DOCS.md reviewed and up to date
-- [ ] All user error fixes from MASTER_DOCS.md Section 3 addressed
-- [ ] Security inventory from MASTER_DOCS.md Section 2 all green
+See PRODUCTION_CHECKLIST.md for current launch status.
 
 ---
 
@@ -405,42 +399,9 @@ Steps 3-10 all rebuilt with Context pattern
 
 ---
 
-## 15. Client Intake System — DESIGNED
+## 15. Client Intake System — DESIGNED (Legacy)
 
-### Build Order
-Finish caregiver profile Steps 1-10 FIRST, then build client intake.
-
-### Architecture
-Client profile is the mirror image of caregiver profile.
-Every client field maps to a caregiver filter for matching.
-
-### Database Tables Needed
-- clients — core client record
-- client_medical — Section C (medical history)
-- client_adl_assessment — Section E (ADL/IADL ratings)
-- client_home_environment — Section F (home safety)
-- client_family_contacts — Section B (family/decision makers)
-- client_care_plan — Section H (schedule/care plan)
-- client_preferences — Section I (caregiver preferences)
-- client_safety_plan — Section K (emergency/risk)
-- client_consents — Section J (legal/compliance)
-
-All linked to agencies via agency_id.
-Client data is HIPAA/PIPEDA sensitive — encrypted at rest.
-Row-level security: agency sees only their own clients.
-
-### Matching Engine (Post Client Intake)
-Hard filters: language, schedule overlap, service area, certifications,
-gender preference, cognitive care match
-Weighted score: service coverage 30%, schedule fit 20%, trust score 15%,
-credential depth 10%, personality fit 10%, experience 8%,
-environment fit 5%, interests 2%
-
-### Routes
-- /agency/clients → client list
-- /agency/clients/new → 12-section intake form
-- /agency/clients/[id] → client profile view
-- /agency/clients/[id]/match → ranked caregiver matches
+See CLIENT_INTAKE.md for full spec.
 
 ---
 
@@ -484,11 +445,7 @@ Stored in personality_profile JSONB
 
 ## 17. Rating System — NOT YET BUILT
 
-Four weighted sources: Caregiver → System → Agency → Admin
-Six categories: Reliability · Human qualities · Hygiene ·
-Beyond the call (bonus) · Skills match · Communication
-Max self-assessment score: 4.0
-Max with agency validation: 5.0
+See RATING_SYSTEM.md for full spec.
 
 ---
 
@@ -507,193 +464,19 @@ decision costs a session.
 
 ---
 
-## 14. Client Intake System — Architecture
+## 19. Client Intake System — Architecture
 
-*From CLIENT_INTAKE.md — designed, not yet built*
-
-### Strategic Context
-The client profile is the mirror image of the caregiver profile.
-Every client field maps to a caregiver filter for matching.
-Without client profiles there is no matching — just a directory.
-
-The agency holds both sides:
-- Creates client profiles from family intake
-- Matches against caregiver profiles
-- Makes placements
-
-Families never directly access client records — only through
-the family portal (Session 14) with agency permission.
-
-### Database Tables Needed
-- `clients` — core client record
-- `client_medical` — Section C (medical history, encrypted)
-- `client_cognitive` — cognitive and mental health
-- `client_adl` — ADL/IADL assessment
-- `client_home` — home environment safety
-- `client_family` — family contacts and decision makers
-- `client_care_plan` — schedule and care plan
-- `client_preferences` — caregiver preferences (matching engine fuel)
-- `client_safety` — safety and emergency
-- `client_consents` — legal consents with e-signatures
-- `client_goals` — goals and notes
-
-### The Matching Matrix
-
-| Client Field | Caregiver Mirror | Weight |
-|-------------|-----------------|-------|
-| preferred_gender | gender | Hard filter |
-| required_languages | languages[] | Hard filter |
-| shift_times_grid | weekly_grid | Hard filter |
-| client location | service_areas + travel_radius | Hard filter |
-| care_types | services[] + specializations[] | Hard filter |
-| required certifications | credentials[] | Hard filter |
-| cognitive status | dementia skills | Hard filter |
-| physical demands | lift_experience[] | Hard filter |
-| preferred_personality | personality_profile.strengths | 10% |
-| hobbies_interests | (future: caregiver hobbies) | 2% |
-| pets | pet_tolerance | Weighted |
-| smoking | smoker_household | Weighted |
-| budget range | hourly_rate | Weighted |
-| consistency_importance | placement_types (permanent) | Weighted |
-| cultural_preferences | (optional match) | Soft |
-
-### Match Score Formula
-Hard filters: pass/fail (fail = excluded from results)
-
-Weighted score (0-100):
-- service_coverage 30% — % of required services caregiver offers
-- schedule_fit 20% — % overlap required/available hours
-- trust_score 15% — aggregate_score normalized to 0-15
-- credential_depth 10% — certs beyond minimum requirement
-- personality_fit 10% — client preference vs caregiver tags
-- experience_level 8% — years + specialization depth match
-- environment_fit 5% — pets/smoke/physical demands
-- interests_alignment 2% — hobbies overlap
-
-### Routes
-- `/agency/clients` → client list (table view)
-- `/agency/clients/new` → 12-section intake form
-- `/agency/clients/[id]` → client profile view
-- `/agency/clients/[id]/edit` → edit any section
-- `/agency/clients/[id]/match` → ranked caregiver matches
-- `/agency/clients/[id]/schedule` → care schedule management
-- `/agency/clients/[id]/notes` → coordinator notes
-
-### Intake Form UX
-Progressive sections (not all shown at once)
-
-Phase 1 — Essential (creates client record, enables matching):
-Sections A, B, H, I — 52 fields — ~15 minutes
-
-Phase 2 — Clinical (unlocks full matching):
-Sections C, D, E — 55 fields — ~20 minutes
-
-Phase 3 — Environment and safety:
-Sections F, G, K — 42 fields — ~15 minutes
-
-Phase 4 — Legal and goals:
-Sections J, L — 20 fields — ~10 minutes
-
-### Build Sequence
-- Session 11A: DB migration — create all 9 tables
-- Session 11B: /agency/clients list page
-- Session 11C: Client intake form Phase 1 (sections A + B + H + I)
-- Session 11D: Client intake form Phase 2 (sections C + D + E)
-- Session 11E: Client intake form Phase 3 (sections F + G + K)
-- Session 11F: Client intake form Phase 4 (sections J + L)
-- Session 11G: Client profile display page
-- Session 12A: Matching engine (hard filters)
-- Session 12B: Matching engine (weighted scoring)
-- Session 12C: /agency/clients/[id]/match display
+See CLIENT_INTAKE.md for full spec.
 
 ---
 
-## 15. Rating System — Design
+## 20. Rating System — Design
 
-*From RATING_SYSTEM.md — designed, not yet built*
-
-### Core Philosophy
-Reputations are **EARNED** through real work — not portable.
-Careified makes earned reputations **VISIBLE**, **VERIFIABLE** and **UNDENIABLE**.
-
-The rating system captures both:
-- **Professional:** did they do the job right?
-- **Human:** did they treat the person with dignity?
-
-These are NOT the same thing. Both matter enormously.
-
-- Max trust score from self-assessment alone: **4.0**
-- Max trust score with agency validation: **5.0**
-- You cannot self-report your way to a perfect score.
-
-### Four Sources — Weighted by Credibility
-
-| Source | Weight | Notes |
-|--------|--------|-------|
-| Caregiver (self) | Baseline — lowest | Structured fields, not free text |
-| System (behavioural) | Medium | Passive signals — completeness, recency, response rate |
-| Agency (employer) | High | Confirmed working relationship required before scoring |
-| Platform admin | Highest | Verified against external standards |
-
-### Six Rating Categories
-
-1. **Professional Reliability** (CRITICAL)
-   - Punctuality, Reliability, Would re-engage, Professional conduct
-   - "Would re-engage" is the single most powerful binary signal
-
-2. **Human Qualities** (HIGH)
-   - Warmth and friendliness, Dignity and respect, Patience, Emotional presence
-
-3. **Personal Care and Hygiene** (HIGH)
-   - Personal hygiene standards, Client hygiene and personal care, Environment and cleanliness
-
-4. **Beyond the Call** (BONUS — elevates only)
-   - Initiative, Emotional support, Family communication, Creative engagement, Problem solving
-
-5. **Skills Match and Competency** (HIGH)
-   - Specialty match, Medical awareness, Medication handling, Mobility and transfer safety
-
-6. **Communication and Conduct** (MEDIUM)
-   - Communication with agency, Communication with family, Boundaries and professionalism
-
-### Recognition Badges
-
-Earned — not scored. Appear visibly on profile.
-
-| Badge | Trigger condition |
-|-------|------------------|
-| Consistently Reliable | 5x would re-engage across 3+ agencies |
-| Exceptionally Caring | Top dignity + warmth scores from families |
-| Above and Beyond | 3+ agencies noted initiative |
-| Dementia Specialist | Specialty confirmed by 2+ agencies |
-| Family Favourite | Top scores from family feedback |
-| Trusted Veteran | 3+ years on platform, consistently high |
-| Culturally Aware | Cultural sensitivity noted by multiple sources |
-| Quick Response | Consistently high availability update rate |
-| Highly Communicative | Top communication scores across agency + family |
-| Self-Aware | Personality self-assessment consistently validated |
-| Humble Professional | Consistently undersells — agencies always rate higher |
-
-### Caregiver Protections
-- **Minimum relationship threshold** — agency must confirm engagement dates
-- **Statistical outlier protection** — auto-flagged for admin review
-- **Aggregate visibility only** — caregivers see dimension scores in aggregate
-- **Dispute path** — 14 days to flag unfair score before permanent publish
-- **No public negative scores** — only positive signals publicly visible
-
-### Profile Completeness Tiers
-
-| Tier | Score | Unlocks |
-|------|-------|---------|
-| Incomplete | < 40% | Not visible in search |
-| Basic | 40–59% | Visible in search |
-| Verified | 60–79% | Verified badge shown |
-| Professional | 80–94% | Featured matching eligible |
-| Elite | 95%+ | Top placement (requires agency validation) |
+See RATING_SYSTEM.md for full spec.
 
 ---
 
-## 17. End-of-Session QA Protocol
+## 21. End-of-Session QA Protocol
 
 Run this at the END of every session before closing, after all commits are pushed to main.
 
@@ -753,11 +536,10 @@ Run three checks:
 Playwright MCP re-run, this time capturing both errors AND warnings.
 
 ### Step 11 — Doc Freshness
-Confirm CAREIFIED_SPEC.md, HANDOFF.md, CAREIFIED_STATUS.md all updated this session.
+Confirm CAREIFIED_SPEC.md and CAREIFIED_STATUS.md all updated this session.
 
 ### Step 12 — Safe Revert Update
-Update safe revert point in HANDOFF.md and CAREIFIED_STATUS.md to latest commit hash.
+Update safe revert point in CAREIFIED_STATUS.md to latest commit hash.
 
 ---
 
-Last updated: May 7 2026

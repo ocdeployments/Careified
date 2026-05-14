@@ -132,7 +132,7 @@ export default function NewCampaignPage() {
                 <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '24px' }}>Add up to 5 screening questions. The AI agent will ask these questions in order during the call.</p>
                 {questions.map((q, i) => (
                   <div key={i} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '13px', color: '#C9A84C', fontWeight: 600, minWidth: '24px' }}>Q{i + 1}:</span>
+                    <span style={{ fontSize: '13px', color: '#C9973A', fontWeight: 600, minWidth: '24px' }}>Q{i + 1}:</span>
                     <input type="text" value={q} onChange={(e) => updateQuestion(i, e.target.value)} placeholder={i === 0 ? "How many years of caregiving experience do you have?" : i === 1 ? "Are you comfortable with dementia or memory care clients?" : "What shifts are you available for?"} style={{ flex: 1, padding: '10px 14px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                     {questions.length > 1 && (
                       <button type="button" onClick={() => removeQuestion(i)} style={{ width: '32px', height: '32px', border: 'none', background: '#F1F5F9', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -142,7 +142,7 @@ export default function NewCampaignPage() {
                   </div>
                 ))}
                 {questions.length < 5 && (
-                  <button type="button" onClick={addQuestion} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid #C9A84C', borderRadius: '9999px', background: 'transparent', color: '#C9A84C', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
+                  <button type="button" onClick={addQuestion} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid #C9973A', borderRadius: '9999px', background: 'transparent', color: '#C9973A', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
                     <Plus size={14} /> Add Question
                   </button>
                 )}
@@ -178,7 +178,7 @@ export default function NewCampaignPage() {
                 ))}
 
                 {candidates.length < 20 && (
-                  <button type="button" onClick={addCandidate} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid #C9A84C', borderRadius: '9999px', background: 'transparent', color: '#C9A84C', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
+                  <button type="button" onClick={addCandidate} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid #C9973A', borderRadius: '9999px', background: 'transparent', color: '#C9973A', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
                     <Plus size={14} /> Add Candidate
                   </button>
                 )}
@@ -192,12 +192,12 @@ export default function NewCampaignPage() {
               {/* Consent */}
               <div style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <input type="checkbox" id="consent" checked={consentConfirmed} onChange={(e) => setConsentConfirmed(e.target.checked)} style={{ width: '18px', height: '18px', marginTop: '2px', accentColor: '#C9A84C' }} />
+                  <input type="checkbox" id="consent" checked={consentConfirmed} onChange={(e) => setConsentConfirmed(e.target.checked)} style={{ width: '18px', height: '18px', marginTop: '2px', accentColor: '#C9973A' }} />
                   <label htmlFor="consent" style={{ fontSize: '13px', color: '#0D1B3E', lineHeight: 1.5, cursor: 'pointer' }}>
                     I confirm that all candidates on this list have provided prior consent to be contacted by automated AI calling systems for recruitment purposes, and that I have complied with all applicable Canadian telecommunications regulations including the CRTC Do Not Call List requirements.
                   </label>
                 </div>
-                <p style={{ fontSize: '12px', color: '#C9A84C', marginTop: '8px', marginLeft: '30px' }}>Required — agencies are responsible for ensuring CRTC and PIPEDA compliance for all contacts.</p>
+                <p style={{ fontSize: '12px', color: '#C9973A', marginTop: '8px', marginLeft: '30px' }}>Required — agencies are responsible for ensuring CRTC and PIPEDA compliance for all contacts.</p>
               </div>
 
               {/* Submit */}
@@ -231,11 +231,11 @@ export default function NewCampaignPage() {
               </div>
               <div style={{ background: '#F5F3EE', borderRadius: '16px', padding: '24px', border: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                  <HelpCircle size={20} color="#C9A84C" />
+                  <HelpCircle size={20} color="#C9973A" />
                   <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '16px', color: '#0D1B3E', margin: 0 }}>Need Help?</h3>
                 </div>
                 <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px', lineHeight: 1.5 }}>Contact our support team to help set up your first campaign</p>
-                <Link href="/contact" style={{ display: 'inline-block', padding: '10px 20px', background: '#C9A84C', color: 'white', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Contact Support</Link>
+                <Link href="/contact" style={{ display: 'inline-block', padding: '10px 20px', background: '#C9973A', color: 'white', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Contact Support</Link>
               </div>
             </div>
           </div>

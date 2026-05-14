@@ -281,6 +281,15 @@ export default async function VerifyPage({
             month: 'short', day: 'numeric', year: 'numeric'
           })}
         </p>
+
+        <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #E5E7EB', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '12px', lineHeight: 1.5 }}>
+            Are you a home care agency? Find verified caregivers like {caregiver.first_name} on Careified.
+          </p>
+          <a href="/agency/signup" style={{ display: 'inline-block', padding: '8px 16px', background: '#0D1B3E', color: 'white', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+            Create Free Agency Account
+          </a>
+        </div>
       </div>
     </div>
   )

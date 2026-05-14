@@ -2,6 +2,7 @@
 import { Pool } from 'pg'
 import { getAttributeMap, tierToConfidence, type AttributeTier } from '@/lib/attributes'
 import type { CaregiverForMatching } from './types'
+import { getLocale } from '@/lib/locale/get-locale'
 
 /**
  * Per-field source + tier info, used when computing dimension confidence.
@@ -20,6 +21,7 @@ export async function loadCaregiverForMatchingV2(
   caregiverId: string
 ): Promise<CaregiverWithProvenance | null> {
   // Load base row (for fields not yet migrated or for shape compatibility)
+  const locale = getLocale()
   const { rows } = await pool.query(
     `SELECT id, first_name, last_name,
       specializations, credentials, placement_types, languages,
@@ -29,8 +31,8 @@ export async function loadCaregiverForMatchingV2(
       availability_status,
       client_preferences, environment_comfort, motivation,
       reliability_metrics
-    FROM caregivers WHERE id = $1 AND status = 'approved'`,
-    [caregiverId]
+    FROM caregivers WHERE id = $1 AND status = 'approved' AND locale = $2`,
+    [caregiverId, locale]
   )
   if (rows.length === 0) return null
   const base = rows[0] as CaregiverForMatching
@@ -79,8 +81,10 @@ export async function loadCaregiverForMatchingV2(
 export async function loadAllApprovedCaregiversV2(
   pool: Pool
 ): Promise<CaregiverWithProvenance[]> {
+  const locale = getLocale()
   const { rows } = await pool.query(
-    `SELECT id FROM caregivers WHERE status = 'approved'`
+    `SELECT id FROM caregivers WHERE status = 'approved' AND locale = $1`,
+    [locale]
   )
   const result: CaregiverWithProvenance[] = []
   for (const { id } of rows) {

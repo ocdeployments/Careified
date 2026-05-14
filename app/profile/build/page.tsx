@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, Suspense, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileFormProvider, useProfileForm } from '@/lib/context/ProfileFormContext'
@@ -22,6 +22,7 @@ import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 import GhostProfileModal from '@/components/profile/GhostProfileModal'
+import LiveBanner from '@/components/profile/LiveBanner'
 
 const FONT_SERIF = "'Inter', sans-serif"
 const FONT_SANS = "'Inter', sans-serif"
@@ -55,6 +56,257 @@ interface FormData {
  [key: string]: any
 }
 
+function Step0ResumeUpload({ onParsed }: { onParsed: (fields: Record<string, any>) => void }) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [parsedData, setParsedData] = useState<Record<string, any> | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const isClaimed = searchParams.get('claimed') === 'true'
+
+  const handleFile = async (file: File) => {
+    if (!file) return
+    setIsUploading(true)
+    setError(null)
+    const formData = new FormData()
+    formData.append('resume', file)
+    try {
+      const res = await fetch('/api/profile/parse-resume', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (res.ok) setParsedData(data)
+      else setError('Could not parse resume. Try again or skip.')
+    } catch {
+      setError('Upload failed. Try again or skip.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleApply = async () => {
+    if (!parsedData) return
+    const fieldMap: Record<string, any> = {
+      firstName: parsedData.firstName,
+      lastName: parsedData.lastName,
+      email: parsedData.email,
+      phone: parsedData.phone,
+      city: parsedData.city,
+      state: parsedData.state,
+      jobTitle: parsedData.jobTitle,
+      yearsExperience: parsedData.yearsExperience,
+      bio: parsedData.bio,
+      services: parsedData.services,
+      credentials: parsedData.certifications,
+      specializations: parsedData.specializations,
+      diagnosisExperience: parsedData.diagnosisExperience,
+      adlsPerformed: parsedData.adlsPerformed,
+      workHistory: parsedData.employers,
+    }
+    console.log('APPLYING FIELDS:', JSON.stringify({
+      firstName: parsedData?.firstName,
+      lastName: parsedData?.lastName,
+      jobTitle: parsedData?.jobTitle,
+      yearsExperience: parsedData?.yearsExperience,
+      workHistory: parsedData?.employers,
+    }, null, 2))
+    await Promise.all(
+      Object.entries(fieldMap)
+        .filter(([_, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0))
+        .map(([field, value]) =>
+          fetch('/api/profile/save-field', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ field, value })
+          })
+        )
+    )
+    onParsed(fieldMap)
+    window.location.href = '/profile/build?step=1'
+  }
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 24px' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0D1B3E', marginBottom: '8px', fontFamily: "'DM Serif Display', serif" }}>
+        {isClaimed ? "Your profile has a head start." : "Let's build your profile"}
+      </h1>
+      <p style={{ fontSize: '15px', color: '#64748B', marginBottom: '32px' }}>
+        {isClaimed
+          ? "Your agency gave us your basic details. Upload your resume and we'll fill in the rest automatically — credentials, work history, certifications. Takes 2 minutes."
+          : "Upload your resume and we'll fill in your details automatically. Takes 2 minutes."}
+      </p>
+      {!parsedData && !isUploading && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+          onClick={() => document.getElementById('resume-upload')?.click()}
+          style={{
+            border: `2px dashed ${isDragging ? '#C9973A' : '#CBD5E1'}`,
+            borderRadius: '12px', padding: '48px 24px', textAlign: 'center',
+            cursor: 'pointer', background: isDragging ? 'rgba(201,151,58,0.04)' : '#F8FAFC',
+            transition: 'all 0.2s'
+          }}
+        >
+          <input id="resume-upload" type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+          <p style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>
+            Drop your resume here or click to browse
+          </p>
+          <p style={{ fontSize: '13px', color: '#94A3B8', marginTop: '8px' }}>PDF, DOC, DOCX — max 5MB</p>
+        </div>
+      )}
+      {isUploading && (
+        <div style={{ textAlign: 'center', padding: '48px', color: '#64748B' }}>
+          Reading your resume...
+        </div>
+      )}
+      {error && <p style={{ color: '#DC2626', fontSize: '14px', marginTop: '16px' }}>{error}</p>}
+      {parsedData && (
+        <div style={{ marginTop: '24px' }}>
+          <p style={{ fontSize: '15px', color: '#16A34A', fontWeight: 700, marginBottom: '20px' }}>✓ We extracted the following from your resume</p>
+
+{/* Personal Info Grid */}
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+  {([
+    ['First Name', parsedData.firstName],
+    ['Last Name', parsedData.lastName],
+    ['Email', parsedData.email],
+    ['Phone', parsedData.phone],
+    ['City', parsedData.city],
+    ['State', parsedData.state],
+    ['Job Title', parsedData.jobTitle],
+    ['Years Experience', parsedData.yearsExperience],
+  ] as [string, any][]).map(([label, value]) => (
+    <div key={label} style={{
+      background: value ? '#F0FDF4' : '#FFF7F7',
+      border: `1px solid ${value ? '#BBF7D0' : '#FEE2E2'}`,
+      borderRadius: '8px', padding: '10px'
+    }}>
+      <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '2px' }}>{label}</p>
+      <p style={{ fontSize: '13px', color: value ? '#15803D' : '#DC2626', fontWeight: 500 }}>
+        {value ? String(value) : '✗ Not found'}
+      </p>
+    </div>
+  ))}
+</div>
+
+{/* Bio */}
+{parsedData.bio && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Professional Summary</p>
+    <p style={{ fontSize: '13px', color: '#334155', lineHeight: 1.5, background: '#F8FAFC', borderRadius: '8px', padding: '12px' }}>{parsedData.bio}</p>
+  </div>
+)}
+
+{/* Work History */}
+{parsedData.employers?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Work History — {parsedData.employers.length} positions found</p>
+    {parsedData.employers.map((e: any, i: number) => (
+      <div key={i} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>{e.title}</p>
+        <p style={{ fontSize: '12px', color: '#64748B' }}>{e.organisation}{e.startYear && ` · ${e.startYear} – ${e.current ? 'Present' : e.endYear || '?'}`}</p>
+      </div>
+    ))}
+  </div>
+)}
+
+{/* Services */}
+{parsedData.services?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Services — {parsedData.services.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.services.map((s: string) => (
+        <span key={s} style={{ background: '#EFF6FF', color: '#1D4ED8', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{s}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Certifications */}
+{parsedData.certifications?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Certifications — {parsedData.certifications.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.certifications.map((c: string) => (
+        <span key={c} style={{ background: '#FEF9C3', color: '#854D0E', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{c}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Specializations */}
+{parsedData.specializations?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Specializations — {parsedData.specializations.length} found</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.specializations.map((s: string) => (
+        <span key={s} style={{ background: '#F0FDF4', color: '#15803D', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{s}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Education */}
+{parsedData.education?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Education</p>
+    {parsedData.education.map((e: any, i: number) => (
+      <div key={i} style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: '#0D1B3E' }}>{e.degree}</p>
+        <p style={{ fontSize: '12px', color: '#64748B' }}>{e.institution}{e.startYear && ` · ${e.startYear} – ${e.endYear || '?'}`}</p>
+      </div>
+    ))}
+  </div>
+)}
+
+{/* ADLs */}
+{parsedData.adlsPerformed?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>ADLs Performed</p>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      {parsedData.adlsPerformed.map((a: string) => (
+        <span key={a} style={{ background: '#FDF4FF', color: '#7E22CE', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', fontWeight: 500 }}>{a}</span>
+      ))}
+    </div>
+  </div>
+)}
+
+{/* Awards */}
+{parsedData.awards?.length > 0 && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Awards & Recognition</p>
+    {parsedData.awards.map((a: any, i: number) => (
+      <div key={i} style={{ background: '#FFFBEB', borderRadius: '8px', padding: '10px 12px', marginBottom: '6px', fontSize: '13px' }}>
+        <span style={{ fontWeight: 600, color: '#92400E' }}>⭐ {a.title}</span>
+        {a.organisation && <span style={{ color: '#78716C' }}> · {a.organisation}</span>}
+        {a.year && <span style={{ color: '#A8A29E' }}> · {a.year}</span>}
+      </div>
+    ))}
+  </div>
+)}
+
+{/* Missing fields note */}
+<div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px', marginBottom: '20px', fontSize: '13px', color: '#64748B' }}>
+  ℹ Missing fields can be filled in manually in the next steps.
+</div>
+
+<button onClick={handleApply} style={{
+            width: '100%', padding: '14px', borderRadius: '10px', border: 'none',
+            background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: '#0D1B3E',
+            fontSize: '15px', fontWeight: 600, cursor: 'pointer', marginBottom: '12px'
+          }}>
+            Apply to my profile →
+          </button>
+        </div>
+      )}
+      <button onClick={() => { window.location.href = '/profile/build?step=1' }}
+        style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '13px', cursor: 'pointer', marginTop: '8px' }}>
+        {isClaimed ? "Skip — I'll review what's already there" : "Skip for now"}
+      </button>
+    </div>
+  )
+}
+
 function SavedIndicator({ show }: { show: boolean }) {
  return (
  <div style={{
@@ -81,6 +333,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const [showReveal, setShowReveal] = useState(false)
  const [showModal, setShowModal] = useState(false)
  const [isClient, setIsClient] = useState(false)
+ const [showLiveBanner, setShowLiveBanner] = useState(false)
  const searchParams = useSearchParams()
  const router = useRouter()
  const step = searchParams.get('step') || '0'
@@ -116,6 +369,20 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  return () => clearTimeout(t)
  }, [currentStep])
 
+ // Check for "went live" flag when entering step 4
+ useEffect(() => {
+ if (currentStep === 4) {
+ const wentLive = localStorage.getItem('careified_went_live')
+ if (wentLive === 'true') {
+ setShowLiveBanner(true)
+ localStorage.removeItem('careified_went_live')
+ // Auto-dismiss after 8 seconds
+ const t = setTimeout(() => setShowLiveBanner(false), 8000)
+ return () => clearTimeout(t)
+ }
+ }
+ }, [currentStep])
+
  const handleSave = (saveData: any) => {
  if (contextFormData) {
  // Context handles saving - just show indicator
@@ -129,6 +396,10 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const navigate = (dir: 'forward' | 'back') => {
  setAnimDir(dir)
  const next = dir === 'forward' ? currentStep + 1 : currentStep - 1
+ // Set "went live" flag when going from step 3 to step 4
+ if (dir === 'forward' && currentStep === 3) {
+ localStorage.setItem('careified_went_live', 'true')
+ }
  if (next >= 1 && next <= 11) router.push(`?step=${next}`)
  }
 
@@ -148,12 +419,8 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 )
 
  // Step 0 — redirect to Step 1 (consent now at Step 11)
-  if (currentStep === 0) {
-    router.replace('/profile/build?step=1')
-    return null
-  }
-
   switch (currentStep) {
+    case 0: return <Step0ResumeUpload onParsed={(fields) => { handleSave(fields) }} />
  case 1: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step1Identity /></motion.div></AnimatePresence>
  case 2: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step2Services /></motion.div></AnimatePresence>
  case 3: return <AnimatePresence mode='wait'><motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}><Step3Availability /></motion.div></AnimatePresence>
@@ -172,27 +439,6 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  return (
  <>
  {isClient && showModal && <GhostProfileModal onDismiss={handleDismissModal} />}
- <style>{`
- @keyframes slideInForward {
- from { opacity: 0; transform: translateX(24px); }
- to { opacity: 1; transform: translateX(0); }
- }
- @keyframes slideInBack {
- from { opacity: 0; transform: translateX(-24px); }
- to { opacity: 1; transform: translateX(0); }
- }
- .step-content-forward { animation: slideInForward 0.28s ease forwards; }
- .step-content-back { animation: slideInBack 0.28s ease forwards; }
- .sidebar-step:hover { background: #F8FAFC !important; }
- .nav-btn-back:hover { color: #0D1B3E !important; }
- .nav-btn-next:hover { opacity: 0.88; }
- @media (max-width: 768px) {
- .pb-layout { grid-template-columns: 1fr !important; }
- .pb-sidebar { display: none !important; }
- .pb-mobile-steps { display: flex !important; }
- .pb-preview { display: none !important; }
- }
- `}</style>
 
  {/* Top bar */}
  <div style={{
@@ -449,6 +695,65 @@ transition={{ duration: 0.15 }}
  </div>
  )}
 
+ {/* Live banner - shows when profile goes live at Step 3 */}
+ {currentStep === 3 && <LiveBanner firstName={formData.firstName} />}
+
+ {/* You're live banner - shows on Step 4 after completing Step 3 */}
+ {showLiveBanner && currentStep === 4 && (
+ <div style={{
+ position: 'fixed',
+ bottom: 0,
+ left: 0,
+ right: 0,
+ zIndex: 50,
+ background: '#0D1B3E',
+ borderLeft: '4px solid #C9973A',
+ padding: '16px 24px',
+ display: 'flex',
+ alignItems: 'center',
+ justifyContent: 'space-between',
+ }}>
+ <style>{`
+ @keyframes pulse {
+ 0%, 100% { opacity: 1; transform: scale(1); }
+ 50% { opacity: 0.5; transform: scale(1.4); }
+ }
+ `}</style>
+ <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+   <div style={{
+     width: 8,
+     height: 8,
+     borderRadius: '50%',
+     background: '#C9973A',
+     animation: 'pulse 2s ease-in-out infinite',
+   }} />
+   <div>
+     <div style={{ color: 'white', fontSize: '14px', fontWeight: 600 }}>
+       You're now live in agency search.
+     </div>
+     <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>
+       Agencies can find you right now.
+     </div>
+   </div>
+ </div>
+ <button
+   onClick={() => setShowLiveBanner(false)}
+   style={{
+     padding: '8px 16px',
+     background: 'transparent',
+     border: '1px solid rgba(255,255,255,0.3)',
+     borderRadius: 6,
+     color: 'white',
+     fontSize: '13px',
+     fontWeight: 500,
+     cursor: 'pointer',
+   }}
+ >
+   Got it
+ </button>
+ </div>
+ )}
+
  {/* Step content with animation */}
  <div
  className={animating
@@ -566,17 +871,7 @@ transition={{ duration: 0.15 }}
 export default function ProfileBuildPage() {
  return (
  <ProfileFormProvider>
- <Suspense fallback={
- <div style={{
- padding: '50px', textAlign: 'center',
- fontFamily: "'Inter', sans-serif",
- color: '#64748B', fontSize: '13px',
- }}>
- Loading...
- </div>
- }>
  <ProfileBuilderWrapper />
- </Suspense>
  </ProfileFormProvider>
  )
 }

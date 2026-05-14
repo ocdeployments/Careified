@@ -75,16 +75,27 @@ function getAvailability(status?: string) {
 }
 
 // Blend: show live value if present, ghost if not (ghost at reduced opacity)
-function useVal<T>(live: T | undefined, ghost: T): { value: T; isGhost: boolean } {
+// For brand new profiles (no localStorage), show empty state instead of ghost data
+function useVal<T>(live: T | undefined, ghost: T, isNewProfile: boolean): { value: T; isGhost: boolean } {
   const hasLive = live !== undefined && live !== null && live !== '' &&
     !(Array.isArray(live) && (live as any[]).length === 0)
+  // Brand new profiles show empty instead of ghost
+  if (isNewProfile && !hasLive) {
+    return { value: live as T, isGhost: false }
+  }
   return { value: hasLive ? live! : ghost, isGhost: !hasLive }
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
 export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardProps) {
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const [isNewProfile, setIsNewProfile] = useState(true)
+  useEffect(() => {
+    setMounted(true)
+    // Check if profile data exists in localStorage
+    const stored = localStorage.getItem('careified_profile_form')
+    setIsNewProfile(!stored)
+  }, [])
 
   const completion = data.profileCompletionPct || Math.min((step - 1) * 11, 85)
   const banner = getBannerState(completion)
@@ -93,30 +104,33 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
     data.firstName || data.preferredName
       ? `${data.preferredName || data.firstName || ''} ${data.lastName || ''}`.trim()
       : undefined,
-    `${GHOST.firstName} ${GHOST.lastName}`
+    `${GHOST.firstName} ${GHOST.lastName}`,
+    isNewProfile
   )
-  const jobTitle = useVal(data.jobTitle, GHOST.jobTitle)
+  const jobTitle = useVal(data.jobTitle, GHOST.jobTitle, isNewProfile)
   const city = useVal(
     data.city ? `${data.city}${data.state ? ', ' + data.state : ''}` : undefined,
-    `${GHOST.city}, ${GHOST.state}`
+    `${GHOST.city}, ${GHOST.state}`,
+    isNewProfile
   )
-  const bio = useVal(data.bio, GHOST.bio)
-  const languages = useVal(data.languages, GHOST.languages)
-  const credentials = useVal(data.credentials, GHOST.credentials)
-  const specializations = useVal(data.specializations, GHOST.specializations)
-  const services = useVal(data.services, GHOST.services)
-  const avStatus = useVal(data.availabilityStatus, GHOST.availabilityStatus)
-  const placementTypes = useVal(data.placementTypes, GHOST.placementTypes)
-  const yearsExp = useVal(data.yearsExperience, GHOST.yearsExperience)
-  const hasVehicle = useVal(data.hasVehicle, GHOST.hasVehicle)
-  const rateMin = useVal(data.hourlyRateMin, GHOST.hourlyRateMin)
-  const rateMax = useVal(data.hourlyRateMax, GHOST.hourlyRateMax)
+  const bio = useVal(data.bio, GHOST.bio, isNewProfile)
+  const languages = useVal(data.languages, GHOST.languages, isNewProfile)
+  const credentials = useVal(data.credentials, GHOST.credentials, isNewProfile)
+  const specializations = useVal(data.specializations, GHOST.specializations, isNewProfile)
+  const services = useVal(data.services, GHOST.services, isNewProfile)
+  const avStatus = useVal(data.availabilityStatus, GHOST.availabilityStatus, isNewProfile)
+  const placementTypes = useVal(data.placementTypes, GHOST.placementTypes, isNewProfile)
+  const yearsExp = useVal(data.yearsExperience, GHOST.yearsExperience, isNewProfile)
+  const hasVehicle = useVal(data.hasVehicle, GHOST.hasVehicle, isNewProfile)
+  const rateMin = useVal(data.hourlyRateMin, GHOST.hourlyRateMin, isNewProfile)
+  const rateMax = useVal(data.hourlyRateMax, GHOST.hourlyRateMax, isNewProfile)
 
   const avail = getAvailability(avStatus.value)
 
-  const initials = name.isGhost
-    ? 'MS'
-    : `${(data.preferredName || data.firstName || '')[0] || ''}${(data.lastName || '')[0] || ''}`.toUpperCase() || '?'
+  // For new profiles, show placeholder initials
+  const initials = (data.firstName || data.preferredName || data.lastName)
+    ? `${(data.preferredName || data.firstName || '')[0] || ''}${(data.lastName || '')[0] || ''}`.toUpperCase() || '?'
+    : '?'
 
   const ghostStyle = (isGhost: boolean): React.CSSProperties =>
     isGhost ? { opacity: 0.35, transition: 'opacity 0.4s ease' } : { opacity: 1, transition: 'opacity 0.4s ease' }
