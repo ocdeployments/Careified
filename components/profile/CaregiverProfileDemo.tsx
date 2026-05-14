@@ -560,6 +560,11 @@ export interface CaregiverProfileProps {
     status: 'earned' | 'locked'
     earned_at?: string
   }>
+  // Custom attributes from CSV
+  customAttributes?: Array<{ key: string; value: string }>
+  // Profile completeness
+  claimStatus?: string
+  sourceAgencyName?: string | null
 }
 
 // Tooltip for alignment score explanation
