@@ -35,6 +35,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.blob.vercel-storage.com' },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/__clerk/:path*',
+        destination: 'https://clerk.careified.com/:path*',
+      },
+    ]
+  },
   async headers() {
     return [
       {
