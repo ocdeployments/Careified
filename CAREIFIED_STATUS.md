@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Purpose: Current build state — what is done, what is pending, what is broken
-# Updated: May 13 2026
+# Updated: May 14 2026
 # Update trigger: Every session — mandatory
 # Owner: Claude
 # DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
@@ -34,6 +34,7 @@
 | May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
 | May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
 | May 13 2026 PM | Rating System: DB tables (placement_reviews, caregiver_suitability, caregiver_badges), scoring engine, suitability analysis + LLM narrative, 4 API routes, agency rating form, self-assessment page, SuitabilityCard + BadgeDisplay components | DONE | 10 commits |
+| May 14 2026 | AIRecruit Session B: reference_calls consent type, reference call Vapi config (7-question interview), reference_calls DB table, POST /api/airecruit/reference route, webhook handles reference calls, trust score recompute on completion, candidate-first call experience (ask-first, pause tolerance, human handoff, transparent AI) | DONE | 9 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.

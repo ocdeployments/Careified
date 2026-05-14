@@ -90,6 +90,14 @@ Agency Roster: /agency/roster, CSV import, resume upload,
   LLM parse (20 fields), claim flow /claim/[token],
   caregiver_claim_tokens, field discovery loop.
 AIRecruit Phases 1-6: Vapi, scoring, webhook, campaigns.
+AIRecruit Session B: reference_calls consent, reference call
+  Vapi config (7-question interview), reference_calls table,
+  /api/airecruit/reference route, webhook handles reference
+  calls, trust score recompute on completion.
+Candidate-first call experience: ask-first opening,
+  pause tolerance (8s silence), human handoff phrase,
+  one-question-at-a-time rule, transparent AI disclosure,
+  clear closing.
 Ticketing: support_tickets, ticket_messages, 3 APIs,
   /agency/support, /caregiver/support, /admin/tickets.
 Demo system, security hardening (SQL injection, rate
@@ -115,7 +123,7 @@ SESSION_CONTEXT.md: compressed session brain.
 - AIRecruit CA phone number (Romy provisions in Vapi)
 
 ## SAFE REVERTS
-41c6b31 (general) | 960aca6 (May 4) | 97a95ad (May 9)
+2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
 
 ## PATTERNS TO REUSE
 Auth: sessionClaims.role === 'agency' from Clerk
