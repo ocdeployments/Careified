@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const SERIF = "'DM Serif Display', Georgia, serif"
@@ -18,7 +18,7 @@ const C = {
   fg: '#4A5568',
 }
 
-export default function ForCaregiversPage() {
+function CaregiversContent() {
   const [isDesktop, setIsDesktop] = useState(false)
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
   const searchParams = useSearchParams()
@@ -510,5 +510,13 @@ export default function ForCaregiversPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+export default function ForCaregiversPage() {
+  return (
+    <Suspense fallback={null}>
+      <CaregiversContent />
+    </Suspense>
   )
 }

@@ -57,14 +57,18 @@ CAREGIVER SIDE
 - [x] Caregiver claims agency-built profile ✅ BUILT May 13 (claim/[token] page, stub pre-fill)
 - [ ] Profile visible in search after Step 3 ✅ built
 - [ ] Verify slug and ID card ✅ built
-- [ ] "You're now live in search" banner after Step 3 ❌ not built
-- [ ] Profile view notification (in-app) ❌ not built
+- [x] "You're now live" banner after Step 3 ✅ BUILT May 13
+- [x] Profile view notification (in-app) ✅ BUILT May 14
 
 AI RECRUIT
 - [ ] Outbound screening calls ✅ built
 - [ ] TCPA/CRTC compliance ✅ built
 - [ ] Scoring and transcript ✅ built
 - [ ] Campaign UI ✅ built
+- [x] AIRecruit Session B — reference calls + consent ✅ BUILT May 14
+- [x] AIRecruit Session C — profile analysis + employer verification ✅ BUILT May 14
+- [x] AIRecruit Session D — retry logic + cron + bulk actions + QuickFill ✅ BUILT May 14
+- [x] In-app notification system (profile viewed, shortlisted) ✅ BUILT May 14
 
 PLATFORM
 - [ ] careified.ca domain purchased and pointed to Vercel ❌ not done

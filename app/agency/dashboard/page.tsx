@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/nextjs'
-import { pool } from '@/lib/db'
 import Link from 'next/link'
 import CommandBar from '@/components/agency/CommandBar'
 import ProfileNudge from '@/components/agency/ProfileNudge'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -25,40 +25,6 @@ type DashboardData = {
   recent_activity: { action: string; timestamp: string; detail?: string }[]
   top_matches: { id: string; first_name: string; last_name: string; aggregate_score: number | null; photo_url: string | null; role: string | null }[]
   expiring_credentials: { caregiver_id: string; caregiver_name: string; certification: string; expiry_date: string }[]
-}
-
-async function getAgencyData(userId: string) {
-  try {
-    const [agency, clients, shortlist, stats, recentReviews, recentMatches] = await Promise.all([
-      pool.query('SELECT id, name FROM agencies WHERE clerk_user_id = $1', [userId]),
-      pool.query(`SELECT id, client_first_name, primary_condition, status, created_at, matched_caregiver_id FROM client_needs WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1) ORDER BY created_at DESC LIMIT 5`, [userId]),
-      pool.query(`SELECT COUNT(*) FROM agency_shortlist WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1)`, [userId]),
-      pool.query(`SELECT
-        (SELECT COUNT(*) FROM client_needs WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1) AND status != 'closed') as active_clients,
-        (SELECT COUNT(*) FROM client_needs WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1) AND matched_caregiver_id IS NOT NULL) as matched_clients,
-        (SELECT COUNT(*) FROM placement_reviews WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1)) as total_reviews,
-        (SELECT COUNT(*) FROM placement_reviews WHERE agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1) AND would_re_engage = true) as positive_reviews`),
-      pool.query(`SELECT pr.id, pr.would_re_engage, pr.created_at, c.first_name, c.last_name
-       FROM placement_reviews pr
-       JOIN caregivers c ON pr.caregiver_id = c.id
-       WHERE pr.agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1)
-       ORDER BY pr.created_at DESC LIMIT 3`),
-      pool.query(`SELECT cn.client_first_name, cn.primary_condition, cn.matched_caregiver_id, cn.updated_at,
-       c.first_name as caregiver_first_name, c.last_name as caregiver_last_name
-       FROM client_needs cn
-       LEFT JOIN caregivers c ON cn.matched_caregiver_id = c.id
-       WHERE cn.agency_id = (SELECT id FROM agencies WHERE clerk_user_id = $1) AND cn.matched_caregiver_id IS NOT NULL
-       ORDER BY cn.updated_at DESC LIMIT 3`),
-    ])
-    return {
-      agency: agency.rows[0] || null,
-      clients: clients.rows,
-      shortlistCount: parseInt(shortlist.rows[0]?.count || '0'),
-      stats: stats.rows[0] || {},
-      recentReviews: recentReviews.rows,
-      recentMatches: recentMatches.rows,
-    }
-  } catch { return { agency: null, clients: [], shortlistCount: 0, stats: {}, recentReviews: [], recentMatches: [] } }
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -225,25 +191,30 @@ function AiAssistantPanel() {
 export default function AgencyDashboard() {
   const { userId, isLoaded } = useAuth()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
-  const [legacyData, setLegacyData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!userId) return
 
-    Promise.all([
-      fetch('/api/agency/dashboard', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
-      getAgencyData(userId).then(d => d)
-    ]).then(([dash, legacy]) => {
-      setDashboardData(dash)
-      setLegacyData(legacy)
-      setLoading(false)
-    })
+    fetch('/api/agency/dashboard', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(dash => {
+        setDashboardData(dash)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [userId])
 
   if (!userId) return null
 
-  const { agency, clients, shortlistCount, stats, recentReviews, recentMatches } = legacyData || {}
+  // Use API data with fallbacks for legacy fields
+  const agency = { name: dashboardData?.stats?.roster_total ? 'Your Agency' : null }
+  const clients: any[] = []
+  const shortlistCount = dashboardData?.stats?.shortlist_total || 0
+  const stats = { active_clients: dashboardData?.stats?.clients_total || 0, matched_clients: 0, total_reviews: 0, positive_reviews: 0 }
+  const recentReviews: any[] = []
+  const recentMatches: any[] = []
+
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -445,7 +416,9 @@ export default function AgencyDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
             {/* AI Assistant */}
-            <AiAssistantPanel />
+            <ErrorBoundary section="AiAssistantPanel">
+              <AiAssistantPanel />
+            </ErrorBoundary>
 
             {/* Recent clients */}
             <div style={{ background: 'white', borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>

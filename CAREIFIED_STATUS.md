@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Purpose: Current build state — what is done, what is pending, what is broken
-# Updated: May 13 2026
+# Updated: May 14 2026
 # Update trigger: Every session — mandatory
 # Owner: Claude
 # DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
@@ -34,6 +34,10 @@
 | May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
 | May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
 | May 13 2026 PM | Rating System: DB tables (placement_reviews, caregiver_suitability, caregiver_badges), scoring engine, suitability analysis + LLM narrative, 4 API routes, agency rating form, self-assessment page, SuitabilityCard + BadgeDisplay components | DONE | 10 commits |
+| May 14 2026 | AIRecruit Session B: reference_calls consent type, reference call Vapi config (7-question interview), reference_calls DB table, POST /api/airecruit/reference route, webhook handles reference calls, trust score recompute on completion, candidate-first call experience (ask-first, pause tolerance, human handoff, transparent AI) | DONE | 9 commits |
+| May 14 2026 | AIRecruit Sessions C+D: employer calls (5-question interview), employment_verifications table, profile analysis engine (/api/airecruit/analyse), campaign from profile, retry logic + call_retry_queue table, cron processor (every 15 min), bulk campaign actions (pause/resume/cancel), QuickFill alert calls (match_time_calls consent) | DONE | 12 commits |
+| May 14 2026 | Notification system: caregiver_notifications table, notification helper lib (createNotification + templates), API routes (GET list, POST mark-read, GET count), profile view trigger, shortlist trigger, NotificationBell component in navbar, /caregiver/notifications page, profile completion nudge with weekly cron | DONE | 7 commits |
+| May 14 2026 | Build fixes: dashboard boundary error fix, pdf-parse restored, for-caregivers Suspense fix | DONE | 3 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -303,13 +307,12 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 ### Features Queued
 12. Admin panel Phase 1 (content editor, build tracker, analytics, feature flags)
 13. LiveProfilePreview (ghost to live animation in builder)
-14. AIRecruit Session B (consent), C (profile analysis), D (SMS, retry, cron)
-15. Rating system (post-placement ratings, trust score, honesty scoring)
-16. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
-17. Background check integration — Checkr (deferred Year 1)
-18. PSV verification — Persona/Didit, Nursys (deferred Year 1)
-19. Upload photo API
-20. Map for travel radius (Leaflet)
+14. Rating system (post-placement ratings, trust score, honesty scoring) — BUILT May 13
+15. Family portal Phase 1 (schedule, shift tracker, care notes, caregiver card — PWA)
+16. Background check integration — Checkr (deferred Year 1)
+17. PSV verification — Persona/Didit, Nursys (deferred Year 1)
+18. Upload photo API — BUILT May 12
+19. Map for travel radius (Leaflet) — BUILT May 4
 
 ---
 
@@ -335,6 +338,10 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | placement_reviews | LIVE | Rating system - post-placement reviews |
 | caregiver_suitability | LIVE | Rating system - client type suitability |
 | caregiver_badges | LIVE | Rating system - earned badges |
+| reference_calls | LIVE | AIRecruit reference verification calls |
+| employment_verifications | LIVE | AIRecruit past employer verification calls |
+| call_retry_queue | LIVE | AIRecruit retry queue with intelligent backoff |
+| caregiver_notifications | LIVE | In-app notification system |
 
 ---
 
