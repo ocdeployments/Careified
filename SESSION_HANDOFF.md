@@ -1,36 +1,47 @@
 ---
-name: session-handoff-may-14
-description: Session end May 14 2026 - AIRecruit Session B complete
+name: session-handoff-may-14-pm
+description: Session end May 14 2026 - AIRecruit Sessions C and D complete
 type: project
 ---
 
-# SESSION_HANDOFF.md — May 14 2026
+# SESSION_HANDOFF.md — May 14 2026 PM
 
 ## Status: CLEAN
 
-No pending prompts or incomplete work. All Session B tasks completed:
+All Session C and D tasks completed this session:
 
-1. ✅ Candidate-first call experience — ask-first, pause tolerance, human handoff, transparent AI
-2. ✅ Configurable consent type in vapi.ts
-3. ✅ Reference call Vapi config (reference-vapi.ts)
-4. ✅ reference_calls DB table + verification columns
-5. ✅ POST /api/airecruit/reference route
-6. ✅ Webhook handles reference calls + scores + tier upgrade
-7. ✅ Trust score recompute on reference completion
-8. ✅ Consent UI auto-renders new toggles
+## Session C (Commits 1-5):
+1. ✅ employer-vapi.ts — 5-question past employer verification call config
+2. ✅ employment_verifications table (migration) + /api/airecruit/employer route
+3. ✅ profile-analysis.ts — rule-based gap analysis, campaign readiness, recommended calls
+4. ✅ /api/airecruit/analyse/[caregiverId] — GET endpoint with 1-hour cache
+5. ✅ /api/airecruit/campaigns/from-profile — analysis-driven campaign
+6. ✅ score-employer.ts — Ring LLM scoring for employer verification
+7. ✅ webhook handles employer calls + scoring + trust recompute
 
-## Today's Commits (local, unpushed)
+## Session D (Commits 6-10):
+8. ✅ retry.ts + call_retry_queue table — intelligent backoff (30min, 2hr, 24hr)
+9. ✅ /api/cron/process-call-queue — cron runs every 15 minutes
+10. ✅ vercel.json — cron schedule configured
+11. ✅ /api/airecruit/campaigns/bulk — pause/resume/cancel/status
+12. ✅ quickfill-vapi.ts + /api/airecruit/quickfill-alert — match_time_calls alerts
+13. ✅ CRON_SECRET env var needed (set in Vercel dashboard)
 
-- 2c5a9ff fix(airecruit): wire trust score recompute on reference call completion
-- 398b2ba fix(airecruit): add candidate-first prompt — ask-first, human handoff, one-at-a-time, pause tolerance, transparent AI
-- fcbf5cf fix(airecruit): add silenceTimeout + backgroundDenoising to Vapi config
-- 870c940 fix(build): remove pdf-parse dep + for-caregivers Suspense fix
-- 1f78953 fix(airecruit): ask-first opening — Is now a good time?
-- 2b8f450 feat(airecruit): webhook handles reference calls — scoring, tier upgrade
-- 0b142d1 feat(api): POST /api/airecruit/reference — initiate AI reference verification call
-- b31ac2f feat(db): reference_calls table + call_type column + caregiver_references verification columns
-- 41ce987 feat(airecruit): reference call Vapi config — structured 7-question reference interview
+## DB Tables Created:
+- employment_verifications ✅
+- call_retry_queue ✅
+
+## Commits on develop (9 new this session):
+- ddb3fa6 feat(airecruit): past employer verification Vapi config
+- 8063822 feat(airecruit): past employer call API + employment_verifications
+- 1cdf54a feat(airecruit): profile analysis engine + analyse API
+- c033916 feat(airecruit): campaign from profile
+- d50b429 feat(airecruit): webhook handles employer calls
+- 7ab7874 feat(airecruit): retry logic + call_retry_queue
+- 547367f feat(airecruit): cron processor for retry queue
+- c8b7037 feat(airecruit): bulk campaign actions
+- 8708d15 feat(airecruit): QuickFill alert calls
 
 ## Push Required
 
-Run `/confirm-push` to push all local commits to origin/main.
+Run `/confirm-push` to push all local commits to origin/develop.

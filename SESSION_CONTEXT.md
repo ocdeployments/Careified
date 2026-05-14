@@ -80,6 +80,7 @@ VAPI_API_KEY ✅ | VAPI_ASSISTANT_ID ✅
 ADMIN_CLERK_USER_ID ✅ | BLOB_READ_WRITE_TOKEN ✅
 NEXT_PUBLIC_LOCALE ❌ missing from Vercel
 Vapi CA phone number ❌ not provisioned
+CRON_SECRET ❌ needs to be set in Vercel dashboard
 
 ## WHAT'S BUILT (summary)
 Auth, agency approval, search (20+ filters, 15 demo),
@@ -94,6 +95,15 @@ AIRecruit Session B: reference_calls consent, reference call
   Vapi config (7-question interview), reference_calls table,
   /api/airecruit/reference route, webhook handles reference
   calls, trust score recompute on completion.
+AIRecruit Session C: past_employer_calls consent, employer
+  Vapi config (5-question verification), employment_verifications
+  table, /api/airecruit/employer route, webhook handles employer
+  calls with scoring and trust recompute.
+AIRecruit Session D: retry logic with call_retry_queue table,
+  cron processor (/api/cron/process-call-queue every 15min),
+  QuickFill alert calls (match_time_calls consent),
+  profile analysis engine (/api/airecruit/analyse/[id]),
+  campaign from profile API, bulk campaign actions API.
 Candidate-first call experience: ask-first opening,
   pause tolerance (8s silence), human handoff phrase,
   one-question-at-a-time rule, transparent AI disclosure,
@@ -123,7 +133,7 @@ SESSION_CONTEXT.md: compressed session brain.
 - AIRecruit CA phone number (Romy provisions in Vapi)
 
 ## SAFE REVERTS
-2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
+8708d15 (May 14 - Session C/D) | 2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
 
 ## PATTERNS TO REUSE
 Auth: sessionClaims.role === 'agency' from Clerk
