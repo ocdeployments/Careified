@@ -34,7 +34,8 @@ const isProtectedProfileRoute = createRouteMatcher([
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
-export default clerkMiddleware(async (auth, request) => {
+export default clerkMiddleware(
+  async (auth, request) => {
   // Get the pathname
   const pathname = request.nextUrl.pathname
 
@@ -62,6 +63,8 @@ export default clerkMiddleware(async (auth, request) => {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
+}, {
+  proxyUrl: process.env.CLERK_PROXY_URL,
 })
 
 export const config = {
