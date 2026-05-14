@@ -254,6 +254,7 @@
 | May 8 2026 | — | Rename "matching engine" → "Careified Engine" checklist item |
 | May 8 2026 | Admin sitemap auto-gen, agency sitemap, brand animation strip, flywheel section, profile demo photo, consolidated auth, /profile/build protected, Try Demo removed, demo gated behind signup | QA automation suite, custom auth form, profile visibility toggle, admin soft delete, empty states |
 | May 11 2026 | — | Resend email checklist (domain verified, API key, sending domain, inbox test) |
+| May 13 2026 | Agency Roster CSV import ✅, Claim flow ✅, ProfilePreviewCard new profile fix ✅ | — |
 
 ---
 _Update this table at the end of every session._
