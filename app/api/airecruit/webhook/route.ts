@@ -4,6 +4,7 @@ import { pool } from '@/lib/db'
 import { scoreTranscript } from '@/lib/airecruit/scoring'
 import { scoreReferenceCall } from '@/lib/airecruit/score-reference'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+import { recomputeCaregiverScore } from '@/lib/ratings/recompute-caregiver-score'
 
 function verifyWebhookSignature(req: NextRequest, body: string): boolean {
   const signature = req.headers.get('x-vapi-signature') || req.headers.get('vapi-signature')
@@ -241,6 +242,13 @@ export async function POST(req: NextRequest) {
           [score.would_reengage, score.ai_summary, refCall.reference_id]
         )
 
+        // Recompute trust score
+        try {
+          await recomputeCaregiverScore(refCall.caregiver_id)
+        } catch (err) {
+          console.error('[webhook] recompute score failed:', err)
+        }
+
         // Check for human handoff request
         const handoffPhrases = [
           'prefer to speak with a person',
@@ -276,6 +284,18 @@ export async function POST(req: NextRequest) {
               overall_sentiment: score.overall_sentiment,
               agency_id: refCall.agency_id
             })
+          ]
+        )
+
+        // Audit log for trust score recompute
+        await pool.query(
+          `INSERT INTO "AuditLog" (id, action, target_type, target_id, metadata, created_at)
+           VALUES (gen_random_uuid()::text, $1, $2, $3, $4, NOW())`,
+          [
+            'trust_score_recomputed',
+            'caregiver',
+            refCall.caregiver_id,
+            JSON.stringify({ trigger: 'reference_call_completed' })
           ]
         )
 
