@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
-export default function NotificationBell() {
+function NotificationBellContent() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
   const [unreadCount, setUnreadCount] = useState(0)
@@ -84,5 +85,13 @@ export default function NotificationBell() {
         </span>
       )}
     </div>
+  )
+}
+
+export default function NotificationBell() {
+  return (
+    <ErrorBoundary section="NotificationBell">
+      <NotificationBellContent />
+    </ErrorBoundary>
   )
 }
