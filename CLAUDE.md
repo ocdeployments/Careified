@@ -152,6 +152,50 @@ Tech stack and versions: see ARCHITECTURE.md §1
 - `middleware.ts` (Clerk auth — already configured with public routes)
 - `lib/airecruit/vapi.ts` (edit from Mac terminal only using bash heredoc)
 
+## AI MODEL CONFIGURATION
+
+### Primary Model (all LLM calls)
+Model: upstage/ring-2.6-1t:free
+Provider: OpenRouter
+Env var: OPENROUTER_API_KEY
+
+Use this model for ALL OpenRouter calls:
+- Resume parsing (lib/resume/parse-resume.ts)
+- CSV column mapping (lib/resume/parse-csv.ts)
+- Rating suitability narrative (lib/ratings/compute-suitability.ts)
+- Any future LLM feature
+
+NEVER use minimax/minimax-m2.5 or any other model
+without explicit instruction from Romy.
+If a file currently uses minimax: flag it and update
+to ring-2.6-1t:free in the same session.
+
+### Fallback on credit exhaustion
+If any OpenRouter call returns a 402, 429, or error
+containing "credits", "quota", "rate limit", or "billing":
+1. Log the full error to console with prefix [OPENROUTER CREDITS]
+2. Return a graceful degraded response (do not throw/crash)
+3. IMMEDIATELY notify Romy in the session output:
+   "⚠️ [OPENROUTER CREDITS] Ring model returned a credit/quota
+    error. Top up at https://openrouter.ai/credits or
+    switch model. Affected feature: [feature name]."
+4. Do NOT silently fall back to another model without telling Romy.
+5. Do NOT retry automatically more than once.
+
+### Model audit at session start
+During start session, run:
+```bash
+grep -r "minimax\|gpt-4\|claude-\|openai/" \
+  lib/ app/api/ --include="*.ts" -l 2>/dev/null
+```
+
+If any files found: list them and flag:
+"⚠️ [MODEL AUDIT] These files use a non-Ring model.
+ Update to upstage/ring-2.6-1t:free or get Romy approval."
+
+**KNOWN EXCEPTION:** AIRecruit scoring uses minimax via OpenRouter.
+This is intentional — do not flag lib/airecruit/ files.
+
 ## 4. Database Rules
 
 - All tables use snake_case column names
@@ -347,6 +391,17 @@ npx tsc --noEmit 2>&1 | head -5
    If exists AND status is not CLEAN: read it fully, execute
    pending prompts in order before taking new instructions.
    If missing or CLEAN: continue normally.
+
+9. Run model audit:
+   ```bash
+   grep -r "minimax\|gpt-4\|claude-3\|openai/" \
+   lib/ app/api/ --include="*.ts" -l 2>/dev/null
+   ```
+   AIRecruit scoring uses minimax via OpenRouter —
+   this is a KNOWN EXCEPTION. Do not flag:
+   lib/airecruit/ files using minimax
+
+   Flag everything else that is not ring-2.6-1t:free.
 
 ### Git Rules at Session Start
 ⛔ **At session start, Claude MUST NOT run any of the following:**
