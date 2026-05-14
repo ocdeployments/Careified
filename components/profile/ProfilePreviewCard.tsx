@@ -204,9 +204,9 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'rgba(255,255,255,0.55)', ...ghostStyle(yearsExp.isGhost) }}>
                   <Briefcase size={10} />{yearsExp.value} yrs
                 </span>
-                {languages.value.length > 0 && (
+                {(languages.value ?? []).length > 0 && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'rgba(255,255,255,0.55)', ...ghostStyle(languages.isGhost) }}>
-                    <Globe size={10} />{languages.value.slice(0, 2).join(', ')}
+                    <Globe size={10} />{(languages.value ?? []).slice(0, 2).join(', ')}
                   </span>
                 )}
               </div>
@@ -225,7 +225,7 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
                 <Zap size={9} /> Urgent
               </span>
             )}
-            {(data.willingLiveIn || placementTypes.value.includes('Live-in')) && (
+            {(data.willingLiveIn || (placementTypes.value ?? []).includes('Live-in')) && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: 'rgba(139,92,246,0.15)', color: '#A78BFA', ...ghostStyle(placementTypes.isGhost) }}>
                 <Home size={9} /> Live-in
               </span>
@@ -242,9 +242,9 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
         <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
           {/* Credential badge */}
-          {credentials.value.length > 0 && (
+          {(credentials.value ?? []).length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', ...ghostStyle(credentials.isGhost) }}>
-              {credentials.value.slice(0, 3).map((c, i) => (
+              {(credentials.value ?? []).slice(0, 3).map((c, i) => (
                 <span key={i} style={{ fontSize: '10px', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: '#EFF6FF', color: '#1E3A8A', border: '1px solid #BFDBFE' }}>
                   {c}
                 </span>
@@ -261,28 +261,28 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
           </div>
 
           {/* Specializations */}
-          {specializations.value.length > 0 && (
+          {(specializations.value ?? []).length > 0 && (
             <div style={{ ...ghostStyle(specializations.isGhost) }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>Specialties</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                {specializations.value.slice(0, 4).map((s, i) => (
+                {(specializations.value ?? []).slice(0, 4).map((s, i) => (
                   <span key={i} style={{ fontSize: '10px', padding: '3px 10px', borderRadius: '999px', border: '1px solid rgba(201,151,58,0.35)', color: '#0D1B3E' }}>
                     {s}
                   </span>
                 ))}
-                {specializations.value.length > 4 && (
-                  <span style={{ fontSize: '10px', color: '#94A3B8', padding: '3px' }}>+{specializations.value.length - 4}</span>
+                {(specializations.value ?? []).length > 4 && (
+                  <span style={{ fontSize: '10px', color: '#94A3B8', padding: '3px' }}>+{(specializations.value ?? []).length - 4}</span>
                 )}
               </div>
             </div>
           )}
 
           {/* Services */}
-          {services.value.length > 0 && (
+          {(services.value ?? []).length > 0 && (
             <div style={{ ...ghostStyle(services.isGhost) }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>Services</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-                {services.value.slice(0, 4).map((s, i) => (
+                {(services.value ?? []).slice(0, 4).map((s, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#475569' }}>
                     <CheckCircle size={11} color="#16A34A" />{s}
                   </div>
@@ -296,7 +296,7 @@ export default function ProfilePreviewCard({ data, step }: ProfilePreviewCardPro
             <div style={{ background: '#F8FAFC', borderRadius: '10px', padding: '10px 12px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '4px' }}>Placement</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', ...ghostStyle(placementTypes.isGhost) }}>
-                {placementTypes.value.slice(0, 3).map((t, i) => (
+                {(placementTypes.value ?? []).slice(0, 3).map((t, i) => (
                   <span key={i} style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '5px', background: 'white', border: '1px solid #E2E8F0', color: '#475569' }}>{t}</span>
                 ))}
               </div>
