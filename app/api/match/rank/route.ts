@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     need: MatchNeed
     clientNeedsId?: string
     minScore?: number
+    page?: number
     limit?: number
   }
   try {
@@ -30,7 +31,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
   }
 
-  const { need, clientNeedsId, minScore = 0, limit = 50 } = body
+  const { need, clientNeedsId, minScore = 0, page = 1, limit = 20 } = body
+  const validLimit = Math.min(Math.max(1, limit), 50)
+  const validPage = Math.max(1, page)
+  const offset = (validPage - 1) * validLimit
   if (!need || typeof need !== 'object') {
     return NextResponse.json({ error: 'missing_need' }, { status: 400 })
   }
@@ -85,12 +89,15 @@ export async function POST(req: NextRequest) {
     })
     .filter(r => (r.result.alignment_score ?? 0) >= minScore)
     .sort((a, b) => (b.result.alignment_score ?? 0) - (a.result.alignment_score ?? 0))
-    .slice(0, limit)
+
+  const totalMatched = ranked.length
+  const paginatedResults = ranked.slice(offset, offset + validLimit)
+  const hasMore = offset + validLimit < totalMatched
 
   // Persist results if we have a client_needs_id (not a filter spec)
   if (clientNeedsId) {
     await Promise.all(
-      ranked.map(r =>
+      paginatedResults.map(r =>
         persistMatchScore(pool, r.caregiver.id, clientNeedsId, r.result).catch(err => {
           console.error('persistMatchScore failed:', err)
         })
@@ -99,15 +106,18 @@ export async function POST(req: NextRequest) {
   }
 
   // Count excluded (gates_failed) for transparency
-  const excludedCount = caregivers.length - ranked.length
+  const excludedCount = caregivers.length - totalMatched
 
   return NextResponse.json({
-    scope: ranked[0]?.result.scope ?? 'partial_filter_match',
-    disclaimer: ranked[0]?.result.disclaimer ?? ALIGNMENT_DISCLAIMER,
+    scope: paginatedResults[0]?.result.scope ?? 'partial_filter_match',
+    disclaimer: paginatedResults[0]?.result.disclaimer ?? ALIGNMENT_DISCLAIMER,
     total_caregivers: caregivers.length,
-    matched_count: ranked.length,
+    matched_count: totalMatched,
     excluded_count: excludedCount,
-    results: ranked.map(r => ({
+    page: validPage,
+    limit: validLimit,
+    has_more: hasMore,
+    results: paginatedResults.map(r => ({
       caregiver_id: r.caregiver.id,
       first_name: r.caregiver.first_name,
       last_name: r.caregiver.last_name,
