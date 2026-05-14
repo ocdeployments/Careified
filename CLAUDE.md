@@ -62,6 +62,40 @@ At 💀 (100%+): Do not attempt the task. Instead:
 - `/end-session` — user manually triggering end session; update docs and stop
 - `/reset-counter` — user confirming a new session started; reset your token estimate to 25,000
 
+### Context Limit Protocol
+At every 5th commit, output this line:
+```
+[CONTEXT CHECK] Approx [N] exchanges this session. Recommend new session after 5 more commits.
+```
+
+When Romy pastes a document or file output longer than 200 lines, output:
+```
+[CONTEXT WARNING] Large paste consumed significant context. Recommend wrapping up within 3 commits and starting fresh session.
+```
+
+When Claude estimates fewer than ~20k tokens remaining:
+- STOP current work.
+- Write SESSION_HANDOFF.md immediately with all pending prompts.
+- Tell Romy: "[CONTEXT LIMIT APPROACHING] Writing SESSION_HANDOFF.md now. Start a new session — pending prompts will auto-load."
+- Do not attempt another commit after this warning.
+
+---
+
+## Context Efficiency Rules
+
+1. **Never paste a full file unprompted.** When reading files for audit:
+   - Files <50 lines: paste in full
+   - Files 50-150 lines: paste relevant sections only, summarise rest
+   - Files >150 lines: paste only the specific lines needed, note line numbers for the rest
+
+2. **Audit outputs: always table format.** Never raw code in audit answers unless Romy explicitly asks to see the code.
+
+3. **When multiple files need reading in one prompt:** read all, summarise findings in one table. Do not paste each file sequentially.
+
+4. **File pastes requested by Romy:** paste in full (her request overrides).
+
+5. **After any paste >100 lines:** add "[CONTEXT: large paste — consider new session within 3 commits]" at the end.
+
 ---
 
 ## 1. Project Identity
@@ -306,6 +340,14 @@ node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionStrin
 npx tsc --noEmit 2>&1 | head -5
 ```
 
+8. Check if SESSION_HANDOFF.md exists:
+   ```bash
+   ls SESSION_HANDOFF.md 2>/dev/null
+   ```
+   If exists AND status is not CLEAN: read it fully, execute
+   pending prompts in order before taking new instructions.
+   If missing or CLEAN: continue normally.
+
 ### Git Rules at Session Start
 ⛔ **At session start, Claude MUST NOT run any of the following:**
 - `git add`
@@ -412,6 +454,17 @@ Session start: see §12 above.
 Session is not complete until all items are checked.**
 
 Run in this order:
+
+0. **Write SESSION_HANDOFF.md:**
+   - If pending prompts exist (prompts discussed but not yet committed):
+     Write each prompt in full, self-contained, in order.
+     Format: ## Prompt [N] — [commit message] / [full prompt text]
+   - If nothing pending: write CLEAN status.
+   Always commit SESSION_HANDOFF.md as part of end-session.
+   ```bash
+   git add SESSION_HANDOFF.md
+   git commit -m "chore(session): update SESSION_HANDOFF.md"
+   ```
 
 1. **Step 1 — Update ALL documentation files**
    Run in this exact order:
