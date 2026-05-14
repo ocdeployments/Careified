@@ -1,9 +1,11 @@
 // Careified — Agency Roster Resume Upload + Parse
-// Accepts resume file, extracts structured data, returns for agency review
+// Uses shared lib/resume/parse-resume.ts for full 20-field extraction
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { Pool } from 'pg'
+import { parseResume } from '@/lib/resume/parse-resume'
+import { sendClaimEmail } from '@/lib/email/send-claim-email'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -13,41 +15,71 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 })
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+// Province/state codes by locale (from CSV import)
+const CA_PROVINCES = new Set(['ON', 'BC', 'AB', 'QC', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU'])
+const US_STATES = new Set([
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID',
+  'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN',
+  'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR',
+  'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+])
 
-async function extractTextFromBuffer(buffer: Buffer, mimeType: string): Promise<string> {
-  const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
-  if (mimeType.includes('pdf')) {
-    const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
-    return strings.join(' ')
-  }
-  return raw
+function deriveLocale(provinceState: string | undefined): string {
+  if (!provinceState) return 'CA'
+  const code = provinceState.toUpperCase().trim()
+  if (CA_PROVINCES.has(code) || code === 'CANADA') return 'CA'
+  // Treat plain "CA" as US California per spec
+  if (US_STATES.has(code) || code === 'USA' || code === 'UNITED STATES') return 'US'
+  return 'CA' // Default to CA
 }
 
-export async function POST(req: NextRequest) {
-  // Auth check — requires approved agency
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+// Auth check - matches roster/add pattern
+async function checkApprovedAgency(): Promise<{ agencyId: string; agencyName: string; clerkUserId: string; locale: string } | null> {
+  let userId: string | null | undefined
+  try {
+    const authResult = await auth()
+    userId = authResult.userId
+  } catch (e: any) {
+    if (e?.message?.includes('NEXT_REDIRECT') || e?.code === 'NEXT_REDIRECT') {
+      return null
+    }
+    return null
   }
 
+  if (!userId) return null
+
   try {
-    // Verify agency exists and is approved
-    const { rows: agencyRows } = await pool.query(
-      'SELECT id, name, locale FROM agencies WHERE clerk_user_id = $1',
+    const client = await clerkClient()
+    const user = await client.users.getUser(userId)
+    const role = user.publicMetadata?.role as string
+
+    if (role !== 'agency') return null
+
+    const result = await pool.query(
+      "SELECT id, name, locale FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
       [userId]
     )
 
-    if (agencyRows.length === 0) {
-      return NextResponse.json({ error: 'Agency not found' }, { status: 404 })
-    }
+    if (result.rows.length === 0) return null
 
-    const agency = agencyRows[0]
-    if (agency.status !== 'approved' && agency.status !== 'active') {
-      return NextResponse.json({ error: 'Agency not approved' }, { status: 403 })
+    return {
+      agencyId: result.rows[0].id,
+      agencyName: result.rows[0].name,
+      clerkUserId: userId,
+      locale: result.rows[0].locale || 'CA'
     }
+  } catch {
+    return null
+  }
+}
 
+export async function POST(req: NextRequest) {
+  const agency = await checkApprovedAgency()
+  if (!agency) {
+    return NextResponse.json({ error: 'unauthorized', message: 'Only approved agencies can upload resumes' }, { status: 403 })
+  }
+
+  try {
     // Parse form data
     const formData = await req.formData()
     const file = formData.get('resume') as File | null
@@ -67,97 +99,175 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File too large — max 5MB' }, { status: 400 })
     }
 
-    // Extract text from file
+    // Extract text and parse with shared lib (full 20-field extraction)
     const buffer = Buffer.from(await file.arrayBuffer())
-    const text = await extractTextFromBuffer(buffer, file.type)
+    const parsed = await parseResume(buffer, file.type)
 
-    if (!text || text.trim().length < 50) {
-      return NextResponse.json({ error: 'Could not extract text from file' }, { status: 400 })
-    }
-
-    // Parse with LLM
-    const prompt = `You are a resume parser for a caregiving platform. Extract structured data from this resume text.
-
-Return ONLY valid JSON with these exact fields (use null for missing fields):
-{
-  "firstName": string | null,
-  "lastName": string | null,
-  "email": string | null,
-  "phone": string | null,
-  "city": string | null,
-  "state": string | null,
-  "jobTitle": string | null,
-  "yearsExperience": number | null,
-  "bio": string | null,
-  "languages": string[] | null,
-  "services": string[] | null,
-  "specializations": string[] | null,
-  "credentials": string[] | null,
-  "diagnosisExperience": string[] | null,
-  "adlsPerformed": string[] | null,
-  "certifications": string[] | null,
-  "employers": [{"organisation": string, "title": string, "startYear": string | null, "endYear": string | null, "current": boolean}] | null
-}
-
-Rules:
-- diagnosisExperience: only include from this list: ["Alzheimer's/Dementia","Parkinson's","Stroke Recovery","Diabetes","Mobility/Fall Risk","Hospice/Palliative","Post-Surgical","Incontinence Care","Mental Health","Spinal Cord Injury","Developmental Disability","Pediatric/Special Needs"]
-- adlsPerformed: only include from this list: ["Bathing","Dressing","Grooming","Toileting","Incontinence care","Transfers","Ambulation","Feeding","Meal preparation","Medication reminders","Repositioning","Range of motion","Wound care observation","Hoyer lift","Gait belt use"]
-- services: extract any caregiving services mentioned
-- credentials: extract certifications like PSW, RPN, RN, CNA, HHA etc
-- bio: write a 2-sentence professional summary from the resume content, or null if insufficient info
-- Return ONLY the JSON object, no markdown, no explanation
-
-Resume text:
-${text.slice(0, 8000)}`
-
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://careified.vercel.app',
-        'X-Title': 'Careified Resume Parser',
-      },
-      body: JSON.stringify({
-        model: 'mistralai/mistral-7b-instruct',
-        max_tokens: 1000,
-        temperature: 0.1,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
-
-    if (!response.ok) {
-      const err = await response.text()
-      console.error('OpenRouter error:', err)
-      return NextResponse.json({ error: 'LLM parsing failed' }, { status: 500 })
-    }
-
-    const data = await response.json()
-    const content = data.choices?.[0]?.message?.content || ''
-
-    let parsed: Record<string, any> = {}
-    try {
-      const clean = content.replace(/```json|```/g, '').trim()
-      parsed = JSON.parse(clean)
-    } catch {
-      console.error('JSON parse failed:', content)
+    if (Object.keys(parsed).length === 0) {
       return NextResponse.json({ error: 'Could not parse resume — try filling in manually' }, { status: 422 })
     }
 
-    // Filter out null values
-    const result = Object.fromEntries(
-      Object.entries(parsed).filter(([, v]) => v !== null && v !== undefined && v !== '')
+    // Extract required fields
+    const firstName = parsed.firstName
+    const lastName = parsed.lastName
+    const email = parsed.email?.toLowerCase()
+    const phone = parsed.phone?.replace(/\D/g, '')
+    const provinceState = parsed.state
+
+    // Validation
+    if (!firstName || firstName.length < 2) {
+      return NextResponse.json({ error: 'validation_error', message: 'first_name required (2+ chars)' }, { status: 400 })
+    }
+    if (!lastName || lastName.length < 2) {
+      return NextResponse.json({ error: 'validation_error', message: 'last_name required (2+ chars)' }, { status: 400 })
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'validation_error', message: 'valid email required' }, { status: 400 })
+    }
+    if (!phone || phone.length !== 10) {
+      return NextResponse.json({ error: 'validation_error', message: '10-digit phone required' }, { status: 400 })
+    }
+
+    // Check if email already exists
+    const existingResult = await pool.query(
+      'SELECT id, claim_status, first_name, last_name FROM caregivers WHERE LOWER(email) = $1',
+      [email]
     )
 
-    // Return parsed data for agency review (no DB save yet)
+    if (existingResult.rows.length > 0) {
+      const existing = existingResult.rows[0]
+      if (existing.claim_status !== 'agency_built') {
+        return NextResponse.json({
+          exists: true,
+          caregiver: { id: existing.id, first_name: existing.first_name, last_name: existing.last_name }
+        }, { status: 409 })
+      } else {
+        return NextResponse.json({ already_rostered: true }, { status: 409 })
+      }
+    }
+
+    // Derive locale
+    const locale = deriveLocale(provinceState)
+
+    // Map fields for caregiver record
+    const caregiverFields: Record<string, unknown> = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      claim_status: 'agency_built',
+      source_agency_id: agency.agencyId,
+      created_by_agency_id: agency.agencyId,
+      availability_status: 'available',
+      locale: locale,
+      years_experience: parsed.yearsExperience || null,
+      city: parsed.city || null,
+      province_state: provinceState || null,
+      bio: parsed.bio || null,
+    }
+
+    // Array fields
+    if ((parsed.services && parsed.services.length > 0) || parsed.jobTitle) {
+      const services = [...(parsed.services || []), parsed.jobTitle].filter(Boolean)
+      caregiverFields.services = services
+    }
+    if (parsed.specializations && parsed.specializations.length > 0) {
+      caregiverFields.specializations = parsed.specializations
+    }
+    if (parsed.languages && parsed.languages.length > 0) {
+      caregiverFields.languages = parsed.languages
+    }
+    if (parsed.credentials && parsed.credentials.length > 0) {
+      caregiverFields.credentials = parsed.credentials
+    }
+    if (parsed.certifications && parsed.certifications.length > 0) {
+      caregiverFields.certifications = parsed.certifications
+    }
+    if (parsed.diagnosisExperience && parsed.diagnosisExperience.length > 0) {
+      caregiverFields.diagnosis_experience = parsed.diagnosisExperience
+    }
+    if (parsed.adlsPerformed && parsed.adlsPerformed.length > 0) {
+      caregiverFields.adls_performed = parsed.adlsPerformed
+    }
+
+    // Insert caregiver
+    const insertResult = await pool.query(
+      `INSERT INTO caregivers
+       (first_name, last_name, email, phone, claim_status, source_agency_id, created_by_agency_id,
+        availability_status, locale, years_experience, city, province_state, bio,
+        services, specializations, languages, credentials, certifications, diagnosis_experience, adls_performed)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+       RETURNING id`,
+      [
+        caregiverFields.first_name,
+        caregiverFields.last_name,
+        caregiverFields.email,
+        caregiverFields.phone,
+        caregiverFields.claim_status,
+        caregiverFields.source_agency_id,
+        caregiverFields.created_by_agency_id,
+        caregiverFields.availability_status,
+        caregiverFields.locale,
+        caregiverFields.years_experience,
+        caregiverFields.city,
+        caregiverFields.province_state,
+        caregiverFields.bio,
+        caregiverFields.services,
+        caregiverFields.specializations,
+        caregiverFields.languages,
+        caregiverFields.credentials,
+        caregiverFields.certifications,
+        caregiverFields.diagnosis_experience,
+        caregiverFields.adls_performed,
+      ]
+    )
+
+    const caregiverId = insertResult.rows[0].id
+
+    // Generate claim token
+    const tokenResult = await pool.query(
+      `INSERT INTO caregiver_claim_tokens (caregiver_id, agency_id, email_sent_to, expires_at, status)
+       VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', 'pending')
+       RETURNING token`,
+      [caregiverId, agency.agencyId, email]
+    )
+
+    const token = tokenResult.rows[0].token
+
+    // Send claim email
+    const emailResult = await sendClaimEmail({ to: email, firstName: firstName, agencyName: agency.agencyName, token })
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO audit_log (action, actor_clerk_id, target_id, metadata)
+       VALUES ('roster_upload_resume', $1, $2, $3)`,
+      [
+        agency.clerkUserId,
+        caregiverId,
+        JSON.stringify({ source: 'resume_upload', agency_id: agency.agencyId, email, email_sent: emailResult.sent })
+      ]
+    )
+
+    // TODO: Write employers to separate table (caregiver_work_history) - follow-up commit
+    if (parsed.employers?.length) {
+      console.log('[resume] employers not written:', parsed.employers.length, 'entries')
+    }
+
+    // TODO: Write certifications to caregiver_certifications table - follow-up commit
+    if (parsed.certifications?.length) {
+      console.log('[resume] certifications not written to caregiver_certifications:', parsed.certifications.length, 'entries')
+    }
+
     return NextResponse.json({
       success: true,
-      data: result,
-      agencyId: agency.id,
-      agencyName: agency.name,
-    })
+      caregiver_id: caregiverId,
+      caregiver: caregiverFields,
+      claim_token_sent: emailResult.sent,
+      email_sent_to: email
+    }, { status: 201 })
+
   } catch (err) {
     console.error('roster-upload error:', err)
-    return NextResponse.json({ error: 'Failed to parse resume' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to process resume' }, { status: 500 })
   }
 }

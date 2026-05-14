@@ -1,6 +1,6 @@
 # CAREIFIED — BUILD STATUS
 # Purpose: Current build state — what is done, what is pending, what is broken
-# Updated: May 10 2026
+# Updated: May 13 2026
 # Update trigger: Every session — mandatory
 # Owner: Claude
 # DO NOT DUPLICATE: Specs (CAREIFIED_SPEC.md), roadmap (ROADMAP.md), launch requirements (PRODUCTION_CHECKLIST.md)
@@ -24,6 +24,16 @@
 | 3 (May 10) | Multi-user agency accounts, pipeline status, gold hex fix | DONE | Session 3 |
 | May 11 2026 | Agency Roster Phase 1 (DB + 7 APIs), ContactCard component, Clerk auth NEXT_REDIRECT fix, Phase 2 UI | DONE | 7 commits |
 | May 12 2026 | Verify page agency CTA, LiveBanner (Telegram/WhatsApp/Copy), referred_by referral tracking, /settings stub, agency signup UX fixes | DONE | 9 commits |
+| May 13 2026 | Support Ticketing System: DB tables (support_tickets, ticket_messages), lib/tickets.ts helpers, 3 API routes (create/list/[id]), /agency/support, /caregiver/support, /admin/tickets queue, /settings/data-rights wired to tickets | DONE | 14 commits |
+| May 12 2026 PM | Demo System: /demo/login, /api/demo/session, /api/admin/demo/wipe, sunrise-demo seed script, demo accounts in admin, demo session in agency layout | DONE | 6 commits |
+| May 12 2026 PM | Demo AIRecruit: /demo/airecruit page with screening results, /api/demo/airecruit/results API | DONE | 1 commit |
+| May 12 2026 PM | Photo Upload API: Vercel Blob storage, PhotoUpload component, Step1 wiring | DONE | 7 commits |
+| May 12 2026 PM | Security Hardening: SQL injection fix, rate limits on agency/signup/assistant/tickets, admin auth, confirmation dialogs | DONE | 6 commits |
+| May 13 2026 PM | Agency Roster bulk import: CSV upload, preview, confirm, claim tokens, stub profiles, resume parsing | DONE | 8 commits |
+| May 13 2026 PM | Intelligence: CSV column mapping UI, unknown field capture, platform discovery loop, field recorder | DONE | 4 commits |
+| May 13 2026 PM | Profile: Step=0 routing fix, claim-aware copy, stub pre-fill on claim | DONE | 2 commits |
+| May 13 2026 PM | ProfilePreviewCard fix: Detect new profile (no localStorage) vs resumed — show empty state on new | DONE | 1 commit |
+| May 13 2026 PM | Rating System: DB tables (placement_reviews, caregiver_suitability, caregiver_badges), scoring engine, suitability analysis + LLM narrative, 4 API routes, agency rating form, self-assessment page, SuitabilityCard + BadgeDisplay components | DONE | 10 commits |
 
 ### Phase 1 Complete (May 5 2026)
 All 11 profile builder steps working with Context pattern and three-layer save.
@@ -173,7 +183,8 @@ Stack: Next.js 16.2.3, React 19, Tailwind v4, Prisma 7, pg Pool, Render PostgreS
 
 ## IN PROGRESS / PARTIALLY BUILT
 
-- LiveProfilePreview: component exists but not built (must build with Romy)
+- LiveProfilePreview (ghost-to-live animation): NOT BUILT - decided to keep ghost profile for existing users
+- ProfilePreviewCard: FIXED May 13 2026 - now detects new profile (no localStorage) and shows empty state instead of ghost Maria Santos data
 - PHI encryption: structure exists, columns plain text for now (needs migration before launch)
 - Match Gap Analysis: rule engine built, generates per caregiver-client pair
 - Agency signup validation: JUST FIXED (May 4 2026) - field-level errors now display
@@ -316,6 +327,14 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | match_scores | LIVE | |
 | reference_verification_requests | LIVE | |
 | audit_log | LIVE | |
+| support_tickets | LIVE | Ticketing system |
+| ticket_messages | LIVE | Ticketing system |
+| caregiver_claim_tokens | LIVE | Claim flow tokens |
+| agency_team_members | LIVE | Multi-user agency accounts |
+| field_discovery | LIVE | CSV intelligence + unknown field capture |
+| placement_reviews | LIVE | Rating system - post-placement reviews |
+| caregiver_suitability | LIVE | Rating system - client type suitability |
+| caregiver_badges | LIVE | Rating system - earned badges |
 
 ---
 
@@ -332,6 +351,8 @@ Pre-launch blockers: see PRODUCTION_CHECKLIST.md
 | VAPI_API_KEY | SET |
 | VAPI_ASSISTANT_ID | SET |
 | ADMIN_CLERK_USER_ID | SET |
+| BLOB_READ_WRITE_TOKEN | SET |
+| RESEND_API_KEY | SET |
 
 ---
 
@@ -525,17 +546,24 @@ Goal: Let agencies try Careified before signing up — no login required
 
 Pages:
 - /demo — landing with "Try the platform" CTA
-- /demo/dashboard — agency dashboard with pre-loaded data
+- /demo/login — NEW (May 12 2026) demo entry with "Enter Demo" button
+- /demo/dashboard — agency dashboard with pre-loaded data (via cookie session)
 - /demo/search — search with 5 mock caregivers (client-side filtering) ✅ FIXED May 4 2026
 - /demo/clients — 5 demo clients with match results
 - /demo/clients/[id] — match analysis with gap list
-- /demo/airecruit — AIRecruit campaign demo (no real calls)
+- /demo/airecruit — NEW (May 12 2026) AI screening results demo
+- /api/demo/session — NEW creates demo session cookie (2-hour expiry)
+- /api/admin/demo/wipe/[id] — NEW admin wipe demo agency
 
-Demo data: Same 15 caregivers + 5 clients in DB (production). Demo search uses in-component mock data.
-Demo banner: "You are in demo mode — no real data · Sign up to get started"
-CTA on every page: "Start your free 30-day trial →"
-Session-based (no DB writes in demo mode)
-Guided tour option: step-by-step walkthrough of key features
+Demo data: Seeded via scripts/seed/sunrise-demo.ts
+- 1 demo agency: Sunrise Home Care (is_demo = true)
+- 4 rostered caregivers (agency_built)
+- 3 active clients
+- 2 shortlist entries
+- AIRecruit screening results
+
+Demo session: Cookie-based (careified_demo_session), bypasses Clerk auth via agency/layout.tsx
+Admin panel: Shows demo agencies with caregiver count and wipe button
 
 **BUG FIX (May 4 2026):** /demo/search was calling /api/match/rank which requires auth. Fixed by adding `isDemo` prop to ClientSearch component with 5 mock caregivers.
 

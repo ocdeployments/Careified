@@ -42,11 +42,11 @@ AGENCY SIDE
 - [ ] Caregiver search with 20+ filters ✅ built
 - [ ] Match scoring visible on results ✅ built
 - [ ] Shortlist management ✅ built
-- [ ] Agency Roster — agency builds caregiver profiles on their behalf ❌ not built
-- [ ] CSV caregiver import — agency uploads existing roster ❌ not built
+- [x] Agency Roster — agency builds caregiver profiles on their behalf ✅ BUILT May 13
+- [x] CSV caregiver import — agency uploads existing roster ✅ BUILT May 13
 - [x] Pipeline status on shortlisted caregivers (5 stages) ✅ BUILT May 10
   Stages: Discovered → Contacted → Interviewing → Placed → Inactive
-- [ ] Caregiver contact info visible to approved agencies ❌ not built
+- [x] Caregiver contact info visible to approved agencies ✅ BUILT May 13 (ContactCard component)
 - [x] Demo gated behind agency signup ✅ BUILT (demo environment removed)
 - [x] Multi-user agency accounts (coordinator + owner) ✅ BUILT May 10
 - [x] Locale column added to caregivers + agencies tables ✅ BUILT May 10
@@ -54,7 +54,7 @@ AGENCY SIDE
 
 CAREGIVER SIDE
 - [ ] Profile builder Steps 0-11 ✅ built
-- [ ] Caregiver claims agency-built profile ❌ not built
+- [x] Caregiver claims agency-built profile ✅ BUILT May 13 (claim/[token] page, stub pre-fill)
 - [ ] Profile visible in search after Step 3 ✅ built
 - [ ] Verify slug and ID card ✅ built
 - [ ] "You're now live in search" banner after Step 3 ❌ not built
@@ -143,8 +143,8 @@ Friday May 16
 - [ ] careified.ca domain pointed to Vercel
 - [ ] careified.com domain pointed to Vercel
 
-### WEEK 3: May 24-30 — Caregiver Experience  
-- [ ] Caregiver claims agency-built profile flow
+### WEEK 3: May 24-30 — Caregiver Experience
+- [x] Caregiver claims agency-built profile flow ✅ DONE May 13
 - [ ] Mobile experience audit — PSW on phone test
 - [ ] Profile completion nudge emails
 - [ ] Empty states — every blank screen has message + CTA

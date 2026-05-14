@@ -1,6 +1,6 @@
 # DOC_INDEX.md — Careified Documentation Index
 # Purpose: Single navigation hub — which doc owns which topic
-# Updated: May 9 2026
+# Updated: May 13 2026
 # Owner: Both
 
 ---

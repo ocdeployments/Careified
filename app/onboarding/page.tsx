@@ -1,8 +1,8 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
-import { Check, AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -18,16 +18,12 @@ const COLORS = {
 interface FormData {
   firstName: string
   lastName: string
-  phoneNumber: string
-  phoneVerified: boolean
   ageConfirmed: boolean
 }
 
 interface FormErrors {
   firstName?: string
   lastName?: string
-  phoneNumber?: string
-  otp?: string
   ageConfirmed?: string
 }
 
@@ -38,22 +34,11 @@ export default function OnboardingPage() {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    phoneNumber: '',
-    phoneVerified: false,
     ageConfirmed: false,
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-
-  // OTP state
-  const [otpSent, setOtpSent] = useState(false)
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', ''])
-  const [otpError, setOtpError] = useState('')
-  const [otpLoading, setOtpLoading] = useState(false)
-  const [resendTimer, setResendTimer] = useState(0)
-  const [devCode, setDevCode] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const otpInputsRef: any = []
+  const [loading, setLoading] = useState(false)
 
   // Redirect if not logged in
   useEffect(() => {
@@ -62,22 +47,7 @@ export default function OnboardingPage() {
     }
   }, [authLoaded, userId, router])
 
-  // Resend countdown
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
-      return () => clearTimeout(t)
-    }
-  }, [resendTimer])
-
-  // Validation helpers
-  const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name)
-  const isValidPhone = (phone: string) => {
-    const digits = phone.replace(/\D/g, '')
-    return digits.length === 10 && !/^(\d)\1{9}$/.test(digits) && !digits.startsWith('55500')
-  }
-
-  const canContinue = formData.firstName && formData.lastName && formData.phoneVerified && formData.ageConfirmed
+  const canContinue = formData.firstName && formData.lastName && formData.ageConfirmed
 
   // Handlers
   const handleChange = (field: keyof FormData, value: string | boolean) => {
@@ -97,144 +67,14 @@ export default function OnboardingPage() {
     return undefined
   }
 
-  const validatePhone = (value: string) => {
-    if (!value) return 'Phone number is required'
-    const digits = value.replace(/\D/g, '')
-    if (digits.length !== 10) return 'Please enter a 10-digit number'
-    if (/^(\d)\1{9}$/.test(digits)) return 'Please enter a valid phone number'
-    if (digits.startsWith('55500')) return 'Please enter a real phone number'
-    return undefined
-  }
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 10)
-    if (digits.length === 0) return ''
-    if (digits.length <= 3) return digits
-    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-  }
-
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhone(value)
-    handleChange('phoneNumber', formatted)
-  }
-
-  const handleSendOTP = async () => {
-    const phoneError = validatePhone(formData.phoneNumber)
-    if (phoneError) {
-      setErrors(prev => ({ ...prev, phoneNumber: phoneError }))
-      return
-    }
-
-    setOtpLoading(true)
-    setOtpError('')
-    setDevCode(null)
-
-    try {
-      const res = await fetch('/api/auth/send-phone-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setErrors(prev => ({ ...prev, phoneNumber: data.error }))
-        return
-      }
-
-      setOtpSent(true)
-      setResendTimer(60)
-
-      // In dev mode, show the code
-      if (data.devCode) {
-        setDevCode(data.devCode)
-      }
-
-      // Focus first OTP input
-      setTimeout(() => otpInputsRef.current[0]?.focus(), 100)
-    } catch {
-      setErrors(prev => ({ ...prev, phoneNumber: 'Failed to send code. Please try again.' }))
-    } finally {
-      setOtpLoading(false)
-    }
-  }
-
-  const handleOTPChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return
-
-    const newCode = [...otpCode]
-    newCode[index] = value.slice(-1)
-    setOtpCode(newCode)
-    setOtpError('')
-
-    // Auto-advance
-    if (value && index < 5) {
-      otpInputsRef.current[index + 1]?.focus()
-    }
-
-    // Auto-submit when complete
-    if (newCode.every(d => d) && newCode.join('').length === 6) {
-      verifyOTP(newCode.join(''))
-    }
-  }
-
-  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      otpInputsRef.current[index - 1]?.focus()
-    }
-  }
-
-  const handleOTPPaste = (e: React.ClipboardEvent) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (pasted.length === 6) {
-      const newCode = pasted.split('')
-      setOtpCode(newCode)
-      verifyOTP(pasted)
-    }
-  }
-
-  const verifyOTP = async (code: string) => {
-    setOtpLoading(true)
-    setOtpError('')
-
-    try {
-      const res = await fetch('/api/auth/verify-phone-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: formData.phoneNumber, code }),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setOtpError(data.error || 'Verification failed')
-        setOtpCode(['', '', '', '', '', ''])
-        otpInputsRef.current[0]?.focus()
-        return
-      }
-
-      handleChange('phoneVerified', true)
-    } catch {
-      setOtpError('Failed to verify. Please try again.')
-    } finally {
-      setOtpLoading(false)
-    }
-  }
-
   const handleSubmit = async () => {
-    // Validate all fields
+    // Validate name fields
     const firstNameError = validateName('firstName', formData.firstName)
     const lastNameError = validateName('lastName', formData.lastName)
-    const phoneError = validatePhone(formData.phoneNumber)
 
-    if (firstNameError || lastNameError || phoneError) {
-      setErrors({ firstName: firstNameError, lastName: lastNameError, phoneNumber: phoneError })
-      setTouched({ firstName: true, lastName: true, phoneNumber: true })
-      return
-    }
-
-    if (!formData.phoneVerified) {
-      setOtpError('Please verify your phone number')
+    if (firstNameError || lastNameError) {
+      setErrors({ firstName: firstNameError, lastName: lastNameError })
+      setTouched({ firstName: true, lastName: true })
       return
     }
 
@@ -243,7 +83,9 @@ export default function OnboardingPage() {
       return
     }
 
-    // Save to caregiver record
+    setLoading(true)
+
+    // Save to caregiver record (phone will be collected in profile builder Step 1)
     try {
       const res = await fetch('/api/caregivers/me', {
         method: 'PATCH',
@@ -251,8 +93,6 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
-          phoneNumber: `+1${formData.phoneNumber.replace(/\D/g, '')}`,
-          phoneVerified: true,
           ageConfirmed: true,
         }),
       })
@@ -261,9 +101,11 @@ export default function OnboardingPage() {
         throw new Error('Failed to save')
       }
 
-      router.push('/profile/build?step=1')
+      router.push('/profile/build?step=0')
     } catch {
       setErrors(prev => ({ ...prev, ageConfirmed: 'Failed to save. Please try again.' }))
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -339,124 +181,6 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* Phone Section */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: COLORS.navy, marginBottom: 12 }}>Phone Number</div>
-
-            {formData.phoneVerified ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 14px', background: '#F0FDF4', borderRadius: 8, border: '1px solid #BBF7D0' }}>
-                <Check size={18} color={COLORS.success} />
-                <span style={{ color: COLORS.success, fontWeight: 500 }}>{formData.phoneNumber}</span>
-                <span style={{ fontSize: 12, color: COLORS.gray }}>Verified</span>
-              </div>
-            ) : (
-              <>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: COLORS.gray, fontSize: 15 }}>+1</span>
-                  <input
-                    type="tel"
-                    placeholder="(416) 555-1234"
-                    value={formData.phoneNumber}
-                    onChange={e => handlePhoneChange(e.target.value)}
-                    onBlur={() => setTouched(prev => ({ ...prev, phoneNumber: true }))}
-                    disabled={otpSent}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px 12px 40px',
-                      border: `1.5px solid ${touched.phoneNumber && errors.phoneNumber ? COLORS.error : COLORS.border}`,
-                      borderRadius: 8,
-                      fontSize: 15,
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-                {touched.phoneNumber && errors.phoneNumber && (
-                  <p style={{ fontSize: 12, color: COLORS.error, margin: '6px 0 0' }}>{errors.phoneNumber}</p>
-                )}
-
-                {/* Send Code button */}
-                {!otpSent && (
-                  <button
-                    onClick={handleSendOTP}
-                    disabled={!isValidPhone(formData.phoneNumber) || otpLoading}
-                    style={{
-                      marginTop: 12,
-                      padding: '10px 20px',
-                      background: isValidPhone(formData.phoneNumber) ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : COLORS.border,
-                      color: isValidPhone(formData.phoneNumber) ? COLORS.navy : COLORS.gray,
-                      border: 'none',
-                      borderRadius: 8,
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: isValidPhone(formData.phoneNumber) ? 'pointer' : 'not-allowed',
-                      opacity: otpLoading ? 0.7 : 1,
-                    }}
-                  >
-                    {otpLoading ? 'Sending...' : 'Send Code'}
-                  </button>
-                )}
-
-                {/* OTP Input */}
-                {otpSent && (
-                  <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 13, color: COLORS.gray, marginBottom: 8 }}>Enter 6-digit code</div>
-
-                    {/* Dev mode code display */}
-                    {devCode && (
-                      <div style={{ padding: '8px 12px', background: '#FEF3C7', borderRadius: 6, marginBottom: 12, fontSize: 13, color: '#92400E' }}>
-                        Dev code: <strong>{devCode}</strong>
-                      </div>
-                    )}
-
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }} onPaste={handleOTPPaste}>
-                      {otpCode.map((digit, i) => (
-                        <input
-                          key={i}
-                          ref={(el) => { otpInputsRef.current[i] = el }}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={e => handleOTPChange(i, e.target.value)}
-                          onKeyDown={e => handleOTPKeyDown(i, e)}
-                          style={{
-                            width: 44,
-                            height: 52,
-                            textAlign: 'center',
-                            fontSize: 20,
-                            fontWeight: 600,
-                            border: `1.5px solid ${otpError ? COLORS.error : COLORS.border}`,
-                            borderRadius: 8,
-                            outline: 'none',
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    {otpError && (
-                      <p style={{ fontSize: 12, color: COLORS.error, margin: '12px 0 0', textAlign: 'center' }}>{otpError}</p>
-                    )}
-
-                    {/* Resend */}
-                    <div style={{ marginTop: 12, textAlign: 'center' }}>
-                      {resendTimer > 0 ? (
-                        <span style={{ fontSize: 13, color: COLORS.gray }}>Resend in {resendTimer}s</span>
-                      ) : (
-                        <button
-                          onClick={handleSendOTP}
-                          style={{ background: 'none', border: 'none', color: COLORS.gold, fontSize: 13, fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}
-                        >
-                          Resend code
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
           {/* Age Confirmation */}
           <div style={{ marginBottom: 28 }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
@@ -478,24 +202,24 @@ export default function OnboardingPage() {
           {/* Continue Button */}
           <button
             onClick={handleSubmit}
-            disabled={!canContinue}
+            disabled={!canContinue || loading}
             style={{
               width: '100%',
               padding: '14px 24px',
-              background: canContinue ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : COLORS.border,
-              color: canContinue ? COLORS.navy : COLORS.gray,
+              background: canContinue && !loading ? `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})` : COLORS.border,
+              color: canContinue && !loading ? COLORS.navy : COLORS.gray,
               border: 'none',
               borderRadius: 8,
               fontSize: 15,
               fontWeight: 600,
-              cursor: canContinue ? 'pointer' : 'not-allowed',
+              cursor: canContinue && !loading ? 'pointer' : 'not-allowed',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
             }}
           >
-            Continue
+            {loading ? 'Saving...' : 'Continue'}
             <ArrowRight size={18} />
           </button>
         </div>

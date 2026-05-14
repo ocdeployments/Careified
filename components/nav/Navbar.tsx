@@ -43,6 +43,19 @@ function AuthButton() {
           Data rights
         </Link>
         <Link
+          href="/caregiver/support"
+          style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.8)',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            transition: 'color 0.15s',
+            textDecoration: 'none',
+          }}
+        >
+          Support
+        </Link>
+        <Link
           href="/settings/communications"
           style={{
             fontSize: '12px',
@@ -69,7 +82,7 @@ function AuthButton() {
   return (
     <>
       <Link
-        href="/sign-up"
+        href="/sign-in"
         style={{
           fontSize: '12px',
           fontWeight: 500,
