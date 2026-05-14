@@ -39,11 +39,37 @@ export interface ParsedResume {
 
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType.includes('pdf')) {
-    // Simple text extraction from PDF binary without external dependencies
-    // Extract readable ASCII/UTF-8 strings from the buffer
-    const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
-    const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
-    return strings.join(' ').slice(0, 8000)
+    try {
+      // Use pdf2json for better PDF text extraction
+      const PDFParser = require('pdf2json')
+      return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser()
+        pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+          const text = pdfData.Pages
+            .map((page: any) =>
+              page.Texts
+                .map((t: any) => decodeURIComponent(t.R[0]?.T || ''))
+                .join(' ')
+            )
+            .join('\n')
+          resolve(text.slice(0, 8000))
+        })
+        pdfParser.on('pdfParser_dataError', (err: Error) => {
+          console.error('pdf2json error:', err.message)
+          // Fallback to simple extraction
+          const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
+          const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
+          resolve(strings.join(' ').slice(0, 8000))
+        })
+        pdfParser.parseBuffer(buffer)
+      })
+    } catch (err) {
+      console.error('PDF extraction failed:', err)
+      // Fallback to simple extraction
+      const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
+      const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
+      return strings.join(' ').slice(0, 8000)
+    }
   }
   // DOC/DOCX: utf-8 decode
   return buffer.toString('utf-8').slice(0, 8000)
