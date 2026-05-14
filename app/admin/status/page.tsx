@@ -87,11 +87,13 @@ type QAData = {
 }
 
 export default function StatusPage() {
-  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'|'audit'|'qa'>('pending')
+  const [tab, setTab] = useState<'pending'|'built'|'vapi'|'live'|'security'|'audit'|'qa'|'fields'>('pending')
   const [live, setLive] = useState<LiveData | null>(null)
   const [liveLoading, setLiveLoading] = useState(false)
   const [qaData, setQaData] = useState<QAData | null>(null)
   const [qaLoading, setQaLoading] = useState(false)
+  const [fieldsData, setFieldsData] = useState<{ fields: any[] } | null>(null)
+  const [fieldsLoading, setFieldsLoading] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ critical: true, high: true })
 
   useEffect(() => {
@@ -109,6 +111,13 @@ export default function StatusPage() {
         .then(r => r.json())
         .then(d => { setQaData(d); setQaLoading(false) })
         .catch(() => setQaLoading(false))
+    }
+    if (tab === 'fields') {
+      setFieldsLoading(true)
+      fetch('/api/admin/field-discovery')
+        .then(r => r.json())
+        .then(d => { setFieldsData(d); setFieldsLoading(false) })
+        .catch(() => setFieldsLoading(false))
     }
   }, [tab])
 
@@ -136,6 +145,7 @@ export default function StatusPage() {
     { id: 'qa', label: 'QA Report' },
     { id: 'vapi', label: 'AIRecruit Agents' },
     { id: 'live', label: 'Live Data' },
+    { id: 'fields', label: 'Field Discovery' },
   ] as const
 
   // Architecture Audit - May 6 2026
@@ -535,6 +545,57 @@ export default function StatusPage() {
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'fields' && (
+          <div>
+            {fieldsLoading && <p style={{ color: '#64748B' }}>Loading field discovery data...</p>}
+            {!fieldsLoading && fieldsData && fieldsData.fields.length === 0 && (
+              <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: 40, textAlign: 'center' }}>
+                <div style={{ fontSize: 16, fontWeight: 600, color: N }}>No fields discovered yet</div>
+                <div style={{ fontSize: 13, color: '#64748B', marginTop: 8 }}>Upload CSV files to discover new fields</div>
+              </div>
+            )}
+            {!fieldsLoading && fieldsData && fieldsData.fields.length > 0 && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: 12, overflow: 'hidden' }}>
+                <thead>
+                  <tr style={{ background: '#F8FAFC' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Field Name</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Original Label</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Agencies</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Caregivers</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Sample Values</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>First Seen</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldsData.fields.map((f: any) => {
+                    const statusStyles: Record<string, { background: string; color: string }> = {
+                      new: { background: '#C9973A', color: '#fff' },
+                      under_review: { background: '#0D1B3E', color: '#fff' },
+                      added: { background: '#2D6A4F', color: '#fff' },
+                      rejected: { background: '#6B7280', color: '#fff' },
+                    }
+                    const s = statusStyles[f.status as string] || statusStyles.new
+                    return (
+                      <tr key={f.id} style={{ borderTop: '1px solid #E2E8F0' }}>
+                        <td style={{ padding: '12px 16px', fontSize: 13, fontFamily: 'monospace', color: N }}>{f.field_name}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13, color: N }}>{f.field_label}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, color: N }}>{f.agency_count}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, color: N }}>{f.caregiver_count}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 12, color: '#64748B' }}>{(f.sample_values || []).slice(0, 3).join(', ')}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 12, color: '#64748B' }}>{f.first_seen_at ? new Date(f.first_seen_at).toLocaleDateString() : '-'}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: s.background, color: s.color }}>{f.status}</span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         )}
