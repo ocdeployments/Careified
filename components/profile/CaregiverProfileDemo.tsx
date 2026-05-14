@@ -754,12 +754,12 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   margin: '4px 0 12px',
                 }}
               >
-                {dm.credential || caregiver.credential} — {dm.jobTitle || caregiver.jobTitle}
+                {dm.credential || '—'} — {dm.jobTitle || '—'}
               </div>
 
               {/* Meta row */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 14 }}>
-                <Meta icon={<MapPin size={13} />}>{dm.city || caregiver.city}, {dm.state || caregiver.state}</Meta>
+                <Meta icon={<MapPin size={13} />}>{dm.city || '—'}, {dm.state || '—'}</Meta>
                 <Meta icon={<Briefcase size={13} />}>{dm.yearsExperience ?? caregiver.yearsExperience} yrs experience</Meta>
                 <Meta icon={<Clock size={13} />}>Avg placement: 14 months</Meta>
                 <Meta icon={<Award size={13} />}>Available immediately</Meta>
@@ -771,7 +771,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   color={C.success}
                   bg={'rgba(22,163,74,0.18)'}
                   icon={<Clock size={11} />}
-                  label={dm.availabilityStatus === 'available_now' ? 'Available now' : dm.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' : caregiver.availability}
+                  label={dm.availabilityStatus === 'available_now' ? 'Available now' : dm.availabilityStatus === 'open_to_opportunities' ? 'Open to opportunities' : dm.availabilityStatus || 'Not available'}
                   dot
                 />
                 {caregiver.openToUrgent && (
@@ -809,13 +809,13 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, position: 'relative' }}>
                 <Star size={22} fill={C.gold} color={C.gold} />
                 <span style={{ fontFamily: SERIF, fontSize: 32, color: '#F5F0E8', lineHeight: 1 }}>
-                  {caregiver.trustScore.toFixed(1)}
+                  {(dm.aggregateScore ?? null) !== null ? dm.aggregateScore!.toFixed(1) : '—'}
                 </span>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>/ 5</span>
                 <TooltipInfo />
               </div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>
-                {dm.ratingCount || caregiver.reviewCount} verified reviews · Profile {dm.profileCompletion || caregiver.profileCompletion}% complete
+                {dm.ratingCount || 0} verified reviews · Profile {dm.profileCompletion || 0}% complete
               </div>
             </div>
 
@@ -1294,7 +1294,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Stat label="Hours / week" value={`${minHours}–${maxHours} hrs`} />
               <Stat label="Languages" value="English (native) · Portuguese (fluent)" />
-              <Stat label="Hourly rate" value={`$${dm.hourlyRateMin || caregiver.rateMin}–$${dm.hourlyRateMax || caregiver.rateMax}/hr`} />
+              <Stat label="Hourly rate" value={`$${dm.hourlyRateMin || '—'}–$${dm.hourlyRateMax || '—'}/hr`} />
               <Stat label="Travel radius" value={`${travelRadius} km from ${dm.city || caregiver.city}`} />
               <Stat label="Vehicle" value="Yes — Class G license" />
               <Stat label="Drives clients" value="Yes — willing in own vehicle" />
