@@ -381,11 +381,21 @@ export async function POST(request: Request) {
     }
 
     // Return preview response (NO writes to DB)
+    // Also return raw_rows for field discovery in confirm
+    const rawRows = records.map((r, i) => ({
+      _rowIndex: i,
+      ...Object.keys(r).reduce((acc, key) => {
+        acc[key.toLowerCase().trim()] = r[key]
+        return acc
+      }, {} as Record<string, string>)
+    }))
+
     return NextResponse.json({
       total_rows: records.length,
       valid_rows: validRows,
       invalid_rows: invalidRows,
       warnings,
+      raw_rows: rawRows,
       message: 'Preview only. No profiles created. Confirm to write to database.',
       column_mapping: columnMapping,
       unknown_fields: {
