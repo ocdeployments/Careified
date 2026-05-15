@@ -127,6 +127,7 @@ Test suite: 40 vitest unit/component/integration tests.
 NavBar: shows Sign in/Get started while Clerk loads.
 Clerk proxy: /__clerk rewrite + proxyUrl config.
 Cron: daily process-call-queue at 9am.
+Resume parsing: pdf2json for PDF extraction with fallback.
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
