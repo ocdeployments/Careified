@@ -101,7 +101,25 @@ export async function POST(req: NextRequest) {
 
     // Extract text and parse with shared lib (full 20-field extraction)
     const buffer = Buffer.from(await file.arrayBuffer())
-    const parsed = await parseResume(buffer, file.type)
+    let parsed: any = {}
+
+    try {
+      parsed = await parseResume(buffer, file.type, file.name)
+    } catch (err: any) {
+      if (err.message === 'LEGACY_DOC_UNSUPPORTED') {
+        return NextResponse.json({
+          error: 'unsupported_format',
+          message: "Old .doc files aren't supported. Please save as .docx or PDF."
+        }, { status: 400 })
+      }
+      if (err.message === 'PDF_PARSE_FAILED' || err.message === 'DOCX_PARSE_FAILED') {
+        return NextResponse.json({
+          error: 'parse_failed',
+          message: "We couldn't read this file. Please enter your details manually."
+        }, { status: 422 })
+      }
+      throw err // Re-throw unexpected errors
+    }
 
     if (Object.keys(parsed).length === 0) {
       return NextResponse.json({ error: 'Could not parse resume — try filling in manually' }, { status: 422 })
