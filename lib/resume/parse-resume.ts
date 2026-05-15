@@ -1,6 +1,8 @@
 // Shared resume parser for Careified
 // Uses the full 20-field extraction prompt from caregiver Step 0
 
+import { extractText as unpdfExtract } from 'unpdf'
+import mammoth from 'mammoth'
 import { Pool } from 'pg'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!
@@ -37,46 +39,73 @@ export interface ParsedResume {
   }>
 }
 
-async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
-  if (mimeType.includes('pdf')) {
+async function extractTextFromBuffer(
+  buffer: Buffer,
+  mimeType: string,
+  filename: string
+): Promise<string> {
+  const ext = filename.toLowerCase().split('.').pop() || ''
+
+  // PDF
+  if (mimeType.includes('pdf') || ext === 'pdf') {
     try {
-      // Use pdf2json for better PDF text extraction
-      const PDFParser = require('pdf2json')
-      return new Promise((resolve, reject) => {
-        const pdfParser = new PDFParser()
-        pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-          const text = pdfData.Pages
-            .map((page: any) =>
-              page.Texts
-                .map((t: any) => decodeURIComponent(t.R[0]?.T || ''))
-                .join(' ')
-            )
-            .join('\n')
-          resolve(text.slice(0, 8000))
-        })
-        pdfParser.on('pdfParser_dataError', (err: Error) => {
-          console.error('pdf2json error:', err.message)
-          // Fallback to simple extraction
-          const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
-          const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
-          resolve(strings.join(' ').slice(0, 8000))
-        })
-        pdfParser.parseBuffer(buffer)
-      })
+      const { text } = await unpdfExtract(
+        new Uint8Array(buffer),
+        { mergePages: true }
+      )
+      const joined = Array.isArray(text) ? text.join('\n') : text
+      return joined.slice(0, 8000)
     } catch (err) {
-      console.error('PDF extraction failed:', err)
-      // Fallback to simple extraction
-      const raw = buffer.toString('utf-8', 0, Math.min(buffer.length, 60000))
-      const strings = raw.match(/[^\x00-\x08\x0E-\x1F\x7F-\xFF]{4,}/g) || []
-      return strings.join(' ').slice(0, 8000)
+      console.error('[parseResume] unpdf failed:', err)
+      throw new Error('PDF_PARSE_FAILED')
     }
   }
-  // DOC/DOCX: utf-8 decode
+
+  // DOCX (modern Word)
+  if (
+    mimeType.includes('officedocument.wordprocessingml') ||
+    ext === 'docx'
+  ) {
+    try {
+      const result = await mammoth.extractRawText({ buffer })
+      return result.value.slice(0, 8000)
+    } catch (err) {
+      console.error('[parseResume] mammoth failed:', err)
+      throw new Error('DOCX_PARSE_FAILED')
+    }
+  }
+
+  // DOC (legacy binary) — rejected
+  if (mimeType === 'application/msword' || ext === 'doc') {
+    throw new Error('LEGACY_DOC_UNSUPPORTED')
+  }
+
+  // TXT or unknown — try as plain text
   return buffer.toString('utf-8').slice(0, 8000)
 }
 
-export async function parseResume(fileBuffer: Buffer, mimeType: string): Promise<ParsedResume> {
-  const resumeText = await extractText(fileBuffer, mimeType)
+export async function parseResume(
+  fileBuffer: Buffer,
+  mimeType: string,
+  filename: string
+): Promise<ParsedResume> {
+  let resumeText: string
+
+  try {
+    resumeText = await extractTextFromBuffer(fileBuffer, mimeType, filename)
+  } catch (err: any) {
+    // Bubble up specific errors for caller to handle
+    if (
+      err.message === 'LEGACY_DOC_UNSUPPORTED' ||
+      err.message === 'PDF_PARSE_FAILED' ||
+      err.message === 'DOCX_PARSE_FAILED'
+    ) {
+      throw err
+    }
+    // Other extraction errors — try plain text fallback
+    console.error('[parseResume] extraction failed, trying fallback:', err)
+    resumeText = fileBuffer.toString('utf-8').slice(0, 8000)
+  }
 
   if (!resumeText || resumeText.trim().length < 50) {
     console.error('Could not extract text from file')
