@@ -14,6 +14,7 @@ const pool = new Pool({
 // GET — called after Clerk signup via forceRedirectUrl
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
+  console.log('[set-role] fired — userId:', userId, 'role param:', req.nextUrl.searchParams.get('role'))
   if (!userId) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   }
