@@ -33,7 +33,7 @@ async function getAdminStats() {
     pool.query("SELECT id,first_name,last_name,city,state,profile_completion_pct,verification_tier,created_at FROM caregivers WHERE status='approved' ORDER BY created_at DESC LIMIT 5"),
     pool.query("SELECT modules_enabled FROM agencies WHERE status IN ('approved','active')"),
     pool.query("SELECT COUNT(*) FROM agencies WHERE subscription_status='trial'"),
-    pool.query("SELECT a.id,a.name,a.email,a.created_at, COUNT(c.id) as caregiver_count FROM agencies a LEFT JOIN caregivers c ON c.source_agency_id = a.id WHERE a.is_demo = true GROUP BY a.id"),
+    pool.query("SELECT a.id,a.name,a.created_at, COUNT(c.id) as caregiver_count FROM agencies a LEFT JOIN caregivers c ON c.source_agency_id = a.id WHERE a.is_demo = true GROUP BY a.id"),
   ])
 
   // Module adoption
@@ -189,7 +189,7 @@ export default async function AdminDashboard() {
             <div key={a.id} style={{ padding: '12px 20px', borderBottom: '1px solid #F9FAFB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: N }}>{a.name}</div>
-                <div style={{ fontSize: 11, color: '#94A3B8' }}>{a.email} · Created {new Date(a.created_at).toLocaleDateString('en-CA')}</div>
+                <div style={{ fontSize: 11, color: '#94A3B8' }}>Created {new Date(a.created_at).toLocaleDateString('en-CA')}</div>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: '#64748B' }}>{a.caregiver_count} caregivers</span>
