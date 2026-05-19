@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { ArrowRight } from 'lucide-react'
 
 const COLORS = {
@@ -30,6 +30,7 @@ interface FormErrors {
 export default function OnboardingPage() {
   const router = useRouter()
   const { userId, isLoaded: authLoaded } = useAuth()
+  const { user, isLoaded: userLoaded } = useUser()
 
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -46,6 +47,16 @@ export default function OnboardingPage() {
       router.push('/sign-in')
     }
   }, [authLoaded, userId, router])
+
+  // Check role and redirect agencies
+  useEffect(() => {
+    if (!userLoaded || !user) return
+
+    const role = user.publicMetadata?.role as string
+    if (role === 'agency') {
+      router.replace('/agency/signup')
+    }
+  }, [userLoaded, user, router])
 
   const canContinue = formData.firstName && formData.lastName && formData.ageConfirmed
 
@@ -107,6 +118,23 @@ export default function OnboardingPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Loading state while checking role
+  if (!authLoaded || !userLoaded) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#0D1B3E',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <p style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans' }}>
+          Loading...
+        </p>
+      </div>
+    )
   }
 
   if (!authLoaded) {
