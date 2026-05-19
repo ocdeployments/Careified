@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+import { auth } from '@clerk/nextjs/server'
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth()
   try {
     // Rate limit: 10 requests per IP per hour
     const clientIp = getClientIp(req)
@@ -76,7 +78,7 @@ export async function POST(req: NextRequest) {
     // Insert into agencies table with pending status
     const result = await pool.query(
       `INSERT INTO agencies (
-        name, display_name, business_type, license_number,
+        id, clerk_user_id, name, display_name, business_type, license_number,
         contact_first_name, contact_last_name, contact_email, contact_phone,
         street, city, state, postal_code,
         brand_color, tagline, website_url,
@@ -85,9 +87,10 @@ export async function POST(req: NextRequest) {
         business_registration, insurance_carrier, insurance_policy,
         background_check_provider,
         status, created_at, updated_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'pending',NOW(),NOW())
+      ) VALUES (gen_random_uuid()::text,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,'pending',NOW(),NOW())
       RETURNING id`,
       [
+        userId,
         body.agencyName,
         body.displayName || body.agencyName,
         body.businessType || null,
