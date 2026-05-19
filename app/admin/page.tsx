@@ -2,6 +2,7 @@ import { pool } from '@/lib/db'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import DemoAgenciesList from './DemoAgenciesList'
 
 export const dynamic = 'force-dynamic'
 
@@ -178,29 +179,7 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Demo accounts */}
-      {s.demoAgencies && s.demoAgencies.length > 0 && (
-        <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', overflow: 'hidden', marginBottom: 20 }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: N }}>Demo Accounts</span>
-            <span style={{ fontSize: 11, color: '#94A3B8' }}>{s.demoAgencies.length} demo agency</span>
-          </div>
-          {s.demoAgencies.map((a: any) => (
-            <div key={a.id} style={{ padding: '12px 20px', borderBottom: '1px solid #F9FAFB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: N }}>{a.name}</div>
-                <div style={{ fontSize: 11, color: '#94A3B8' }}>Created {new Date(a.created_at).toLocaleDateString('en-CA')}</div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: '#64748B' }}>{a.caregiver_count} caregivers</span>
-                <form action={`/api/admin/demo/wipe/${a.id}`} method="POST" onSubmit={(e) => { if (!confirm('Are you sure? This cannot be undone.')) e.preventDefault() }}>
-                  <button type="submit" style={{ fontSize: 11, padding: '4px 10px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, color: '#DC2626', cursor: 'pointer', fontWeight: 600 }}>Wipe</button>
-                </form>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <DemoAgenciesList agencies={s.demoAgencies} />
 
       {/* Recent caregivers */}
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
