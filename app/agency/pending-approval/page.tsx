@@ -1,89 +1,140 @@
-import { Clock, Mail, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
+'use client'
 
 export default function PendingApprovalPage() {
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-10">
-      <div className="max-w-md w-full text-center">
-
-        {/* Icon */}
-        <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-gold to-gold-warm flex items-center justify-center mx-auto mb-6">
-          <Clock size={32} className="text-navy" />
+    <div style={{
+      minHeight: '100vh',
+      background: '#0D1B3E',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 24px',
+      fontFamily: '"DM Sans", sans-serif',
+    }}>
+      <div style={{
+        maxWidth: '520px',
+        width: '100%',
+        textAlign: 'center',
+      }}>
+        {/* Logo */}
+        <div style={{
+          fontFamily: '"DM Serif Display", serif',
+          fontSize: '24px',
+          color: '#C9973A',
+          marginBottom: '40px',
+        }}>
+          Careified
         </div>
 
-        {/* Heading */}
-        <h1 className="font-serif text-3xl font-normal text-navy tracking-tight mb-3">
-          Application received
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: '"DM Serif Display", serif',
+          fontSize: '36px',
+          color: '#FFFFFF',
+          marginBottom: '16px',
+        }}>
+          Application Received
         </h1>
-        <p className="text-[15px] text-slate-500 leading-relaxed mb-8">
-          Your agency account is under review. We verify all agencies before granting
-          access to caregiver profiles. You will receive an email once your account is approved.
+
+        {/* Subtext */}
+        <p style={{
+          fontSize: '16px',
+          color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.6,
+          marginBottom: '32px',
+        }}>
+          We&apos;re reviewing your agency profile. You&apos;ll receive an email once approved — usually within 1 business day.
         </p>
 
-        {/* Status card */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-6 text-left">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
-              <Clock size={16} className="text-gold" />
+        {/* Status Card */}
+        <div style={{
+          background: '#FFFFFF',
+          borderRadius: '16px',
+          padding: '32px',
+          textAlign: 'left',
+          marginBottom: '32px',
+        }}>
+          {/* Status indicator */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '24px',
+          }}>
+            <div style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: '#C9973A',
+            }} />
+            <span style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#C9973A',
+            }}>
+              Under Review
+            </span>
+          </div>
+
+          {/* What happens next */}
+          <div>
+            <div style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#0D1B3E',
+              marginBottom: '16px',
+            }}>
+              What happens next
             </div>
-            <div>
-              <div className="text-sm font-semibold text-navy">Review in progress</div>
-              <div className="text-xs text-slate-500">Typically 1–2 business days</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[
+                'We verify your agency details',
+                'You receive an approval email',
+                'Full platform access unlocked',
+              ].map((step, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: '#0D1B3E',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#FFFFFF',
+                      fontWeight: 600,
+                    }}>
+                      {i + 1}
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#64748B',
+                    lineHeight: 1.5,
+                  }}>
+                    {step}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Mail size={16} className="text-slate-400" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-navy">Email notification</div>
-              <div className="text-xs text-slate-500">
-                We&apos;ll email you at the address you registered with when your account is approved.
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* What happens next */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-8 text-left">
-          <h2 className="text-sm font-bold text-navy mb-3">What happens next?</h2>
-          <ul className="space-y-2">
-            {[
-              'Our team reviews your agency details',
-              'We verify your license and contact information',
-              'You receive an approval email with login instructions',
-              'Full access to caregiver search and matching',
-            ].map((step, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs text-slate-600">
-                <CheckCircle size={14} className="text-green-500 flex-shrink-0 mt-0.5" />
-                {step}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Preview the platform card */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-6 text-left">
-          <p className="text-xs text-slate-500 mb-3">
-            While you wait — preview the platform
-          </p>
-          <p className="text-xs text-slate-600 mb-4">
-            See exactly what you'll have access to once approved.
-          </p>
-          <Link
-            href="/agency/signup"
-            className="inline-block px-4 py-2 rounded-lg border border-[#C9973A] text-[#C9973A] text-sm font-semibold bg-transparent hover:bg-[#C9973A] hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#C9973A] focus-visible:outline-none"
-          >
-            Launch Preview
-          </Link>
-        </div>
-
-        <Link
-          href="/"
-          className="inline-block px-6 py-2.5 rounded-xl bg-navy text-white text-sm font-semibold hover:bg-navy-light transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+        {/* Contact link */}
+        <a
+          href="/contact"
+          style={{
+            fontSize: '13px',
+            color: 'rgba(255,255,255,0.5)',
+            textDecoration: 'none',
+          }}
         >
-          Back to home
-        </Link>
+          Questions? Contact us
+        </a>
       </div>
     </div>
   )
