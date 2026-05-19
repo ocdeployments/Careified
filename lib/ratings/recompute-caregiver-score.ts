@@ -4,7 +4,11 @@ import { Pool } from 'pg'
 import { computeTrustScore, PlacementReview, TrustScoreResult } from './compute-trust-score'
 import { computeSuitabilityScores, generateSuitabilityNarrative, CaregiverProfile } from './compute-suitability'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL!, ssl: { rejectUnauthorized: false } })
+const pool = new Pool({ connectionString: process.env.DATABASE_URL!, ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true })
 
 export async function recomputeCaregiverScore(caregiverId: string): Promise<void> {
   // 1. Fetch all approved placement reviews for caregiver

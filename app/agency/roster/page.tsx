@@ -5,7 +5,11 @@ import { redirect } from 'next/navigation'
 import { Pool } from 'pg'
 import RosterClient from './RosterClient'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true })
 
 async function getApprovedAgency(): Promise<{ id: string; name: string } | null> {
   try {
