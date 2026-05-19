@@ -6,6 +6,10 @@ import { notifyReviewSubmitted } from '@/lib/notifications'
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 })
 
 export async function POST(req: NextRequest) {

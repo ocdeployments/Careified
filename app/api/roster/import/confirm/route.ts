@@ -6,7 +6,11 @@ import { sendClaimEmail } from '@/lib/email/send-claim-email'
 import { recordUnknownFields } from '@/lib/intelligence/field-discovery'
 import { extractUnknownFields, CsvColumnMap } from '@/lib/resume/parse-csv'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true })
 
 // Allowed caregiver roles per spec
 const ALLOWED_ROLES = ['PSW', 'HCA', 'DSW', 'Companion', 'LiveIn', 'Other']
