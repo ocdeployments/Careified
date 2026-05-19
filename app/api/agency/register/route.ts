@@ -22,9 +22,6 @@ export async function POST(req: NextRequest) {
     if (!body.agencyName?.trim()) {
       errors.agencyName = 'Agency name is required'
     }
-    if (!body.businessType) {
-      errors.businessType = 'Business type is required'
-    }
     if (!body.contactFirstName?.trim()) {
       errors.contactFirstName = 'First name is required'
     }
@@ -36,26 +33,11 @@ export async function POST(req: NextRequest) {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.contactEmail)) {
       errors.contactEmail = 'Invalid email format'
     }
-    if (!body.contactPhone?.trim()) {
-      errors.contactPhone = 'Phone is required'
-    }
     if (!body.city?.trim()) {
       errors.city = 'City is required'
     }
     if (!body.state && !body.province) {
       errors.province = 'Province is required'
-    }
-    if (!body.streetAddress?.trim()) {
-      errors.streetAddress = 'Street address is required'
-    }
-    if (!body.postalCode?.trim()) {
-      errors.postalCode = 'Postal code is required'
-    }
-    if (!body.serviceAreas || body.serviceAreas.length === 0) {
-      errors.serviceAreas = 'Select at least one service area'
-    }
-    if (!body.careTypes || body.careTypes.length === 0) {
-      errors.careTypes = 'Select at least one care type'
     }
 
     if (Object.keys(errors).length > 0) {
