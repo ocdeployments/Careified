@@ -7,6 +7,10 @@ import { isWithinCallingHours } from './calling-hours'
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 })
 
 export interface RetryConfig {

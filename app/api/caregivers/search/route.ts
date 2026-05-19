@@ -5,9 +5,13 @@ import { getLocale } from '@/lib/locale/get-locale'
 // Use shared pool from lib/db.ts - NO hardcoded credentials
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' 
+  ssl: process.env.NODE_ENV === 'production'
     ? { rejectUnauthorized: true }
-    : { rejectUnauthorized: false }
+    : { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 })
 
 async function handleSearch(request: NextRequest) {

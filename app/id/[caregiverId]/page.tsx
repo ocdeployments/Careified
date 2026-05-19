@@ -5,6 +5,10 @@ import QRCodeDisplay from '@/components/id/QRCodeDisplay'
 const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 })
 
 export const dynamic = 'force-dynamic'

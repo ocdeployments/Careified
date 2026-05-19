@@ -13,6 +13,10 @@ export const maxDuration = 30
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 })
 
 // Province/state codes by locale (from CSV import)
