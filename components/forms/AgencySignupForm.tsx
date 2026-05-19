@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { toast } from 'sonner'
 
 const N = '#0D1B3E'
@@ -54,6 +55,7 @@ interface FormData {
   websiteUrl: string
   contactFirstName: string
   contactLastName: string
+  contactEmail: string
   contactPhone: string
   city: string
   province: string
@@ -67,6 +69,7 @@ const EMPTY: FormData = {
   websiteUrl: '',
   contactFirstName: '',
   contactLastName: '',
+  contactEmail: '',
   contactPhone: '',
   city: '',
   province: '',
@@ -76,9 +79,20 @@ const EMPTY: FormData = {
 
 export function AgencySignupForm() {
   const router = useRouter()
+  const { user, isLoaded: userLoaded } = useUser()
   const [form, setForm] = useState<FormData>(EMPTY)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+
+  // Pre-fill email from Clerk
+  useEffect(() => {
+    if (userLoaded && user?.primaryEmailAddress) {
+      const email = user.primaryEmailAddress.emailAddress
+      if (!form.contactEmail) {
+        set('contactEmail', email)
+      }
+    }
+  }, [userLoaded, user])
 
   function set<K extends keyof FormData>(key: K, val: FormData[K]) {
     setForm(f => ({ ...f, [key]: val }))
@@ -88,11 +102,11 @@ export function AgencySignupForm() {
   function validate(): boolean {
     const e: Record<string, string> = {}
     if (!form.agencyName.trim()) e.agencyName = 'Agency name is required'
-    if (!form.businessType) e.businessType = 'Agency type is required'
     if (!form.contactFirstName.trim()) e.contactFirstName = 'First name is required'
     if (!form.contactLastName.trim()) e.contactLastName = 'Last name is required'
-    if (!form.contactPhone.trim()) e.contactPhone = 'Phone number is required'
-    else {
+    if (!form.contactEmail.trim()) e.contactEmail = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) e.contactEmail = 'Invalid email'
+    if (form.contactPhone) {
       const phoneDigits = form.contactPhone.replace(/\D/g, '')
       if (phoneDigits.length !== 10) {
         e.contactPhone = 'Please enter a valid 10-digit phone number'
@@ -117,11 +131,12 @@ export function AgencySignupForm() {
         body: JSON.stringify({
           agencyName: form.agencyName,
           displayName: form.agencyName,
-          businessType: form.businessType,
+          businessType: form.businessType || null,
           websiteUrl: form.websiteUrl || null,
           contactFirstName: form.contactFirstName,
           contactLastName: form.contactLastName,
-          contactPhone: form.contactPhone,
+          contactEmail: form.contactEmail,
+          contactPhone: form.contactPhone || null,
           city: form.city,
           state: form.province,
           serviceAreas: [form.city],
@@ -225,7 +240,19 @@ export function AgencySignupForm() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Phone number <span style={{ color: '#EF4444' }}>*</span></label>
+            <label style={labelStyle}>Email <span style={{ color: '#EF4444' }}>*</span></label>
+            <input
+              style={errors.contactEmail ? inputErrorStyle : inputStyle}
+              type="email"
+              value={form.contactEmail}
+              onChange={e => set('contactEmail', e.target.value)}
+              placeholder="you@agency.com"
+            />
+            {errors.contactEmail && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{errors.contactEmail}</p>}
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Phone number</label>
             <input
               style={errors.contactPhone ? inputErrorStyle : inputStyle}
               type="tel"
