@@ -1,26 +1,34 @@
----
-name: session-handoff-may-14-pdf-fix
-description: PDF extraction fix using pdf2json
-type: project
----
-
-# SESSION_HANDOFF.md — May 14 2026
+# SESSION_HANDOFF.md — May 19 2026
 
 ## Status: CLEAN
 
 Work completed this session:
 
-1. ✅ PDF extraction fix: replaced pdf-parse with pdf2json
-   - Removed unused pdf-parse (native deps fail on Vercel)
-   - Added pdf2json for better PDF text extraction
-   - Falls back to simple regex on error
-   - Added to serverExternalPackages in next.config.ts
+1. fix(resume): unpdf + mammoth for serverless-safe PDF/DOCX parsing (fa790ad)
+2. fix(onboarding): agency routes to /agency/signup not /profile/build (66e009c)
+3. fix(db): pool resilience settings across all 57 API routes (c05e6e0)
+4. fix(sign-up): role selection screen when no role param (325ab1f)
+5. fix(agency): pending-approval page — inline styles, proper content (a3326e2)
+6. fix(sign-up): push role param to URL on card selection (e1518d6)
+7. chore: remove accidental Success! file (abe792b)
+8. Render DB upgraded from free (suspended) to Starter $7/mo
+9. careified.com domain confirmed live in production
+10. CLERK_PROXY_URL fixed — was missing https:// prefix
+11. NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL deleted from Vercel
+12. NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL set to /api/auth/role-redirect
 
-## Commits on develop (2 new this session)
+## Pending next session:
+- Merge develop → main (all fixes above)
+- Verify resume parse works on Vercel (PDF + DOCX upload test)
+- Verify agency signup full flow end-to-end on production
+- Run Playwright E2E tests (caregiver + agency flows)
+- /agency/pending-approval — verify not blank after deploy
+- Homepage redesign (brief written, ready to build)
 
-- 8d34bb7 fix(resume): use pdf2json for PDF text extraction
-- f806f83 fix(resume): remove unused pdf-parse dependency
+## Commits on develop not yet on main:
+fa790ad, b86d0a5, 8d34bb7, f806f83 (pdf2json reverts),
+66e009c, 07f04bc, e56995b, 1e10cb9, c05e6e0, c8b0d41,
+325ab1f, abe792b, a3326e2, e1518d6
 
-## Push Required
-
-Run `/confirm-push` to push all local commits to origin/develop.
+## Safe reverts:
+5f6e626 (pre-session stable point on origin/develop)

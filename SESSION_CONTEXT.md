@@ -81,7 +81,9 @@ ADMIN_CLERK_USER_ID ✅ | BLOB_READ_WRITE_TOKEN ✅
 NEXT_PUBLIC_LOCALE ❌ missing from Vercel
 Vapi CA phone number ❌ not provisioned
 CRON_SECRET ❌ needs to be set in Vercel dashboard
-CLERK_PROXY_URL ✅ (added this session)
+CLERK_PROXY_URL ✅ (fixed https:// prefix)
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL ✅ → /api/auth/role-redirect
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL ✅ deleted
 
 ## WHAT'S BUILT (summary)
 Auth, agency approval, search (20+ filters, 15 demo),
@@ -127,12 +129,16 @@ Test suite: 40 vitest unit/component/integration tests.
 NavBar: shows Sign in/Get started while Clerk loads.
 Clerk proxy: /__clerk rewrite + proxyUrl config.
 Cron: daily process-call-queue at 9am.
-Resume parsing: pdf2json for PDF extraction with fallback.
+Resume parsing: unpdf + mammoth for serverless PDF/DOCX extraction.
+Role-based signup routing: caregiver → /profile/build, agency → /agency/signup.
+Role selection screen when no role param in URL.
+DB pool resilience: max:3, idleTimeoutMillis:10000, connectionTimeoutMillis:10000, allowExitOnIdle:true — 57 files.
+Render DB upgraded from free to Starter $7/mo.
+careified.com domain live in production.
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
 - Clerk production keys (needs upgrade before June 15)
-- careified.ca domain (not pointed to Vercel)
 - Family portal Phase 1
 - Copy session (all placeholder copy)
 - AIRecruit CA phone number (Romy provisions in Vapi)
