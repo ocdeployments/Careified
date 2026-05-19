@@ -23,14 +23,29 @@ export async function GET(req: NextRequest) {
     const role = user.publicMetadata?.role as string
 
     if (role === 'agency') {
-      // Check approval status
       const { rows } = await pool.query(
-        'SELECT status FROM agencies WHERE clerk_user_id = $1',
+        'SELECT status, name FROM agencies WHERE clerk_user_id = $1',
         [userId]
       )
-      if (rows.length === 0 || rows[0].status !== 'approved') {
+
+      // No agency record yet — create one and send to signup form
+      if (rows.length === 0) {
+        return NextResponse.redirect(new URL('/agency/signup', req.url))
+      }
+
+      const agency = rows[0]
+
+      // Agency exists but hasn't completed registration (no name)
+      if (!agency.name || agency.name.trim() === '') {
+        return NextResponse.redirect(new URL('/agency/signup', req.url))
+      }
+
+      // Agency registered but not approved yet
+      if (agency.status !== 'approved') {
         return NextResponse.redirect(new URL('/agency/pending-approval', req.url))
       }
+
+      // Approved agency → dashboard
       return NextResponse.redirect(new URL('/agency/dashboard', req.url))
     }
 
