@@ -4,7 +4,11 @@ import { Pool } from 'pg'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true
 })
 
 // GET — called after Clerk signup via forceRedirectUrl
@@ -15,7 +19,6 @@ export async function GET(req: NextRequest) {
   }
 
   const role = req.nextUrl.searchParams.get('role')
-  const redirect = req.nextUrl.searchParams.get('redirect') || '/'
 
   if (!role || !['agency', 'caregiver'].includes(role)) {
     return NextResponse.redirect(new URL('/onboarding', req.url))
@@ -41,7 +44,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.redirect(new URL(redirect, req.url))
+    if (role === 'caregiver') {
+      return NextResponse.redirect(new URL('/profile/build?step=0', req.url))
+    }
+    if (role === 'agency') {
+      return NextResponse.redirect(new URL('/agency/signup', req.url))
+    }
   } catch (error) {
     console.error('set-role GET error:', error)
     return NextResponse.redirect(new URL('/onboarding', req.url))
@@ -80,7 +88,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, role })
+    return NextResponse.json({
+      success: true,
+      role,
+      redirect: role === 'agency' ? '/agency/signup' : '/profile/build?step=0'
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     return NextResponse.json({ error: 'Failed to set role', detail: message }, { status: 500 })
