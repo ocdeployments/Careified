@@ -10,7 +10,11 @@ const pool = new Pool({
   connectionString,
   ssl: process.env.NODE_ENV === 'production'
     ? { rejectUnauthorized: true }
-    : { rejectUnauthorized: false }
+    : { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  allowExitOnIdle: true,
 });
 
 // Column allowlist to prevent SQL injection
