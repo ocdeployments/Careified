@@ -17,6 +17,7 @@ function SignUpContent() {
 
   const handleRoleSelect = (selected: 'caregiver' | 'agency') => {
     setSelectedRole(selected)
+    window.history.replaceState(null, '', `/sign-up?role=${selected}`)
   }
 
   return (
