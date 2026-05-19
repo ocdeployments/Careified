@@ -12,6 +12,7 @@ export default async function OnboardingPage() {
   const client = await clerkClient()
   const user = await client.users.getUser(userId)
   const role = user.publicMetadata?.role as string
+  console.log('[onboarding] userId:', userId, 'raw role:', JSON.stringify(user.publicMetadata))
 
   if (role === 'agency') {
     redirect('/agency/signup')
