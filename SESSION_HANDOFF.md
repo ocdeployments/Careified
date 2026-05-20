@@ -4,31 +4,29 @@
 
 Work completed this session:
 
-1. fix(resume): unpdf + mammoth for serverless-safe PDF/DOCX parsing (fa790ad)
-2. fix(onboarding): agency routes to /agency/signup not /profile/build (66e009c)
-3. fix(db): pool resilience settings across all 57 API routes (c05e6e0)
-4. fix(sign-up): role selection screen when no role param (325ab1f)
-5. fix(agency): pending-approval page — inline styles, proper content (a3326e2)
-6. fix(sign-up): push role param to URL on card selection (e1518d6)
-7. chore: remove accidental Success! file (abe792b)
-8. Render DB upgraded from free (suspended) to Starter $7/mo
-9. careified.com domain confirmed live in production
-10. CLERK_PROXY_URL fixed — was missing https:// prefix
-11. NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL deleted from Vercel
-12. NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL set to /api/auth/role-redirect
+1. fix(onboarding): server-side role check before rendering form (0b88147)
+2. fix(onboarding): redirect agency users to /agency/signup
+3. fix(admin): correct table alias for email column in query (df6d647)
+4. fix(admin): extract demo agencies form to client component (f87111a)
+5. fix(auth): route new agencies to /agency/signup before pending-approval (d87a146)
+6. fix(agency-register): add generated id and clerk_user_id to INSERT (deca438)
+7. fix(agency-signup): simplify to single-step essential fields only (c01fd7e)
+8. fix(agency-signup): align form fields with API validation (16bcab4)
+9. fix(agency-register): upsert on clerk_user_id conflict (727f842)
+10. Debug logging added to /onboarding and /api/onboarding/set-role
+11. careified.com domain live and stable
+12. Render DB Starter confirmed working
 
-## Pending next session:
-- Merge develop → main (all fixes above)
-- Verify resume parse works on Vercel (PDF + DOCX upload test)
-- Verify agency signup full flow end-to-end on production
-- Run Playwright E2E tests (caregiver + agency flows)
-- /agency/pending-approval — verify not blank after deploy
-- Homepage redesign (brief written, ready to build)
+## Pending next session (priority order):
+1. Role-based route protection in proxy.ts (agencies blocked from caregiver routes and vice versa)
+2. Fix /agency/pending-approval blank page
+3. Remove debug console.log from /onboarding
+4. Fix NotificationBell React error #310
+5. Verify resume parse works on Vercel (PDF + DOCX)
+6. Test full caregiver flow end-to-end
+7. Test full agency flow post-approval
+8. Post-approval email to agency
+9. Playwright E2E tests
 
-## Commits on develop not yet on main:
-fa790ad, b86d0a5, 8d34bb7, f806f83 (pdf2json reverts),
-66e009c, 07f04bc, e56995b, 1e10cb9, c05e6e0, c8b0d41,
-325ab1f, abe792b, a3326e2, e1518d6
-
-## Safe reverts:
-5f6e626 (pre-session stable point on origin/develop)
+## Safe revert:
+b638da1 (last known working state - agency register upsert)

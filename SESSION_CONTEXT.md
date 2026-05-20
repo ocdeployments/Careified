@@ -132,6 +132,9 @@ Cron: daily process-call-queue at 9am.
 Resume parsing: unpdf + mammoth for serverless PDF/DOCX extraction.
 Role-based signup routing: caregiver → /profile/build, agency → /agency/signup.
 Role selection screen when no role param in URL.
+Agency signup flow: server-side role check → /agency/signup → /agency/pending-approval (upsert on clerk_user_id).
+Admin dashboard: demo agencies list extracted to client component.
+Render DB: Starter plan $7/mo, no suspensions.
 DB pool resilience: max:3, idleTimeoutMillis:10000, connectionTimeoutMillis:10000, allowExitOnIdle:true — 57 files.
 Render DB upgraded from free to Starter $7/mo.
 careified.com domain live in production.
