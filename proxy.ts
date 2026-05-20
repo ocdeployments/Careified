@@ -78,6 +78,18 @@ export default clerkMiddleware(
     }
   }
 
+  // Explicitly protect /opportunities, /caregiver/, /profile/ routes
+  if (pathname.startsWith('/opportunities') ||
+      pathname.startsWith('/caregiver/') ||
+      pathname.startsWith('/profile/')) {
+    const { userId: uid } = await auth()
+    if (!uid) {
+      return NextResponse.redirect(
+        new URL('/sign-in?redirect_url=' + encodeURIComponent(pathname), request.url)
+      )
+    }
+  }
+
   // Public routes - allow without auth
   if (isPublicRoute(request)) return
 
@@ -88,7 +100,7 @@ export default clerkMiddleware(
   }
 
   // Role-based route protection
-  const role = (sessionClaims?.metadata as any)?.role as string | undefined
+  const role = (sessionClaims?.publicMetadata as any)?.role as string | undefined
 
   // Block agencies from caregiver routes
   if (isCaregiverRoute(request) && role === 'agency') {
