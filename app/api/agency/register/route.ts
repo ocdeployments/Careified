@@ -57,46 +57,41 @@ export async function POST(req: NextRequest) {
       postalCode,
     } = body
 
-    // Insert into agencies table with pending status
+    // Upsert agency record (may already exist from set-role)
     const result = await pool.query(
       `INSERT INTO agencies (
-        id, clerk_user_id, name, display_name, business_type, license_number,
+        id, clerk_user_id, name, display_name, business_type,
         contact_first_name, contact_last_name, contact_email, contact_phone,
-        street, city, state, postal_code,
-        brand_color, tagline, website_url,
-        service_areas, care_types, coordinator_count,
-        recruitment_methods, current_tools,
-        business_registration, insurance_carrier, insurance_policy,
-        background_check_provider,
-        status, created_at, updated_at
-      ) VALUES (gen_random_uuid()::text,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,'pending',NOW(),NOW())
+        city, state, website_url, status, created_at, updated_at
+      ) VALUES (
+        gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+        'pending', NOW(), NOW()
+      )
+      ON CONFLICT (clerk_user_id) DO UPDATE SET
+        name = EXCLUDED.name,
+        display_name = EXCLUDED.display_name,
+        business_type = EXCLUDED.business_type,
+        contact_first_name = EXCLUDED.contact_first_name,
+        contact_last_name = EXCLUDED.contact_last_name,
+        contact_email = EXCLUDED.contact_email,
+        contact_phone = EXCLUDED.contact_phone,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        website_url = EXCLUDED.website_url,
+        updated_at = NOW()
       RETURNING id`,
       [
         userId,
         body.agencyName,
         body.displayName || body.agencyName,
         body.businessType || null,
-        body.licenseNumber || null,
         body.contactFirstName,
         body.contactLastName,
         body.contactEmail,
-        body.contactPhone,
-        body.streetAddress || null,
+        body.contactPhone || null,
         body.city,
         body.state || body.province,
-        body.postalCode || null,
-        body.brandColor || '#0D1B3E',
-        body.tagline || null,
         body.websiteUrl || null,
-        body.serviceAreas || [],
-        body.careTypes || [],
-        body.coordinatorCount || null,
-        body.recruitmentMethods || [],
-        body.currentTools || [],
-        body.businessRegistration || null,
-        body.insuranceCarrier || null,
-        body.insurancePolicy || null,
-        body.backgroundCheckProvider || null,
       ]
     )
 
