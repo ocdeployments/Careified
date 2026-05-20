@@ -1,6 +1,36 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
+const isAgencyRoute = createRouteMatcher([
+  '/agency/dashboard(.*)',
+  '/agency/search(.*)',
+  '/agency/roster(.*)',
+  '/agency/shortlist(.*)',
+  '/agency/clients(.*)',
+  '/agency/airecruit(.*)',
+  '/agency/assistant(.*)',
+  '/agency/settings(.*)',
+  '/agency/reviews(.*)',
+  '/agency/signup(.*)',
+  '/agency/support(.*)',
+  '/agency/team(.*)',
+  '/api/agency/(.*)',
+  '/api/airecruit/(.*)',
+  '/api/roster/(.*)',
+])
+
+const isCaregiverRoute = createRouteMatcher([
+  '/profile/build(.*)',
+  '/profile/strength(.*)',
+  '/caregiver/(.*)',
+  '/api/profile/(.*)',
+  '/api/caregivers/me(.*)',
+  '/api/caregiver/(.*)',
+  '/opportunities(.*)',
+  '/settings/communications(.*)',
+  '/settings/data-rights(.*)',
+])
+
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
@@ -52,9 +82,22 @@ export default clerkMiddleware(
   if (isPublicRoute(request)) return
 
   // All other routes require auth
-  const { userId } = await auth()
+  const { userId, sessionClaims } = await auth()
   if (!userId) {
     return NextResponse.redirect(new URL('/sign-in?redirect_url=' + encodeURIComponent(pathname), request.url))
+  }
+
+  // Role-based route protection
+  const role = (sessionClaims?.metadata as any)?.role as string | undefined
+
+  // Block agencies from caregiver routes
+  if (isCaregiverRoute(request) && role === 'agency') {
+    return NextResponse.redirect(new URL('/agency/dashboard', request.url))
+  }
+
+  // Block caregivers from agency routes
+  if (isAgencyRoute(request) && role === 'caregiver') {
+    return NextResponse.redirect(new URL('/profile/build', request.url))
   }
 
   if (isAdminRoute(request)) {
