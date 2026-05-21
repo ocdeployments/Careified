@@ -18,8 +18,17 @@ export default defineConfig({
   workers: 1,
   projects: [
     {
+      name: 'setup',
+      testMatch: '**/*.setup.ts',
+    },
+    {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/e2e/.auth/caregiver.json',
+      },
+      testMatch: '**/caregiver-flow.spec.ts',
+      dependencies: ['setup'],
     },
   ],
   /*
