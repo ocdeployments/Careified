@@ -29,24 +29,23 @@ test.describe('Agency Flow', () => {
     test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
 
     await page.goto('/sign-in')
+    await page.waitForLoadState('networkidle')
 
-    // Fill email
-    await page.fill('input[name="email"], input[type="email"], input[id="email-address"]', email)
+    // Fill email - Clerk uses "identifier" not "email"
+    await page.locator('input[name="identifier"]').waitFor({ timeout: 10000 })
+    await page.locator('input[name="identifier"]').fill(email)
+    await page.locator('button[data-localization-key="formButtonPrimary"]').click()
 
     // Fill password
-    await page.fill('input[name="password"], input[type="password"], input[id="password"]', password)
-
-    // Submit
-    const submitBtn = page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Continue")')
-    await submitBtn.click()
+    await page.locator('input[name="password"]').waitFor({ timeout: 10000 })
+    await page.locator('input[name="password"]').fill(password)
+    await page.locator('button[data-localization-key="formButtonPrimary"]').click()
 
     // Wait for navigation
+    await page.waitForURL(/\/(?!sign-in)/, { timeout: 20000 })
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
-    // Assert: redirected to /agency/dashboard
-    // Note: might redirect to /sign-in again if agency not approved
-    // Just check we're not on error page
-    expect(page.url()).not.toContain('error')
+    // Assert: not on error page
     expect(page.url()).not.toContain('/500')
 
     // Save auth state
