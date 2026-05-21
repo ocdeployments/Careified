@@ -23,7 +23,7 @@ async function getApprovedAgency(): Promise<{ id: string; name: string } | null>
     if (role !== 'agency') return null
 
     const result = await pool.query(
-      "SELECT id, name FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
+      "SELECT id, name FROM agencies WHERE clerk_user_id = $1 AND status IN ('approved', 'active')",
       [userId]
     )
 
