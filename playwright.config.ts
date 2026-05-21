@@ -18,8 +18,14 @@ export default defineConfig({
   workers: 1,
   projects: [
     {
-      name: 'setup',
-      testMatch: '**/*.setup.ts',
+      name: 'caregiver-setup',
+      testMatch: '**/caregiver.setup.ts',
+      use: { storageState: { cookies: [], origins: [] } },
+    },
+    {
+      name: 'agency-setup',
+      testMatch: '**/agency.setup.ts',
+      use: { storageState: { cookies: [], origins: [] } },
     },
     {
       name: 'caregiver',
@@ -28,14 +34,16 @@ export default defineConfig({
         storageState: 'tests/e2e/.auth/caregiver.json',
       },
       testMatch: '**/caregiver-flow.spec.ts',
-      dependencies: ['setup'],
+      dependencies: ['caregiver-setup'],
     },
     {
       name: 'agency',
       use: {
         ...devices['Desktop Chrome'],
+        storageState: 'tests/e2e/.auth/agency.json',
       },
       testMatch: '**/agency-flow.spec.ts',
+      dependencies: ['agency-setup'],
     },
   ],
   /*
