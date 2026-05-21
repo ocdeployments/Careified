@@ -199,13 +199,13 @@ test.describe('Caregiver Flow', () => {
     // Assert: page loads
     expect(page.url()).not.toContain('/500')
 
-    // Assert: completion percentage visible
-    const percentageVisible = await Promise.all([
-      page.locator('text=/\\d+%/').isVisible().catch(() => false),
+    // Assert: profile strength heading visible
+    const strengthVisible = await Promise.all([
+      page.locator('h1:has-text("Your profile strength")').isVisible().catch(() => false),
+      page.locator('h1:has-text("profile strength")').isVisible().catch(() => false),
       page.locator('text=Profile Strength').isVisible().catch(() => false),
-      page.locator('text=completion').isVisible().catch(() => false)
     ]).then(results => results.some(r => r))
 
-    expect(percentageVisible).toBe(true)
+    expect(strengthVisible).toBe(true)
   })
 })

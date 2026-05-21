@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test'
 
-const PREVIEW_URL = 'https://careified-mdm58l9w9-ocdeployments-projects.vercel.app'
+const PRODUCTION_URL = 'https://www.careified.com'
 
 test.describe('Agency Flow', () => {
-  test.use({ baseURL: PREVIEW_URL })
+  test.use({ baseURL: PRODUCTION_URL })
 
   test('1. For-agencies page loads', async ({ page }) => {
     await page.goto('/for-agencies')
@@ -89,7 +89,7 @@ test.describe('Agency Flow', () => {
     expect(quickLinks).toBe(true)
 
     // Assert: stats visible (even if 0)
-    const stats = page.locator('[class*="stat"], [class*=" Stat"], text=/\\d+/)
+    const stats = page.locator('[class*="stat"], [class*=" Stat"], text=/\\d+/')
     await expect(stats.first()).toBeVisible({ timeout: 5000 }).catch(() => {
       // If no stats, at least page should load
       expect(page.url()).toContain('dashboard')
@@ -121,7 +121,7 @@ test.describe('Agency Flow', () => {
 
     // Assert: match score visible on cards
     const scoreVisible = await Promise.all([
-      page.locator('text=/\\d+%/).first().isVisible().catch(() => false),
+      page.locator('text=/\\d+%/').first().isVisible().catch(() => false),
       page.locator('text=Match').isVisible().catch(() => false),
       page.locator('text=Score').isVisible().catch(() => false)
     ]).then(results => results.some(r => r))
