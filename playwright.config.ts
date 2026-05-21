@@ -22,13 +22,20 @@ export default defineConfig({
       testMatch: '**/*.setup.ts',
     },
     {
-      name: 'chromium',
+      name: 'caregiver',
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'tests/e2e/.auth/caregiver.json',
       },
       testMatch: '**/caregiver-flow.spec.ts',
       dependencies: ['setup'],
+    },
+    {
+      name: 'agency',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: '**/agency-flow.spec.ts',
     },
   ],
   /*
