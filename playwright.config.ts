@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+
+dotenv.config({ path: path.resolve(__dirname, '.env.local') })
 
 export default defineConfig({
   testDir: './tests',
@@ -14,8 +18,24 @@ export default defineConfig({
   workers: 1,
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'setup',
+      testMatch: '**/*.setup.ts',
+    },
+    {
+      name: 'caregiver',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/e2e/.auth/caregiver.json',
+      },
+      testMatch: '**/caregiver-flow.spec.ts',
+      dependencies: ['setup'],
+    },
+    {
+      name: 'agency',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: '**/agency-flow.spec.ts',
     },
   ],
   /*
