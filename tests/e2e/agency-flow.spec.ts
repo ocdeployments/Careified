@@ -22,45 +22,15 @@ test.describe('Agency Flow', () => {
     expect(ctaVisible).toBe(true)
   })
 
-  test('2. Agency sign-in works', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    await page.goto('/sign-in')
-    await page.waitForLoadState('networkidle')
-
-    // Fill email - Clerk uses "identifier" not "email"
-    await page.locator('input[name="identifier"]').waitFor({ timeout: 10000 })
-    await page.locator('input[name="identifier"]').fill(email)
-    await page.locator('button[data-localization-key="formButtonPrimary"]').click()
-
-    // Fill password
-    await page.locator('input[name="password"]').waitFor({ timeout: 10000 })
-    await page.locator('input[name="password"]').fill(password)
-    await page.locator('button[data-localization-key="formButtonPrimary"]').click()
-
-    // Wait for navigation
-    await page.waitForURL(/\/(?!sign-in)/, { timeout: 20000 })
+  test('2. Agency authenticated session works', async ({ page }) => {
+    // Project already provides auth via storageState
+    await page.goto('/agency/dashboard')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
-
-    // Assert: not on error page
+    expect(page.url()).not.toContain('/sign-in')
     expect(page.url()).not.toContain('/500')
-
-    // Save auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
   })
 
   test('3. Agency dashboard renders', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/dashboard')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -96,14 +66,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('4. Agency search loads with caregivers', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/search')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -129,14 +91,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('5. Caregiver profile opens from search', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/search')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -178,14 +132,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('6. Shortlist add works', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/search')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -213,14 +159,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('7. Agency roster page loads', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/roster')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -247,14 +185,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('8. Resume upload on roster — PDF', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     // Create minimal test PDF
     const minimalPdf = Buffer.from(
       'JVBERi0xLjQKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPJ4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNTggMDAwMDAgbiAKMDAwMDAwMDExNSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjIxOQolJUVPRgo=',
@@ -287,14 +217,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('9. Agency support page loads', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/support')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -312,14 +234,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('10. Agency settings page loads', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/settings')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -332,14 +246,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('11. AIRecruit page loads', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/airecruit')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
@@ -357,14 +263,6 @@ test.describe('Agency Flow', () => {
   })
 
   test('12. Agency shortlist page loads', async ({ page }) => {
-    const email = process.env.PLAYWRIGHT_AGENCY_EMAIL
-    const password = process.env.PLAYWRIGHT_AGENCY_PASSWORD
-
-    test.skip(!email || !password, 'PLAYWRIGHT_AGENCY_EMAIL and PLAYWRIGHT_AGENCY_PASSWORD must be set in .env.local')
-
-    // Load auth state
-    await page.context().storageState({ path: 'tests/e2e/.auth/agency.json' })
-
     await page.goto('/agency/shortlist')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
 
