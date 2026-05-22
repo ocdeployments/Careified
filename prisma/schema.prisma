@@ -141,8 +141,43 @@ model Caregiver {
   caregiver_shifts               CaregiverShift[]
   users                          User?                         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   airecruit_calls                AIRecruitCall[]
+  caregiver_disclosures          caregiver_disclosures[]
+  verification_evidence         verification_evidence[]
 
   @@map("caregivers")
+}
+
+model caregiver_disclosures {
+  id               String     @id @default(cuid()) @db.VarChar(255)
+  caregiver_id     String     @db.VarChar(255)
+  question_key     String     @db.VarChar(64) // regulatory_complaint | suspension_revoked | pending_charges | dismissed_5yr
+  answer           Boolean
+  detail           String?    @db.Text
+  attested_at      DateTime   @default(now()) @db.Timestamp(6)
+  attestation_ip   String?    @db.VarChar(64)
+  caregiver        Caregiver  @relation(fields: [caregiver_id], references: [id], onDelete: Cascade)
+
+  @@unique([caregiver_id, question_key])
+  @@index([caregiver_id])
+  @@map("caregiver_disclosures")
+}
+
+model verification_evidence {
+  id            String     @id @default(cuid()) @db.VarChar(255)
+  caregiver_id  String     @db.VarChar(255)
+  claim_ref     String     @db.VarChar(128) // certification:<id>, reference:<id>, disclosure:<key>, identity, vsc, psw_registration
+  source        String     @db.VarChar(48) // self_attestation | document_upload | hscpoa_register | cno_register | id_verification_api | background_check_api | reference_call | agency_confirmation
+  verified_by   String?    @db.VarChar(255) // admin id | agency id | 'system' | null
+  verified_at   DateTime?  @db.Timestamp(6)
+  expires_at    DateTime?  @db.Timestamp(6)
+  artifact_ref  Json?
+  method_note   String?    @db.Text
+  created_at    DateTime   @default(now()) @db.Timestamp(6)
+  caregiver     Caregiver  @relation(fields: [caregiver_id], references: [id], onDelete: Cascade)
+
+  @@index([caregiver_id])
+  @@index([claim_ref])
+  @@map("verification_evidence")
 }
 
 model CaregiverCertification {
