@@ -3,30 +3,45 @@
 ## Status: CLEAN
 
 ## Last commit on develop
-cddb6e3 — fix(notifications): resolve React #310 — move hooks above conditional return in NotificationBell
+69d8d47 — fix(codebase-map): clean lib exports section
 
 ## Last commit on main
-b109a4e — session-end: merged to main, 10/10 caregiver tests
+9704006 — merge: profile aggregateScore crash fix
 
-## This session's commits (5 total)
+## This session's commits (8 total)
 
-1. b704be4 — chore: gitignore test-results
-2. 68c5151 — fix(agency): accept both approved and active status for roster/assistant pages
-3. 18f3ef6 — fix(e2e): parallel workers to avoid Clerk 60s token expiry mid-suite
-4. f1ed784 — docs: agency E2E resolved — token TTL, not page bugs
-5. cddb6e3 — fix(notifications): resolve React #310 — move hooks above conditional return
+1. f59be06 — feat(verification): add caregiver_disclosures + verification_evidence tables (foundation)
+2. 96c6f9a — feat(verification): tier-derivation function (11 tests) + pin test deps
+3. b282de5 — chore: codebase map generator + session lifecycle rule
+4. 69d8d47 — fix(codebase-map): clean lib exports section
+5. ec10aa6 — fix(profile): coerce aggregateScore to Number — pg returns numeric as string
+6. 645c687 — fix(resume): use minimax-m2.5 with JSON mode
+7. cddb6e3 — fix(notifications): resolve React #310 — hooks above conditional
+8. c532d2d — session-end: regenerate session context and handoff
 
 ## What's built this session
 
-### Bug fixes
-- Roster/assistant pages: accept both 'approved' and 'active' agency status (5 agencies with 'active' were 404ing)
-- NotificationBell: React #310 fix — hooks moved above conditional return
-- E2E: parallel workers (4) to avoid Clerk 60s token expiry mid-suite
+### Verification foundation (NEW)
+- DB tables: caregiver_disclosures, verification_evidence (migration created manually)
+- Prisma schema updated with new models
+- lib/verification/derive-tier.ts: Pure function to derive tier from evidence array
+- tests/unit/derive-tier.test.ts: 11 tests covering all tier derivation scenarios
+- Test deps installed: vitest, @vitejs/plugin-react, jsdom, @testing-library/jest-dom
 
-### Investigation (not bugs)
-- Agency 404s: disproven as app bug — root cause was token expiry (60s vs 250s suite)
-- Search cards not rendering: not investigated (not launch-blocking)
-- Resume parser: code path correct, verified runtime:nodejs
+### Profile crash fix
+- CaregiverProfileDemo.tsx: aggregateScore is string from pg, added Number coercion
+
+### Resume parser fix
+- lib/resume/parse-resume.ts: switched from ring-2.6-1t:free to minimax-m2.5 with JSON mode
+
+### Codebase documentation (NEW)
+- scripts/gen-codebase-map.sh: Auto-generates docs/CODEBASE_MAP.md
+- docs/CODEBASE_MAP.md: 1507 lines of file tree, routes, lib exports, DB tables, env vars
+- CLAUDE.md: Added CODEBASE_MAP.md lifecycle rule
+
+### Dev tool fixes
+- Prisma generator output path fixed (../../node_modules → ../node_modules)
+- Prisma client regenerated
 
 ## Pending — Priority Order
 
@@ -42,4 +57,4 @@ b109a4e — session-end: merged to main, 10/10 caregiver tests
 - careified.ca domain purchase
 
 ## Safe revert
-b109a4e — session-end: merged to main, 10/10 caregiver tests
+9704006 — merge: profile aggregateScore crash fix
