@@ -138,6 +138,7 @@ Render DB: Starter plan $7/mo, no suspensions.
 DB pool resilience: max:3, idleTimeoutMillis:10000, connectionTimeoutMillis:10000, allowExitOnIdle:true — 57 files.
 Render DB upgraded from free to Starter $7/mo.
 careified.com domain live in production.
+NotificationBell: React #310 fix applied (hooks moved above conditional return).
 
 ## WHAT'S NOT BUILT (Phase 1 blockers)
 - Stripe billing (7-14 day lead time — start NOW)
@@ -145,6 +146,7 @@ careified.com domain live in production.
 - Family portal Phase 1
 - Copy session (all placeholder copy)
 - AIRecruit CA phone number (Romy provisions in Vapi)
+- Agency E2E tests: 7/13 pass (token TTL issue resolved, remaining failures are residual/brittle selectors)
 
 ## SAFE REVERTS
 2175f20 (Clerk proxy config) | 16c41bd (test suite) | 8708d15 (May 14 - Session C/D) | 2c5a9ff (May 14) | 41c6b31 (general) | 960aca6 (May 4)
