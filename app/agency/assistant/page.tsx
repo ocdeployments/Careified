@@ -10,10 +10,10 @@ export default async function AgencyAssistantPage() {
     redirect('/sign-in')
   }
 
-  // Check agency approval status
+  // Check agency approval status (accept both approved and active)
   const { rows } = await pool.query(
-    'SELECT id, name FROM agencies WHERE clerk_user_id = $1 AND status = $2',
-    [userId, 'approved']
+    "SELECT id, name FROM agencies WHERE clerk_user_id = $1 AND status IN ('approved', 'active')",
+    [userId]
   )
 
   if (rows.length === 0) {
