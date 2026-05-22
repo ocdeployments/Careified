@@ -12,13 +12,12 @@ function NotificationBellContent() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Only show for caregiver role
   const role = user?.publicMetadata?.role as string | undefined
-  if (role !== 'caregiver') {
-    return null
-  }
 
+  // Hooks must be unconditional — guard effect body instead
   useEffect(() => {
+    if (role !== 'caregiver') return
+
     if (!isLoaded || !user) return
 
     async function fetchCount() {
@@ -40,7 +39,12 @@ function NotificationBellContent() {
     // Poll every 60 seconds
     const interval = setInterval(fetchCount, 60000)
     return () => clearInterval(interval)
-  }, [user, isLoaded])
+  }, [user, isLoaded, role])
+
+  // Early return AFTER all hooks
+  if (role !== 'caregiver') {
+    return null
+  }
 
   const handleClick = () => {
     router.push('/caregiver/notifications')
