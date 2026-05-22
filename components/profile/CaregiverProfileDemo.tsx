@@ -480,7 +480,7 @@ export interface CaregiverProfileProps {
   languageFluency?: Record<string, string>
   bio?: string
   profileCompletion?: number
-  aggregateScore?: number
+  aggregateScore?: number | string | null
   ratingCount?: number
   // Clinical
   services?: string[]
@@ -814,7 +814,9 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, position: 'relative' }}>
                 <Star size={22} fill={C.gold} color={C.gold} />
                 <span style={{ fontFamily: SERIF, fontSize: 32, color: '#F5F0E8', lineHeight: 1 }}>
-                  {(dm.aggregateScore ?? null) !== null ? dm.aggregateScore!.toFixed(1) : '—'}
+                  {dm.aggregateScore != null && !isNaN(Number(dm.aggregateScore))
+                    ? Number(dm.aggregateScore).toFixed(1)
+                    : '—'}
                 </span>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>/ 5</span>
                 <TooltipInfo />
