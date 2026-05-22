@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Fri 22 May 2026 17:27:33 EDT
+Generated: Fri 22 May 2026 17:37:51 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -466,278 +466,270 @@ app/terms/page.tsx
 app/verify/[slug]/page.tsx
 ```
 
-## lib EXPORTS (every exported symbol per file)
+## lib EXPORTS (file : exported symbol)
 ```
-lib/matching/score.ts:161:export function computeMatchScore(
-lib/matching/dimension-meta.ts:4:export type DimensionMeta = 
-lib/matching/dimension-meta.ts:12:export const DIMENSION_META: Record<DimensionKey, DimensionMeta> = 
-lib/matching/dimension-meta.ts:64:export const DIMENSION_ORDER: DimensionKey[] = [
-lib/matching/dimension-meta.ts:74:export function confidenceLabel(multiplier: number): string 
-lib/matching/dimension-meta.ts:82:export function tierFromMultiplier(multiplier: number): 1 | 2 | 3 | 4 
-lib/matching/types.ts:3:export type 
-lib/matching/types.ts:12:export type Confidence = 'high' | 'medium' | 'low' | 'none'
-lib/matching/types.ts:18:export type DimensionScore = 
-lib/matching/types.ts:34:export type MatchScope = 'full_client_match' | 'partial_filter_match'
-lib/matching/types.ts:39:export type MatchResult = 
-lib/matching/types.ts:94:export const ALIGNMENT_DISCLAIMER =
-lib/matching/types.ts:105:export type MatchNeed = 
-lib/matching/types.ts:139:export type CaregiverForMatching = 
-lib/matching/types.ts:204:export const BASE_WEIGHTS = 
-lib/matching/types.ts:214:export type DimensionKey = keyof typeof BASE_WEIGHTS
-lib/matching/gates.ts:4:export type GateResult = 
-lib/matching/gates.ts:13:export function runGates(
-lib/matching/dimensions.ts:47:export function scoreClinicalFit(
-lib/matching/dimensions.ts:136:export function scoreReliability(
-lib/matching/dimensions.ts:186:export function scoreLogisticsMatch(
-lib/matching/dimensions.ts:270:export function scorePersonalityCompatibility(
-lib/matching/dimensions.ts:323:export function scoreCulturalLanguageFit(
-lib/matching/dimensions.ts:377:export function scoreRetentionSignal(
-lib/matching/dimensions.ts:435:export function scoreEnvironmentFit(
-lib/matching/index.ts:2:export * from './types'
-lib/matching/index.ts:3:export 
-lib/matching/index.ts:4:export type 
-lib/matching/index.ts:5:export 
-lib/matching/index.ts:14:export 
-lib/matching/index.ts:15:export 
-lib/matching/index.ts:21:export 
-lib/matching/index.ts:22:export type 
-lib/matching/index.ts:23:export 
-lib/matching/persistence.ts:7:export async function persistMatchScore(
-lib/matching/persistence.ts:42:export async function getCachedMatchScore(
-lib/matching/persistence.ts:61:export async function loadCaregiverForMatching(
-lib/matching/persistence.ts:68:export async function loadAllApprovedCaregivers(
-lib/matching/gap-analysis.ts:4:export interface GapItem 
-lib/matching/gap-analysis.ts:10:export function generateGapAnalysis(
-lib/matching/caregiver-loader.ts:10:export type CaregiverWithProvenance = CaregiverForMatching & 
-lib/matching/caregiver-loader.ts:19:export async function loadCaregiverForMatchingV2(
-lib/matching/caregiver-loader.ts:81:export async function loadAllApprovedCaregiversV2(
-lib/matching/caregiver-loader.ts:101:export function lowestConfidenceFor(
-lib/encryption/phi.ts:21:export function encryptPHI(plaintext: string | null | undefined): Buffer | null 
-lib/encryption/phi.ts:34:export function decryptPHI(buf: Buffer | null | undefined): string | null 
-lib/encryption/phi.ts:52:export function encryptPHIJson(value: unknown): Buffer | null 
-lib/encryption/phi.ts:60:export function decryptPHIJson<T = unknown>(buf: Buffer | null | undefined): T | null 
-lib/types/shortlist.ts:1:export interface ShortlistEntry 
-lib/types/shortlist.ts:9:export interface ShortlistResponse 
-lib/types/search.ts:3:export interface SearchFilters 
-lib/types/search.ts:49:export interface CaregiverSearchResult 
-lib/types/search.ts:91:export interface SearchResponse 
-lib/types/search.ts:99:export const SPECIALTY_OPTIONS = [
-lib/types/search.ts:122:export const CREDENTIAL_OPTIONS = [
-lib/types/search.ts:128:export const PLACEMENT_TYPE_OPTIONS = [
-lib/types/search.ts:135:export const LANGUAGE_OPTIONS = [
-lib/types/search.ts:141:export const DAYS_OF_WEEK = [
-lib/types/search.ts:145:export const SHIFT_TYPE_OPTIONS = [
-lib/types/search.ts:153:export const LIFT_EXPERIENCE_OPTIONS = [
-lib/types/search.ts:160:export const EMPLOYMENT_TYPE_OPTIONS = [
-lib/types/search.ts:166:export const TECHNOLOGY_COMFORT_OPTIONS = [
-lib/types/search.ts:172:export const PET_TOLERANCE_OPTIONS = [
-lib/types/search.ts:178:export const AVAILABILITY_STATUS_OPTIONS = [
-lib/types/search.ts:185:export const US_STATES = [
-lib/types/search.ts:213:export const CANADIAN_PROVINCES = [
-lib/locale/useLocale.ts:4:export function useLocale(): 
-lib/locale/get-locale.ts:4:export function getLocale(): string 
-lib/locale/get-locale.ts:8:export const LOCALE_CA = 'CA'
-lib/locale/get-locale.ts:9:export const LOCALE_US = 'US'
-lib/locale/config.ts:1:export type Locale = 'CA' | 'US'
-lib/locale/config.ts:3:export const localeConfig = 
-lib/locale/config.ts:93:export type LocaleConfig = typeof localeConfig[Locale]
-lib/locale/config.ts:95:export function getLocaleConfig(locale: Locale): LocaleConfig 
-lib/opportunities/discover.ts:8:export type Opportunity = 
-lib/opportunities/discover.ts:39:export async function discoverOpportunities(
-lib/demo.ts:4:export const DEMO_MODE = true;
-lib/demo.ts:6:export const DEMO_AGENCY = 
-lib/demo.ts:21:export const DEMO_CLIENTS = [
-lib/demo.ts:114:export const DEMO_BANNER = 
-lib/demo.ts:121:export const DEMO_REVIEWS = [
-lib/demo.ts:159:export const DEMO_BADGES = [
-lib/intelligence/field-discovery.ts:29:export async function recordUnknownFields(params: 
-lib/security/audit.ts:3:export interface AuditLogParams 
-lib/security/audit.ts:16:export async function logAdminAction(
-lib/security/audit.ts:48:export async function getAuditLogs(limit = 50): Promise<AuditLogParams[]> 
-lib/notifications.ts:4:export interface NotificationPayload 
-lib/notifications.ts:11:export async function sendNotification(payload: NotificationPayload): Promise<boolean> 
-lib/notifications.ts:34:export async function notifyReviewSubmitted(caregiverEmail: string, caregiverName: string, agencyName: string): Promise<boolean> 
-lib/notifications.ts:47:export async function notifyBadgeEarned(caregiverEmail: string, caregiverName: string, badgeLabel: string): Promise<boolean> 
-lib/airecruit/consent-gate.ts:17:export interface CallGateRequest 
-lib/airecruit/consent-gate.ts:24:export interface CallGateResult 
-lib/airecruit/consent-gate.ts:30:export async function checkCallAllowed(req: CallGateRequest): Promise<CallGateResult> 
-lib/airecruit/consent-gate.ts:52:export async function requireCallAllowed(req: CallGateRequest): Promise<void> 
-lib/airecruit/vapi.ts:8:export interface VapiCallParams 
-lib/airecruit/vapi.ts:24:export interface VapiCallResult 
-lib/airecruit/vapi.ts:30:export async function initiateVapiCall(
-lib/airecruit/reference-vapi.ts:6:export interface ReferenceCallParams 
-lib/airecruit/reference-vapi.ts:16:export function buildReferenceCallConfig(params: ReferenceCallParams): VapiCallParams 
-lib/airecruit/reference-vapi.ts:119:export async function initiateReferenceCall(
-lib/airecruit/retry.ts:16:export interface RetryConfig 
-lib/airecruit/retry.ts:27:export async function scheduleRetry(
-lib/airecruit/retry.ts:79:export async function cancelRetries(caregiverId: string, callType: string): Promise<void> 
-lib/airecruit/retry.ts:88:export async function getPendingRetries(limit: number = 10): Promise<any[]> 
-lib/airecruit/retry.ts:100:export async function markRetryProcessing(retryId: string): Promise<void> 
-lib/airecruit/retry.ts:107:export async function markRetryCompleted(retryId: string): Promise<void> 
-lib/airecruit/retry.ts:114:export async function markRetryFailed(retryId: string, error: string): Promise<void> 
-lib/airecruit/employer-vapi.ts:6:export interface EmployerCallParams 
-lib/airecruit/employer-vapi.ts:20:export function buildEmployerCallConfig(params: EmployerCallParams): VapiCallParams 
-lib/airecruit/employer-vapi.ts:122:export async function initiateEmployerCall(
-lib/airecruit/scoring.ts:5:export interface QuestionScore 
-lib/airecruit/scoring.ts:12:export interface ScoringResult 
-lib/airecruit/scoring.ts:21:export async function scoreTranscript(
-lib/airecruit/profile-analysis.ts:17:export interface ProfileGap 
-lib/airecruit/profile-analysis.ts:25:export interface RecommendedCall 
-lib/airecruit/profile-analysis.ts:33:export interface RiskFlag 
-lib/airecruit/profile-analysis.ts:39:export interface ProfileAnalysis 
-lib/airecruit/profile-analysis.ts:52:export async function analyseProfile(caregiverId: string): Promise<ProfileAnalysis> 
-lib/airecruit/score-employer.ts:15:export interface EmployerScore 
-lib/airecruit/score-employer.ts:27:export async function scoreEmployerCall(
-lib/airecruit/score-reference.ts:15:export interface ReferenceScore 
-lib/airecruit/score-reference.ts:28:export async function scoreReferenceCall(
-lib/airecruit/calling-hours.ts:1:export type PhoneRegion = 'CA' | 'US'
-lib/airecruit/calling-hours.ts:11:export function detectRegion(phoneNumber: string): PhoneRegion 
-lib/airecruit/calling-hours.ts:19:export function isWithinCallingHours(
-lib/airecruit/quickfill-vapi.ts:6:export interface QuickFillAlertParams 
-lib/airecruit/quickfill-vapi.ts:19:export function buildQuickFillAlertConfig(params: QuickFillAlertParams): VapiCallParams 
-lib/airecruit/quickfill-vapi.ts:91:export async function initiateQuickFillAlert(
-lib/personality/working-style.ts:4:export const WORKING_STYLE_TAGS = [
-lib/personality/working-style.ts:19:export type WorkingStyleTag = typeof WORKING_STYLE_TAGS[number]
-lib/personality/working-style.ts:55:export function deriveWorkingStyle(answers: Record<number, 'A' | 'B'>): WorkingStyleTag[] 
-lib/resume/parse-resume.ts:11:export interface ParsedResume 
-lib/resume/parse-resume.ts:87:export async function parseResume(
-lib/resume/parse-csv.ts:9:export interface CsvColumnMap 
-lib/resume/parse-csv.ts:113:export async function mapCsvColumns(
-lib/resume/parse-csv.ts:214:export function normalizeCsvRow(
-lib/resume/parse-csv.ts:351:export function extractUnknownFields(
-lib/profile-templates.ts:17:export function generateWorkingStyle(profile: ProfileData): string 
-lib/profile-templates.ts:62:export function generateBio(profile: ProfileData): string 
-lib/profile-templates.ts:81:export function generateOpenQuestion(questionType: string, profile: ProfileData): string 
-lib/data-rights/export.ts:4:export type ExportBundle = 
-lib/data-rights/export.ts:10:export async function exportCaregiverData(
-lib/data-rights/export.ts:43:export async function exportAgencyData(
-lib/data-rights/delete.ts:3:export type DeletionResult = 
-lib/data-rights/delete.ts:10:export async function deleteCaregiverData(
-lib/data-rights/delete.ts:72:export async function deleteAgencyData(
-lib/ratings/recompute-caregiver-score.ts:13:export async function recomputeCaregiverScore(caregiverId: string): Promise<void> 
-lib/ratings/compute-suitability.ts:9:export interface SuitabilityScores 
-lib/ratings/compute-suitability.ts:24:export interface CaregiverProfile 
-lib/ratings/compute-suitability.ts:64:export function computeSuitabilityScores(
-lib/ratings/compute-suitability.ts:166:export async function generateSuitabilityNarrative(
-lib/ratings/compute-trust-score.ts:4:export interface PlacementReview 
-lib/ratings/compute-trust-score.ts:16:export interface TrustScoreResult 
-lib/ratings/compute-trust-score.ts:73:export function computeTrustScore(reviews: PlacementReview[]): TrustScoreResult 
-lib/npi/fetchNPI.ts:8:export interface NPIProvider 
-lib/npi/fetchNPI.ts:88:export async function fetchNPIProviders(params: 
-lib/utils/generate-caregiver-code.ts:11:export function generateCaregiverCode(
-lib/utils/profile-completion.ts:6:export interface CompletionInput 
-lib/utils/profile-completion.ts:39:export interface CompletionResult 
-lib/utils/profile-completion.ts:46:export function calculateProfileCompletion(input: CompletionInput): CompletionResult 
-lib/utils/profile-completion.ts:128:export function getTierColor(tier: string): string 
-lib/profile-strength/analyze.ts:5:export type StrengthGap = 
-lib/profile-strength/analyze.ts:13:export type StrengthReport = 
-lib/profile-strength/analyze.ts:113:export async function analyzeProfileStrength(
-lib/validations/agency-signup.ts:3:export const agencySignupSchema = z.object(
-lib/validations/agency-signup.ts:41:export type AgencySignupData = z.infer<typeof agencySignupSchema>;
-lib/attributes/index.ts:4:export type AttributeTier = 1 | 2 | 3 | 4
-lib/attributes/index.ts:5:export type AttributeStatus = 'active' | 'expired' | 'revoked' | 'pending'
-lib/attributes/index.ts:7:export type CaregiverAttribute = 
-lib/attributes/index.ts:20:export type AttributeInput = 
-lib/attributes/index.ts:34:export async function upsertAttribute(
-lib/attributes/index.ts:81:export async function loadCaregiverAttributes(
-lib/attributes/index.ts:97:export async function getAttribute(
-lib/attributes/index.ts:115:export async function getAttributeMap(
-lib/attributes/index.ts:136:export function tierToConfidence(tier: AttributeTier): number 
-lib/attributes/index.ts:148:export const TIER_LABELS: Record<AttributeTier, string> = 
-lib/verification/derive-tier.ts:4:export type EvidenceRow = 
-lib/verification/derive-tier.ts:21:export function deriveTier(evidence: EvidenceRow[], now: Date = new Date()): AttributeTier 
-lib/verification/derive-tier.ts:37:export function deriveTierLabel(tier: AttributeTier): string 
-lib/rateLimit.ts:15:export function checkRateLimit(ip: string, limit: number = DEFAULT_LIMIT): boolean 
-lib/rateLimit.ts:43:export function getClientIp(req: NextRequest): string 
-lib/consent/helpers.ts:16:export interface ConsentRecord 
-lib/consent/helpers.ts:28:export interface ConsentRequestMeta 
-lib/consent/helpers.ts:36:export async function grantConsent(
-lib/consent/helpers.ts:50:export async function revokeConsent(
-lib/consent/helpers.ts:65:export async function hasActiveConsent(
-lib/consent/helpers.ts:80:export async function getCaregiverConsents(caregiverId: string): Promise<ConsentRecord[]> 
-lib/consent/helpers.ts:101:export async function requireConsent(
-lib/consent/capture.ts:5:export type ConsentCapture = 
-lib/consent/capture.ts:12:export async function recordCaregiverConsent(
-lib/consent/capture.ts:32:export async function recordAgencyConsent(
-lib/consent/capture.ts:53:export async function recordClientDataConsent(
-lib/consent/capture.ts:83:export async function hasCurrentCaregiverConsent(
-lib/consent/capture.ts:100:export async function hasCurrentAgencyConsent(
-lib/consent/types.ts:5:export type RiskLevel = 'low' | 'medium' | 'high'
-lib/consent/types.ts:6:export type ConsentMethod = 'signup_form' | 'settings_page' | 'per_call_modal'
-lib/consent/types.ts:8:export interface ConsentType 
-lib/consent/types.ts:20:export const CONSENT_TYPES = 
-lib/consent/types.ts:84:export type ConsentTypeId = keyof typeof CONSENT_TYPES
-lib/consent/types.ts:86:export function getConsentType(id: ConsentTypeId): ConsentType 
-lib/consent/types.ts:90:export function getAllConsentTypes(): ConsentType[] 
-lib/consent/types.ts:94:export function requiresPerCallConfirmation(id: ConsentTypeId): boolean 
-lib/consent/types.ts:98:export function isRequiredConsent(id: ConsentTypeId): boolean 
-lib/audit/log.ts:4:export type AuditActorType = 'caregiver' | 'agency' | 'admin' | 'system'
-lib/audit/log.ts:6:export type AuditEvent = 
-lib/audit/log.ts:20:export async function logAudit(pool: Pool, event: AuditEvent): Promise<void> 
-lib/caregiver-trust-score/badges.ts:4:export interface PlacementReview 
-lib/caregiver-trust-score/badges.ts:35:export interface Badge 
-lib/caregiver-trust-score/badges.ts:81:export function computeBadges(
-lib/caregiver-trust-score/calculate.ts:74:export interface ScoreEvent 
-lib/caregiver-trust-score/calculate.ts:88:export interface ScoreSnapshot 
-lib/caregiver-trust-score/calculate.ts:102:export interface ScoreResult 
-lib/caregiver-trust-score/calculate.ts:171:export async function calculateCaregiverScore(caregiverId: string): Promise<ScoreResult> 
-lib/caregiver-trust-score/calculate.ts:228:export async function saveScoreSnapshot(result: ScoreResult): Promise<void> 
-lib/caregiver-trust-score/calculate.ts:258:export async function getCaregiverScore(caregiverId: string): Promise<ScoreResult | null> 
-lib/caregiver-trust-score/calculate.ts:285:export 
-lib/hooks/useProfileSave.ts:12:export function useProfileSave() 
-lib/actions/profile.ts:88:export async function getProfileData() 
-lib/actions/profile.ts:105:export async function saveStep1(data: 
-lib/actions/profile.ts:149:export async function saveStep2(data: 
-lib/actions/profile.ts:175:export async function saveStep3(data: 
-lib/actions/profile.ts:249:export async function saveStep4(certifications: Array<
-lib/actions/profile.ts:293:export async function saveStep5(references: Array<
-lib/actions/profile.ts:334:export async function submitProfile() 
-lib/wallet/apple-wallet.ts:6:export interface CaregiverPassData 
-lib/wallet/apple-wallet.ts:19:export interface PassGenerationResult 
-lib/wallet/apple-wallet.ts:25:export async function generateAppleWalletPass(
-lib/wallet/apple-wallet.ts:40:export const PASS_STRUCTURE = 
-lib/enrichment/types.ts:3:export type EnvValue = 'yes' | 'no' | 'prefer_not'
-lib/enrichment/types.ts:5:export type EnvironmentComfort = 
-lib/enrichment/types.ts:17:export type CareStyle = 'hands_on' | 'companionship' | 'balanced'
-lib/enrichment/types.ts:19:export type AgeRangeKey =
-lib/enrichment/types.ts:26:export type ClientPreferences = 
-lib/enrichment/types.ts:32:export type Motivation = 
-lib/enrichment/types.ts:38:export type CaregiverDisclosedPreferences = 
-lib/enrichment/types.ts:47:export type BestFitProfile = CaregiverDisclosedPreferences
-lib/enrichment/types.ts:49:export type MatchingTag =
-lib/enrichment/types.ts:64:export type CaregiverForEnrichment = 
-lib/enrichment/types.ts:83:export type EnrichmentResult = 
-lib/enrichment/index.ts:10:export * from './types'
-lib/enrichment/index.ts:11:export 
-lib/enrichment/index.ts:12:export 
-lib/enrichment/index.ts:18:export function enrichCaregiver(
-lib/enrichment/index.ts:32:export async function enrichAndPersist(
-lib/enrichment/bestFitProfile.ts:8:export function generateDisclosedPreferences(
-lib/enrichment/bestFitProfile.ts:133:export const generateBestFitProfile = generateDisclosedPreferences
-lib/enrichment/tagsAndScore.ts:8:export function extractMatchingTags(
-lib/enrichment/tagsAndScore.ts:83:export function computeProfileStrength(
-lib/legal/text.ts:16:export const CURRENT_VERSIONS = 
-lib/legal/text.ts:29:export type ConsentType = keyof typeof CURRENT_VERSIONS
-lib/legal/text.ts:31:export const LEGAL_TEXT: Record<ConsentType, string> = 
-lib/legal/text.ts:136:export function hashLegalText(text: string): string 
-lib/legal/text.ts:143:export function getLegalTextForConsent(consentType: ConsentType): 
-lib/db.ts:47:export const prisma = 
-lib/db.ts:167:export 
-lib/notifications/nudge.ts:40:export async function sendProfileNudge(caregiverId: string): Promise<void> 
-lib/notifications/nudge.ts:84:export async function nudgeAllIncompleteCaregivers(): Promise<
-lib/notifications/create.ts:6:export type NotificationType =
-lib/notifications/create.ts:26:export const NotificationTemplates = 
-lib/notifications/create.ts:64:export async function createNotification(params: CreateNotificationParams): Promise<void> 
-lib/email/send-agency-approval-email.ts:3:export async function sendAgencyApprovalEmail(params: 
-lib/email/resend-client.ts:5:export function getResendClient(): Resend | null 
-lib/email/send-claim-email.ts:3:export async function sendClaimEmail(params: 
-lib/services/caregiver-search.ts:17:export class CaregiverSearchService 
-lib/tickets.ts:33:export async function generateTicketNumber(pool: Pool): Promise<string> 
-lib/tickets.ts:40:export function getSLADueDate(type: string): Date | null 
-lib/tickets.ts:48:export function validateTicketType(type: string): boolean 
-lib/tickets.ts:52:export function validateTicketStatus(from: string, to: string): boolean 
-lib/tickets.ts:57:export 
-lib/tickets.ts:58:export 
+lib/actions/profile.ts  ::  async function getProfileData()
+lib/actions/profile.ts  ::  async function saveStep1(data:
+lib/actions/profile.ts  ::  async function saveStep2(data:
+lib/actions/profile.ts  ::  async function saveStep3(data:
+lib/actions/profile.ts  ::  async function saveStep4(certifications: Array
+lib/actions/profile.ts  ::  async function saveStep5(references: Array
+lib/actions/profile.ts  ::  async function submitProfile()
+lib/airecruit/calling-hours.ts  ::  function detectRegion(phoneNumber: string): PhoneRegion
+lib/airecruit/calling-hours.ts  ::  function isWithinCallingHours(
+lib/airecruit/calling-hours.ts  ::  type PhoneRegion
+lib/airecruit/consent-gate.ts  ::  async function checkCallAllowed(req: CallGateRequest): Promise
+lib/airecruit/consent-gate.ts  ::  async function requireCallAllowed(req: CallGateRequest): Promise
+lib/airecruit/consent-gate.ts  ::  interface CallGateRequest
+lib/airecruit/consent-gate.ts  ::  interface CallGateResult
+lib/airecruit/employer-vapi.ts  ::  async function initiateEmployerCall(
+lib/airecruit/employer-vapi.ts  ::  function buildEmployerCallConfig(params: EmployerCallParams): VapiCallParams
+lib/airecruit/employer-vapi.ts  ::  interface EmployerCallParams
+lib/airecruit/profile-analysis.ts  ::  async function analyseProfile(caregiverId: string): Promise
+lib/airecruit/profile-analysis.ts  ::  interface ProfileAnalysis
+lib/airecruit/profile-analysis.ts  ::  interface ProfileGap
+lib/airecruit/profile-analysis.ts  ::  interface RecommendedCall
+lib/airecruit/profile-analysis.ts  ::  interface RiskFlag
+lib/airecruit/quickfill-vapi.ts  ::  async function initiateQuickFillAlert(
+lib/airecruit/quickfill-vapi.ts  ::  function buildQuickFillAlertConfig(params: QuickFillAlertParams): VapiCallParams
+lib/airecruit/quickfill-vapi.ts  ::  interface QuickFillAlertParams
+lib/airecruit/reference-vapi.ts  ::  async function initiateReferenceCall(
+lib/airecruit/reference-vapi.ts  ::  function buildReferenceCallConfig(params: ReferenceCallParams): VapiCallParams
+lib/airecruit/reference-vapi.ts  ::  interface ReferenceCallParams
+lib/airecruit/retry.ts  ::  async function cancelRetries(caregiverId: string, callType: string): Promise
+lib/airecruit/retry.ts  ::  async function getPendingRetries(limit: number
+lib/airecruit/retry.ts  ::  async function markRetryCompleted(retryId: string): Promise
+lib/airecruit/retry.ts  ::  async function markRetryFailed(retryId: string, error: string): Promise
+lib/airecruit/retry.ts  ::  async function markRetryProcessing(retryId: string): Promise
+lib/airecruit/retry.ts  ::  async function scheduleRetry(
+lib/airecruit/retry.ts  ::  interface RetryConfig
+lib/airecruit/score-employer.ts  ::  async function scoreEmployerCall(
+lib/airecruit/score-employer.ts  ::  interface EmployerScore
+lib/airecruit/score-reference.ts  ::  async function scoreReferenceCall(
+lib/airecruit/score-reference.ts  ::  interface ReferenceScore
+lib/airecruit/scoring.ts  ::  async function scoreTranscript(
+lib/airecruit/scoring.ts  ::  interface QuestionScore
+lib/airecruit/scoring.ts  ::  interface ScoringResult
+lib/airecruit/vapi.ts  ::  async function initiateVapiCall(
+lib/airecruit/vapi.ts  ::  interface VapiCallParams
+lib/airecruit/vapi.ts  ::  interface VapiCallResult
+lib/attributes/index.ts  ::  async function getAttribute(
+lib/attributes/index.ts  ::  async function getAttributeMap(
+lib/attributes/index.ts  ::  async function loadCaregiverAttributes(
+lib/attributes/index.ts  ::  async function upsertAttribute(
+lib/attributes/index.ts  ::  const TIER_LABELS: Record
+lib/attributes/index.ts  ::  function tierToConfidence(tier: AttributeTier): number
+lib/attributes/index.ts  ::  type AttributeInput
+lib/attributes/index.ts  ::  type AttributeStatus
+lib/attributes/index.ts  ::  type AttributeTier
+lib/attributes/index.ts  ::  type CaregiverAttribute
+lib/audit/log.ts  ::  async function logAudit(pool: Pool, event: AuditEvent): Promise
+lib/audit/log.ts  ::  type AuditActorType
+lib/audit/log.ts  ::  type AuditEvent
+lib/caregiver-trust-score/badges.ts  ::  function computeBadges(
+lib/caregiver-trust-score/badges.ts  ::  interface Badge
+lib/caregiver-trust-score/badges.ts  ::  interface PlacementReview
+lib/caregiver-trust-score/calculate.ts  :: 
+lib/caregiver-trust-score/calculate.ts  ::  async function calculateCaregiverScore(caregiverId: string): Promise
+lib/caregiver-trust-score/calculate.ts  ::  async function getCaregiverScore(caregiverId: string): Promise
+lib/caregiver-trust-score/calculate.ts  ::  async function saveScoreSnapshot(result: ScoreResult): Promise
+lib/caregiver-trust-score/calculate.ts  ::  interface ScoreEvent
+lib/caregiver-trust-score/calculate.ts  ::  interface ScoreResult
+lib/caregiver-trust-score/calculate.ts  ::  interface ScoreSnapshot
+lib/consent/capture.ts  ::  async function hasCurrentAgencyConsent(
+lib/consent/capture.ts  ::  async function hasCurrentCaregiverConsent(
+lib/consent/capture.ts  ::  async function recordAgencyConsent(
+lib/consent/capture.ts  ::  async function recordCaregiverConsent(
+lib/consent/capture.ts  ::  async function recordClientDataConsent(
+lib/consent/capture.ts  ::  type ConsentCapture
+lib/consent/helpers.ts  ::  async function getCaregiverConsents(caregiverId: string): Promise
+lib/consent/helpers.ts  ::  async function grantConsent(
+lib/consent/helpers.ts  ::  async function hasActiveConsent(
+lib/consent/helpers.ts  ::  async function requireConsent(
+lib/consent/helpers.ts  ::  async function revokeConsent(
+lib/consent/helpers.ts  ::  interface ConsentRecord
+lib/consent/helpers.ts  ::  interface ConsentRequestMeta
+lib/consent/types.ts  ::  const CONSENT_TYPES
+lib/consent/types.ts  ::  function getAllConsentTypes(): ConsentType[]
+lib/consent/types.ts  ::  function getConsentType(id: ConsentTypeId): ConsentType
+lib/consent/types.ts  ::  function isRequiredConsent(id: ConsentTypeId): boolean
+lib/consent/types.ts  ::  function requiresPerCallConfirmation(id: ConsentTypeId): boolean
+lib/consent/types.ts  ::  interface ConsentType
+lib/consent/types.ts  ::  type ConsentMethod
+lib/consent/types.ts  ::  type ConsentTypeId
+lib/consent/types.ts  ::  type RiskLevel
+lib/data-rights/delete.ts  ::  async function deleteAgencyData(
+lib/data-rights/delete.ts  ::  async function deleteCaregiverData(
+lib/data-rights/delete.ts  ::  type DeletionResult
+lib/data-rights/export.ts  ::  async function exportAgencyData(
+lib/data-rights/export.ts  ::  async function exportCaregiverData(
+lib/data-rights/export.ts  ::  type ExportBundle
+lib/db.ts  :: 
+lib/db.ts  ::  const prisma
+lib/demo.ts  ::  const DEMO_AGENCY
+lib/demo.ts  ::  const DEMO_BADGES
+lib/demo.ts  ::  const DEMO_BANNER
+lib/demo.ts  ::  const DEMO_CLIENTS
+lib/demo.ts  ::  const DEMO_MODE
+lib/demo.ts  ::  const DEMO_REVIEWS
+lib/email/resend-client.ts  ::  function getResendClient(): Resend | null
+lib/email/send-agency-approval-email.ts  ::  async function sendAgencyApprovalEmail(params:
+lib/email/send-claim-email.ts  ::  async function sendClaimEmail(params:
+lib/encryption/phi.ts  ::  function decryptPHI(buf: Buffer | null | undefined): string | null
+lib/encryption/phi.ts  ::  function decryptPHIJson
+lib/encryption/phi.ts  ::  function encryptPHI(plaintext: string | null | undefined): Buffer | null
+lib/encryption/phi.ts  ::  function encryptPHIJson(value: unknown): Buffer | null
+lib/enrichment/bestFitProfile.ts  ::  const generateBestFitProfile
+lib/enrichment/bestFitProfile.ts  ::  function generateDisclosedPreferences(
+lib/enrichment/index.ts  :: 
+lib/enrichment/index.ts  ::  * from './types'
+lib/enrichment/index.ts  ::  async function enrichAndPersist(
+lib/enrichment/index.ts  ::  function enrichCaregiver(
+lib/enrichment/tagsAndScore.ts  ::  function computeProfileStrength(
+lib/enrichment/tagsAndScore.ts  ::  function extractMatchingTags(
+lib/enrichment/types.ts  ::  type AgeRangeKey
+lib/enrichment/types.ts  ::  type BestFitProfile
+lib/enrichment/types.ts  ::  type CaregiverDisclosedPreferences
+lib/enrichment/types.ts  ::  type CaregiverForEnrichment
+lib/enrichment/types.ts  ::  type CareStyle
+lib/enrichment/types.ts  ::  type ClientPreferences
+lib/enrichment/types.ts  ::  type EnrichmentResult
+lib/enrichment/types.ts  ::  type EnvironmentComfort
+lib/enrichment/types.ts  ::  type EnvValue
+lib/enrichment/types.ts  ::  type MatchingTag
+lib/enrichment/types.ts  ::  type Motivation
+lib/hooks/useProfileSave.ts  ::  function useProfileSave()
+lib/intelligence/field-discovery.ts  ::  async function recordUnknownFields(params:
+lib/legal/text.ts  ::  const CURRENT_VERSIONS
+lib/legal/text.ts  ::  const LEGAL_TEXT: Record
+lib/legal/text.ts  ::  function getLegalTextForConsent(consentType: ConsentType):
+lib/legal/text.ts  ::  function hashLegalText(text: string): string
+lib/legal/text.ts  ::  type ConsentType
+lib/locale/config.ts  ::  const localeConfig
+lib/locale/config.ts  ::  function getLocaleConfig(locale: Locale): LocaleConfig
+lib/locale/config.ts  ::  type Locale
+lib/locale/config.ts  ::  type LocaleConfig
+lib/locale/get-locale.ts  ::  const LOCALE_CA
+lib/locale/get-locale.ts  ::  const LOCALE_US
+lib/locale/get-locale.ts  ::  function getLocale(): string
+lib/locale/useLocale.ts  ::  function useLocale():
+lib/matching/caregiver-loader.ts  ::  async function loadAllApprovedCaregiversV2(
+lib/matching/caregiver-loader.ts  ::  async function loadCaregiverForMatchingV2(
+lib/matching/caregiver-loader.ts  ::  function lowestConfidenceFor(
+lib/matching/caregiver-loader.ts  ::  type CaregiverWithProvenance
+lib/matching/dimension-meta.ts  ::  const DIMENSION_META: Record
+lib/matching/dimension-meta.ts  ::  const DIMENSION_ORDER: DimensionKey[]
+lib/matching/dimension-meta.ts  ::  function confidenceLabel(multiplier: number): string
+lib/matching/dimension-meta.ts  ::  function tierFromMultiplier(multiplier: number): 1 | 2 | 3 | 4
+lib/matching/dimension-meta.ts  ::  type DimensionMeta
+lib/matching/dimensions.ts  ::  function scoreClinicalFit(
+lib/matching/dimensions.ts  ::  function scoreCulturalLanguageFit(
+lib/matching/dimensions.ts  ::  function scoreEnvironmentFit(
+lib/matching/dimensions.ts  ::  function scoreLogisticsMatch(
+lib/matching/dimensions.ts  ::  function scorePersonalityCompatibility(
+lib/matching/dimensions.ts  ::  function scoreReliability(
+lib/matching/dimensions.ts  ::  function scoreRetentionSignal(
+lib/matching/gap-analysis.ts  ::  function generateGapAnalysis(
+lib/matching/gap-analysis.ts  ::  interface GapItem
+lib/matching/gates.ts  ::  function runGates(
+lib/matching/gates.ts  ::  type GateResult
+lib/matching/index.ts  :: 
+lib/matching/index.ts  ::  * from './types'
+lib/matching/index.ts  ::  type
+lib/matching/persistence.ts  ::  async function getCachedMatchScore(
+lib/matching/persistence.ts  ::  async function loadAllApprovedCaregivers(
+lib/matching/persistence.ts  ::  async function loadCaregiverForMatching(
+lib/matching/persistence.ts  ::  async function persistMatchScore(
+lib/matching/score.ts  ::  function computeMatchScore(
+lib/matching/types.ts  ::  const ALIGNMENT_DISCLAIMER
+lib/matching/types.ts  ::  const BASE_WEIGHTS
+lib/matching/types.ts  ::  type
+lib/matching/types.ts  ::  type CaregiverForMatching
+lib/matching/types.ts  ::  type Confidence
+lib/matching/types.ts  ::  type DimensionKey
+lib/matching/types.ts  ::  type DimensionScore
+lib/matching/types.ts  ::  type MatchNeed
+lib/matching/types.ts  ::  type MatchResult
+lib/matching/types.ts  ::  type MatchScope
+lib/notifications.ts  ::  async function notifyBadgeEarned(caregiverEmail: string, caregiverName: string, badgeLabel: string): Promise
+lib/notifications.ts  ::  async function notifyReviewSubmitted(caregiverEmail: string, caregiverName: string, agencyName: string): Promise
+lib/notifications.ts  ::  async function sendNotification(payload: NotificationPayload): Promise
+lib/notifications.ts  ::  interface NotificationPayload
+lib/notifications/create.ts  ::  async function createNotification(params: CreateNotificationParams): Promise
+lib/notifications/create.ts  ::  const NotificationTemplates
+lib/notifications/create.ts  ::  type NotificationType
+lib/notifications/nudge.ts  ::  async function nudgeAllIncompleteCaregivers(): Promise
+lib/notifications/nudge.ts  ::  async function sendProfileNudge(caregiverId: string): Promise
+lib/npi/fetchNPI.ts  ::  async function fetchNPIProviders(params:
+lib/npi/fetchNPI.ts  ::  interface NPIProvider
+lib/opportunities/discover.ts  ::  async function discoverOpportunities(
+lib/opportunities/discover.ts  ::  type Opportunity
+lib/personality/working-style.ts  ::  const WORKING_STYLE_TAGS
+lib/personality/working-style.ts  ::  function deriveWorkingStyle(answers: Record
+lib/personality/working-style.ts  ::  type WorkingStyleTag
+lib/profile-strength/analyze.ts  ::  async function analyzeProfileStrength(
+lib/profile-strength/analyze.ts  ::  type StrengthGap
+lib/profile-strength/analyze.ts  ::  type StrengthReport
+lib/profile-templates.ts  ::  function generateBio(profile: ProfileData): string
+lib/profile-templates.ts  ::  function generateOpenQuestion(questionType: string, profile: ProfileData): string
+lib/profile-templates.ts  ::  function generateWorkingStyle(profile: ProfileData): string
+lib/rateLimit.ts  ::  function checkRateLimit(ip: string, limit: number
+lib/rateLimit.ts  ::  function getClientIp(req: NextRequest): string
+lib/ratings/compute-suitability.ts  ::  async function generateSuitabilityNarrative(
+lib/ratings/compute-suitability.ts  ::  function computeSuitabilityScores(
+lib/ratings/compute-suitability.ts  ::  interface CaregiverProfile
+lib/ratings/compute-suitability.ts  ::  interface SuitabilityScores
+lib/ratings/compute-trust-score.ts  ::  function computeTrustScore(reviews: PlacementReview[]): TrustScoreResult
+lib/ratings/compute-trust-score.ts  ::  interface PlacementReview
+lib/ratings/compute-trust-score.ts  ::  interface TrustScoreResult
+lib/ratings/recompute-caregiver-score.ts  ::  async function recomputeCaregiverScore(caregiverId: string): Promise
+lib/resume/parse-csv.ts  ::  async function mapCsvColumns(
+lib/resume/parse-csv.ts  ::  function extractUnknownFields(
+lib/resume/parse-csv.ts  ::  function normalizeCsvRow(
+lib/resume/parse-csv.ts  ::  interface CsvColumnMap
+lib/resume/parse-resume.ts  ::  async function parseResume(
+lib/resume/parse-resume.ts  ::  interface ParsedResume
+lib/security/audit.ts  ::  async function getAuditLogs(limit
+lib/security/audit.ts  ::  async function logAdminAction({
+lib/security/audit.ts  ::  interface AuditLogParams
+lib/services/caregiver-search.ts  ::  class CaregiverSearchService
+lib/tickets.ts  :: 
+lib/tickets.ts  ::  async function generateTicketNumber(pool: Pool): Promise
+lib/tickets.ts  ::  function getSLADueDate(type: string): Date | null
+lib/tickets.ts  ::  function validateTicketStatus(from: string, to: string): boolean
+lib/tickets.ts  ::  function validateTicketType(type: string): boolean
+lib/types/search.ts  ::  const AVAILABILITY_STATUS_OPTIONS
+lib/types/search.ts  ::  const CANADIAN_PROVINCES
+lib/types/search.ts  ::  const CREDENTIAL_OPTIONS
+lib/types/search.ts  ::  const DAYS_OF_WEEK
+lib/types/search.ts  ::  const EMPLOYMENT_TYPE_OPTIONS
+lib/types/search.ts  ::  const LANGUAGE_OPTIONS
+lib/types/search.ts  ::  const LIFT_EXPERIENCE_OPTIONS
+lib/types/search.ts  ::  const PET_TOLERANCE_OPTIONS
+lib/types/search.ts  ::  const PLACEMENT_TYPE_OPTIONS
+lib/types/search.ts  ::  const SHIFT_TYPE_OPTIONS
+lib/types/search.ts  ::  const SPECIALTY_OPTIONS
+lib/types/search.ts  ::  const TECHNOLOGY_COMFORT_OPTIONS
+lib/types/search.ts  ::  const US_STATES
+lib/types/search.ts  ::  interface CaregiverSearchResult
+lib/types/search.ts  ::  interface SearchFilters
+lib/types/search.ts  ::  interface SearchResponse
+lib/types/shortlist.ts  ::  interface ShortlistEntry
+lib/types/shortlist.ts  ::  interface ShortlistResponse
+lib/utils/generate-caregiver-code.ts  ::  function generateCaregiverCode(
+lib/utils/profile-completion.ts  ::  function calculateProfileCompletion(input: CompletionInput): CompletionResult
+lib/utils/profile-completion.ts  ::  function getTierColor(tier: string): string
+lib/utils/profile-completion.ts  ::  interface CompletionInput
+lib/utils/profile-completion.ts  ::  interface CompletionResult
+lib/validations/agency-signup.ts  ::  const agencySignupSchema
+lib/validations/agency-signup.ts  ::  type AgencySignupData
+lib/verification/derive-tier.ts  ::  function deriveTier(evidence: EvidenceRow[], now: Date
+lib/verification/derive-tier.ts  ::  function deriveTierLabel(tier: AttributeTier): string
+lib/verification/derive-tier.ts  ::  type EvidenceRow
+lib/wallet/apple-wallet.ts  ::  async function generateAppleWalletPass(
+lib/wallet/apple-wallet.ts  ::  const PASS_STRUCTURE
+lib/wallet/apple-wallet.ts  ::  interface CaregiverPassData
+lib/wallet/apple-wallet.ts  ::  interface PassGenerationResult
 ```
 
 ## DB TABLES + COLUMNS (information_schema — ground truth)
