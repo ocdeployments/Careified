@@ -17,8 +17,13 @@ echo -e "\n## ROUTES (app pages + api)\n\`\`\`" >> docs/CODEBASE_MAP.md
 find app -name "page.tsx" -o -name "route.ts" 2>/dev/null | sort >> docs/CODEBASE_MAP.md
 echo -e "\`\`\`" >> docs/CODEBASE_MAP.md
 
-echo -e "\n## lib EXPORTS (every exported symbol per file)\n\`\`\`" >> docs/CODEBASE_MAP.md
-grep -rn "^export " lib/ --include="*.ts" 2>/dev/null | sed 's/{.*//' >> docs/CODEBASE_MAP.md
+echo -e "\n## lib EXPORTS (file : exported symbol)\n\`\`\`" >> docs/CODEBASE_MAP.md
+grep -rn "^export " lib/ --include="*.ts" 2>/dev/null \
+  | sed 's/:[0-9]*:export /  ::  /' \
+  | sed 's/ {.*//' \
+  | sed 's/ =.*//' \
+  | sed 's/<.*//' \
+  | sort -u >> docs/CODEBASE_MAP.md
 echo -e "\`\`\`" >> docs/CODEBASE_MAP.md
 
 echo -e "\n## DB TABLES + COLUMNS (information_schema — ground truth)\n\`\`\`" >> docs/CODEBASE_MAP.md
