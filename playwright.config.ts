@@ -15,7 +15,7 @@ export default defineConfig({
     baseURL: 'https://www.careified.com',
     trace: 'on-first-retry',
   },
-  workers: 1,
+  workers: process.env.CI ? 2 : 4,
   projects: [
     {
       name: 'caregiver-setup',
