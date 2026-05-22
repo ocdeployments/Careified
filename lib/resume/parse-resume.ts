@@ -271,9 +271,10 @@ Return ONLY this JSON object:
         'X-Title': 'Careified Resume Parser',
       },
       body: JSON.stringify({
-        model: 'upstage/ring-2.6-1t:free',
+        model: 'minimax/minimax-m2.5',
         max_tokens: 1500,
         temperature: 0.1,
+        response_format: { type: 'json_object' },
         messages: [{ role: 'user', content: pass1Prompt }],
       }),
     })
