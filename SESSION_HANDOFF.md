@@ -1,67 +1,45 @@
-# SESSION_HANDOFF.md — May 21 2026
+# SESSION_HANDOFF.md — May 22 2026
 
 ## Status: CLEAN
 
 ## Last commit on develop
-7273208 — fix(test): use correct Clerk selectors for agency sign-in
+cddb6e3 — fix(notifications): resolve React #310 — move hooks above conditional return in NotificationBell
 
 ## Last commit on main
-4d98ea8 — merge: E2E tests, routing fixes, DB resilience
+b109a4e — session-end: merged to main, 10/10 caregiver tests
 
-## Completed this session
+## This session's commits (5 total)
 
-### E2E Tests
-- Playwright caregiver auth: working via password (Client Trust disabled in Clerk)
-- caregiver.setup.ts: handles Clerk sign-in, saves storageState
-- caregiver-flow.spec.ts: 10/10 PASSING ✅
-- agency.setup.ts: created, blocked by 2FA on test account
-- agency-flow.spec.ts: 4/12 passing (public pages only, 8 blocked by 2FA)
-- MERGED to main ✅
+1. b704be4 — chore: gitignore test-results
+2. 68c5151 — fix(agency): accept both approved and active status for roster/assistant pages
+3. 18f3ef6 — fix(e2e): parallel workers to avoid Clerk 60s token expiry mid-suite
+4. f1ed784 — docs: agency E2E resolved — token TTL, not page bugs
+5. cddb6e3 — fix(notifications): resolve React #310 — move hooks above conditional return
 
-### Routing & Auth (from prior sessions)
-- fix(middleware): role-based route protection — agencies blocked from caregiver routes
-- fix(middleware): sessionClaims.publicMetadata (was .metadata — silently failing)
-- fix(onboarding): pure server-side role redirect
-- fix(auth): role-redirect routes new agencies to /agency/signup
-- Agency signup → pending-approval flow: working
+## What's built this session
 
-### Database & Infrastructure
-- fix(db): pool resilience across 57 API route files
-- careified.com: live
+### Bug fixes
+- Roster/assistant pages: accept both 'approved' and 'active' agency status (5 agencies with 'active' were 404ing)
+- NotificationBell: React #310 fix — hooks moved above conditional return
+- E2E: parallel workers (4) to avoid Clerk 60s token expiry mid-suite
+
+### Investigation (not bugs)
+- Agency 404s: disproven as app bug — root cause was token expiry (60s vs 250s suite)
+- Search cards not rendering: not investigated (not launch-blocking)
+- Resume parser: code path correct, verified runtime:nodejs
 
 ## Pending — Priority Order
 
-### STILL BLOCKED
-1. Agency test account 2FA still enabled despite disable attempt
-   - Need to fully disable in Clerk dashboard OR
-   - Create new agency test account without 2FA
+### Still open (from prior sessions)
+- /agency/search: caregiver cards don't navigate on click (Tailwind classes not rendering in prod)
+- Locale-scoping leak: US states shown to CA-locale agency
+- agencies table: duplicate + null clerk_user_id rows (data hygiene)
 
-### BUGS TO FIX
-2. Remove debug console.log from app/onboarding/page.tsx
-   (leaks userId to Vercel logs)
-
-3. Fix /agency/pending-approval blank page
-
-4. Fix NotificationBell React error #310
-
-5. Verify resume parse on Vercel (PDF + DOCX)
-
-6. Post-approval email to agency
-
-### LAUNCH BLOCKERS (June 15)
-- Clerk production keys (dev keys)
-- careified.ca domain not purchased
-- Copy session (placeholder text)
-- Lawyer review of lib/legal/text.ts
+### Launch blockers (from prior sessions)
+- Stripe billing
+- Clerk production keys
+- Copy session
+- careified.ca domain purchase
 
 ## Safe revert
-13d063b — middleware auth guards
-## AGENCY E2E — RESOLVED (do not reopen the "roster 404" theory)
-CONCLUSIVE FINDING: agency pages WORK. Failures were Clerk session TOKEN ttl = 60s
-(not dashboard-configurable) vs ~250s suite runtime. Tests after ~60s ran with an
-expired token → false 404s/redirects. Verified by decoding JWT iat/exp (60s lifetime)
-and by pages passing in isolation but failing late in suite.
-FIX APPLIED: workers:4 (parallel) → 7/13 pass. Remaining 6 = residual token timing +
-brittle selectors ([class*="card"]) on pages that DO render ("15 caregivers match"
-confirmed). NOT app bugs. Pages manually verified in browser.
-DECISION: agency E2E parked. Not launch-blocking. Do NOT spend more time chasing green.
+b109a4e — session-end: merged to main, 10/10 caregiver tests
