@@ -97,16 +97,6 @@ const caregiver = {
   languages: [],
 }
 
-const verification: { label: string; tier: TierLevel; meta?: string }[] = [
-  { label: 'Vulnerable Sector Check', tier: 1, meta: 'Verified Mar 14, 2026' },
-  { label: 'PSW registration (HCSWO)', tier: 1, meta: 'Reg #PSW-184293 · Active' },
-  { label: 'Government ID', tier: 1, meta: 'Identity match confirmed' },
-  { label: 'CPR / First Aid certificate', tier: 2, meta: 'Issued by Red Cross · Expires Aug 2026' },
-  { label: 'Work history', tier: 2, meta: '3 roles · Documents on file' },
-  { label: 'Professional references', tier: 3, meta: '3 of 3 confirmed by phone' },
-  { label: 'Availability & rate', tier: 4, meta: 'Self-disclosed by caregiver' },
-]
-
 const overallConfidence = 86 // out of 100
 
 const scorecard: { label: string; pct: number; reason: string }[] = [
@@ -635,6 +625,55 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         ]
       : [] // no disclosure data yet — render nothing rather than fabricate
 
+  // Build verification items from props
+  function buildVerification(): { label: string; tier: TierLevel; meta?: string }[] {
+    const items: { label: string; tier: TierLevel; meta?: string }[] = []
+
+    // VSC — real boolean from props
+    if (dm.vulnerableSectorCheck != null) {
+      items.push({
+        label: 'Vulnerable Sector Check',
+        tier: dm.vulnerableSectorCheck ? 1 : 4,
+        meta: dm.vulnerableSectorCheck ? 'On file' : 'Self-reported',
+      })
+    }
+
+    // Certifications — real data from props
+    if (dm.certifications && Array.isArray(dm.certifications)) {
+      for (const cert of dm.certifications) {
+        const expired = cert.expiry_date && new Date(cert.expiry_date) < new Date()
+        items.push({
+          label: cert.certification || 'Certification',
+          tier: expired ? 4 : 2,
+          meta: cert.issuing_org
+            ? `${cert.issuing_org}${cert.expiry_date ? ' · Expires ' + new Date(cert.expiry_date).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' }) : ''}`
+            : undefined,
+        })
+      }
+    }
+
+    // References — count from verifiedReferences prop
+    if (dm.verifiedReferences && dm.verifiedReferences.length > 0) {
+      const confirmed = dm.verifiedReferences.length
+      items.push({
+        label: 'Professional references',
+        tier: 3,
+        meta: `${confirmed} confirmed`,
+      })
+    }
+
+    // Availability & rate — always self-reported
+    items.push({
+      label: 'Availability & rate',
+      tier: 4,
+      meta: 'Self-disclosed by caregiver',
+    })
+
+    return items
+  }
+
+  const verificationItems = buildVerification()
+
   const [openWorkHistory, setOpenWorkHistory] = useState(true)
   const [openRoles, setOpenRoles] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false })
   const [openCredentials, setOpenCredentials] = useState(true)
@@ -983,27 +1022,33 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         <Section title="Verification status">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 240px', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {verification.map((v, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 14px',
-                    background: C.bgSubtle,
-                    border: `1px solid ${C.borderSoft}`,
-                    borderRadius: 12,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>{v.label}</div>
-                    {v.meta && <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>{v.meta}</div>}
+              {verificationItems.length > 0 ? (
+                verificationItems.map((v, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 14px',
+                      background: C.bgSubtle,
+                      border: `1px solid ${C.borderSoft}`,
+                      borderRadius: 12,
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>{v.label}</div>
+                      {v.meta && <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>{v.meta}</div>}
+                    </div>
+                    <TierChip tier={v.tier} />
                   </div>
-                  <TierChip tier={v.tier} />
+                ))
+              ) : (
+                <div style={{ fontSize: 13, color: C.fg3, fontStyle: 'italic', padding: '12px 14px' }}>
+                  Verification data not yet available.
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Confidence aside */}
