@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Fri 22 May 2026 17:37:51 EDT
+Generated: Fri 22 May 2026 23:25:29 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -305,6 +305,7 @@ lib/utils/generate-caregiver-code.ts
 lib/utils/profile-completion.ts
 lib/validations/agency-signup.ts
 lib/verification/derive-tier.ts
+lib/verification/get-caregiver-verification.ts
 lib/wallet/apple-wallet.ts
 ```
 
@@ -726,6 +727,8 @@ lib/validations/agency-signup.ts  ::  type AgencySignupData
 lib/verification/derive-tier.ts  ::  function deriveTier(evidence: EvidenceRow[], now: Date
 lib/verification/derive-tier.ts  ::  function deriveTierLabel(tier: AttributeTier): string
 lib/verification/derive-tier.ts  ::  type EvidenceRow
+lib/verification/get-caregiver-verification.ts  ::  async function getCaregiverVerification(caregiverId: string): Promise
+lib/verification/get-caregiver-verification.ts  ::  interface VerifiedClaim
 lib/wallet/apple-wallet.ts  ::  async function generateAppleWalletPass(
 lib/wallet/apple-wallet.ts  ::  const PASS_STRUCTURE
 lib/wallet/apple-wallet.ts  ::  interface CaregiverPassData
