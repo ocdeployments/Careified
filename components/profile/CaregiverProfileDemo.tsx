@@ -283,8 +283,6 @@ const immunisations = [
   'MMR — documented',
 ]
 
-const declarationDate = 'Mar 22, 2026'
-
 // Weekly grid: 7 days × 4 blocks (Morning, Afternoon, Evening, Overnight)
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const blocks = ['Morning', 'Afternoon', 'Evening', 'Overnight']
@@ -301,13 +299,6 @@ const serviceAreas = ['Toronto — Downtown', 'Toronto — West End', 'Etobicoke
 const travelRadius = 25 // km
 const minHours = 24
 const maxHours = 44
-
-const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string }[] = [
-  { question: 'Have you ever been the subject of a complaint to a regulatory body?', answer: 'No' },
-  { question: 'Has your right to provide care ever been suspended or revoked?', answer: 'No' },
-  { question: 'Are there pending criminal charges against you?', answer: 'No' },
-  { question: 'Have you been dismissed from a care role in the last 5 years?', answer: 'No' },
-]
 
 const openQuestions = [
   {
@@ -617,6 +608,32 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   // Merge real data with demo fallbacks
   const dm = props
 
+  // Build real disclosure flags from props
+  const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string }[] =
+    dm.rfComplaint || dm.rfTerminated || dm.rfBackground || dm.rfPhysicalLimitation || dm.declarationDate
+      ? [
+          {
+            question: 'Have you ever been the subject of a complaint to a regulatory body?',
+            answer: dm.rfComplaint ? 'Yes' : 'No',
+            explanation: typeof dm.rfComplaint === 'string' ? dm.rfComplaint : undefined,
+          },
+          {
+            question: 'Has your right to provide care ever been suspended or revoked?',
+            answer: dm.rfTerminated ? 'Yes' : 'No',
+            explanation: typeof dm.rfTerminated === 'string' ? dm.rfTerminated : undefined,
+          },
+          {
+            question: 'Are there pending criminal charges against you?',
+            answer: dm.rfBackground ? 'Yes' : 'No',
+            explanation: typeof dm.rfBackground === 'string' ? dm.rfBackground : undefined,
+          },
+          {
+            question: 'Have you been dismissed from a care role in the last 5 years?',
+            answer: dm.rfPhysicalLimitation ? 'Yes' : 'No',
+            explanation: typeof dm.rfPhysicalLimitation === 'string' ? dm.rfPhysicalLimitation : undefined,
+          },
+        ]
+      : [] // no disclosure data yet — render nothing rather than fabricate
 
   const [openWorkHistory, setOpenWorkHistory] = useState(true)
   const [openRoles, setOpenRoles] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false })
@@ -911,48 +928,54 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         {/* 2. DISCLOSURE — moved to top for agency triage */}
         <Section title="Disclosure">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {redFlags.map((r, i) => {
-              const isYes = r.answer === 'Yes'
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    gap: 12,
-                    alignItems: 'center',
-                    padding: '12px 14px',
-                    background: isYes ? '#FEF2F2' : C.successBg,
-                    border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
-                    borderRadius: 10,
-                  }}
-                >
-                  <div style={{ fontSize: 13, color: C.fg1 }}>
-                    {r.question}
-                    {isYes && r.explanation && (
-                      <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
-                    )}
-                  </div>
-                  <span
+            {redFlags.length > 0 ? (
+              redFlags.map((r, i) => {
+                const isYes = r.answer === 'Yes'
+                return (
+                  <div
+                    key={i}
                     style={{
-                      display: 'inline-flex',
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      gap: 12,
                       alignItems: 'center',
-                      gap: 5,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      padding: '4px 12px',
-                      borderRadius: 999,
-                      background: isYes ? '#DC2626' : C.success,
-                      color: 'white',
-                      letterSpacing: '0.02em',
+                      padding: '12px 14px',
+                      background: isYes ? '#FEF2F2' : C.successBg,
+                      border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
+                      borderRadius: 10,
                     }}
                   >
-                    {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
-                    {r.answer}
-                  </span>
-                </div>
-              )
-            })}
+                    <div style={{ fontSize: 13, color: C.fg1 }}>
+                      {r.question}
+                      {isYes && r.explanation && (
+                        <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        padding: '4px 12px',
+                        borderRadius: 999,
+                        background: isYes ? '#DC2626' : C.success,
+                        color: 'white',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
+                      {r.answer}
+                    </span>
+                  </div>
+                )
+              })
+            ) : (
+              <div style={{ fontSize: 13, color: C.fg3, fontStyle: 'italic', padding: '12px 14px' }}>
+                Disclosure questions not yet completed by caregiver.
+              </div>
+            )}
           </div>
         </Section>
 
@@ -1803,7 +1826,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   }}
                 >
                   <Shield size={12} color={C.gold} />
-                  Declaration of accuracy signed by caregiver on <strong style={{ color: C.fg1 }}>{declarationDate}</strong>.
+                  Declaration of accuracy signed by caregiver on <strong style={{ color: C.fg1 }}>{dm.declarationDate || 'N/A'}</strong>.
                 </div>
               </div>
             </div>
