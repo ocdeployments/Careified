@@ -5,6 +5,24 @@
 # Owner: Claude
 # DO NOT DUPLICATE: Decisions (CONTEXT.md), standards (BEST_PRACTICES.md), identity (SOUL.md)
 
+## CODEBASE_MAP.md — keep it true
+docs/CODEBASE_MAP.md is the architect's source of truth for what currently exists
+(files, exports, routes, DB tables/columns, env vars). It is AUTO-GENERATED — never
+hand-edit it.
+
+**START of every session:**
+- Regenerate it (run `scripts/gen-codebase-map.sh`) BEFORE any other work.
+- Paste the regenerated file into project knowledge / share with architect.
+- Architect reads from this, not from memory or assumptions.
+
+**END of every session:**
+- If ANY file, export, route, DB table, or column changed during the session,
+  regenerate docs/CODEBASE_MAP.md and commit it with the session's work.
+- The regeneration is what updates it — do NOT manually edit sections.
+
+The map must always reflect the CURRENT committed state. A stale map is worse than
+no map. When in doubt, regenerate.
+
 ## ⚠️ SESSION HEALTH MONITOR — READ THIS FIRST, EVERY MESSAGE
 
 You must track and report session health at the start of EVERY response, no exceptions.

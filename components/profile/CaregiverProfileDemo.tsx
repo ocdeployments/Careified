@@ -97,16 +97,6 @@ const caregiver = {
   languages: [],
 }
 
-const verification: { label: string; tier: TierLevel; meta?: string }[] = [
-  { label: 'Vulnerable Sector Check', tier: 1, meta: 'Verified Mar 14, 2026' },
-  { label: 'PSW registration (HCSWO)', tier: 1, meta: 'Reg #PSW-184293 · Active' },
-  { label: 'Government ID', tier: 1, meta: 'Identity match confirmed' },
-  { label: 'CPR / First Aid certificate', tier: 2, meta: 'Issued by Red Cross · Expires Aug 2026' },
-  { label: 'Work history', tier: 2, meta: '3 roles · Documents on file' },
-  { label: 'Professional references', tier: 3, meta: '3 of 3 confirmed by phone' },
-  { label: 'Availability & rate', tier: 4, meta: 'Self-disclosed by caregiver' },
-]
-
 const overallConfidence = 86 // out of 100
 
 const scorecard: { label: string; pct: number; reason: string }[] = [
@@ -283,8 +273,6 @@ const immunisations = [
   'MMR — documented',
 ]
 
-const declarationDate = 'Mar 22, 2026'
-
 // Weekly grid: 7 days × 4 blocks (Morning, Afternoon, Evening, Overnight)
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const blocks = ['Morning', 'Afternoon', 'Evening', 'Overnight']
@@ -301,13 +289,6 @@ const serviceAreas = ['Toronto — Downtown', 'Toronto — West End', 'Etobicoke
 const travelRadius = 25 // km
 const minHours = 24
 const maxHours = 44
-
-const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string }[] = [
-  { question: 'Have you ever been the subject of a complaint to a regulatory body?', answer: 'No' },
-  { question: 'Has your right to provide care ever been suspended or revoked?', answer: 'No' },
-  { question: 'Are there pending criminal charges against you?', answer: 'No' },
-  { question: 'Have you been dismissed from a care role in the last 5 years?', answer: 'No' },
-]
 
 const openQuestions = [
   {
@@ -617,6 +598,81 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   // Merge real data with demo fallbacks
   const dm = props
 
+  // Build real disclosure flags from props
+  const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string }[] =
+    dm.rfComplaint || dm.rfTerminated || dm.rfBackground || dm.rfPhysicalLimitation || dm.declarationDate
+      ? [
+          {
+            question: 'Have you ever been the subject of a complaint to a regulatory body?',
+            answer: dm.rfComplaint ? 'Yes' : 'No',
+            explanation: typeof dm.rfComplaint === 'string' ? dm.rfComplaint : undefined,
+          },
+          {
+            question: 'Has your right to provide care ever been suspended or revoked?',
+            answer: dm.rfTerminated ? 'Yes' : 'No',
+            explanation: typeof dm.rfTerminated === 'string' ? dm.rfTerminated : undefined,
+          },
+          {
+            question: 'Are there pending criminal charges against you?',
+            answer: dm.rfBackground ? 'Yes' : 'No',
+            explanation: typeof dm.rfBackground === 'string' ? dm.rfBackground : undefined,
+          },
+          {
+            question: 'Have you been dismissed from a care role in the last 5 years?',
+            answer: dm.rfPhysicalLimitation ? 'Yes' : 'No',
+            explanation: typeof dm.rfPhysicalLimitation === 'string' ? dm.rfPhysicalLimitation : undefined,
+          },
+        ]
+      : [] // no disclosure data yet — render nothing rather than fabricate
+
+  // Build verification items from props
+  function buildVerification(): { label: string; tier: TierLevel; meta?: string }[] {
+    const items: { label: string; tier: TierLevel; meta?: string }[] = []
+
+    // VSC — real boolean from props
+    if (dm.vulnerableSectorCheck != null) {
+      items.push({
+        label: 'Vulnerable Sector Check',
+        tier: dm.vulnerableSectorCheck ? 1 : 4,
+        meta: dm.vulnerableSectorCheck ? 'On file' : 'Self-reported',
+      })
+    }
+
+    // Certifications — real data from props
+    if (dm.certifications && Array.isArray(dm.certifications)) {
+      for (const cert of dm.certifications) {
+        const expired = cert.expiry_date && new Date(cert.expiry_date) < new Date()
+        items.push({
+          label: cert.certification || 'Certification',
+          tier: expired ? 4 : 2,
+          meta: cert.issuing_org
+            ? `${cert.issuing_org}${cert.expiry_date ? ' · Expires ' + new Date(cert.expiry_date).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' }) : ''}`
+            : undefined,
+        })
+      }
+    }
+
+    // References — count from verifiedReferences prop
+    if (dm.verifiedReferences && dm.verifiedReferences.length > 0) {
+      const confirmed = dm.verifiedReferences.length
+      items.push({
+        label: 'Professional references',
+        tier: 3,
+        meta: `${confirmed} confirmed`,
+      })
+    }
+
+    // Availability & rate — always self-reported
+    items.push({
+      label: 'Availability & rate',
+      tier: 4,
+      meta: 'Self-disclosed by caregiver',
+    })
+
+    return items
+  }
+
+  const verificationItems = buildVerification()
 
   const [openWorkHistory, setOpenWorkHistory] = useState(true)
   const [openRoles, setOpenRoles] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false })
@@ -911,48 +967,54 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         {/* 2. DISCLOSURE — moved to top for agency triage */}
         <Section title="Disclosure">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {redFlags.map((r, i) => {
-              const isYes = r.answer === 'Yes'
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    gap: 12,
-                    alignItems: 'center',
-                    padding: '12px 14px',
-                    background: isYes ? '#FEF2F2' : C.successBg,
-                    border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
-                    borderRadius: 10,
-                  }}
-                >
-                  <div style={{ fontSize: 13, color: C.fg1 }}>
-                    {r.question}
-                    {isYes && r.explanation && (
-                      <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
-                    )}
-                  </div>
-                  <span
+            {redFlags.length > 0 ? (
+              redFlags.map((r, i) => {
+                const isYes = r.answer === 'Yes'
+                return (
+                  <div
+                    key={i}
                     style={{
-                      display: 'inline-flex',
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      gap: 12,
                       alignItems: 'center',
-                      gap: 5,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      padding: '4px 12px',
-                      borderRadius: 999,
-                      background: isYes ? '#DC2626' : C.success,
-                      color: 'white',
-                      letterSpacing: '0.02em',
+                      padding: '12px 14px',
+                      background: isYes ? '#FEF2F2' : C.successBg,
+                      border: `1px solid ${isYes ? 'rgba(220,38,38,0.20)' : C.successBorder}`,
+                      borderRadius: 10,
                     }}
                   >
-                    {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
-                    {r.answer}
-                  </span>
-                </div>
-              )
-            })}
+                    <div style={{ fontSize: 13, color: C.fg1 }}>
+                      {r.question}
+                      {isYes && r.explanation && (
+                        <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        padding: '4px 12px',
+                        borderRadius: 999,
+                        background: isYes ? '#DC2626' : C.success,
+                        color: 'white',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      {isYes ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
+                      {r.answer}
+                    </span>
+                  </div>
+                )
+              })
+            ) : (
+              <div style={{ fontSize: 13, color: C.fg3, fontStyle: 'italic', padding: '12px 14px' }}>
+                Disclosure questions not yet completed by caregiver.
+              </div>
+            )}
           </div>
         </Section>
 
@@ -960,27 +1022,33 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
         <Section title="Verification status">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 240px', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {verification.map((v, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 14px',
-                    background: C.bgSubtle,
-                    border: `1px solid ${C.borderSoft}`,
-                    borderRadius: 12,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>{v.label}</div>
-                    {v.meta && <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>{v.meta}</div>}
+              {verificationItems.length > 0 ? (
+                verificationItems.map((v, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 14px',
+                      background: C.bgSubtle,
+                      border: `1px solid ${C.borderSoft}`,
+                      borderRadius: 12,
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>{v.label}</div>
+                      {v.meta && <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>{v.meta}</div>}
+                    </div>
+                    <TierChip tier={v.tier} />
                   </div>
-                  <TierChip tier={v.tier} />
+                ))
+              ) : (
+                <div style={{ fontSize: 13, color: C.fg3, fontStyle: 'italic', padding: '12px 14px' }}>
+                  Verification data not yet available.
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Confidence aside */}
@@ -1803,7 +1871,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                   }}
                 >
                   <Shield size={12} color={C.gold} />
-                  Declaration of accuracy signed by caregiver on <strong style={{ color: C.fg1 }}>{declarationDate}</strong>.
+                  Declaration of accuracy signed by caregiver on <strong style={{ color: C.fg1 }}>{dm.declarationDate || 'N/A'}</strong>.
                 </div>
               </div>
             </div>
