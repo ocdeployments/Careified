@@ -1,5 +1,26 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// Gate check — must come before everything
+const GATE_PATHS = ['/gate', '/api/gate', '/waitlist', '/api/waitlist']
+const betaPassword = process.env.BETA_PASSWORD
+
+function isBetaEnabled() { return !!betaPassword }
+
+function handleGate(request: NextRequest): NextResponse | null {
+  if (!isBetaEnabled()) return null
+  const path = request.nextUrl.pathname
+  // Allow gate page and verify API through
+  if (GATE_PATHS.some(p => path.startsWith(p))) return null
+  // Check cookie
+  const cookie = request.cookies.get('beta_access')
+  if (cookie?.value === betaPassword) return null
+  // Block — redirect to gate with return URL
+  const gateUrl = new URL('/gate', request.url)
+  gateUrl.searchParams.set('redirect', request.nextUrl.pathname)
+  return NextResponse.redirect(gateUrl)
+}
 
 const isAgencyRoute = createRouteMatcher([
   '/agency/dashboard(.*)',
@@ -66,8 +87,17 @@ const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
 export default clerkMiddleware(
   async (auth, request) => {
+  // Gate check — must come first
+  const gateResponse = handleGate(request)
+  if (gateResponse) return gateResponse
+
   // Get the pathname
   const pathname = request.nextUrl.pathname
+
+  // Redirect root to waitlist
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/waitlist', request.url))
+  }
 
   // Explicitly protect /profile/build routes
   if (pathname.startsWith('/profile/build')) {
