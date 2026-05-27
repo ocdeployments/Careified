@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown, Info, Briefcase, UserCheck, Building2, Presentation, Play, Heart, Users } from 'lucide-react'
 import { UserButton, useAuth, useUser } from '@clerk/nextjs'
@@ -316,6 +317,8 @@ export default function Navbar() {
     setCurrentPath(window.location.pathname)
   }, [])
 
+  const pathname = usePathname()
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -347,6 +350,9 @@ export default function Navbar() {
     const panelLinks = panels[key].links.map(l => l.href)
     return panelLinks.some(href => currentPath.startsWith(href.split('#')[0]))
   }
+
+  // Hide navbar on waitlist page
+  if (pathname === '/waitlist') return null
 
   return (
     <nav
