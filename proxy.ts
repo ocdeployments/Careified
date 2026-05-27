@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Gate check — must come before everything
-const GATE_PATHS = ['/gate', '/api/gate']
+const GATE_PATHS = ['/gate', '/api/gate', '/waitlist', '/api/waitlist']
 const betaPassword = process.env.BETA_PASSWORD
 
 function isBetaEnabled() { return !!betaPassword }
@@ -93,6 +93,11 @@ export default clerkMiddleware(
 
   // Get the pathname
   const pathname = request.nextUrl.pathname
+
+  // Redirect root to waitlist
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/waitlist', request.url))
+  }
 
   // Explicitly protect /profile/build routes
   if (pathname.startsWith('/profile/build')) {
