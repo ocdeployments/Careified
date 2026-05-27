@@ -17,6 +17,10 @@ const pool = new Pool({
   allowExitOnIdle: true,
 });
 
+export const sslConfig = process.env.DATABASE_URL?.includes('supabase.com')
+  ? { rejectUnauthorized: true }
+  : { rejectUnauthorized: false }
+
 // Column allowlist to prevent SQL injection
 const CAREGIVER_COLUMNS = new Set([
   'id', 'user_id', 'clerk_id', 'first_name', 'last_name', 'email', 'phone', 'status',

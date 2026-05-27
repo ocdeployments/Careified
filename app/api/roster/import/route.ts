@@ -5,7 +5,7 @@ import { Pool } from 'pg'
 import { parse } from 'csv-parse/sync'
 import { mapCsvColumns, extractUnknownFields, CsvColumnMap } from '@/lib/resume/parse-csv'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false },
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.DATABASE_URL?.includes('supabase.com') ? { rejectUnauthorized: true } : { rejectUnauthorized: false },
   max: 3,
   idleTimeoutMillis: 10000,
   connectionTimeoutMillis: 10000,
