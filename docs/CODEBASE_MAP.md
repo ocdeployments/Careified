@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Sat 23 May 2026 00:48:29 EDT
+Generated: Tue 26 May 2026 21:43:09 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
