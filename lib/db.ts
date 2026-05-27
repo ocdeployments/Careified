@@ -8,7 +8,7 @@ if (!connectionString) {
 
 const pool = new Pool({
   connectionString,
-  ssl: process.env.NODE_ENV === 'production'
+  ssl: process.env.DATABASE_URL?.includes('supabase.com')
     ? { rejectUnauthorized: true }
     : { rejectUnauthorized: false },
   max: 3,
