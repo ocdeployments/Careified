@@ -316,9 +316,6 @@ export default function Navbar() {
     setCurrentPath(window.location.pathname)
   }, [])
 
-  // Hide navbar on waitlist page
-  if (currentPath === '/waitlist') return null
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll, { passive: true })
