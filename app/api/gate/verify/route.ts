@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid' }, { status: 401 })
   }
 
-  const response = NextResponse.json({ redirect: redirectTo || '/' })
+  const response = NextResponse.json({ redirect: redirectTo || '/sign-in' })
   response.cookies.set('beta_access', correct, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
