@@ -24,6 +24,13 @@ const caregiverNavLinks = [
   { href: '/settings/communications', label: 'Settings' },
 ]
 
+const adminNavLinks = [
+  { href: '/admin',              label: 'Admin Home' },
+  { href: '/admin/caregivers',   label: 'Caregivers' },
+  { href: '/agency/search',      label: 'Search' },
+  { href: '/admin/status',       label: 'Status' },
+]
+
 // ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
   const { isLoaded, userId } = useAuth()
@@ -83,6 +90,22 @@ function AuthButton() {
             >
               Settings
             </Link>
+            <Link
+              href="/contact"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Support
+            </Link>
+          </>
+        ) : userRole === 'admin' ? (
+          <>
             <Link
               href="/contact"
               style={{
@@ -375,7 +398,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link
-          href={userRole === 'agency' ? '/agency/dashboard' : userRole === 'caregiver' ? '/profile/build' : '/'}
+          href={userRole === 'admin' ? '/admin' : userRole === 'agency' ? '/agency/dashboard' : userRole === 'caregiver' ? '/profile/build' : '/'}
           style={{ borderRadius: '4px', outline: 'none' }}
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
@@ -395,6 +418,30 @@ export default function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
           {userRole === 'agency' ? (
             agencyNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    letterSpacing: '0.01em',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease',
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.75)',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : userRole === 'admin' ? (
+            adminNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
               return (
                 <Link
@@ -658,6 +705,29 @@ export default function Navbar() {
         <div style={{ display: 'block', background: '#0D1B3E', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '16px 24px' }}>
           {userRole === 'agency' ? (
             agencyNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'block',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.8)',
+                    textDecoration: 'none',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : userRole === 'admin' ? (
+            adminNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
               return (
                 <Link
