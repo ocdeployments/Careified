@@ -12,7 +12,7 @@ function handleGate(request: NextRequest): NextResponse | null {
   if (!isBetaEnabled()) return null
   const path = request.nextUrl.pathname
   // Allow gate page and verify API through
-  if (GATE_PATHS.some(p => path.startsWith(p))) return null
+  if (GATE_PATHS.some(p => path.startsWith(p)) || path === '/') return null
   // Check cookie
   const cookie = request.cookies.get('beta_access')
   if (cookie?.value === betaPassword) return null
