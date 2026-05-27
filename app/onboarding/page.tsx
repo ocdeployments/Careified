@@ -1,5 +1,6 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { pool } from '@/lib/db'
 import OnboardingForm from './OnboardingForm'
 
 export default async function OnboardingPage() {
@@ -15,7 +16,17 @@ export default async function OnboardingPage() {
   console.log('[onboarding] userId:', userId, 'raw role:', JSON.stringify(user.publicMetadata))
 
   if (role === 'agency') {
-    redirect('/agency/signup')
+    const { rows } = await pool.query(
+      'SELECT status, name FROM agencies WHERE clerk_user_id = $1',
+      [userId]
+    )
+    if (rows.length === 0 || !rows[0].name || rows[0].name.trim() === '') {
+      redirect('/agency/signup')
+    }
+    if (rows[0].status !== 'approved' && rows[0].status !== 'active') {
+      redirect('/agency/pending-approval')
+    }
+    redirect('/agency/dashboard')
   }
 
   // Only caregivers reach here
