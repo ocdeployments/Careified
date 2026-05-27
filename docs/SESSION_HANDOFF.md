@@ -1,29 +1,40 @@
 # SESSION HANDOFF — 2026-05-27
 
 ## Branch state
-- main: f66c89a — all waitlist fixes live
-- develop: 634a50b — same, 1 commit ahead (cherry-pick artifact)
+- main: 86de162 — live, stable on Render DB
+- develop: 2e7b90a — same
+- Safe revert: 41c6b31
 
 ## What shipped today
 - fix(nav): context-aware navbar — role-specific nav per user type
-- fix(onboarding): approved agencies go to dashboard, not signup
+- fix(onboarding): approved agencies bypass signup if already registered
 - fix(agency-layout): redirect to /agency/signup not /onboarding
-- feat(security): beta gate — BETA_PASSWORD env var, /gate page
-- feat(waitlist): holding page, API route, standalone layout, no navbar
-- fix(waitlist): public routes, logged-out only redirect, navbar hidden
-- DB: migrated from Render Oregon → Supabase ca-central-1 (Toronto) ✅
-- careified.ca domain purchased (not yet added to Vercel)
+- feat(security): beta gate — BETA_PASSWORD at /gate, 30-day cookie
+- feat(waitlist): holding page, API route (Resend email), no navbar
+- fix(waitlist): public routes, logged-out only redirect, usePathname fix
+- fix(db): all pool SSL configs updated for Supabase compatibility
+- fix(gate): redirect to /sign-in after password entry
 
-## Env vars set in Vercel
+## DB state
+- Production: Render Oregon (stable, working)
+- Supabase ca-central-1 (Toronto): provisioned, schema migrated, demo data copied
+- SSL fix is deployed — ready to switch when app is stable
+- Switch sequence: test on Vercel preview URL first, then production
+- DO NOT switch DATABASE_URL in Vercel without testing preview first
+
+## Vercel env vars
 - BETA_PASSWORD: set ✅
-- DATABASE_URL: updated to Supabase Toronto ✅
+- DATABASE_URL: Render (production) ✅
+- Supabase URL saved separately for when ready to switch
 
-## Pending
-- Add careified.ca to Vercel as domain alias (same project for now)
-- Verify app works on Supabase — test sign-in, search, profile
-- Run seed scripts to confirm demo data loads correctly
-- DB: Render can be kept as backup for now, cancel when confirmed stable
-- Supabase connection string in .env.local (local dev)
+## careified.ca
+- Domain purchased on Spaceship
+- NOT yet added to Vercel
+- Parked — come back after app is stable
 
-## Session start checklist
-1. ./scripts/gen-codebase-map.sh → past
+## Next session priorities
+1. Test full agency flow: sign in → dashboard → search → profile → shortlist
+2. Test caregiver flow: sign up → profile builder → submit
+3. Fix any broken flows found in testing
+4. CA/US locale leak on /agency/search (US states showing to CA agency)
+5. Supabase switch (after testing confirmed stable)
