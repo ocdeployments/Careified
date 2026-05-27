@@ -73,6 +73,10 @@ const isPublicRoute = createRouteMatcher([
   '/demo(.*)',
   '/api/demo(.*)',
   '/reference(.*)',
+  '/waitlist(.*)',
+  '/api/waitlist(.*)',
+  '/gate(.*)',
+  '/api/gate(.*)',
   '/claim(.*)',
   '/.well-known(.*)',
   // /api/profile/upload-photo — auth required, not in publicRoutes (verified 2026-05-12)
