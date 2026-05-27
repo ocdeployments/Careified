@@ -6,7 +6,7 @@ import { sendClaimEmail } from '@/lib/email/send-claim-email'
 import { recordUnknownFields } from '@/lib/intelligence/field-discovery'
 import { extractUnknownFields, CsvColumnMap } from '@/lib/resume/parse-csv'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false },
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.DATABASE_URL?.includes('supabase.com') ? { rejectUnauthorized: true } : { rejectUnauthorized: false },
   max: 3,
   idleTimeoutMillis: 10000,
   connectionTimeoutMillis: 10000,

@@ -8,7 +8,7 @@ if (!connectionString) {
 
 const pool = new Pool({
   connectionString,
-  ssl: process.env.NODE_ENV === 'production'
+  ssl: process.env.DATABASE_URL?.includes('supabase.com')
     ? { rejectUnauthorized: true }
     : { rejectUnauthorized: false },
   max: 3,
@@ -16,6 +16,10 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
   allowExitOnIdle: true,
 });
+
+export const sslConfig = process.env.DATABASE_URL?.includes('supabase.com')
+  ? { rejectUnauthorized: true }
+  : { rejectUnauthorized: false }
 
 // Column allowlist to prevent SQL injection
 const CAREGIVER_COLUMNS = new Set([
