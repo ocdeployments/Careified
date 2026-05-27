@@ -53,6 +53,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL('/profile/build', req.url))
     }
 
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', req.url))
+    }
+
     // No role set — send to landing page to pick entry point
     return NextResponse.redirect(new URL('/', req.url))
   } catch (error) {
