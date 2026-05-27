@@ -44,7 +44,7 @@ export default async function AgencyLayout({ children }: { children: React.React
     )
 
     if (teamMember.rows.length === 0) {
-      redirect('/onboarding')
+      redirect('/agency/signup')
     }
 
     // Team member - allow access
