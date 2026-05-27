@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Wed 27 May 2026 00:24:03 EDT
+Generated: Wed 27 May 2026 00:54:17 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -576,6 +576,7 @@ lib/data-rights/export.ts  ::  async function exportCaregiverData(
 lib/data-rights/export.ts  ::  type ExportBundle
 lib/db.ts  :: 
 lib/db.ts  ::  const prisma
+lib/db.ts  ::  const sslConfig
 lib/demo.ts  ::  const DEMO_AGENCY
 lib/demo.ts  ::  const DEMO_BADGES
 lib/demo.ts  ::  const DEMO_BANNER
@@ -1412,13 +1413,48 @@ lib/wallet/apple-wallet.ts  ::  interface PassGenerationResult
   internal : boolean
   created_at : timestamp without time zone
 === users ===
+  instance_id : uuid ?
   id : character varying
+  id : uuid
   email : character varying
   password_hash : character varying ?
+  aud : character varying ?
+  role : character varying ?
   role : character varying ?
   is_active : boolean ?
+  email : character varying ?
   created_at : timestamp without time zone ?
+  encrypted_password : character varying ?
   updated_at : timestamp without time zone ?
+  email_confirmed_at : timestamp with time zone ?
+  invited_at : timestamp with time zone ?
+  confirmation_token : character varying ?
+  confirmation_sent_at : timestamp with time zone ?
+  recovery_token : character varying ?
+  recovery_sent_at : timestamp with time zone ?
+  email_change_token_new : character varying ?
+  email_change : character varying ?
+  email_change_sent_at : timestamp with time zone ?
+  last_sign_in_at : timestamp with time zone ?
+  raw_app_meta_data : jsonb ?
+  raw_user_meta_data : jsonb ?
+  is_super_admin : boolean ?
+  created_at : timestamp with time zone ?
+  updated_at : timestamp with time zone ?
+  phone : text ?
+  phone_confirmed_at : timestamp with time zone ?
+  phone_change : text ?
+  phone_change_token : character varying ?
+  phone_change_sent_at : timestamp with time zone ?
+  confirmed_at : timestamp with time zone ?
+  email_change_token_current : character varying ?
+  email_change_confirm_status : smallint ?
+  banned_until : timestamp with time zone ?
+  reauthentication_token : character varying ?
+  reauthentication_sent_at : timestamp with time zone ?
+  is_sso_user : boolean
+  deleted_at : timestamp with time zone ?
+  is_anonymous : boolean
 === verification_evidence ===
   id : character varying
   caregiver_id : character varying
