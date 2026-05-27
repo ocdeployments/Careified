@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Tue 26 May 2026 21:43:09 EDT
+Generated: Tue 26 May 2026 23:59:24 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -99,6 +99,7 @@ app/api/data-rights/requests/route.ts
 app/api/demo/airecruit/results/route.ts
 app/api/demo/assistant/route.ts
 app/api/demo/session/route.ts
+app/api/gate/verify/route.ts
 app/api/health/route.ts
 app/api/match/rank/route.ts
 app/api/notifications/count/route.ts
@@ -135,6 +136,7 @@ app/api/roster/template/route.ts
 app/api/tickets/[id]/route.ts
 app/api/tickets/create/route.ts
 app/api/tickets/list/route.ts
+app/api/waitlist/route.ts
 app/api/wallet/apple/route.ts
 app/caregiver/notifications/page.tsx
 app/caregiver/support/page.tsx
@@ -148,6 +150,7 @@ app/demo/login/page.tsx
 app/for-agencies/page.tsx
 app/for-caregivers/page.tsx
 app/for-families/page.tsx
+app/gate/page.tsx
 app/id/[caregiverId]/page.tsx
 app/layout.tsx
 app/not-found.tsx
@@ -184,6 +187,8 @@ app/sign-up/[[...sign-up]]/page.tsx
 app/sitemap.ts
 app/terms/page.tsx
 app/verify/[slug]/page.tsx
+app/waitlist/layout.tsx
+app/waitlist/page.tsx
 components/agency/AddToRosterModal.tsx
 components/agency/CommandBar.tsx
 components/agency/PrivateRelationshipPanel.tsx
@@ -398,6 +403,7 @@ app/api/data-rights/requests/route.ts
 app/api/demo/airecruit/results/route.ts
 app/api/demo/assistant/route.ts
 app/api/demo/session/route.ts
+app/api/gate/verify/route.ts
 app/api/health/route.ts
 app/api/match/rank/route.ts
 app/api/notifications/count/route.ts
@@ -434,6 +440,7 @@ app/api/roster/template/route.ts
 app/api/tickets/[id]/route.ts
 app/api/tickets/create/route.ts
 app/api/tickets/list/route.ts
+app/api/waitlist/route.ts
 app/api/wallet/apple/route.ts
 app/caregiver/notifications/page.tsx
 app/caregiver/support/page.tsx
@@ -446,6 +453,7 @@ app/demo/login/page.tsx
 app/for-agencies/page.tsx
 app/for-caregivers/page.tsx
 app/for-families/page.tsx
+app/gate/page.tsx
 app/id/[caregiverId]/page.tsx
 app/onboarding/page.tsx
 app/opportunities/page.tsx
@@ -465,6 +473,7 @@ app/sign-in/[[...sign-in]]/page.tsx
 app/sign-up/[[...sign-up]]/page.tsx
 app/terms/page.tsx
 app/verify/[slug]/page.tsx
+app/waitlist/page.tsx
 ```
 
 ## lib EXPORTS (file : exported symbol)
@@ -1426,6 +1435,7 @@ lib/wallet/apple-wallet.ts  ::  interface PassGenerationResult
 ## ENV VARS REFERENCED (names only, no values)
 ```
 ADMIN_CLERK_USER_ID
+BETA_PASSWORD
 CRON_SECRET
 DATABASE_URL
 NEXT_PUBLIC_ADMIN_CLERK_USER_ID
