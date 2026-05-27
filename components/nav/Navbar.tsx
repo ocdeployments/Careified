@@ -7,6 +7,22 @@ import { UserButton, useAuth, useUser } from '@clerk/nextjs'
 import BrandLogo from '../BrandLogo'
 import NotificationBell from '../notifications/NotificationBell'
 
+// ── Role-specific nav configs ───────────────────────────────────────────────────
+const agencyNavLinks = [
+  { href: '/agency/dashboard', label: 'Dashboard' },
+  { href: '/agency/search',    label: 'Search Caregivers' },
+  { href: '/agency/shortlist', label: 'Shortlist' },
+  { href: '/agency/roster',    label: 'Roster' },
+  { href: '/agency/airecruit', label: 'AIRecruit' },
+]
+
+const caregiverNavLinks = [
+  { href: '/profile/build',           label: 'My Profile' },
+  { href: '/opportunities',           label: 'Opportunities' },
+  { href: '/caregiver/notifications', label: 'Notifications' },
+  { href: '/settings/communications', label: 'Settings' },
+]
+
 // ── Auth buttons ──────────────────────────────────────────────────────────────
 function AuthButton() {
   const { isLoaded, userId } = useAuth()
@@ -51,58 +67,146 @@ function AuthButton() {
   if (userId) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link
-          href="/profile/strength"
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.8)',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            transition: 'color 0.15s',
-            textDecoration: 'none',
-          }}
-        >
-          Profile strength
-        </Link>
-        <Link
-          href="/settings/data-rights"
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.8)',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            transition: 'color 0.15s',
-            textDecoration: 'none',
-          }}
-        >
-          Data rights
-        </Link>
-        <Link
-          href="/caregiver/support"
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.8)',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            transition: 'color 0.15s',
-            textDecoration: 'none',
-          }}
-        >
-          Support
-        </Link>
-        <Link
-          href="/settings/communications"
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.8)',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            transition: 'color 0.15s',
-            textDecoration: 'none',
-          }}
-        >
-          Communications
-        </Link>
+        {userRole === 'agency' ? (
+          <>
+            <Link
+              href="/agency/settings"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Settings
+            </Link>
+            <Link
+              href="/contact"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Support
+            </Link>
+          </>
+        ) : userRole === 'caregiver' ? (
+          <>
+            <Link
+              href="/profile/strength"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Profile strength
+            </Link>
+            <Link
+              href="/settings/data-rights"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Data rights
+            </Link>
+            <Link
+              href="/caregiver/support"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Support
+            </Link>
+            <Link
+              href="/settings/communications"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Communications
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/profile/strength"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Profile strength
+            </Link>
+            <Link
+              href="/settings/data-rights"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Data rights
+            </Link>
+            <Link
+              href="/caregiver/support"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Support
+            </Link>
+            <Link
+              href="/settings/communications"
+              style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.8)',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                transition: 'color 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Communications
+            </Link>
+          </>
+        )}
         <NotificationBell />
         <UserButton
           appearance={{
@@ -265,7 +369,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link
-          href="/"
+          href={userRole === 'agency' ? '/agency/dashboard' : userRole === 'caregiver' ? '/profile/build' : '/'}
           style={{ borderRadius: '4px', outline: 'none' }}
           onClick={() => { setActivePanel(null); setMobileOpen(false) }}
         >
@@ -283,89 +387,142 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-          {(Object.keys(panels) as PanelKey[]).map(key => {
-            const isActive = isSectionActive(key)
-            return (
-              <button
-                key={key}
-                onClick={() => togglePanel(key)}
-                aria-expanded={activePanel === key}
-                aria-haspopup="true"
+          {userRole === 'agency' ? (
+            agencyNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    letterSpacing: '0.01em',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease',
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.75)',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : userRole === 'caregiver' ? (
+            caregiverNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    letterSpacing: '0.01em',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease',
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.75)',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : (
+            // Logged out / unknown role: show panels dropdowns
+            <>
+              {(Object.keys(panels) as PanelKey[]).map(key => {
+                const isActive = isSectionActive(key)
+                return (
+                  <button
+                    key={key}
+                    onClick={() => togglePanel(key)}
+                    aria-expanded={activePanel === key}
+                    aria-haspopup="true"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      letterSpacing: '0.01em',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      background: activePanel === key ? 'rgba(201,151,58,0.08)' : 'transparent',
+                      color: activePanel === key ? '#E8B86D' : 'rgba(255,255,255,0.75)',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activePanel !== key) {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+                        e.currentTarget.style.color = '#fff'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activePanel !== key) {
+                        e.currentTarget.style.background = 'transparent'
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
+                      }
+                    }}
+                  >
+                    <span style={{ textTransform: 'capitalize' }}>{key}</span>
+                    {isActive && (
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C9973A', marginLeft: '4px', display: 'inline-block' }} />
+                    )}
+                    <ChevronDown
+                      size={14}
+                      style={{
+                        marginLeft: '4px',
+                        opacity: 0.6,
+                        transition: 'transform 0.2s ease',
+                        transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
+                      }}
+                    />
+                  </button>
+                )
+              })}
+              <Link
+                href="/about"
+                onClick={() => setActivePanel(null)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontFamily: 'DM Sans, sans-serif',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
                   fontSize: '13px',
                   fontWeight: 500,
-                  letterSpacing: '0.01em',
-                  border: 'none',
-                  cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.75)',
+                  textDecoration: 'none',
                   transition: 'all 0.15s ease',
-                  background: activePanel === key ? 'rgba(201,151,58,0.08)' : 'transparent',
-                  color: activePanel === key ? '#E8B86D' : 'rgba(255,255,255,0.75)',
-                }}
-                onMouseEnter={(e) => {
-                  if (activePanel !== key) {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-                    e.currentTarget.style.color = '#fff'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activePanel !== key) {
-                    e.currentTarget.style.background = 'transparent'
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
-                  }
                 }}
               >
-                <span style={{ textTransform: 'capitalize' }}>{key}</span>
-                {isActive && (
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C9973A', marginLeft: '4px', display: 'inline-block' }} />
-                )}
-                <ChevronDown
-                  size={14}
-                  style={{
-                    marginLeft: '4px',
-                    opacity: 0.6,
-                    transition: 'transform 0.2s ease',
-                    transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
-                  }}
-                />
-              </button>
-            )
-          })}
-          <Link
-            href="/about"
-            onClick={() => setActivePanel(null)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'rgba(255,255,255,0.75)',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            onClick={() => setActivePanel(null)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'rgba(255,255,255,0.75)',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            Contact
-          </Link>
+                About
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setActivePanel(null)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.75)',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Contact
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Desktop auth */}
@@ -493,89 +650,140 @@ export default function Navbar() {
       {/* ── Mobile menu ── */}
       {mobileOpen && (
         <div style={{ display: 'block', background: '#0D1B3E', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '16px 24px' }}>
-          {(Object.keys(panels) as PanelKey[]).map(key => (
-            <div key={key}>
-              <button
-                onClick={() => togglePanel(key)}
+          {userRole === 'agency' ? (
+            agencyNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'block',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.8)',
+                    textDecoration: 'none',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : userRole === 'caregiver' ? (
+            caregiverNavLinks.map(link => {
+              const isActive = currentPath.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'block',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: isActive ? '#C9973A' : 'rgba(255,255,255,0.8)',
+                    textDecoration: 'none',
+                    opacity: isActive ? 1 : undefined,
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })
+          ) : (
+            // Logged out / unknown role: show panels dropdowns
+            <>
+              {(Object.keys(panels) as PanelKey[]).map(key => (
+                <div key={key}>
+                  <button
+                    onClick={() => togglePanel(key)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: 'none',
+                      cursor: 'pointer',
+                      background: 'transparent',
+                      color: 'rgba(255,255,255,0.8)',
+                    }}
+                  >
+                    <span style={{ textTransform: 'capitalize' }}>{key}</span>
+                    <ChevronDown
+                      size={14}
+                      style={{
+                        transition: 'transform 0.2s ease',
+                        transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
+                      }}
+                    />
+                  </button>
+                  {activePanel === key && (
+                    <div style={{ marginLeft: '12px', marginTop: '4px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+                      {panels[key].links
+                        .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
+                        .map(link => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => { setActivePanel(null); setMobileOpen(false) }}
+                          style={{
+                            display: 'block',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            color: 'rgba(255,255,255,0.7)',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                      <Link
+                        href={panels[key].cta.href}
+                        onClick={() => { setActivePanel(null); setMobileOpen(false) }}
+                        style={{
+                          display: 'block',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          color: '#C9973A',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        {panels[key].cta.label} →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <Link
+                href="/about"
+                onClick={() => setMobileOpen(false)}
                 style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: 'block',
                   padding: '10px 12px',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  border: 'none',
-                  cursor: 'pointer',
-                  background: 'transparent',
                   color: 'rgba(255,255,255,0.8)',
+                  textDecoration: 'none',
                 }}
               >
-                <span style={{ textTransform: 'capitalize' }}>{key}</span>
-                <ChevronDown
-                  size={14}
-                  style={{
-                    transition: 'transform 0.2s ease',
-                    transform: activePanel === key ? 'rotate(180deg)' : 'rotate(0deg)',
-                  }}
-                />
-              </button>
-              {activePanel === key && (
-                <div style={{ marginLeft: '12px', marginTop: '4px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
-                  {panels[key].links
-                    .filter(link => !link.href.includes('/agency/sitemap') || isAgency)
-                    .map(link => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                      style={{
-                        display: 'block',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        color: 'rgba(255,255,255,0.7)',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                  <Link
-                    href={panels[key].cta.href}
-                    onClick={() => { setActivePanel(null); setMobileOpen(false) }}
-                    style={{
-                      display: 'block',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#C9973A',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {panels[key].cta.label} →
-                  </Link>
-                </div>
-              )}
-            </div>
-          ))}
-          <Link
-            href="/about"
-            onClick={() => setMobileOpen(false)}
-            style={{
-              display: 'block',
-              padding: '10px 12px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 500,
-              color: 'rgba(255,255,255,0.8)',
-              textDecoration: 'none',
-            }}
-          >
-            About
-          </Link>
+                About
+              </Link>
+            </>
+          )}
           <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <AuthButton />
           </div>
