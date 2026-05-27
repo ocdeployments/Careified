@@ -546,7 +546,12 @@ export interface CaregiverProfileProps {
   // Profile completeness
   claimStatus?: string
   sourceAgencyName?: string | null
+  // Verification (Step 4)
+  isDemo?: boolean
+  verifiedClaims?: VerifiedClaim[]
 }
+
+import { type VerifiedClaim } from '@/lib/verification/get-caregiver-verification'
 
 // Tooltip for alignment score explanation
 function TooltipInfo() {
@@ -597,37 +602,67 @@ function TooltipInfo() {
 export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} as CaregiverProfileProps) {
   // Merge real data with demo fallbacks
   const dm = props
+  const isDemo = dm.isDemo ?? false
 
-  // Build real disclosure flags from props
-  const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string }[] =
-    dm.rfComplaint || dm.rfTerminated || dm.rfBackground || dm.rfPhysicalLimitation || dm.declarationDate
-      ? [
-          {
-            question: 'Have you ever been the subject of a complaint to a regulatory body?',
-            answer: dm.rfComplaint ? 'Yes' : 'No',
-            explanation: typeof dm.rfComplaint === 'string' ? dm.rfComplaint : undefined,
-          },
-          {
-            question: 'Has your right to provide care ever been suspended or revoked?',
-            answer: dm.rfTerminated ? 'Yes' : 'No',
-            explanation: typeof dm.rfTerminated === 'string' ? dm.rfTerminated : undefined,
-          },
-          {
-            question: 'Are there pending criminal charges against you?',
-            answer: dm.rfBackground ? 'Yes' : 'No',
-            explanation: typeof dm.rfBackground === 'string' ? dm.rfBackground : undefined,
-          },
-          {
-            question: 'Have you been dismissed from a care role in the last 5 years?',
-            answer: dm.rfPhysicalLimitation ? 'Yes' : 'No',
-            explanation: typeof dm.rfPhysicalLimitation === 'string' ? dm.rfPhysicalLimitation : undefined,
-          },
-        ]
-      : [] // no disclosure data yet — render nothing rather than fabricate
+  // Build disclosure flags from verifiedClaims (real data) or legacy props (demo fallback)
+  // Step 4: For real caregivers, use verifiedClaims; for demo, use hardcoded legacy props
+  const redFlags: { question: string; answer: 'No' | 'Yes'; explanation?: string; attestedAt?: string }[] = isDemo
+    ? // Demo mode: use legacy props (existing behavior)
+      (dm.rfComplaint || dm.rfTerminated || dm.rfBackground || dm.rfPhysicalLimitation || dm.declarationDate
+        ? [
+            {
+              question: 'Have you ever been the subject of a complaint to a regulatory body?',
+              answer: dm.rfComplaint ? 'Yes' : 'No',
+              explanation: typeof dm.rfComplaint === 'string' ? dm.rfComplaint : undefined,
+            },
+            {
+              question: 'Has your right to provide care ever been suspended or revoked?',
+              answer: dm.rfTerminated ? 'Yes' : 'No',
+              explanation: typeof dm.rfTerminated === 'string' ? dm.rfTerminated : undefined,
+            },
+            {
+              question: 'Are there pending criminal charges against you?',
+              answer: dm.rfBackground ? 'Yes' : 'No',
+              explanation: typeof dm.rfBackground === 'string' ? dm.rfBackground : undefined,
+            },
+            {
+              question: 'Have you been dismissed from a care role in the last 5 years?',
+              answer: dm.rfPhysicalLimitation ? 'Yes' : 'No',
+              explanation: typeof dm.rfPhysicalLimitation === 'string' ? dm.rfPhysicalLimitation : undefined,
+            },
+          ]
+        : [])
+    : // Real mode: use verifiedClaims disclosure data
+      (dm.verifiedClaims?.filter(c => c.kind === 'disclosure').map(c => {
+        const answer = c.detail.toLowerCase() === 'yes' || c.detail.toLowerCase() === 'true' ? 'Yes' : 'No'
+        const attestedAt = c.evidence?.[0]?.verified_at
+          ? new Date(c.evidence[0].verified_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })
+          : undefined
+        return {
+          question: c.label,
+          answer,
+          explanation: answer === 'Yes' ? c.detail : undefined,
+          attestedAt,
+        }
+      }) ?? [])
 
-  // Build verification items from props
-  function buildVerification(): { label: string; tier: TierLevel; meta?: string }[] {
-    const items: { label: string; tier: TierLevel; meta?: string }[] = []
+  // Build verification items from verifiedClaims (Step 4) or legacy props (demo fallback)
+  // Returns full VerifiedClaim for clickable provenance (Step 5)
+  function buildVerification(): { label: string; tier: TierLevel; meta?: string; claim?: VerifiedClaim }[] {
+    // Real mode: use verifiedClaims
+    if (!isDemo && dm.verifiedClaims && dm.verifiedClaims.length > 0) {
+      return dm.verifiedClaims
+        .filter(c => c.kind !== 'disclosure') // disclosures shown in Disclosure section
+        .map(c => ({
+          label: c.label,
+          tier: c.tier as TierLevel,
+          meta: c.detail || c.tierLabel,
+          claim: c,
+        }))
+    }
+
+    // Demo mode or no verifiedClaims: use legacy props
+    const items: { label: string; tier: TierLevel; meta?: string; claim?: VerifiedClaim }[] = []
 
     // VSC — real boolean from props
     if (dm.vulnerableSectorCheck != null) {
@@ -678,6 +713,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   const [openRoles, setOpenRoles] = useState<Record<number, boolean>>({ 0: true, 1: false, 2: false })
   const [openCredentials, setOpenCredentials] = useState(true)
   const [openOpenQs, setOpenOpenQs] = useState(true)
+  const [selectedClaim, setSelectedClaim] = useState<VerifiedClaim | null>(null)
 
   const initials = dm.firstName ? `${dm.firstName[0]}${dm.lastName?.[0] || ''}` : '?'
   const fullName = dm.firstName ? `${dm.firstName} ${dm.lastName || ''}` : '—'
@@ -989,6 +1025,12 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                       {isYes && r.explanation && (
                         <div style={{ fontSize: 12, color: C.fg3, marginTop: 4 }}>{r.explanation}</div>
                       )}
+                      {/* Step 4: Show self-disclosed date for real caregivers */}
+                      {!isDemo && r.attestedAt && (
+                        <div style={{ fontSize: 11, color: C.fg5, marginTop: 4 }}>
+                          Self-disclosed by caregiver on {r.attestedAt}
+                        </div>
+                      )}
                     </div>
                     <span
                       style={{
@@ -1026,6 +1068,7 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                 verificationItems.map((v, i) => (
                   <div
                     key={i}
+                    onClick={() => v.claim && setSelectedClaim(v.claim)}
                     style={{
                       display: 'grid',
                       gridTemplateColumns: '1fr auto',
@@ -1035,21 +1078,133 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
                       background: C.bgSubtle,
                       border: `1px solid ${C.borderSoft}`,
                       borderRadius: 12,
+                      cursor: v.claim ? 'pointer' : 'default',
+                      transition: 'background 150ms ease',
                     }}
+                    onMouseEnter={e => v.claim && (e.currentTarget.style.background = '#E2E8F0')}
+                    onMouseLeave={e => v.claim && (e.currentTarget.style.background = C.bgSubtle)}
                   >
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: C.fg1 }}>{v.label}</div>
                       {v.meta && <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>{v.meta}</div>}
+                      {v.claim && (
+                        <div style={{ fontSize: 10, color: C.gold, marginTop: 4, fontWeight: 600 }}>
+                          Click for evidence details →
+                        </div>
+                      )}
                     </div>
                     <TierChip tier={v.tier} />
                   </div>
                 ))
               ) : (
                 <div style={{ fontSize: 13, color: C.fg3, fontStyle: 'italic', padding: '12px 14px' }}>
-                  Verification data not yet available.
+                  {isDemo ? 'Verification data not yet available.' : 'Verification pending — caregiver has not yet submitted verification evidence.'}
                 </div>
               )}
             </div>
+
+            {/* Step 5: Clickable provenance — evidence detail modal */}
+            {selectedClaim && (
+              <div
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 200,
+                }}
+                onClick={() => setSelectedClaim(null)}
+              >
+                <div
+                  style={{
+                    background: C.white,
+                    borderRadius: 16,
+                    padding: 24,
+                    maxWidth: 420,
+                    width: '90%',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: C.fg5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        {selectedClaim.kind}
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: C.fg1, marginTop: 4 }}>{selectedClaim.label}</div>
+                    </div>
+                    <TierChip tier={selectedClaim.tier as TierLevel} size="md" />
+                  </div>
+
+                  {selectedClaim.detail && (
+                    <div style={{ fontSize: 13, color: C.fg3, marginBottom: 16, padding: '12px 14px', background: C.bgSubtle, borderRadius: 8 }}>
+                      {selectedClaim.detail}
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: 12 }}>
+                    <Eyebrow>Evidence</Eyebrow>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {selectedClaim.evidence && selectedClaim.evidence.length > 0 ? (
+                      selectedClaim.evidence.map((ev, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            padding: '10px 12px',
+                            background: ev.verified_at ? C.successBg : C.bgSubtle,
+                            border: `1px solid ${ev.verified_at ? C.successBorder : C.borderSoft}`,
+                            borderRadius: 8,
+                          }}
+                        >
+                          <Shield size={14} color={ev.verified_at ? C.success : C.fg5} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: C.fg1 }}>{ev.source}</div>
+                            {ev.verified_at && (
+                              <div style={{ fontSize: 11, color: C.fg4, marginTop: 2 }}>
+                                Verified {new Date(ev.verified_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </div>
+                            )}
+                            {!ev.verified_at && (
+                              <div style={{ fontSize: 11, color: C.fg5 }}>Awaiting verification</div>
+                            )}
+                          </div>
+                          {ev.verified_at && <CheckCircle size={14} color={C.success} />}
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ fontSize: 12, color: C.fg4, fontStyle: 'italic', padding: 8 }}>
+                        No evidence submitted yet
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClaim(null)}
+                    style={{
+                      marginTop: 20,
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: C.navy,
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 10,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Confidence aside */}
             <div

@@ -91,6 +91,30 @@ const pool = new Pool({
  referredBy: 'referred_by',
  diagnosisExperience: 'diagnosis_experience',
  adlsPerformed: 'adls_performed',
+ // Disclosure fields (Step 6) - save to both caregivers table and caregiver_disclosures table
+ rfTerminated: 'rf_terminated',
+ rfTerminatedDetail: 'rf_terminated',
+ rfComplaint: 'rf_complaint',
+ rfComplaintDetail: 'rf_complaint',
+ rfPhysicalLimitation: 'rf_physical_limitation',
+ rfPhysicalDetail: 'rf_physical_limitation',
+ rfBackground: 'rf_background',
+ rfBackgroundDetail: 'rf_background',
+}
+
+// Disclosure fields that need to be saved to caregiver_disclosures table (Step 6)
+const DISCLOSURE_FIELDS = ['rfTerminated', 'rfTerminatedDetail', 'rfComplaint', 'rfComplaintDetail', 'rfPhysicalLimitation', 'rfPhysicalDetail', 'rfBackground', 'rfBackgroundDetail']
+
+// Map disclosure field to question_key for caregiver_disclosures table
+const DISCLOSURE_QUESTION_KEYS: Record<string, string> = {
+ rfTerminated: 'dismissed_from_care_role',
+ rfTerminatedDetail: 'dismissed_from_care_role',
+ rfComplaint: 'regulatory_complaint',
+ rfComplaintDetail: 'regulatory_complaint',
+ rfPhysicalLimitation: 'physical_limitation',
+ rfPhysicalDetail: 'physical_limitation',
+ rfBackground: 'background_charge',
+ rfBackgroundDetail: 'background_charge',
 }
 
 // PostgreSQL text[] array columns - pass JS arrays directly
@@ -171,6 +195,42 @@ export async function POST(req: NextRequest) {
     [serializedValue, userId]
    )
   }
+ }
+
+ // Step 6: Also save disclosure fields to caregiver_disclosures table
+ if (DISCLOSURE_FIELDS.includes(field)) {
+   const caregiverId = existing[0]?.id
+   if (caregiverId) {
+     const questionKey = DISCLOSURE_QUESTION_KEYS[field]
+     // Determine the answer value - use 'yes'/'no' for the main field, detail for detail fields
+     let answerValue: string
+     let detailValue: string | null = null
+
+     if (field.includes('Detail')) {
+       // Detail field - get the corresponding yes/no field value
+       const baseField = field.replace('Detail', '')
+       const detailField = baseField as keyof typeof FIELD_MAP
+       // Get current value from caregivers table
+       const { rows: caregiverRows } = await pool.query(
+         `SELECT ${FIELD_MAP[detailField]} as val FROM caregivers WHERE id = $1`,
+         [caregiverId]
+       )
+       answerValue = caregiverRows[0]?.val === 'yes' ? 'Yes' : 'No'
+       detailValue = serializedValue as string || null
+     } else {
+       // Yes/No field
+       answerValue = serializedValue === 'yes' ? 'Yes' : 'No'
+     }
+
+     // Upsert into caregiver_disclosures table
+     await pool.query(
+       `INSERT INTO caregiver_disclosures (caregiver_id, question_key, answer, detail, attested_at)
+        VALUES ($1, $2, $3, $4, NOW())
+        ON CONFLICT (caregiver_id, question_key)
+        DO UPDATE SET answer = $3, detail = $4, attested_at = NOW()`,
+       [caregiverId, questionKey, answerValue, detailValue]
+     )
+   }
  }
 
  return NextResponse.json({ success: true })

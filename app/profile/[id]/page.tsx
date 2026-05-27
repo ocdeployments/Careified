@@ -3,6 +3,7 @@
 import { notFound } from 'next/navigation'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { pool } from '@/lib/db'
+import { getCaregiverVerification, type VerifiedClaim } from '@/lib/verification/get-caregiver-verification'
 import CaregiverProfileDemo from '@/components/profile/CaregiverProfileDemo'
 import { deriveWorkingStyle } from '@/lib/personality/working-style'
 import SuitabilityCard from '@/components/ratings/SuitabilityCard'
@@ -32,7 +33,7 @@ async function fetchReviewData(caregiverId: string): Promise<ReviewData | null> 
 async function getCaregiver(id: string) {
   try {
     const result = await pool.query(
-      `SELECT * FROM caregivers WHERE id = $1 AND status = 'approved'`,
+      `SELECT *, is_demo FROM caregivers WHERE id = $1 AND status = 'approved'`,
       [id]
     )
     return result.rows[0] || null
@@ -163,6 +164,9 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
   const ratings = await getPlacementRatings(id)
   const badges = await getBadges(id)
 
+  // Fetch verification claims (Step 4)
+  const verifiedClaims: VerifiedClaim[] = await getCaregiverVerification(id)
+
   // Fetch rating data (graceful - returns null if fails or not authorized)
   const reviewData = await fetchReviewData(id)
 
@@ -289,6 +293,8 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
       customAttributes={customAttributes}
       claimStatus={caregiver.claim_status}
       sourceAgencyName={sourceAgencyName}
+      isDemo={caregiver.is_demo ?? false}
+      verifiedClaims={verifiedClaims}
     />
   )
 }
