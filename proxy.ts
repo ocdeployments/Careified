@@ -94,9 +94,12 @@ export default clerkMiddleware(
   // Get the pathname
   const pathname = request.nextUrl.pathname
 
-  // Redirect root to waitlist
+  // Redirect root to waitlist for logged-out users only
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/waitlist', request.url))
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.redirect(new URL('/waitlist', request.url))
+    }
   }
 
   // Explicitly protect /profile/build routes
