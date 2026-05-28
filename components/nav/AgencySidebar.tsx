@@ -16,6 +16,8 @@ import {
   TrendingUp,
   Settings,
   HelpCircle,
+  X,
+  MoreHorizontal,
 } from 'lucide-react'
 
 // Design tokens
@@ -30,6 +32,17 @@ const TEXT_MUTED = 'rgba(255,255,255,0.55)'
 const TEXT_TERTIARY = 'rgba(255,255,255,0.3)'
 const RED = '#E24B4A'
 const AMBER = '#F59E0B'
+
+const SIDEBAR_DESKTOP = 220
+const SIDEBAR_TABLET = 60
+const BREAKPOINT_TABLET = 1024
+const BREAKPOINT_MOBILE = 768
+
+export const SIDEBAR_WIDTHS = {
+  desktop: 220,
+  tablet: 60,
+  mobile: 0,
+}
 
 interface AgencySidebarProps {
   counts?: {
@@ -46,6 +59,7 @@ interface NavItem {
   href: string
   badge?: 'unmatched' | 'pipeline' | 'credentials' | 'airecruit'
   disabled?: boolean
+  icon?: React.ReactNode
 }
 
 interface NavSection {
@@ -119,6 +133,20 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
   const pathname = usePathname()
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
+  const [tabletExpanded, setTabletExpanded] = useState(false)
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+
+  // Responsive breakpoints
+  const isMobile = windowWidth < BREAKPOINT_MOBILE
+  const isTablet = windowWidth >= BREAKPOINT_MOBILE && windowWidth < BREAKPOINT_TABLET
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const isActive = (href: string) => {
     if (href.includes('?')) {
@@ -127,21 +155,128 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
     return pathname.startsWith(href)
   }
 
+  // Mobile: hide sidebar, show bottom tab bar
+  if (isMobile) {
+    const tabs = [
+      { label: 'Dashboard', href: '/agency/dashboard', icon: LayoutDashboard },
+      { label: 'Clients', href: '/agency/clients', icon: Users, badge: counts?.unmatched_clients },
+      { label: 'Caregivers', href: '/agency/caregivers', icon: Briefcase },
+      { label: 'AIRecruit', href: '/agency/airecruit', icon: Zap, badge: counts?.airecruit_results },
+      { label: 'More', icon: MoreHorizontal, action: true },
+    ]
+
+    return (
+      <>
+        {/* Bottom tab bar */}
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 56,
+            background: NAV_BG,
+            borderTop: `1px solid ${CARD_BORDER}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            zIndex: 300,
+          }}
+        >
+          {tabs.map((tab) => {
+            const isActive = tab.href ? pathname.startsWith(tab.href) : false
+            const Icon = tab.icon
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href || '#'}
+                onClick={tab.action ? (e => { e.preventDefault(); setMobileSheetOpen(true) }) : undefined}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', textDecoration: 'none', position: 'relative' }}
+              >
+                <Icon size={20} color={isActive ? GOLD : TEXT_MUTED} />
+                <span style={{ fontSize: 11, color: isActive ? GOLD : TEXT_MUTED, marginTop: 2 }}>{tab.label}</span>
+                {tab.badge && tab.badge > 0 && (
+                  <span style={{ position: 'absolute', top: 2, right: '30%', width: 8, height: 8, borderRadius: '50%', background: RED }} />
+                )}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Mobile "More" sheet */}
+        {mobileSheetOpen && (
+          <>
+            <div
+              onClick={() => setMobileSheetOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 350 }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '80vh',
+                background: NAV_BG,
+                borderRadius: '16px 16px 0 0',
+                borderTop: `1px solid ${CARD_BORDER}`,
+                zIndex: 400,
+                padding: 20,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+                <span style={{ fontSize: 16, color: TEXT_PRIMARY, fontWeight: 600 }}>More</span>
+                <button onClick={() => setMobileSheetOpen(false)} style={{ background: 'none', border: 'none', color: TEXT_MUTED, cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+              {[
+                { label: 'Roster', href: '/agency/roster', icon: ClipboardList },
+                { label: 'Intelligence', href: '/agency/intelligence', icon: BarChart2 },
+                { label: 'Settings', href: '/agency/settings', icon: Settings },
+                { label: 'Support', href: '/agency/support', icon: HelpCircle },
+              ].map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileSheetOpen(false)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', color: TEXT_PRIMARY, fontSize: 14, borderBottom: `1px solid ${CARD_BORDER}`, textDecoration: 'none' }}
+                  >
+                    <Icon size={18} color={TEXT_MUTED} />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </>
+    )
+  }
+
+  // Tablet: 60px icon-only with hover expand
+  const sidebarWidth = isTablet && !tabletExpanded ? SIDEBAR_TABLET : SIDEBAR_DESKTOP
+
   return (
     <aside
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        width: 220,
+        width: sidebarWidth,
         height: '100vh',
         background: NAV_BG,
         borderRight: `1px solid ${CARD_BORDER}`,
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 100,
+        zIndex: isTablet && tabletExpanded ? 200 : 100,
         overflowY: 'auto',
+        transition: 'width 0.2s ease',
       }}
+      onMouseLeave={() => isTablet && setTabletExpanded(false)}
     >
       {/* Logo area */}
       <div
