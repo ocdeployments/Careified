@@ -13,6 +13,18 @@ const pool = new Pool({
   allowExitOnIdle: true,
 })
 
+// One-time migration: add processing_at column if not exists
+async function ensureProcessingAtColumn() {
+  try {
+    await pool.query(
+      `ALTER TABLE call_retry_queue ADD COLUMN IF NOT EXISTS processing_at TIMESTAMP WITHOUT TIME ZONE`
+    )
+  } catch (e) {
+    // Column already exists or other error - continue silently
+  }
+}
+ensureProcessingAtColumn()
+
 export interface RetryConfig {
   maxAttempts: number
   backoffMinutes: number[]
@@ -86,34 +98,51 @@ export async function cancelRetries(caregiverId: string, callType: string): Prom
 }
 
 export async function getPendingRetries(limit: number = 10): Promise<any[]> {
+  // Optimistic locking: atomically claim up to `limit` rows by setting processing_at
+  const claimedIds: string[] = []
+
+  for (let i = 0; i < limit; i++) {
+    const { rows } = await pool.query(
+      `UPDATE call_retry_queue
+       SET processing_at = NOW()
+       WHERE id = (
+         SELECT id FROM call_retry_queue
+         WHERE status = 'pending'
+           AND scheduled_for <= NOW()
+           AND processing_at IS NULL
+         ORDER BY scheduled_for ASC
+         LIMIT 1
+         FOR UPDATE SKIP LOCKED
+       )
+       RETURNING id`,
+      []
+    )
+    if (rows.length === 0) break
+    claimedIds.push(rows[0].id)
+  }
+
+  if (claimedIds.length === 0) return []
+
+  // Fetch the full records for claimed rows
   const { rows } = await pool.query(
     `SELECT id, call_type, target_phone, target_id, caregiver_id, agency_id, call_params, attempt_number, max_attempts
      FROM call_retry_queue
-     WHERE status = 'pending' AND scheduled_for <= NOW()
-     ORDER BY scheduled_for ASC
-     LIMIT $1`,
-    [limit]
+     WHERE id = ANY($1)`,
+    [claimedIds]
   )
   return rows
 }
 
-export async function markRetryProcessing(retryId: string): Promise<void> {
-  await pool.query(
-    `UPDATE call_retry_queue SET status = 'processing' WHERE id = $1`,
-    [retryId]
-  )
-}
-
 export async function markRetryCompleted(retryId: string): Promise<void> {
   await pool.query(
-    `UPDATE call_retry_queue SET status = 'completed', processed_at = NOW() WHERE id = $1`,
+    `UPDATE call_retry_queue SET status = 'completed', processed_at = NOW(), processing_at = NOW() WHERE id = $1`,
     [retryId]
   )
 }
 
 export async function markRetryFailed(retryId: string, error: string): Promise<void> {
   await pool.query(
-    `UPDATE call_retry_queue SET status = 'failed', last_error = $1, processed_at = NOW() WHERE id = $2`,
+    `UPDATE call_retry_queue SET status = 'failed', last_error = $1, processed_at = NOW(), processing_at = NULL WHERE id = $2`,
     [error, retryId]
   )
 }

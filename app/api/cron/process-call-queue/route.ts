@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
-import { getPendingRetries, markRetryProcessing, markRetryCompleted, markRetryFailed, scheduleRetry } from '@/lib/airecruit/retry'
+import { getPendingRetries, markRetryCompleted, markRetryFailed, scheduleRetry } from '@/lib/airecruit/retry'
 import { initiateReferenceCall } from '@/lib/airecruit/reference-vapi'
 import { initiateEmployerCall } from '@/lib/airecruit/employer-vapi'
 import { initiateVapiCall } from '@/lib/airecruit/vapi'
@@ -29,8 +29,6 @@ export async function GET(req: NextRequest) {
 
     for (const retry of pendingRetries) {
       try {
-        await markRetryProcessing(retry.id)
-
         const { call_type, target_phone, target_id, caregiver_id, agency_id, call_params, attempt_number, max_attempts } = retry
 
         // Get caregiver details
