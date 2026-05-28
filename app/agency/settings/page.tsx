@@ -23,8 +23,8 @@ const CURRENT_TOOLS = ['AlayaCare','ClearCare','WellSky','HHAeXchange',
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: 10,
-  border: '1.5px solid #E2E8F0', fontSize: 14, color: N,
-  outline: 'none', boxSizing: 'border-box', fontFamily: S, background: 'white',
+  border: '1.5px solid rgba(255,255,255,0.08)', fontSize: 14, color: '#F5F0E8',
+  outline: 'none', boxSizing: 'border-box', fontFamily: S, background: 'rgba(255,255,255,0.04)',
 }
 
 function toggle(arr: string[], val: string) {
@@ -36,18 +36,18 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
     <button type="button" onClick={onClick} style={{
       padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 500,
       cursor: 'pointer', fontFamily: S,
-      border: active ? `2px solid ${G}` : '1.5px solid #E2E8F0',
-      background: active ? '#FDF6EC' : 'white',
-      color: active ? '#92400E' : '#64748B',
+      border: active ? `2px solid ${G}` : '1.5px solid rgba(255,255,255,0.08)',
+      background: active ? 'rgba(201,151,58,0.15)' : 'rgba(255,255,255,0.04)',
+      color: active ? '#E8B86D' : 'rgba(255,255,255,0.55)',
     }}>{label}</button>
   )
 }
 
 function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'white', borderRadius: 16, border: '1px solid #E2E8F0', padding: 28, marginBottom: 20 }}>
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, color: N, margin: '0 0 4px' }}>{title}</h2>
-      {desc && <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 20px' }}>{desc}</p>}
+    <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', padding: 28, marginBottom: 20 }}>
+      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, color: '#F5F0E8', margin: '0 0 4px' }}>{title}</h2>
+      {desc && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: '0 0 20px' }}>{desc}</p>}
       {!desc && <div style={{ marginBottom: 20 }} />}
       {children}
     </div>
