@@ -3,40 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton, useUser } from '@clerk/nextjs'
-import {
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  Star,
-  Search,
-  ClipboardList,
-  Zap,
-  BarChart2,
-  TrendingUp,
-  Settings,
-  HelpCircle,
-  X,
-  MoreHorizontal,
-} from 'lucide-react'
-
-// Design tokens
-const PAGE_BG = '#080F1E'
-const NAV_BG = '#0D1B3E'
-const CARD_BG = 'rgba(255,255,255,0.04)'
-const CARD_BORDER = 'rgba(255,255,255,0.08)'
-const GOLD = '#C9973A'
-const GL = '#E8B86D'
-const TEXT_PRIMARY = '#F5F0E8'
-const TEXT_MUTED = 'rgba(255,255,255,0.55)'
-const TEXT_TERTIARY = 'rgba(255,255,255,0.3)'
-const RED = '#E24B4A'
-const AMBER = '#F59E0B'
-
-const SIDEBAR_DESKTOP = 220
-const SIDEBAR_TABLET = 60
-const BREAKPOINT_TABLET = 1024
-const BREAKPOINT_MOBILE = 768
+import { UserButton } from '@clerk/nextjs'
 
 export const SIDEBAR_WIDTHS = {
   desktop: 220,
@@ -59,7 +26,6 @@ interface NavItem {
   href: string
   badge?: 'unmatched' | 'pipeline' | 'credentials' | 'airecruit'
   disabled?: boolean
-  icon?: React.ReactNode
 }
 
 interface NavSection {
@@ -123,30 +89,9 @@ function getBadgeCount(counts: AgencySidebarProps['counts'], badge?: string): nu
   return 0
 }
 
-function isBadgeActive(badge?: string, counts?: AgencySidebarProps['counts']): boolean {
-  const count = getBadgeCount(counts, badge)
-  return count > 0
-}
-
 export default function AgencySidebar({ counts, currentPath }: AgencySidebarProps) {
-  const { user } = useUser()
   const pathname = usePathname()
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
-  const [tabletExpanded, setTabletExpanded] = useState(false)
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
-
-  // Responsive breakpoints
-  const isMobile = windowWidth < BREAKPOINT_MOBILE
-  const isTablet = windowWidth >= BREAKPOINT_MOBILE && windowWidth < BREAKPOINT_TABLET
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   const isActive = (href: string) => {
     if (href.includes('?')) {
@@ -155,258 +100,142 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
     return pathname.startsWith(href)
   }
 
-  // Mobile: hide sidebar, show bottom tab bar
-  if (isMobile) {
-    const tabs = [
-      { label: 'Dashboard', href: '/agency/dashboard', icon: LayoutDashboard },
-      { label: 'Clients', href: '/agency/clients', icon: Users, badge: counts?.unmatched_clients },
-      { label: 'Caregivers', href: '/agency/caregivers', icon: Briefcase },
-      { label: 'AIRecruit', href: '/agency/airecruit', icon: Zap, badge: counts?.airecruit_results },
-      { label: 'More', icon: MoreHorizontal, action: true },
-    ]
-
-    return (
-      <>
-        {/* Bottom tab bar */}
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 56,
-            background: NAV_BG,
-            borderTop: `1px solid ${CARD_BORDER}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-            zIndex: 300,
-          }}
-        >
-          {tabs.map((tab) => {
-            const isActive = tab.href ? pathname.startsWith(tab.href) : false
-            const Icon = tab.icon
-            return (
-              <Link
-                key={tab.label}
-                href={tab.href || '#'}
-                onClick={tab.action ? (e => { e.preventDefault(); setMobileSheetOpen(true) }) : undefined}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', textDecoration: 'none', position: 'relative' }}
-              >
-                <Icon size={20} color={isActive ? GOLD : TEXT_MUTED} />
-                <span style={{ fontSize: 11, color: isActive ? GOLD : TEXT_MUTED, marginTop: 2 }}>{tab.label}</span>
-                {tab.badge && tab.badge > 0 && (
-                  <span style={{ position: 'absolute', top: 2, right: '30%', width: 8, height: 8, borderRadius: '50%', background: RED }} />
-                )}
-              </Link>
-            )
-          })}
-        </div>
-
-        {/* Mobile "More" sheet */}
-        {mobileSheetOpen && (
-          <>
-            <div
-              onClick={() => setMobileSheetOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 350, transition: 'opacity 0.3s ease' }}
-            />
-            <div
-              style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '80vh',
-                background: NAV_BG,
-                borderRadius: '16px 16px 0 0',
-                borderTop: `1px solid ${CARD_BORDER}`,
-                zIndex: 400,
-                padding: 20,
-                transform: 'translateY(0)',
-                transition: 'transform 0.3s ease',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-                <span style={{ fontSize: 16, color: TEXT_PRIMARY, fontWeight: 600 }}>More</span>
-                <button onClick={() => setMobileSheetOpen(false)} style={{ background: 'none', border: 'none', color: TEXT_MUTED, cursor: 'pointer' }}>
-                  <X size={20} />
-                </button>
-              </div>
-              {[
-                { label: 'Roster', href: '/agency/roster', icon: ClipboardList },
-                { label: 'Intelligence', href: '/agency/intelligence', icon: BarChart2 },
-                { label: 'Settings', href: '/agency/settings', icon: Settings },
-                { label: 'Support', href: '/agency/support', icon: HelpCircle },
-              ].map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileSheetOpen(false)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', color: TEXT_PRIMARY, fontSize: 14, borderBottom: `1px solid ${CARD_BORDER}`, textDecoration: 'none' }}
-                  >
-                    <Icon size={18} color={TEXT_MUTED} />
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </>
-    )
+  const containerStyle: React.CSSProperties = {
+    width: 220,
+    background: '#0D1B3E',
+    borderRight: '1px solid rgba(255,255,255,0.07)',
+    paddingTop: '0',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    overflowY: 'auto',
+    zIndex: 100,
   }
 
-  // Tablet: 60px icon-only with hover expand
-  const sidebarWidth = isTablet && !tabletExpanded ? SIDEBAR_TABLET : SIDEBAR_DESKTOP
+  const logoAreaStyle: React.CSSProperties = {
+    padding: '20px 20px 16px',
+    borderBottom: '1px solid rgba(255,255,255,0.07)',
+    marginBottom: '8px',
+  }
+
+  const logoTextStyle: React.CSSProperties = {
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#F5F0E8',
+    fontFamily: "'DM Serif Display', serif",
+    letterSpacing: '-0.01em',
+  }
+
+  const sectionLabelStyle: React.CSSProperties = {
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: '0.12em',
+    color: 'rgba(255,255,255,0.35)',
+    textTransform: 'uppercase',
+    padding: '24px 20px 8px',
+    fontFamily: "'DM Sans', sans-serif",
+  }
+
+  const navItemStyle = (item: NavItem, active: boolean): React.CSSProperties => ({
+    fontSize: 14,
+    fontWeight: active ? 600 : 400,
+    fontFamily: "'DM Sans', sans-serif",
+    padding: '9px 20px',
+    color: item.disabled ? 'rgba(255,255,255,0.25)' : (active || hoveredItem === item.href ? '#F5F0E8' : 'rgba(255,255,255,0.65)'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderLeft: active ? '2px solid #C9973A' : (hoveredItem === item.href && !item.disabled ? '2px solid rgba(201,151,58,0.4)' : '2px solid transparent'),
+    transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+    cursor: item.disabled ? 'not-allowed' : 'pointer',
+    textDecoration: 'none',
+    borderRadius: '0 6px 6px 0',
+    marginRight: '8px',
+    background: active ? 'rgba(201,151,58,0.1)' : (hoveredItem === item.href && !item.disabled ? 'rgba(255,255,255,0.06)' : 'transparent'),
+  })
+
+  const soonTextStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.2)',
+    marginLeft: 6,
+    fontStyle: 'italic',
+  }
+
+  const redBadgeStyle: React.CSSProperties = {
+    background: '#E24B4A',
+    color: 'white',
+    fontSize: 11,
+    fontWeight: 700,
+    padding: '2px 7px',
+    borderRadius: '10px',
+    minWidth: '20px',
+    textAlign: 'center',
+  }
+
+  const goldBadgeStyle: React.CSSProperties = {
+    background: 'rgba(201,151,58,0.15)',
+    color: '#E8B86D',
+    border: '1px solid rgba(201,151,58,0.5)',
+    fontSize: 11,
+    fontWeight: 700,
+    padding: '2px 7px',
+    borderRadius: '10px',
+    minWidth: '20px',
+    textAlign: 'center',
+  }
+
+  const bottomSectionStyle: React.CSSProperties = {
+    borderTop: '1px solid rgba(255,255,255,0.07)',
+    padding: '16px 20px',
+    marginTop: 'auto',
+  }
+
+  const planLabelStyle: React.CSSProperties = {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.4)',
+    fontWeight: 500,
+  }
+
+  const daysRemainingStyle: React.CSSProperties = {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.25)',
+    marginTop: 3,
+  }
 
   return (
-    <aside
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: sidebarWidth,
-        height: '100vh',
-        background: NAV_BG,
-        borderRight: `1px solid ${CARD_BORDER}`,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: isTablet && tabletExpanded ? 200 : 100,
-        overflowY: 'auto',
-        transition: 'width 0.25s ease',
-      }}
-      onMouseLeave={() => isTablet && setTabletExpanded(false)}
-    >
-      {/* Logo area */}
-      <div
-        style={{
-          padding: '20px 16px',
-          borderBottom: `1px solid ${CARD_BORDER}`,
-        }}
-      >
+    <aside style={containerStyle}>
+      {/* Top Logo Area */}
+      <div style={logoAreaStyle}>
         <Link href="/agency/dashboard" style={{ textDecoration: 'none' }}>
-          <span
-            style={{
-              fontFamily: "'DM Serif Display', Georgia, serif",
-              fontSize: 18,
-              color: TEXT_PRIMARY,
-            }}
-          >
-            Careified
-          </span>
+          <span style={logoTextStyle}>Careified</span>
         </Link>
       </div>
 
-      {/* Navigation sections */}
-      <nav style={{ flex: 1, padding: '12px 0' }}>
+      {/* Navigation Sections */}
+      <nav style={{ flex: 1 }}>
         {navSections.map((section) => (
-          <div key={section.title} style={{ marginBottom: 16 }}>
-            <div
-              style={{
-                padding: '4px 16px',
-                fontSize: 11,
-                fontWeight: 500,
-                color: TEXT_TERTIARY,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              {section.title}
-            </div>
+          <div key={section.title}>
+            <div style={sectionLabelStyle}>{section.title}</div>
             {section.items.map((item) => {
               const active = isActive(item.href)
               const badgeCount = getBadgeCount(counts, item.badge)
-              const badgeActive = isBadgeActive(item.badge, counts)
-
-              const itemStyle: React.CSSProperties = {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 16px',
-                fontSize: 14,
-                fontFamily: "'DM Sans', sans-serif",
-                color: item.disabled
-                  ? TEXT_TERTIARY
-                  : active
-                  ? TEXT_PRIMARY
-                  : TEXT_MUTED,
-                background: active
-                  ? 'rgba(201,151,58,0.12)'
-                  : hoveredItem === item.href
-                  ? 'rgba(255,255,255,0.04)'
-                  : 'transparent',
-                borderLeft: active ? '2px solid #C9973A' : '2px solid transparent',
-                cursor: item.disabled ? 'not-allowed' : 'pointer',
-                opacity: item.disabled ? 0.4 : 1,
-                textDecoration: 'none',
-                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease',
-              }
-
-              const badgeStyle: React.CSSProperties = {
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 11,
-                fontWeight: 600,
-                padding: '1px 6px',
-                borderRadius: 10,
-                minWidth: 18,
-                height: 18,
-              }
-
-              const content = (
-                <>
-                  <span>
-                    {item.label}
-                    {item.disabled && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: TEXT_TERTIARY,
-                          marginLeft: 4,
-                        }}
-                      >
-                        (soon)
-                      </span>
-                    )}
-                  </span>
-                  {item.badge && !item.disabled && badgeCount > 0 && (
-                    <span
-                      style={{
-                        ...badgeStyle,
-                        background:
-                          item.badge === 'unmatched'
-                            ? RED
-                            : 'rgba(201,151,58,0.2)',
-                        color:
-                          item.badge === 'unmatched'
-                            ? 'white'
-                            : GL,
-                        border:
-                          item.badge === 'unmatched'
-                            ? 'none'
-                            : '1px solid rgba(201,151,58,0.4)',
-                      }}
-                    >
-                      {badgeCount}
-                    </span>
-                  )}
-                </>
-              )
+              const showBadge = item.badge && !item.disabled && badgeCount > 0
 
               if (item.disabled) {
                 return (
                   <div
                     key={item.href}
-                    style={itemStyle}
+                    style={navItemStyle(item, active)}
                     onMouseEnter={() => setHoveredItem(item.href)}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
-                    {content}
+                    <span>
+                      {item.label}
+                      <span style={soonTextStyle}>(soon)</span>
+                    </span>
                   </div>
                 )
               }
@@ -415,11 +244,16 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
                 <Link
                   key={item.href}
                   href={getBadgeHref(item)}
-                  style={itemStyle}
+                  style={navItemStyle(item, active)}
                   onMouseEnter={() => setHoveredItem(item.href)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  {content}
+                  <span>{item.label}</span>
+                  {showBadge && (
+                    <span style={item.badge === 'unmatched' ? redBadgeStyle : goldBadgeStyle}>
+                      {badgeCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}
@@ -427,33 +261,11 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div
-        style={{
-          padding: 16,
-          borderTop: `1px solid ${CARD_BORDER}`,
-          background: 'rgba(0,0,0,0.2)',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 12,
-            color: TEXT_MUTED,
-            marginBottom: 4,
-          }}
-        >
-          Growth Plan
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            color: TEXT_TERTIARY,
-            marginBottom: 12,
-          }}
-        >
-          28 days remaining
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+      {/* Bottom Section */}
+      <div style={bottomSectionStyle}>
+        <div style={planLabelStyle}>Growth Plan</div>
+        <div style={daysRemainingStyle}>28 days remaining</div>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: 12 }}>
           <UserButton
             appearance={{
               elements: {
@@ -466,28 +278,4 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
       </div>
     </aside>
   )
-}
-
-// Also export a hook for responsive width
-export function useSidebarWidth() {
-  const [width, setWidth] = useState(220)
-
-  useEffect(() => {
-    const updateWidth = () => {
-      if (typeof window === 'undefined') return
-      if (window.innerWidth < 768) {
-        setWidth(0)
-      } else if (window.innerWidth < 1024) {
-        setWidth(60)
-      } else {
-        setWidth(220)
-      }
-    }
-
-    updateWidth()
-    window.addEventListener('resize', updateWidth)
-    return () => window.removeEventListener('resize', updateWidth)
-  }, [])
-
-  return width
 }
