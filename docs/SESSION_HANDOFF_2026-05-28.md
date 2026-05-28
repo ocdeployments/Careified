@@ -25,6 +25,26 @@
 - 2b45eef — Nav: live badge counts (AIRecruit + Roster)
 - Latest — Dashboard: dark glass visual redesign + microcopy + amber alerts + three-mode toggle
 
+### S1 — Sidebar + Layout (COMPLETE)
+- 8c4415d feat(sidebar): add AgencySidebar component — 220px fixed left nav with badge counts
+- 168f93c feat(layout): add AgencySidebar to agency layout with client wrapper
+- e5c363e fix(nav): hide agency nav links when on /agency/* pages — sidebar handles nav
+- 6e8a6b8 feat(sidebar): add responsive behavior — tablet hover expand, mobile bottom tab bar
+- fde8435 fix(dashboard): consolidate stats queries, fix roster_claimed
+- 7e247ad feat(dashboard): complete rewrite with 5-zone layout
+
+### Hotfixes (production emergencies)
+- 7f7448b hotfix: remove pool.end() calls and silence audit log errors
+- 73c159f hotfix: fix uuid/text type mismatch in dashboard query
+- 13d2031 fix(shortlist): cast aggregate_score to number before toFixed
+- c676586 fix(dashboard): use /api/roster/list instead of /api/agency/roster
+- 17da05e fix(airecruit): replace light backgrounds with dark theme
+- a4d1035 docs: add CLAUDE.md with project rules
+
+### Remaining Work
+- Full agency page QA pending before S3 starts
+- S2 marked complete, S3+ pending
+
 ---
 
 ## PRODUCT VISION (locked this session)
@@ -231,6 +251,47 @@ L: Copy scanner pre-commit hook
 - Supabase switch (Vercel → Supabase Toronto, test on preview first) — BUILD AGENT
 - PRICING.md update to $149/$349/$699 — BUILD AGENT
 
+### S2 — Dashboard 5-zone (COMPLETE)
+- Consolidate dashboard stats queries (done)
+- Fix roster_claimed = 0 bug (done)
+- Remove mode toggle (done)
+- 5-zone layout (done)
+
+### S3+ — Pending
+- Full agency page QA required before starting S3
+- See "Agency Page QA" section below
+
+---
+
+## AGENCY PAGE QA (pending before S3)
+
+Before starting S3 (Client triage panel), verify all agency pages render correctly with dark theme:
+
+**Priority 1 — Must verify:**
+- /agency/dashboard — 5-zone layout, no mode toggle
+- /agency/clients — list view, add client flow
+- /agency/clients/new — form renders with dark theme
+- /agency/caregivers — 4-tab page
+- /agency/roster — tabs, import flow
+
+**Priority 2 — Should verify:**
+- /agency/airecruit — campaign list, create campaign
+- /agency/shortlist — pipeline view
+- /agency/intelligence — ROI summary
+- /agency/settings — all tabs
+
+**Priority 3 — Nice to verify:**
+- /agency/support — ticket form
+- /agency/billing — billing page
+- /agency/assistant — AI chat
+
+**Known issues to check:**
+- Any remaining light/white backgrounds
+- Any remaining dark text that should be light
+- AgencyShell duplicate nav removed (verify no double sidebar)
+- Mobile responsive on all pages
+- Bottom tab bar shows on mobile
+
 ---
 
 ## PENDING VERIFICATION (test on careified.com before next build)
@@ -328,16 +389,16 @@ Register CNAM on Vapi phone number:
 4. Also set up Twilio account for SMS before S10 builds
 
 ### Complete build sequence (final)
-S1: Sidebar + layout restructure
-S2: Dashboard 5-zone redesign
-S3: Client triage panel (find coverage workflow)
-S4: Bench strength intelligence
-S5: Overnight triage narrative
-S6: Conversational search Phase 1
-S7: Telegram bot
-S8: Bulk upload → AIRecruit auto-launch
-S9: AIRecruit mobile responsive
-S10: Pre-call SMS + CNAM branding
+S1: Sidebar + layout restructure ✅ DONE
+S2: Dashboard 5-zone redesign ✅ DONE
+S3: Client triage panel (find coverage workflow) ⏭ PENDING — requires QA pass first
+S4: Bench strength intelligence ⏭ PENDING
+S5: Overnight triage narrative ⏭ PENDING
+S6: Conversational search Phase 1 ⏭ PENDING
+S7: Telegram bot ⏭ PENDING
+S8: Bulk upload → AIRecruit auto-launch ⏭ PENDING
+S9: AIRecruit mobile responsive ⏭ PENDING
+S10: Pre-call SMS + CNAM branding ⏭ PENDING
 Then E-L: operational features backlog
 
 ## AGENCY PLAYBOOK — POST-LAUNCH
