@@ -258,3 +258,66 @@
 - careified.ca in Vercel
 - Copy session (placeholder text everywhere)
 - Both test agencies onboarded
+
+## EXTENDED SESSION — DASHBOARD STRATEGY & DESIGN (2026-05-28 late)
+
+### Full build backlog organised into prompts A-L
+See master spec widget from this conversation. Summary:
+
+Prompt A — Nav badge counts (Navbar.tsx + /api/agency/nav-counts)
+Prompt B — Microcopy audit (dashboard + empty states)
+Prompt C — Alert strip amber tier (gold pre-alert, red critical only)
+Prompt D — Full dashboard redesign (left rail, 3 modes, warm design)
+Prompt E — Find coverage panel 5-step funnel (/agency/clients/[id])
+Prompt F — Urgency flag (client_needs boolean + DB migration)
+Prompt G — Placement track record (/profile/[id])
+Prompt H — QuickFill blast UI (/agency/airecruit)
+Prompt I — Caregiver engagement basics (views + percentile)
+Prompt J — Onboarding checklist card (new agency first login)
+Prompt K — Compliance health per caregiver (/agency/roster)
+Prompt L — Copy scanner pre-commit hook
+
+### Design system decisions locked
+- Background: #FAF8F5 warm cream (not #F8F9FC)
+- Card bg: #FFFDF9 warm white
+- Card border: #EDE8E0 warm sand
+- Text secondary: #7A6F5E warm grey
+- Typography: DM Serif Display for greetings/headers, DM Sans for stats/labels
+- Line height body: 1.65-1.75
+- Border radius: 12px cards, 8px inputs, 20px pills
+- Alert tiers: Gold = pre-alert, Red = critical only, Green = confirmed healthy
+- Button language: outcome invitations not action commands
+- Human presence: initials circles, first names, warm avatars everywhere
+
+### Dashboard layout decisions locked
+- Persistent left command rail 220px — never collapses
+- Three canvas modes: Today (default) / Command / Week
+- Command mode = full control panel grid (6-8 feature cards with live status)
+- Week mode = 7-day coverage strip + coming up lookahead
+- Overnight AI briefing narrative pinned to Today mode top
+- Client aging indicator: amber 7 days, red 14 days
+- Revenue implication on unmatched clients ($value not just count)
+- Platform value ticker at bottom
+- Team activity feed (hidden if solo coordinator)
+- Onboarding checklist for new agencies (5 things first)
+
+### Microcopy replacements (all documented in master spec)
+- "3 families waiting" not "3 clients unmatched"
+- "Campaign live. We'll start calling when calling hours open." not "Campaign created"
+- Celebration moments: first login, first placement, first AIRecruit result, all matched, credential caught
+
+### Research validated
+- F-pattern layout confirmed correct
+- Progressive disclosure 4 levels confirmed
+- Amber/gold pre-alert tier before red (new)
+- Nav badge counts = highest impact lowest effort addition
+- Empty states as onboarding moments = highest churn prevention
+- Keep green all-clear card (don't hide — home care needs calm confirmation)
+- Bullhorn/Intercom/Linear navigation patterns validated our IA
+
+### Next session start
+1. Run gen-codebase-map.sh — paste into project knowledge
+2. git checkout develop && git pull
+3. Start with Prompt A (nav badge counts) — lowest risk highest impact
+4. Then B, C in same session if time
+5. Prompt D (dashboard redesign) is its own full session
