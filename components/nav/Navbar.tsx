@@ -334,6 +334,22 @@ export default function Navbar() {
   const navRef = useRef<HTMLElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Nav badge counts for agency users
+  const [navCounts, setNavCounts] = useState<{ clients_unmatched: number; airecruit_ready: number; credentials_expiring: number } | null>(null)
+
+  useEffect(() => {
+    if (userRole !== 'agency') return
+    const fetchCounts = () => {
+      fetch('/api/agency/nav-counts')
+        .then(r => r.json())
+        .then(setNavCounts)
+        .catch(() => {})
+    }
+    fetchCounts()
+    const interval = setInterval(fetchCounts, 60000)
+    return () => clearInterval(interval)
+  }, [userRole])
+
   // Track current path for active indicator
   const [currentPath, setCurrentPath] = useState('')
   useEffect(() => {
@@ -419,11 +435,18 @@ export default function Navbar() {
           {userRole === 'agency' ? (
             agencyNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
+              const isAIRecruit = link.href === '/agency/airecruit'
+              const isRoster = link.href === '/agency/roster'
+              const badgeCount = isAIRecruit ? navCounts?.airecruit_ready : isRoster ? navCounts?.credentials_expiring : 0
+              const showBadge = badgeCount && badgeCount > 0
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     padding: '8px 14px',
                     borderRadius: '6px',
                     fontFamily: 'DM Sans, sans-serif',
@@ -437,6 +460,27 @@ export default function Navbar() {
                   }}
                 >
                   {link.label}
+                  {showBadge && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '16px',
+                        height: '16px',
+                        background: isRoster ? '#F59E0B' : '#C9973A',
+                        color: '#0D1B3E',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        borderRadius: '8px',
+                        padding: '0 4px',
+                        marginLeft: '5px',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {badgeCount}
+                    </span>
+                  )}
                 </Link>
               )
             })
