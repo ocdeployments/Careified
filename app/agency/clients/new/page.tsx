@@ -8,19 +8,23 @@ const FONT_SERIF = "'DM Serif Display', serif"
 const COLORS = {
   navy: '#0D1B3E',
   gold: '#C9973A',
-  red: '#DC2626',
+  red: '#E24B4A',
   slate: '#64748B',
-  border: '#E2E8F0',
+  border: 'rgba(255,255,255,0.08)',
+  text: '#F5F0E8',
+  textMuted: 'rgba(255,255,255,0.55)',
+  cardBg: 'rgba(255,255,255,0.04)',
+  inputBg: 'rgba(255,255,255,0.04)',
 }
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '12px 16px',
   borderRadius: 12,
-  border: '1.5px solid #E2E8F0',
-  backgroundColor: 'white',
+  border: '1.5px solid rgba(255,255,255,0.08)',
+  backgroundColor: 'rgba(255,255,255,0.04)',
   fontSize: 13,
-  color: '#0D1B3E',
+  color: '#F5F0E8',
   outline: 'none',
   fontFamily: FONT_SANS,
   boxSizing: 'border-box',
@@ -30,13 +34,13 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 13,
   fontWeight: 500,
-  color: '#0D1B3E',
+  color: '#F5F0E8',
   marginBottom: 6,
 }
 
 const sectionStyle: React.CSSProperties = {
-  background: 'white',
-  border: '1px solid #E2E8F0',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: 16,
   padding: 32,
   marginBottom: 24,
@@ -45,7 +49,7 @@ const sectionStyle: React.CSSProperties = {
 const sectionTitle: React.CSSProperties = {
   fontFamily: FONT_SERIF,
   fontSize: 22,
-  color: '#0D1B3E',
+  color: '#F5F0E8',
   margin: '0 0 4px 0',
 }
 
@@ -249,7 +253,7 @@ export default function NewClientPage() {
         />
       )}
 
-      <h1 style={{ fontFamily: FONT_SERIF, fontSize: 32, color: '#0D1B3E', margin: '0 0 8px 0' }}>New Client</h1>
+      <h1 style={{ fontFamily: FONT_SERIF, fontSize: 32, color: '#F5F0E8', margin: '0 0 8px 0' }}>New Client</h1>
       <p style={{ color: '#64748B', marginBottom: 32 }}>Every field improves match accuracy. The more detail, the better the results.</p>
 
       {/* SECTION 1: Identity */}
@@ -327,7 +331,7 @@ export default function NewClientPage() {
         <div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={form.medications_complex} onChange={e => setField('medications_complex', e.target.checked)} />
-            <span style={{ fontSize: 14, color: '#0D1B3E' }}>Complex medication management required</span>
+            <span style={{ fontSize: 14, color: '#F5F0E8' }}>Complex medication management required</span>
           </label>
         </div>
       </div>
@@ -355,7 +359,7 @@ export default function NewClientPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '10px 14px', borderRadius: 10,
                 border: '1px solid ' + (selected ? COLORS.gold : COLORS.border),
-                background: selected ? '#FDF6EC' : 'white',
+                background: selected ? '#FDF6EC' : 'rgba(255,255,255,0.04)',
               }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flex: 1 }}>
                   <input
@@ -429,7 +433,7 @@ export default function NewClientPage() {
                           style={{
                             width: 40, height: 40, borderRadius: 8,
                             border: active ? 'none' : '1px solid ' + COLORS.border,
-                            background: active ? COLORS.gold : 'white',
+                            background: active ? COLORS.gold : 'rgba(255,255,255,0.04)',
                             color: active ? COLORS.navy : '#94A3B8',
                             fontWeight: active ? 800 : 400,
                             cursor: 'pointer', fontSize: 16,
@@ -499,7 +503,7 @@ export default function NewClientPage() {
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 8 }}>
               <input type="checkbox" checked={form.smoking_household} onChange={e => setField('smoking_household', e.target.checked)} />
-              <span style={{ fontSize: 14, color: '#0D1B3E' }}>Smoking household</span>
+              <span style={{ fontSize: 14, color: '#F5F0E8' }}>Smoking household</span>
             </label>
           </div>
           <div>
@@ -647,12 +651,12 @@ export default function NewClientPage() {
       )}
 
       <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-        <button onClick={() => router.push('/agency/clients')} style={{ padding: '12px 24px', borderRadius: 10, border: '1.5px solid #E2E8F0', background: 'white', color: '#0D1B3E', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: FONT_SANS }}>
+        <button onClick={() => router.push('/agency/clients')} style={{ padding: '12px 24px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', color: '#F5F0E8', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: FONT_SANS }}>
           Cancel
         </button>
         <button
           onClick={handleSubmit} disabled={!canSubmit || submitting}
-          style={{ padding: '12px 32px', borderRadius: 10, border: 'none', background: canSubmit && !submitting ? 'linear-gradient(135deg, #C9973A, #E8B86D)' : '#E2E8F0', color: '#0D1B3E', fontSize: 14, fontWeight: 700, cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed', fontFamily: FONT_SANS }}
+          style={{ padding: '12px 32px', borderRadius: 10, border: 'none', background: canSubmit && !submitting ? 'linear-gradient(135deg, #C9973A, #E8B86D)' : 'rgba(255,255,255,0.08)', color: '#F5F0E8', fontSize: 14, fontWeight: 700, cursor: canSubmit && !submitting ? 'pointer' : 'not-allowed', fontFamily: FONT_SANS }}
         >
           {submitting ? 'Creating…' : 'Create Client & Find Matches'}
         </button>
@@ -662,8 +666,8 @@ export default function NewClientPage() {
 }
 
 function Pill({ label, active, onClick, color = 'gold' }: { label: string; active: boolean; onClick: () => void; color?: string }) {
-  const borderColor = active ? (color === 'red' ? '#DC2626' : '#C9973A') : '#E2E8F0'
-  const bg = active ? (color === 'red' ? '#FEF2F2' : '#FDF6EC') : 'white'
+  const borderColor = active ? (color === 'red' ? '#DC2626' : '#C9973A') : 'rgba(255,255,255,0.08)'
+  const bg = active ? (color === 'red' ? '#FEF2F2' : '#FDF6EC') : 'rgba(255,255,255,0.04)'
   const textColor = active ? (color === 'red' ? '#DC2626' : '#92400E') : '#64748B'
   return (
     <button onClick={onClick} type="button" style={{ padding: '8px 16px', borderRadius: 20, border: `1.5px solid ${borderColor}`, background: bg, color: textColor, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: FONT_SANS }}>
@@ -678,8 +682,8 @@ function ConsentModal({ onAccept, acknowledgedPlatform, setAcknowledgedPlatform,
 }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(13,27,62,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24, fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ background: 'white', borderRadius: 16, maxWidth: 640, width: '100%', maxHeight: '90vh', overflow: 'auto', padding: 40 }}>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 26, color: '#0D1B3E', margin: '0 0 8px 0' }}>Before you add a client</h2>
+      <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 16, maxWidth: 640, width: '100%', maxHeight: '90vh', overflow: 'auto', padding: 40 }}>
+        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 26, color: '#F5F0E8', margin: '0 0 8px 0' }}>Before you add a client</h2>
         <p style={{ color: '#64748B', marginBottom: 24, fontSize: 14 }}>Please acknowledge how Careified works. These are one-time acknowledgments.</p>
         {[
           { checked: acknowledgedPlatform, set: setAcknowledgedPlatform, title: 'Platform, not recommender.', body: 'I acknowledge that Careified organizes and displays information provided by caregivers and third parties. Careified does NOT recommend, vouch for, endorse, or employ any caregiver. All hiring decisions are solely my responsibility.' },
@@ -688,13 +692,13 @@ function ConsentModal({ onAccept, acknowledgedPlatform, setAcknowledgedPlatform,
           <div key={title} style={{ background: '#F7F4F0', borderRadius: 12, padding: 20, marginBottom: 16 }}>
             <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
               <input type="checkbox" checked={checked} onChange={e => set(e.target.checked)} style={{ marginTop: 3 }} />
-              <div style={{ fontSize: 13, color: '#0D1B3E', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: '#F5F0E8', lineHeight: 1.6 }}>
                 <strong>{title}</strong> {body}
               </div>
             </label>
           </div>
         ))}
-        <button onClick={onAccept} disabled={!acknowledgedPlatform || !acknowledgedEmployer || saving} style={{ width: '100%', padding: '14px 24px', borderRadius: 10, border: 'none', background: acknowledgedPlatform && acknowledgedEmployer && !saving ? 'linear-gradient(135deg, #C9973A, #E8B86D)' : '#E2E8F0', color: '#0D1B3E', fontSize: 14, fontWeight: 700, cursor: acknowledgedPlatform && acknowledgedEmployer && !saving ? 'pointer' : 'not-allowed', fontFamily: "'DM Sans', sans-serif" }}>
+        <button onClick={onAccept} disabled={!acknowledgedPlatform || !acknowledgedEmployer || saving} style={{ width: '100%', padding: '14px 24px', borderRadius: 10, border: 'none', background: acknowledgedPlatform && acknowledgedEmployer && !saving ? 'linear-gradient(135deg, #C9973A, #E8B86D)' : 'rgba(255,255,255,0.08)', color: '#F5F0E8', fontSize: 14, fontWeight: 700, cursor: acknowledgedPlatform && acknowledgedEmployer && !saving ? 'pointer' : 'not-allowed', fontFamily: "'DM Sans', sans-serif" }}>
           {saving ? 'Saving…' : 'I acknowledge and continue'}
         </button>
       </div>
