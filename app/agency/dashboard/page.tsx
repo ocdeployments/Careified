@@ -1,19 +1,22 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import CommandBar from '@/components/agency/CommandBar'
-import ProfileNudge from '@/components/agency/ProfileNudge'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
 
+// Design tokens
 const N = '#0D1B3E'
 const G = '#C9973A'
-const GL = '#E8B86D'
-const M = '#64748B'
-const BG = '#F8F9FC'
+const GL = '#FEF3E2'
+const W = '#FFFFFF'
+const S = '#F8F9FC'
 const B = '#E2E8F0'
-const S = "'DM Sans', sans-serif"
-const SERIF = "'DM Serif Display', Georgia, serif"
+const M = '#64748B'
+const MT = '#94A3B8'
+const R = '#E24B4A'
+const RL = '#FEF2F2'
+const GR = '#22C55E'
+const GRL = '#F0FDF4'
 
 type DashboardData = {
   stats: {
@@ -24,14 +27,16 @@ type DashboardData = {
     clients_total: number
     clients_unmatched: number
     airecruit_active: number
+    profile_completion?: number
+    plan_tier?: string
+    subscription_status?: string
   }
   action_items: { priority: string; title: string; cta_href: string }[]
   pipeline: { discovered: number; contacted: number; interviewing: number; placed: number; inactive: number } | null
   recent_activity: { action: string; timestamp: string; detail?: string }[]
   top_matches: { id: string; first_name: string; last_name: string; aggregate_score: number | null; photo_url: string | null; role: string | null }[]
   expiring_credentials: { caregiver_id: string; caregiver_name: string; certification: string; expiry_date: string }[]
-  profileCompletion?: number
-  currentPlan?: { name: string; daysRemaining: number; modules: string[] }
+  unmatched_clients?: { id: string; first_name: string; care_level: string }[]
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -50,192 +55,9 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function Skeleton({ width = 60, height = 32 }: { width?: number; height?: number }) {
-  return (
-    <div style={{
-      width, height,
-      background: 'linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%)',
-      backgroundSize: '468px 100%',
-      animation: 'shimmer 1.2s ease-in-out infinite',
-      borderRadius: 4,
-      display: 'inline-block'
-    }} />
-  )
-}
-
-function TypingIndicator() {
-  return (
-    <div style={{ display: 'flex', gap: 4, padding: '12px 16px' }}>
-      {[0, 0.15, 0.3].map((delay, i) => (
-        <div key={i} style={{
-          width: 6, height: 6, borderRadius: '50%', background: G,
-          animation: 'dotBounce 1.4s ease-in-out infinite',
-          animationDelay: `${delay}s`
-        }} />
-      ))}
-    </div>
-  )
-}
-
-function CounterAnimation({ value, duration = 600 }: { value: number; duration?: number }) {
-  const [displayValue, setDisplayValue] = useState(0)
-
-  useEffect(() => {
-    const steps = 30
-    const stepDuration = duration / steps
-    let current = 0
-    const interval = setInterval(() => {
-      current++
-      const progress = current / steps
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setDisplayValue(Math.round(value * eased))
-      if (current >= steps) clearInterval(interval)
-    }, stepDuration)
-    return () => clearInterval(interval)
-  }, [value, duration])
-
-  return <span>{displayValue}</span>
-}
-
-function FadeInSection({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  return (
-    <div style={{
-      opacity: mounted ? 1 : 0,
-      transform: mounted ? 'translateY(0)' : 'translateY(10px)',
-      transition: 'opacity 0.4s ease, transform 0.4s ease',
-    }}>
-      {children}
-    </div>
-  )
-}
-
-function AiAssistantPanel() {
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
-
-  async function sendMessage(msg?: string) {
-    const text = msg || input
-    if (!text.trim() || loading) return
-
-    const userMsg = text.trim()
-    setInput('')
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }])
-    setLoading(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/api/agency/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, history: messages }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed')
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const suggestions = ['Roster status', 'Unmatched clients', 'AIRecruit results', "Who's in interviewing?"]
-
-  return (
-    <div style={{ background: 'white', borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-      {/* Header */}
-      <div style={{ background: N, padding: '14px 18px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#F5F0E8' }}>Careified Assistant</div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ask about your roster, clients, or campaigns</div>
-      </div>
-
-      {/* Messages */}
-      <div style={{ maxHeight: 320, overflowY: 'auto', padding: '12px 0' }}>
-        {messages.length === 0 && !loading && (
-          <div style={{ padding: '12px 18px' }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {suggestions.map(s => (
-                <button key={s} onClick={() => sendMessage(s)} style={{
-                  fontSize: 12, padding: '6px 14px', borderRadius: 20,
-                  border: '1px solid #E2E8F0', background: 'transparent', color: N,
-                  cursor: 'pointer', fontFamily: S,
-                }}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {messages.map((m, i) => (
-          <div key={i} style={{
-            display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
-            padding: '4px 18px', marginBottom: 4
-          }}>
-            <div style={{
-              maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '12px 12px 0 12px' : '12px 12px 12px 0',
-              background: m.role === 'user' ? G : 'white', color: m.role === 'user' ? N : '#475569',
-              fontSize: 13, border: m.role === 'assistant' ? '1px solid #E2E8F0' : 'none',
-            }}>
-              {m.content}
-            </div>
-          </div>
-        ))}
-
-        {loading && <TypingIndicator />}
-        {error && (
-          <div style={{ padding: '8px 18px', color: '#DC2626', fontSize: 12 }}>{error}</div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div style={{ padding: '12px 18px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8 }}>
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-          placeholder="Ask about your data..."
-          rows={1}
-          style={{
-            flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid #E2E8F0',
-            fontSize: 13, fontFamily: S, resize: 'none', outline: 'none',
-          }}
-        />
-        <button
-          onClick={() => sendMessage()}
-          disabled={loading || !input.trim()}
-          style={{
-            padding: '8px 16px', borderRadius: 8, border: 'none',
-            background: input.trim() && !loading ? G : '#E2E8F0',
-            color: input.trim() && !loading ? N : '#94A3B8',
-            fontSize: 12, fontWeight: 700, cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-            fontFamily: S,
-          }}
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  )
-}
-
 export default function AgencyDashboard() {
-  const { userId, isLoaded } = useAuth()
+  const router = useRouter()
+  const { userId } = useAuth()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -253,350 +75,281 @@ export default function AgencyDashboard() {
 
   if (!userId) return null
 
-  const agency = { name: dashboardData?.stats?.roster_total ? 'Your Agency' : null }
-  const clients: any[] = []
-  const shortlistCount = dashboardData?.stats?.shortlist_total || 0
-  const stats = { active_clients: dashboardData?.stats?.clients_total || 0, matched_clients: 0, total_reviews: 0, positive_reviews: 0 }
-  const recentReviews: any[] = []
-  const recentMatches: any[] = []
-
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-
-  const unmatched = clients?.filter((c: any) => !c.matched_caregiver_id) || []
-
+  const stats = dashboardData?.stats
   const pipeline = dashboardData?.pipeline
-  const pipelineTotal = pipeline ? (pipeline.discovered + pipeline.contacted + pipeline.interviewing + pipeline.placed + pipeline.inactive) : 0
-  const getPipelineWidth = (val: number) => pipelineTotal > 0 ? Math.max((val / pipelineTotal) * 100, 5) : 0
+  const unmatchedClients = dashboardData?.unmatched_clients || []
 
-  const cardShadow = '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)'
+  // Zone 1: Top Status Bar
+  const planBadge = stats?.plan_tier ? `${stats.plan_tier} · ${stats.subscription_status || 'Active'}` : 'Growth · Trial'
+  const profilePct = stats?.profile_completion || 0
+
+  // Zone 2: Alert strip
+  const alerts: { type: string; count: number; accent: string; icon: string; text: string; href: string }[] = []
+  if (stats?.clients_unmatched && stats.clients_unmatched > 0) {
+    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: R, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
+  }
+  if (stats?.airecruit_active && stats.airecruit_active > 0) {
+    alerts.push({ type: 'airecruit_results', count: stats.airecruit_active, accent: G, icon: '📋', text: `${stats.airecruit_active} AIRecruit results ready`, href: '/agency/airecruit' })
+  }
+  if (dashboardData?.expiring_credentials && dashboardData.expiring_credentials.length > 0) {
+    alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: '#F59E0B', icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
+  }
+  const showAllClear = alerts.length === 0
 
   return (
-    <div style={{ minHeight: '100vh', background: BG, fontFamily: S }}>
-      <style>{`
-        @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-        @keyframes dotBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
-      `}</style>
+    <div style={{ minHeight: '100vh', background: S, fontFamily: "'DM Sans', sans-serif" }}>
+      {/* ZONE 1: TOP STATUS BAR */}
+      <div style={{ background: W, borderBottom: `1px solid ${B}`, padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: N }}>Your Agency</span>
+          <span style={{ border: `1px solid ${G}`, color: G, fontSize: 11, padding: '2px 8px', borderRadius: 12, marginLeft: 12 }}>{planBadge}</span>
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <span style={{ fontSize: 11, color: M }}>CAREGIVERS <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
+            <span style={{ fontSize: 11, color: M }}>PLACEMENTS <b style={{ color: N }}>{pipeline?.placed || 0}</b></span>
+            <span style={{ fontSize: 11, color: M }}>SHORTLISTED <b style={{ color: N }}>{stats?.shortlist_total || 0}</b></span>
+            <span style={{ fontSize: 11, color: M }}>AIRECRUIT <b style={{ color: N }}>{stats?.airecruit_active || 0}</b></span>
+          </div>
+          <span style={{ fontSize: 12, color: G, cursor: 'pointer' }} onClick={() => router.push('/agency/settings')}>Profile {profilePct}% complete →</span>
+        </div>
+      </div>
 
-      {/* COMMAND BAR */}
-      <FadeInSection delay={0}>
-        <div style={{
-          background: '#0A1628',
-          padding: '20px 32px',
-          borderBottom: `2px solid ${G}`,
-        }}>
-          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '0 0 4px' }}>{greeting}</p>
-            <h1 style={{ fontFamily: SERIF, fontSize: 32, color: '#F5F0E8', margin: '0 0 24px' }}>
-              {agency?.name || 'Your Agency'}
-            </h1>
+      {/* ZONE 2: ALERT STRIP */}
+      <div style={{ background: S, borderBottom: `1px solid ${B}`, padding: '12px 32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+        {showAllClear ? (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: W, borderRadius: 8, padding: '10px 14px', minWidth: 220, cursor: 'default' }}>
+            <div style={{ width: 3, height: '100%', minHeight: 32, background: GR, borderRadius: '3px 0 0 3px' }} />
+            <span style={{ color: GR }}>✓</span>
+            <span style={{ fontSize: 13, color: N }}>Everything is on track today</span>
+          </div>
+        ) : (
+          alerts.map((alert, i) => (
+            <Link key={i} href={alert.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: W, borderRadius: 8, padding: '10px 14px', minWidth: 220, border: `1px solid ${B}`, cursor: 'pointer', textDecoration: 'none', marginRight: 12 }}>
+              <div style={{ width: 3, height: '100%', minHeight: 32, background: alert.accent, borderRadius: '3px 0 0 3px' }} />
+              <span style={{ color: alert.accent }}>{alert.icon}</span>
+              <span style={{ fontSize: 13, color: N }}>{alert.text}</span>
+            </Link>
+          ))
+        )}
+      </div>
 
-            <div style={{
-              background: '#0D1B3E',
-              borderRadius: 12,
-              padding: '16px 20px',
-              border: '1px solid rgba(201,151,58,0.3)',
-            }}>
-              <input
-                type="text"
-                placeholder="Ask anything — find a caregiver, check your roster, review pipeline..."
-                style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: '#F5F0E8',
-                  fontSize: 15,
-                  fontFamily: S,
-                }}
-              />
-            </div>
-            <button style={{
-              marginTop: 12,
-              padding: '10px 24px',
-              borderRadius: 8,
-              border: 'none',
-              background: G,
-              color: N,
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: S,
-            }}>
-              Send
-            </button>
+      {/* ZONE 3: THREE WORKFLOW COLUMNS */}
+      <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
 
-            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-              {['Roster status', 'Unmatched clients', 'AIRecruit results', "Who's in interviewing?"].map(s => (
-                <span key={s} style={{
-                  fontSize: 12,
-                  padding: '4px 12px',
-                  borderRadius: 16,
-                  background: 'rgba(201,151,58,0.15)',
-                  color: GL,
-                  cursor: 'pointer',
-                }}>
-                  {s}
-                </span>
+        {/* COLUMN 1: CLIENTS & COVERAGE */}
+        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Clients & Coverage</span>
+            <Link href="/agency/clients" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View all →</Link>
+          </div>
+
+          {unmatchedClients.length > 0 ? (
+            <>
+              {unmatchedClients.slice(0, 4).map((client, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < 3 ? `1px solid ${B}` : 'none' }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: N, fontWeight: 500 }}>{client.first_name}</div>
+                    <div style={{ fontSize: 11, color: M }}>{client.care_level}</div>
+                  </div>
+                  <button onClick={() => router.push(`/agency/clients/${client.id}`)} style={{ background: G, color: W, border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>Find coverage →</button>
+                </div>
               ))}
+              {unmatchedClients.length > 4 && (
+                <Link href="/agency/clients?tab=unmatched" style={{ fontSize: 12, color: G, textDecoration: 'none', display: 'block', marginTop: 8 }}>View {unmatchedClients.length - 4} more →</Link>
+              )}
+            </>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: GR }}>
+              <span>✓</span>
+              <span style={{ fontSize: 13 }}>All clients have coverage</span>
             </div>
+          )}
+
+          <div style={{ borderTop: `1px solid ${B}`, marginTop: 16, paddingTop: 16 }}>
+            <div style={{ fontSize: 13, color: N, marginBottom: 8 }}>Available on your roster</div>
+            <div style={{ fontSize: 12, color: M }}>{stats?.roster_claimed || 0} active caregivers</div>
+            <Link href="/agency/roster" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>View available →</Link>
           </div>
         </div>
-      </FadeInSection>
 
-      {/* HERO STATS ROW */}
-      <FadeInSection delay={100}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 32px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        {/* COLUMN 2: RECRUITMENT PIPELINE */}
+        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Recruitment Pipeline</span>
+            <Link href="/agency/shortlist" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View shortlist →</Link>
+          </div>
+
+          {/* Pipeline bar */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             {[
-              { label: 'CAREGIVERS', value: dashboardData?.stats?.roster_total || 0 },
-              { label: 'PLACEMENTS', value: pipeline?.placed || 0 },
-              { label: 'SHORTLISTED', value: dashboardData?.stats?.shortlist_total || 0 },
-              { label: 'AIRECRUIT', value: dashboardData?.stats?.airecruit_active || 0 },
-            ].map((stat, i) => (
-              <div key={i} style={{
-                background: 'white',
-                borderRadius: 16,
-                boxShadow: cardShadow,
-                padding: 20,
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background: G,
-                }} />
-                <div style={{
-                  fontSize: 11,
-                  color: M,
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                  marginBottom: 8,
-                }}>
-                  {stat.label}
-                </div>
-                <div style={{
-                  fontSize: 48,
-                  fontWeight: 700,
-                  color: N,
-                  lineHeight: 1,
-                }}>
-                  {loading ? <Skeleton width={80} height={48} /> : <CounterAnimation value={stat.value} />}
-                </div>
+              { label: 'Discovered', count: pipeline?.discovered || 0, bg: '#E6F1FB', color: '#185FA5' },
+              { label: 'Contacted', count: pipeline?.contacted || 0, bg: '#E6F1FB', color: '#185FA5' },
+              { label: 'Interviewing', count: pipeline?.interviewing || 0, bg: GL, color: G },
+              { label: 'Placed', count: pipeline?.placed || 0, bg: GRL, color: '#16A34A' },
+              { label: 'Inactive', count: pipeline?.inactive || 0, bg: '#F1F5F9', color: M },
+            ].map((stage, i) => (
+              <div key={i} style={{ flex: 1, textAlign: 'center', background: stage.bg, borderRadius: 12, padding: '3px 8px' }}>
+                <div style={{ fontSize: 11, color: stage.color }}>{stage.label}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: stage.color }}>{stage.count}</div>
               </div>
             ))}
           </div>
-        </div>
-      </FadeInSection>
 
-      {/* TWO-COLUMN SECTION */}
-      <FadeInSection delay={200}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px 24px', display: 'grid', gridTemplateColumns: '70% 30%', gap: 24 }}>
-
-          {/* LEFT COLUMN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-            {/* Action Items */}
-            <div style={{ background: 'white', borderRadius: 16, boxShadow: cardShadow, overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: `1px solid ${B}` }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>What needs attention</span>
-              </div>
-              <div>
-                {dashboardData?.action_items && dashboardData.action_items.length > 0 ? (
-                  dashboardData.action_items.map((item, i) => (
-                    <Link key={i} href={item.cta_href} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '14px 20px',
-                      borderBottom: `1px solid ${B}`,
-                      borderLeft: `4px solid ${item.priority === 'high' || item.priority === 'urgent' ? G : N}`,
-                      textDecoration: 'none',
-                      background: 'transparent',
-                      transition: 'background 0.15s',
-                    }}>
-                      <span style={{ fontSize: 14, color: N, fontWeight: 500 }}>{item.title}</span>
-                      <span style={{ color: G, fontSize: 18 }}>→</span>
-                    </Link>
-                  ))
-                ) : (
-                  <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-                    <span style={{ color: '#16A34A', fontSize: 14 }}>✓ Everything is up to date</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Pipeline Funnel */}
-            <div style={{ background: 'white', borderRadius: 16, boxShadow: cardShadow, padding: 20 }}>
-              <div style={{ fontFamily: SERIF, fontSize: 18, color: N, marginBottom: 16 }}>Pipeline</div>
-              {pipeline && pipelineTotal > 0 ? (
-                <>
-                  <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
-                    <div style={{ width: `${getPipelineWidth(pipeline.discovered)}%`, background: 'linear-gradient(90deg, #0D1B3E, #1E3A8A)' }} />
-                    <div style={{ width: `${getPipelineWidth(pipeline.contacted)}%`, background: 'linear-gradient(90deg, #1E3A8A, #3B82F6)' }} />
-                    <div style={{ width: `${getPipelineWidth(pipeline.interviewing)}%`, background: GL }} />
-                    <div style={{ width: `${getPipelineWidth(pipeline.placed)}%`, background: G }} />
-                    <div style={{ width: `${getPipelineWidth(pipeline.inactive)}%`, background: '#E2E8F0' }} />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: M }}>
-                    <span>{pipeline.discovered} discovered</span>
-                    <span>{pipeline.contacted} contacted</span>
-                    <span>{pipeline.interviewing} interviewing</span>
-                    <span>{pipeline.placed} placed</span>
-                    <span>{pipeline.inactive} inactive</span>
-                  </div>
-                </>
-              ) : (
-                <div style={{ fontSize: 24, color: '#94A3B8', textAlign: 'center', padding: '20px 0' }}>—</div>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-            {/* Recent Activity */}
-            <div style={{ background: 'white', borderRadius: 16, boxShadow: cardShadow, overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: `1px solid ${B}` }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Recent activity</span>
-              </div>
-              <div style={{ maxHeight: 280, overflow: 'auto' }}>
-                {(dashboardData?.recent_activity?.length === 0 && recentMatches?.length === 0 && recentReviews?.length === 0) || (loading && !dashboardData?.recent_activity?.length) ? (
-                  <div style={{ padding: '24px 20px', textAlign: 'center', color: '#94A3B8', fontSize: 12 }}>
-                    No activity yet
-                  </div>
-                ) : (
-                  <>
-                    {dashboardData?.recent_activity?.slice(0, 5).map((a, i) => (
-                      <div key={`a-${i}`} style={{ padding: '10px 20px', borderBottom: `1px solid ${B}`, display: 'flex', gap: 10, alignItems: 'center' }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', flexShrink: 0 }} />
-                        <div style={{ fontSize: 12, color: N }}>
-                          <strong>{a.action}</strong>
-                          <span style={{ color: M, marginLeft: 4 }}>{formatRelativeTime(a.timestamp)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Actions 2x2 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {[
-                'Search Caregivers',
-                'Add Client',
-                'Start AIRecruit',
-                'View Roster',
-              ].map((label, i) => (
-                <button
-                  key={label}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = G}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = B}
-                  style={{
-                    padding: '14px 16px',
-                    borderRadius: 12,
-                    border: `1px solid ${B}`,
-                    background: 'white',
-                    color: N,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontFamily: S,
-                    transition: 'border-color 0.15s',
-                    textAlign: 'center',
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div style={{ borderTop: `1px solid ${B}`, paddingTop: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: N, marginBottom: 8 }}>AIRecruit</div>
+            {stats?.airecruit_active && stats.airecruit_active > 0 ? (
+              <div style={{ fontSize: 12, color: M }}>{stats.airecruit_active} active campaigns</div>
+            ) : (
+              <div style={{ fontSize: 12, color: M }}>No campaigns yet</div>
+            )}
+            <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Start new campaign →</Link>
           </div>
         </div>
-      </FadeInSection>
 
-      {/* BOTTOM ROW */}
-      <FadeInSection delay={300}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {/* COLUMN 3: AI ASSISTANT */}
+        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
+          <div style={{ marginBottom: 16 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Careified AI</span>
+            <div style={{ fontSize: 12, color: M }}>Your operations co-pilot</div>
+          </div>
+          <MiniAssistant />
+        </div>
+      </div>
 
-          {/* Agency Profile Completion */}
-          <div style={{ background: 'white', borderRadius: 16, boxShadow: cardShadow, padding: 20 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 18, color: N, marginBottom: 16 }}>Agency Profile</div>
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: M, marginBottom: 8 }}>
-                <span>Profile completion</span>
-                <span>{dashboardData?.profileCompletion || 0}%</span>
-              </div>
-              <div style={{ height: 8, background: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{
-                  width: `${dashboardData?.profileCompletion || 0}%`,
-                  height: '100%',
-                  background: G,
-                  borderRadius: 4,
-                  transition: 'width 0.3s',
-                }} />
-              </div>
-            </div>
-            <button style={{
-              padding: '10px 20px',
-              borderRadius: 8,
-              border: `1px solid ${G}`,
-              background: 'transparent',
-              color: G,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: S,
-            }}>
-              Complete your profile
-            </button>
+      {/* ZONE 4: ROSTER + ACTIVITY */}
+      <div style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+
+        {/* LEFT: Roster health */}
+        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Roster Health</span>
+            <Link href="/agency/roster" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View roster →</Link>
           </div>
 
-          {/* Plan Status */}
-          <div style={{ background: 'white', borderRadius: 16, boxShadow: cardShadow, padding: 20 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 18, color: N, marginBottom: 16 }}>Plan Status</div>
-            <div style={{ fontSize: 14, color: N, fontWeight: 600, marginBottom: 8 }}>
-              {dashboardData?.currentPlan?.name || 'Professional Plan'}
-            </div>
-            <div style={{
-              display: 'inline-block',
-              padding: '4px 12px',
-              borderRadius: 16,
-              background: 'rgba(201,151,58,0.15)',
-              color: G,
-              fontSize: 12,
-              fontWeight: 700,
-              marginBottom: 16,
-            }}>
-              {dashboardData?.currentPlan?.daysRemaining || 14} days remaining
-            </div>
-            <div style={{ fontSize: 13, color: M }}>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>Active modules:</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {(dashboardData?.currentPlan?.modules || ['Roster', 'Matching', 'AIRecruit', 'Analytics']).map((mod, i) => (
-                  <span key={i} style={{
-                    padding: '3px 10px',
-                    borderRadius: 12,
-                    background: '#F1F5F9',
-                    color: N,
-                    fontSize: 12,
-                  }}>
-                    {mod}
-                  </span>
-                ))}
-              </div>
-            </div>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+            <span style={{ fontSize: 12, color: M }}>Total <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
+            <span style={{ fontSize: 12, color: M }}>Active <b style={{ color: N }}>{stats?.roster_claimed || 0}</b></span>
+            <span style={{ fontSize: 12, color: M }}>Incomplete <b style={{ color: N }}>{stats?.roster_pending || 0}</b></span>
+          </div>
+
+          <div style={{ display: 'flex', gap: 16 }}>
+            <Link href="/agency/roster/add" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Add caregiver →</Link>
+            <Link href="/agency/roster/import" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Import CSV →</Link>
           </div>
         </div>
-      </FadeInSection>
 
-      {/* Profile completion + billing nudge */}
-      <ProfileNudge />
+        {/* RIGHT: Recent activity */}
+        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+          <div style={{ marginBottom: 16 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Recent Activity</span>
+          </div>
+
+          {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 ? (
+            dashboardData.recent_activity.slice(0, 5).map((activity, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${B}` : 'none' }}>
+                <span style={{ fontSize: 11, color: MT }}>{formatRelativeTime(activity.timestamp)}</span>
+                <span style={{ fontSize: 12, color: N }}>{activity.action}</span>
+              </div>
+            ))
+          ) : (
+            <div style={{ fontSize: 12, color: MT }}>Activity will appear here as your team uses the platform.</div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
+
+// Mini AI Assistant component (inline)
+function MiniAssistant() {
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const suggestions = ['Find caregivers with dementia experience', "Which clients don't have a caregiver yet?", 'Start a screening campaign', "Show me my AIRecruit results"]
+
+  async function sendMessage(text?: string) {
+    const msg = text || input
+    if (!msg.trim() || loading) return
+    setInput('')
+    setMessages(prev => [...prev, { role: 'user', content: msg }])
+    setLoading(true)
+
+    try {
+      const res = await fetch('/api/agency/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: messages }),
+      })
+      const data = await res.json()
+      if (res.ok && data.response) {
+        const parsed = parseActionBlock(data.response)
+        setMessages(prev => [...prev, { role: 'assistant', content: parsed.content }])
+      }
+    } catch (e) {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'AI temporarily unavailable' }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function parseActionBlock(text: string): { content: string } {
+    const actionRegex = /<action>{"type":"navigate","url":"([^"]+)"}<\/action>/
+    const match = text.match(actionRegex)
+    if (match) {
+      const url = match[1]
+      setTimeout(() => router.push(url), 1500)
+      return { content: text.replace(actionRegex, '').trim() }
+    }
+    return { content: text }
+  }
+
+  return (
+    <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+      {messages.length === 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+          {suggestions.map((s, i) => (
+            <button key={i} onClick={() => sendMessage(s)} style={{ background: '#F1F5F9', border: `1px solid ${B}`, borderRadius: 20, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: N, margin: 2 }}>
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {messages.map((m, i) => (
+        <div key={i} style={{ marginBottom: 8, padding: '8px 12px', borderRadius: m.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px', background: m.role === 'user' ? G : '#F1F5F9', color: m.role === 'user' ? W : N, fontSize: 12 }}>
+          {m.content}
+        </div>
+      ))}
+
+      {loading && (
+        <div style={{ fontSize: 11, color: M }}>Thinking...</div>
+      )}
+
+      <div ref={messagesEndRef} />
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())}
+          placeholder="Ask about your roster..."
+          style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: `1px solid ${B}`, fontSize: 12, outline: 'none' }}
+        />
+        <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: input.trim() && !loading ? G : B, color: input.trim() && !loading ? W : M, fontSize: 12, cursor: input.trim() && !loading ? 'pointer' : 'default' }}>
+          →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+import React from 'react'
