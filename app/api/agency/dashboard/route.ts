@@ -51,11 +51,33 @@ export async function GET(request: NextRequest) {
           (SELECT COUNT(*) FROM agency_shortlist WHERE agency_clerk_id = $2) as shortlist_total,
           (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1 AND status != 'closed') as clients_total,
           (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1 AND matched_caregiver_id IS NULL AND status != 'closed') as clients_unmatched,
-          (SELECT COUNT(*) FROM airecruit_campaigns WHERE agency_id = $1 AND status = 'active') as airecruit_active
+          (SELECT COUNT(*) FROM airecruit_campaigns WHERE agency_id = $1 AND status = 'active') as airecruit_active,
+          (SELECT name FROM agencies WHERE id = $1) as agency_name,
+          (SELECT plan_tier FROM agencies WHERE id = $1) as plan_tier,
+          (SELECT subscription_status FROM agencies WHERE id = $1) as subscription_status,
+          (SELECT COALESCE(onboarding_step * 10, 0) FROM agencies WHERE id = $1) as profile_completion,
+          (SELECT trial_ends_at FROM agencies WHERE id = $1) as trial_ends_at
       `, [agencyId, userId])
       response.stats = statsResult.rows[0] || {}
     } catch (e) {
       console.error('Stats query failed:', e)
+    }
+
+    // Unmatched clients
+    try {
+      const unmatchedResult = await pool.query(`
+        SELECT id, client_first_name as first_name, primary_condition as care_level
+        FROM client_needs
+        WHERE agency_id = $1
+          AND matched_caregiver_id IS NULL
+          AND status != 'closed'
+        ORDER BY created_at ASC
+        LIMIT 10
+      `, [agencyId])
+      response.unmatched_clients = unmatchedResult.rows
+    } catch (e) {
+      console.error('Unmatched clients query failed:', e)
+      response.unmatched_clients = []
     }
 
     // Action items
