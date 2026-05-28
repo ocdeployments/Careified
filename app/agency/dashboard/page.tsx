@@ -5,18 +5,22 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 // Design tokens
-const N = '#0D1B3E'
-const G = '#C9973A'
-const GL = '#FEF3E2'
-const W = '#FFFFFF'
-const S = '#F8F9FC'
-const B = '#E2E8F0'
-const M = '#64748B'
-const MT = '#94A3B8'
-const R = '#E24B4A'
-const RL = '#FEF2F2'
-const GR = '#22C55E'
-const GRL = '#F0FDF4'
+const N = '#0D1B3E'      // navy
+const G = '#C9973A'      // gold
+const GL = '#FEF3E2'     // gold light
+const W = '#FFFFFF'      // white
+const WW = '#FFFDF9'     // warm white (cards)
+const S = '#FAF8F5'      // warm cream (page bg)
+const B = '#EDE8E0'      // warm sand border
+const M = '#7A6F5E'      // warm grey text
+const MT = '#94A3B8'     // tertiary text
+const R = '#E24B4A'      // red critical
+const RL = '#FEF2F2'     // red light
+const AM = '#F59E0B'     // amber warning
+const GR = '#22C55E'    // green healthy
+const GRL = '#F0FDF4'    // green light
+const SERIF = "'DM Serif Display', Georgia, serif"
+const SANS = "'DM Sans', sans-serif"
 
 type DashboardData = {
   stats: {
@@ -62,6 +66,20 @@ export default function AgencyDashboard() {
   const { userId } = useAuth()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mode, setMode] = useState<'today'|'command'|'week'>('today')
+
+  // Load mode from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('dashboard_mode')
+    if (saved === 'today' || saved === 'command' || saved === 'week') {
+      setMode(saved)
+    }
+  }, [])
+
+  // Save mode to localStorage
+  useEffect(() => {
+    localStorage.setItem('dashboard_mode', mode)
+  }, [mode])
 
   useEffect(() => {
     if (!userId) return
@@ -85,25 +103,41 @@ export default function AgencyDashboard() {
   const planBadge = stats?.plan_tier ? `${stats.plan_tier} · ${stats.subscription_status || 'Active'}` : 'Growth · Trial'
   const profilePct = stats?.profile_completion || 0
 
-  // Zone 2: Alert strip
+  // Zone 2: Alert strip (3 tiers: red=critical, amber=attention, green=all-clear)
+  const A = AM // amber/gold for attention needed
   const alerts: { type: string; count: number; accent: string; icon: string; text: string; href: string }[] = []
+
+  // Unmatched clients: amber (not critical until flagged urgent)
   if (stats?.clients_unmatched && stats.clients_unmatched > 0) {
-    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: R, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
+    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: A, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
   }
+
+  // AIRecruit results: gold accent
   if (stats?.airecruit_active && stats.airecruit_active > 0) {
     alerts.push({ type: 'airecruit_results', count: stats.airecruit_active, accent: G, icon: '📋', text: `${stats.airecruit_active} AIRecruit results ready`, href: '/agency/airecruit' })
   }
+
+  // Expiring credentials: red if <=7 days, amber if 8-30 days
   if (dashboardData?.expiring_credentials && dashboardData.expiring_credentials.length > 0) {
-    alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: '#F59E0B', icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
+    const soonestExpiry = dashboardData.expiring_credentials[0]?.expiry_date
+    const daysUntilExpiry = soonestExpiry ? Math.ceil((new Date(soonestExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 99
+    const credentialAccent = daysUntilExpiry <= 7 ? R : A
+    alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: credentialAccent, icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
   }
+
   const showAllClear = alerts.length === 0
 
+  // Greeting
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
   return (
-    <div style={{ minHeight: '100vh', background: S, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: S, fontFamily: SANS, lineHeight: 1.65 }}>
       <style>{`
         @media (max-width: 1024px) {
           .dash-cols { grid-template-columns: 1fr 1fr !important; }
           .dash-ai-col { display: none !important; }
+          .dash-cmd-grid { grid-template-columns: 1fr 1fr !important; }
         }
         @media (max-width: 768px) {
           .dash-cols { grid-template-columns: 1fr !important; }
@@ -113,9 +147,13 @@ export default function AgencyDashboard() {
           .dash-alert-strip { padding: 10px 16px !important; }
           .dash-cols { padding: 16px !important; }
           .dash-bottom { padding: 0 16px 16px !important; }
+          .dash-mode-toggle { padding: 10px 16px !important; }
+          .dash-cmd-grid { grid-template-columns: 1fr !important; padding: 16px !important; }
+          .dash-greeting { padding: 0 16px 10px !important; }
         }
         @media (max-width: 480px) {
           .dash-profile-pct { display: none !important; }
+          .dash-mode-toggle button { font-size: 11px !important; padding: 6px 10px !important; }
         }
       `}</style>
 
@@ -136,17 +174,41 @@ export default function AgencyDashboard() {
         </div>
       </div>
 
+      {/* MODE TOGGLE */}
+      <div className="dash-mode-toggle" style={{ display: 'flex', gap: 4, padding: '12px 32px', background: S, borderBottom: `1px solid ${B}` }}>
+        {(['today', 'command', 'week'] as const).map(m => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 20,
+              border: mode === m ? 'none' : `1px solid ${B}`,
+              background: mode === m ? N : 'transparent',
+              color: mode === m ? W : M,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              textTransform: 'capitalize',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
+
       {/* ZONE 2: ALERT STRIP */}
       <div className="dash-alert-strip" style={{ background: S, borderBottom: `1px solid ${B}`, padding: '12px 32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {showAllClear ? (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: W, borderRadius: 8, padding: '10px 14px', minWidth: 220, cursor: 'default' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: WW, borderRadius: 8, padding: '10px 14px', minWidth: 220, cursor: 'default', border: `1px solid ${B}` }}>
             <div style={{ width: 3, height: '100%', minHeight: 32, background: GR, borderRadius: '3px 0 0 3px' }} />
             <span style={{ color: GR }}>✓</span>
             <span style={{ fontSize: 13, color: N }}>Everything is on track today</span>
           </div>
         ) : (
           alerts.map((alert, i) => (
-            <Link key={i} href={alert.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: W, borderRadius: 8, padding: '10px 14px', minWidth: 220, border: `1px solid ${B}`, cursor: 'pointer', textDecoration: 'none', marginRight: 12 }}>
+            <Link key={i} href={alert.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: WW, borderRadius: 8, padding: '10px 14px', minWidth: 220, border: `1px solid ${B}`, cursor: 'pointer', textDecoration: 'none', marginRight: 12 }}>
               <div style={{ width: 3, height: '100%', minHeight: 32, background: alert.accent, borderRadius: '3px 0 0 3px' }} />
               <span style={{ color: alert.accent }}>{alert.icon}</span>
               <span style={{ fontSize: 13, color: N }}>{alert.text}</span>
@@ -155,129 +217,236 @@ export default function AgencyDashboard() {
         )}
       </div>
 
-      {/* ZONE 3: THREE WORKFLOW COLUMNS */}
-      <div className="dash-cols" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
+      {/* GREETING */}
+      <div className="dash-greeting" style={{ padding: '0 32px 12px', fontFamily: SERIF, fontSize: 15, color: M }}>
+        {greeting} — here's what needs your attention today
+      </div>
 
-        {/* COLUMN 1: CLIENTS & COVERAGE */}
-        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Clients & Coverage</span>
-            <Link href="/agency/clients" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View all →</Link>
-          </div>
+      {/* MODE: TODAY */}
+      {mode === 'today' && (
+        <>
+          {/* ZONE 3: THREE WORKFLOW COLUMNS */}
+          <div className="dash-cols" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
 
-          {unmatchedClients.length > 0 ? (
-            <>
-              {unmatchedClients.slice(0, 4).map((client, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < 3 ? `1px solid ${B}` : 'none' }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: N, fontWeight: 500 }}>{client.first_name}</div>
-                    <div style={{ fontSize: 11, color: M }}>{client.care_level}</div>
-                  </div>
-                  <button onClick={() => router.push(`/agency/clients/${client.id}`)} style={{ background: G, color: W, border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>Find coverage →</button>
+            {/* COLUMN 1: CLIENTS & COVERAGE */}
+            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Clients & Coverage</span>
+                <Link href="/agency/clients" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View all →</Link>
+              </div>
+
+              {unmatchedClients.length > 0 ? (
+                <>
+                  {unmatchedClients.slice(0, 4).map((client, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < 3 ? `1px solid ${B}` : 'none' }}>
+                      <div>
+                        <div style={{ fontSize: 14, color: N, fontWeight: 500 }}>{client.first_name}</div>
+                        <div style={{ fontSize: 11, color: M }}>{client.care_level}</div>
+                      </div>
+                      <button onClick={() => router.push(`/agency/clients/${client.id}`)} style={{ background: G, color: W, border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>Find coverage →</button>
+                    </div>
+                  ))}
+                  {unmatchedClients.length > 4 && (
+                    <Link href="/agency/clients?tab=unmatched" style={{ fontSize: 12, color: G, textDecoration: 'none', display: 'block', marginTop: 8 }}>View {unmatchedClients.length - 4} more →</Link>
+                  )}
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: GR }}>
+                  <span>✓</span>
+                  <span style={{ fontSize: 13 }}>All clients have coverage</span>
                 </div>
-              ))}
-              {unmatchedClients.length > 4 && (
-                <Link href="/agency/clients?tab=unmatched" style={{ fontSize: 12, color: G, textDecoration: 'none', display: 'block', marginTop: 8 }}>View {unmatchedClients.length - 4} more →</Link>
               )}
-            </>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: GR }}>
-              <span>✓</span>
-              <span style={{ fontSize: 13 }}>All clients have coverage</span>
+
+              <div style={{ borderTop: `1px solid ${B}`, marginTop: 16, paddingTop: 16 }}>
+                <div style={{ fontSize: 13, color: N, marginBottom: 8 }}>Available on your roster</div>
+                <div style={{ fontSize: 12, color: M }}>{stats?.roster_claimed || 0} active caregivers</div>
+                <Link href="/agency/roster" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>View available →</Link>
+              </div>
             </div>
-          )}
 
-          <div style={{ borderTop: `1px solid ${B}`, marginTop: 16, paddingTop: 16 }}>
-            <div style={{ fontSize: 13, color: N, marginBottom: 8 }}>Available on your roster</div>
-            <div style={{ fontSize: 12, color: M }}>{stats?.roster_claimed || 0} active caregivers</div>
-            <Link href="/agency/roster" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>View available →</Link>
-          </div>
-        </div>
-
-        {/* COLUMN 2: RECRUITMENT PIPELINE */}
-        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Recruitment Pipeline</span>
-            <Link href="/agency/shortlist" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View shortlist →</Link>
-          </div>
-
-          {/* Pipeline bar */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            {[
-              { label: 'Discovered', count: pipeline?.discovered || 0, bg: '#E6F1FB', color: '#185FA5' },
-              { label: 'Contacted', count: pipeline?.contacted || 0, bg: '#E6F1FB', color: '#185FA5' },
-              { label: 'Interviewing', count: pipeline?.interviewing || 0, bg: GL, color: G },
-              { label: 'Placed', count: pipeline?.placed || 0, bg: GRL, color: '#16A34A' },
-              { label: 'Inactive', count: pipeline?.inactive || 0, bg: '#F1F5F9', color: M },
-            ].map((stage, i) => (
-              <div key={i} style={{ flex: 1, textAlign: 'center', background: stage.bg, borderRadius: 12, padding: '3px 8px' }}>
-                <div style={{ fontSize: 11, color: stage.color }}>{stage.label}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: stage.color }}>{stage.count}</div>
+            {/* COLUMN 2: RECRUITMENT PIPELINE */}
+            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Recruitment Pipeline</span>
+                <Link href="/agency/shortlist" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View shortlist →</Link>
               </div>
-            ))}
-          </div>
 
-          <div style={{ borderTop: `1px solid ${B}`, paddingTop: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: N, marginBottom: 8 }}>AIRecruit</div>
-            {stats?.airecruit_active && stats.airecruit_active > 0 ? (
-              <div style={{ fontSize: 12, color: M }}>{stats.airecruit_active} active campaigns</div>
-            ) : (
-              <div style={{ fontSize: 12, color: M }}>No campaigns yet</div>
-            )}
-            <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Start new campaign →</Link>
-          </div>
-        </div>
-
-        {/* COLUMN 3: AI ASSISTANT */}
-        <div className="dash-ai-col" style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
-          <div style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Careified AI</span>
-            <div style={{ fontSize: 12, color: M }}>Your operations co-pilot</div>
-          </div>
-          <MiniAssistant />
-        </div>
-      </div>
-
-      {/* ZONE 4: ROSTER + ACTIVITY */}
-      <div className="dash-bottom" style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-
-        {/* LEFT: Roster health */}
-        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Roster Health</span>
-            <Link href="/agency/roster" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View roster →</Link>
-          </div>
-
-          <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-            <span style={{ fontSize: 12, color: M }}>Total <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
-            <span style={{ fontSize: 12, color: M }}>Active <b style={{ color: N }}>{stats?.roster_claimed || 0}</b></span>
-            <span style={{ fontSize: 12, color: M }}>Incomplete <b style={{ color: N }}>{stats?.roster_pending || 0}</b></span>
-          </div>
-
-          <div style={{ display: 'flex', gap: 16 }}>
-            <Link href="/agency/roster/add" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Add caregiver →</Link>
-            <Link href="/agency/roster/import" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Import CSV →</Link>
-          </div>
-        </div>
-
-        {/* RIGHT: Recent activity */}
-        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-          <div style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Recent Activity</span>
-          </div>
-
-          {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 ? (
-            dashboardData.recent_activity.slice(0, 5).map((activity, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${B}` : 'none' }}>
-                <span style={{ fontSize: 11, color: MT }}>{formatRelativeTime(activity.timestamp)}</span>
-                <span style={{ fontSize: 12, color: N }}>{activity.action}</span>
+              {/* Pipeline bar */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                {[
+                  { label: 'Discovered', count: pipeline?.discovered || 0, bg: '#E6F1FB', color: '#185FA5' },
+                  { label: 'Contacted', count: pipeline?.contacted || 0, bg: '#E6F1FB', color: '#185FA5' },
+                  { label: 'Interviewing', count: pipeline?.interviewing || 0, bg: GL, color: G },
+                  { label: 'Placed', count: pipeline?.placed || 0, bg: GRL, color: '#16A34A' },
+                  { label: 'Inactive', count: pipeline?.inactive || 0, bg: '#F1F5F9', color: M },
+                ].map((stage, i) => (
+                  <div key={i} style={{ flex: 1, textAlign: 'center', background: stage.bg, borderRadius: 12, padding: '3px 8px' }}>
+                    <div style={{ fontSize: 11, color: stage.color }}>{stage.label}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: stage.color }}>{stage.count}</div>
+                  </div>
+                ))}
               </div>
-            ))
-          ) : (
-            <div style={{ fontSize: 12, color: MT }}>Activity will appear here as your team uses the platform.</div>
-          )}
+
+              <div style={{ borderTop: `1px solid ${B}`, paddingTop: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: N, marginBottom: 8 }}>AIRecruit</div>
+                {stats?.airecruit_active && stats.airecruit_active > 0 ? (
+                  <div style={{ fontSize: 12, color: M }}>{stats.airecruit_active} active campaigns</div>
+                ) : (
+                  <div style={{ fontSize: 12, color: M }}>No campaigns yet</div>
+                )}
+                <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Start new campaign →</Link>
+              </div>
+            </div>
+
+            {/* COLUMN 3: AI ASSISTANT */}
+            <div className="dash-ai-col" style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Careified AI</span>
+                <div style={{ fontSize: 12, color: M }}>Your operations co-pilot</div>
+              </div>
+              <MiniAssistant />
+            </div>
+          </div>
+
+          {/* ZONE 4: ROSTER + ACTIVITY */}
+          <div className="dash-bottom" style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+
+            {/* LEFT: Roster health */}
+            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Roster Health</span>
+                <Link href="/agency/roster" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View roster →</Link>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+                <span style={{ fontSize: 12, color: M }}>Total <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
+                <span style={{ fontSize: 12, color: M }}>Active <b style={{ color: N }}>{stats?.roster_claimed || 0}</b></span>
+                <span style={{ fontSize: 12, color: M }}>Incomplete <b style={{ color: N }}>{stats?.roster_pending || 0}</b></span>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16 }}>
+                <Link href="/agency/roster/add" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Add caregiver →</Link>
+                <Link href="/agency/roster/import" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Import CSV →</Link>
+              </div>
+            </div>
+
+            {/* RIGHT: Recent activity */}
+            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Recent Activity</span>
+              </div>
+
+              {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 ? (
+                dashboardData.recent_activity.slice(0, 5).map((activity, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${B}` : 'none' }}>
+                    <span style={{ fontSize: 11, color: MT }}>{formatRelativeTime(activity.timestamp)}</span>
+                    <span style={{ fontSize: 12, color: N }}>{activity.action}</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: 12, color: MT }}>Activity will appear here as your team uses the platform.</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* MODE: COMMAND */}
+      {mode === 'command' && (
+        <div className="dash-cmd-grid" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+
+          {/* 1. Clients */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,151,58,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>👥</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Clients & Coverage</div>
+            <div style={{ fontSize: 12, color: M }}>{stats?.clients_total || 0} active · {stats?.clients_unmatched || 0} need coverage</div>
+            <button onClick={() => router.push('/agency/clients')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View clients →</button>
+          </div>
+
+          {/* 2. Find Caregivers */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,139,221,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>🔍</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Find Caregivers</div>
+            <div style={{ fontSize: 12, color: M }}>Search {'>'}500 verified caregivers</div>
+            <button onClick={() => router.push('/agency/caregivers')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Search now →</button>
+          </div>
+
+          {/* 3. Roster */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(34,197,94,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>📋</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Your Roster</div>
+            <div style={{ fontSize: 12, color: M }}>{stats?.roster_total || 0} caregivers · {stats?.roster_pending || 0} need attention</div>
+            <button onClick={() => router.push('/agency/roster')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Manage roster →</button>
+          </div>
+
+          {/* 4. AIRecruit */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,92,246,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>🤖</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>AIRecruit</div>
+            <div style={{ fontSize: 12, color: M }}>{stats?.airecruit_active || 0} campaigns · calls tonight</div>
+            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View results →</button>
+          </div>
+
+          {/* 5. QuickFill */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>⚡</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>QuickFill</div>
+            <div style={{ fontSize: 12, color: M }}>Emergency coverage blast</div>
+            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Send blast →</button>
+          </div>
+
+          {/* 6. Intelligence */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(20,184,166,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>📊</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Intelligence</div>
+            <div style={{ fontSize: 12, color: M }}>ROI summary · placement outcomes</div>
+            <button onClick={() => router.push('/agency/intelligence')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View report →</button>
+          </div>
+
+          {/* 7. References */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,158,11,0.1)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>📞</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>References & Verify</div>
+            <div style={{ fontSize: 12, color: M }}>AI calls references automatically</div>
+            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Start calls →</button>
+          </div>
+
+          {/* 8. Compliance */}
+          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.08)', marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>🛡️</span>
+            </div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Compliance Check</div>
+            <div style={{ fontSize: 12, color: M }}>{dashboardData?.expiring_credentials?.length || 0} credentials need attention</div>
+            <button onClick={() => router.push('/agency/roster?tab=credentials')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Review now →</button>
+          </div>
+
         </div>
-      </div>
+      )}
+
+      {/* MODE: WEEK */}
+      {mode === 'week' && (
+        <div style={{ padding: '40px 32px', textAlign: 'center' }}>
+          <div style={{ maxWidth: 500, margin: '0 auto', background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 40 }}>
+            <div style={{ fontFamily: SERIF, fontSize: 20, color: N, marginBottom: 12 }}>Week view coming soon</div>
+            <div style={{ fontSize: 14, color: M, lineHeight: 1.65 }}>You'll see a 7-day coverage calendar, upcoming placement endings, and credential deadlines.</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
