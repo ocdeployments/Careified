@@ -10,11 +10,21 @@ interface Caregiver {
   email: string
   phone?: string
   claim_status: string
+  profile_status?: string
   created_at: string
+  updated_at?: string
+  availability_status?: string
+  days_available?: string
   token?: string
   expires_at?: string
   claimed_at?: string
   token_status?: string
+  certifications: { certification: string; expiry_date: string }[]
+}
+
+interface Certification {
+  certification: string
+  expiry_date: string
 }
 
 interface RosterClientProps {
@@ -35,6 +45,7 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'all' | 'onboarding' | 'credentials' | 'availability'>('all')
 
   useEffect(() => {
     fetchRoster()
@@ -96,6 +107,76 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
       day: 'numeric',
       year: 'numeric',
     })
+  }
+
+  const daysUntil = (dateStr: string) => {
+    const diff = new Date(dateStr).getTime() - Date.now()
+    return Math.ceil(diff / (1000 * 60 * 60 * 24))
+  }
+
+  const isOnboarding = (cg: Caregiver) => {
+    const ps = cg.profile_status
+    return ps === 'stub' || ps === 'invited' || ps === 'incomplete'
+  }
+
+  const hasExpiringCerts = (cg: Caregiver) => {
+    return cg.certifications && cg.certifications.length > 0
+  }
+
+  const hasRecentAvailabilityChange = (cg: Caregiver) => {
+    if (!cg.updated_at) return false
+    const updated = new Date(cg.updated_at)
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    return updated > sevenDaysAgo
+  }
+
+  const getOnboardingChecklist = (cg: Caregiver) => {
+    const isComplete = cg.claim_status === 'claimed'
+    const profilePct = isComplete ? '100%' : '25%'
+    const vsc = 'missing'
+    const refs = 0
+    const ready = isComplete ? 'yes' : 'no'
+    return { profile: profilePct, vsc, refs, ready }
+  }
+
+  const getCertExpiryInfo = (cg: Caregiver) => {
+    if (!cg.certifications || cg.certifications.length === 0) return []
+    return cg.certifications.map(cert => ({
+      name: cert.certification,
+      expiry: cert.expiry_date,
+      days: daysUntil(cert.expiry_date)
+    })).sort((a, b) => a.days - b.days)
+  }
+
+  const getCertColor = (days: number) => {
+    if (days < 14) return '#E24B4A' // red
+    if (days < 30) return '#F59E0B' // amber
+    return '#16A34A' // green
+  }
+
+  const getAvailabilityChange = (cg: Caregiver) => {
+    if (!cg.updated_at) return null
+    const what = cg.availability_status || cg.days_available ? `Changed: ${cg.availability_status || cg.days_available}` : 'Updated'
+    return { what, when: formatDate(cg.updated_at) }
+  }
+
+  const handleNudge = async (caregiverId: string) => {
+    setActionLoading(caregiverId)
+    try {
+      const res = await fetch('/api/roster/regenerate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caregiver_id: caregiverId }),
+      })
+      if (res.ok) {
+        setSuccess('Nudge sent successfully')
+      }
+    } catch {
+      setSuccess('Failed to send nudge')
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   if (loading) {
@@ -175,6 +256,35 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
 
       {/* Main content */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px' }}>
+        {/* Tab Bar */}
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E2E8F0', marginBottom: 24 }}>
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'onboarding', label: 'Onboarding' },
+            { key: 'credentials', label: 'Credentials' },
+            { key: 'availability', label: 'Availability changes' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
+              style={{
+                padding: '12px 20px',
+                fontSize: 14,
+                fontWeight: 500,
+                fontFamily: S,
+                background: 'none',
+                border: 'none',
+                borderBottom: activeTab === tab.key ? '2px solid #C9973A' : '2px solid transparent',
+                color: activeTab === tab.key ? '#C9973A' : '#64748B',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {success && (
           <div style={{
             padding: '12px 16px',
@@ -256,7 +366,13 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
                 </tr>
               </thead>
               <tbody>
-                {caregivers.map((cg) => {
+                {caregivers.filter(cg => {
+                  if (activeTab === 'all') return true
+                  if (activeTab === 'onboarding') return isOnboarding(cg)
+                  if (activeTab === 'credentials') return hasExpiringCerts(cg)
+                  if (activeTab === 'availability') return hasRecentAvailabilityChange(cg)
+                  return true
+                }).map((cg) => {
                   const badge = getStatusBadge(cg.claim_status, cg.token_status)
                   return (
                     <tr key={cg.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
