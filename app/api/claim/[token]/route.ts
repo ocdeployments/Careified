@@ -72,7 +72,6 @@ export async function GET(
     console.error('Error in GET /api/claim/[token]:', err)
     return NextResponse.json({ error: 'internal_error', message: 'Failed to validate token' }, { status: 500 })
   } finally {
-    pool.end()
   }
 }
 
@@ -170,6 +169,5 @@ export async function POST(
     console.error('Error in POST /api/claim/[token]:', err)
     return NextResponse.json({ error: 'internal_error', message: 'Failed to claim profile' }, { status: 500 })
   } finally {
-    pool.end()
   }
 }

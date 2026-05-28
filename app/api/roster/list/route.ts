@@ -113,6 +113,5 @@ export async function GET() {
     console.error('Error in /api/roster/list:', err)
     return NextResponse.json({ error: 'internal_error', message: 'Failed to list caregivers' }, { status: 500 })
   } finally {
-    pool.end()
   }
 }

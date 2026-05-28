@@ -99,6 +99,5 @@ export async function POST(request: Request) {
     console.error('Error in /api/roster/regenerate-token:', err)
     return NextResponse.json({ error: 'internal_error', message: 'Failed to regenerate token' }, { status: 500 })
   } finally {
-    pool.end()
   }
 }

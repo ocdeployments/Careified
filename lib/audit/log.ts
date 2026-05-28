@@ -15,7 +15,7 @@ export type AuditEvent = {
 }
 
 /**
- * Write an audit log entry. Non-blocking — errors are logged but never thrown.
+ * Write an audit log entry. Non-blocking — errors are silently swallowed.
  */
 export async function logAudit(pool: Pool, event: AuditEvent): Promise<void> {
   try {
@@ -36,6 +36,6 @@ export async function logAudit(pool: Pool, event: AuditEvent): Promise<void> {
       ]
     )
   } catch (err) {
-    console.error('audit_log write failed (non-fatal):', err)
+    console.warn('audit_log table missing, skipping audit log write')
   }
 }

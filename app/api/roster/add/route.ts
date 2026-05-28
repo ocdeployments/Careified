@@ -148,6 +148,5 @@ export async function POST(request: Request) {
     console.error('Error in /api/roster/add:', err)
     return NextResponse.json({ error: 'internal_error', message: 'Failed to add caregiver' }, { status: 500 })
   } finally {
-    pool.end()
   }
 }
