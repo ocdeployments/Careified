@@ -209,7 +209,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
           <>
             <div
               onClick={() => setMobileSheetOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 350 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 350, transition: 'opacity 0.3s ease' }}
             />
             <div
               style={{
@@ -223,6 +223,8 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
                 borderTop: `1px solid ${CARD_BORDER}`,
                 zIndex: 400,
                 padding: 20,
+                transform: 'translateY(0)',
+                transition: 'transform 0.3s ease',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -274,7 +276,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
         flexDirection: 'column',
         zIndex: isTablet && tabletExpanded ? 200 : 100,
         overflowY: 'auto',
-        transition: 'width 0.2s ease',
+        transition: 'width 0.25s ease',
       }}
       onMouseLeave={() => isTablet && setTabletExpanded(false)}
     >
@@ -341,7 +343,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
                 cursor: item.disabled ? 'not-allowed' : 'pointer',
                 opacity: item.disabled ? 0.4 : 1,
                 textDecoration: 'none',
-                transition: 'all 0.15s ease',
+                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease',
               }
 
               const badgeStyle: React.CSSProperties = {
