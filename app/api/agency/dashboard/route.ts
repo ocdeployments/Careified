@@ -41,37 +41,32 @@ export async function GET(request: NextRequest) {
     // Build response
     const response: any = { stats: {}, action_items: [], pipeline: null, recent_activity: [], top_matches: [], expiring_credentials: [] }
 
-    // Stats queries
+    // Stats queries - single consolidated query
     try {
-      console.log('[dashboard] agencyId:', agencyId, '| type:', typeof agencyId)
+      const statsResult = await pool.query(`
+        SELECT
+          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1) as total_caregivers,
+          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'claimed') as roster_claimed,
+          (SELECT COUNT(*)::int FROM agency_shortlist WHERE agency_clerk_id = $2) as pipeline_count,
+          (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND status != 'closed') as total_clients,
+          (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND matched_caregiver_id IS NULL AND status != 'closed') as unmatched_clients,
+          (SELECT COUNT(*)::int FROM airecruit_campaigns WHERE agency_id = $1) as airecruit_results,
+          (SELECT name FROM agencies WHERE id = $1) as agency_name,
+          (SELECT plan_tier FROM agencies WHERE id = $1) as plan_tier,
+          (SELECT subscription_status FROM agencies WHERE id = $1) as subscription_status
+      `, [agencyId, userId])
 
-      const s1 = await pool.query('SELECT COUNT(*) as c FROM caregivers WHERE created_by_agency_id = $1', [agencyId])
-      console.log('[stats] caregivers:', s1.rows[0].c)
-
-      const s2 = await pool.query('SELECT COUNT(*) as c FROM agency_shortlist WHERE agency_clerk_id = $1', [userId])
-      console.log('[stats] shortlist:', s2.rows[0].c)
-
-      const s3 = await pool.query("SELECT COUNT(*) as c FROM client_needs WHERE agency_id::text = $1 AND status != 'closed'", [agencyId])
-      console.log('[stats] clients:', s3.rows[0].c)
-
-      const s4 = await pool.query("SELECT COUNT(*) as c FROM airecruit_campaigns WHERE agency_id = $1", [agencyId])
-      console.log('[stats] airecruit:', s4.rows[0].c)
-
-      const s5 = await pool.query('SELECT name, plan_tier, subscription_status FROM agencies WHERE id = $1', [agencyId])
-      console.log('[stats] agency:', s5.rows[0])
-
+      const row = statsResult.rows[0]
       response.stats = {
-        roster_total: parseInt(s1.rows[0].c),
-        roster_claimed: 0,
-        roster_pending: 0,
-        shortlist_total: parseInt(s2.rows[0].c),
-        clients_total: parseInt(s3.rows[0].c),
-        clients_unmatched: 0,
-        airecruit_active: parseInt(s4.rows[0].c),
-        agency_name: s5.rows[0]?.name,
-        plan_tier: s5.rows[0]?.plan_tier,
-        subscription_status: s5.rows[0]?.subscription_status,
-        profile_completion: 30,
+        total_clients: row.total_clients || 0,
+        unmatched_clients: row.unmatched_clients || 0,
+        total_caregivers: row.total_caregivers || 0,
+        roster_claimed: row.roster_claimed || 0,
+        pipeline_count: row.pipeline_count || 0,
+        airecruit_results: row.airecruit_results || 0,
+        agency_name: row.agency_name,
+        plan_tier: row.plan_tier,
+        subscription_status: row.subscription_status,
       }
     } catch (e: any) {
       console.error('Stats query failed:', e.message)
@@ -97,9 +92,10 @@ export async function GET(request: NextRequest) {
     // Action items
     try {
       const actionItems: any[] = []
-      const { roster_pending, clients_unmatched, airecruit_active } = response.stats
+      const { unmatched_clients, airecruit_results, total_caregivers, roster_claimed } = response.stats
 
-      // Pending claims
+      // Pending claims (total - claimed = pending)
+      const roster_pending = (total_caregivers || 0) - (roster_claimed || 0)
       if (roster_pending > 0) {
         actionItems.push({
           priority: 'high',
@@ -123,26 +119,19 @@ export async function GET(request: NextRequest) {
       }
 
       // Unmatched clients
-      if (clients_unmatched > 0) {
+      if (unmatched_clients > 0) {
         actionItems.push({
           priority: 'high',
-          title: `${clients_unmatched} clients have no matched caregivers`,
+          title: `${unmatched_clients} clients have no matched caregivers`,
           cta_href: '/agency/clients'
         })
       }
 
       // AIRecruit unreviewed
-      const unreviewedResult = await pool.query(`
-        SELECT COUNT(*) as count FROM airecruit_call_results cr
-        JOIN airecruit_campaigns cc ON cc.id = cr.campaign_id
-        WHERE cc.agency_id = $1 AND cr.recommendation = 'review'
-        AND cr.called_at > NOW() - INTERVAL '48 hours'
-      `, [agencyId])
-      const unreviewed = parseInt(unreviewedResult.rows[0]?.count || '0')
-      if (unreviewed > 0) {
+      if (airecruit_results > 0) {
         actionItems.push({
           priority: 'high',
-          title: `${unreviewed} AIRecruit results ready for review`,
+          title: `${airecruit_results} AIRecruit results ready for review`,
           cta_href: '/agency/airecruit'
         })
       }
