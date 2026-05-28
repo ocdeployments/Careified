@@ -58,17 +58,33 @@ export async function GET() {
         c.email,
         c.phone,
         c.claim_status,
+        c.profile_status,
         c.created_at,
+        c.updated_at,
+        c.availability_status,
+        c.days_available,
         ct.token,
         ct.expires_at,
         ct.claimed_at,
-        ct.status as token_status
+        ct.status as token_status,
+        COALESCE(
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'certification', cc.certification,
+              'expiry_date', cc.expiry_date
+            )
+          ) FILTER (WHERE cc.certification IS NOT NULL),
+          '[]'
+        ) as certifications
        FROM caregivers c
        LEFT JOIN caregiver_claim_tokens ct
          ON ct.caregiver_id = c.id
          AND ct.agency_id = $1
          AND ct.status = 'pending'
+       LEFT JOIN caregiver_certifications cc
+         ON cc.caregiver_id = c.id
        WHERE c.source_agency_id = $1
+       GROUP BY c.id, ct.id
        ORDER BY c.created_at DESC`,
       [agencyId]
     )
@@ -80,11 +96,16 @@ export async function GET() {
       email: row.email,
       phone: row.phone,
       claim_status: row.claim_status,
+      profile_status: row.profile_status,
       created_at: row.created_at,
+      updated_at: row.updated_at,
+      availability_status: row.availability_status,
+      days_available: row.days_available,
       token: row.token,
       expires_at: row.expires_at,
       claimed_at: row.claimed_at,
       token_status: row.token_status,
+      certifications: row.certifications || [],
     }))
 
     return NextResponse.json({ caregivers })
