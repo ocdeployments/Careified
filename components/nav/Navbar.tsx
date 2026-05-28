@@ -10,11 +10,11 @@ import NotificationBell from '../notifications/NotificationBell'
 
 // ── Role-specific nav configs ───────────────────────────────────────────────────
 const agencyNavLinks = [
-  { href: '/agency/dashboard', label: 'Dashboard' },
-  { href: '/agency/search',    label: 'Search Caregivers' },
-  { href: '/agency/shortlist', label: 'Shortlist' },
-  { href: '/agency/roster',    label: 'Roster' },
-  { href: '/agency/airecruit', label: 'AIRecruit' },
+  { href: '/agency/dashboard',    label: 'Dashboard' },
+  { href: '/agency/caregivers',   label: 'Caregivers' },
+  { href: '/agency/roster',       label: 'Roster' },
+  { href: '/agency/airecruit',    label: 'AIRecruit' },
+  { href: '/agency/intelligence', label: 'Intelligence' },
 ]
 
 const caregiverNavLinks = [
