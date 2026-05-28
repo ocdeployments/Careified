@@ -45,15 +45,15 @@ export async function GET(request: NextRequest) {
     try {
       const statsResult = await pool.query(`
         SELECT
-          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1) as total_caregivers,
-          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'claimed') as roster_claimed,
+          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1::uuid) as total_caregivers,
+          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1::uuid AND claim_status = 'claimed') as roster_claimed,
           (SELECT COUNT(*)::int FROM agency_shortlist WHERE agency_clerk_id = $2) as pipeline_count,
           (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND status != 'closed') as total_clients,
           (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND matched_caregiver_id IS NULL AND status != 'closed') as unmatched_clients,
-          (SELECT COUNT(*)::int FROM airecruit_campaigns WHERE agency_id = $1) as airecruit_results,
-          (SELECT name FROM agencies WHERE id = $1) as agency_name,
-          (SELECT plan_tier FROM agencies WHERE id = $1) as plan_tier,
-          (SELECT subscription_status FROM agencies WHERE id = $1) as subscription_status
+          (SELECT COUNT(*)::int FROM airecruit_campaigns WHERE agency_id = $1::uuid) as airecruit_results,
+          (SELECT name FROM agencies WHERE id = $1::uuid) as agency_name,
+          (SELECT plan_tier FROM agencies WHERE id = $1::uuid) as plan_tier,
+          (SELECT subscription_status FROM agencies WHERE id = $1::uuid) as subscription_status
       `, [agencyId, userId])
 
       const row = statsResult.rows[0]
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       // Expiring tokens
       const expiringTokensResult = await pool.query(`
         SELECT COUNT(*) as count FROM caregiver_claim_tokens
-        WHERE agency_id = $1 AND status = 'pending' AND expires_at < NOW() + INTERVAL '3 days'
+        WHERE agency_id = $1::uuid AND status = 'pending' AND expires_at < NOW() + INTERVAL '3 days'
       `, [agencyId])
       const expiring_tokens = parseInt(expiringTokensResult.rows[0]?.count || '0')
       if (expiring_tokens > 0) {
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       // Incomplete profiles
       const incompleteResult = await pool.query(`
         SELECT COUNT(*) as count FROM caregivers
-        WHERE created_by_agency_id = $1 AND (first_name IS NULL OR last_name IS NULL OR city IS NULL)
+        WHERE created_by_agency_id = $1::uuid AND (first_name IS NULL OR last_name IS NULL OR city IS NULL)
       `, [agencyId])
       const incomplete_profiles = parseInt(incompleteResult.rows[0]?.count || '0')
       if (incomplete_profiles > 0) {
@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
       const matchesResult = await pool.query(`
         SELECT id, first_name, last_name, aggregate_score, photo_url, specializations
         FROM caregivers
-        WHERE created_by_agency_id = $1
+        WHERE created_by_agency_id = $1::uuid
           AND claim_status = 'claimed'
           AND availability_status IN ('available', 'open_to_work')
         ORDER BY aggregate_score DESC NULLS LAST
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
         SELECT cc.certification, cc.expiry_date, c.id as caregiver_id, c.first_name, c.last_name
         FROM caregiver_certifications cc
         JOIN caregivers c ON c.id = cc.caregiver_id
-        WHERE c.created_by_agency_id = $1
+        WHERE c.created_by_agency_id = $1::uuid
           AND cc.expiry_date IS NOT NULL
           AND cc.expiry_date BETWEEN NOW() AND NOW() + INTERVAL '60 days'
         ORDER BY cc.expiry_date ASC
