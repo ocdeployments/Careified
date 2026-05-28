@@ -45,18 +45,18 @@ export async function GET(request: NextRequest) {
     try {
       const statsResult = await pool.query(`
         SELECT
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1::text) as roster_total,
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1::text AND claim_status = 'claimed') as roster_claimed,
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1::text AND claim_status = 'agency_built') as roster_pending,
+          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1) as roster_total,
+          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'claimed') as roster_claimed,
+          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'agency_built') as roster_pending,
           (SELECT COUNT(*) FROM agency_shortlist WHERE agency_clerk_id = $2) as shortlist_total,
-          (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1::text AND status != 'closed') as clients_total,
-          (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1::text AND matched_caregiver_id IS NULL AND status != 'closed') as clients_unmatched,
-          (SELECT COUNT(*) FROM airecruit_campaigns WHERE agency_id = $1::text AND status = 'active') as airecruit_active,
-          (SELECT name FROM agencies WHERE id = $1::text) as agency_name,
-          (SELECT plan_tier FROM agencies WHERE id = $1::text) as plan_tier,
-          (SELECT subscription_status FROM agencies WHERE id = $1::text) as subscription_status,
-          (SELECT COALESCE(onboarding_step * 10, 0) FROM agencies WHERE id = $1::text) as profile_completion,
-          (SELECT trial_ends_at FROM agencies WHERE id = $1::text) as trial_ends_at
+          (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1::uuid AND status != 'closed') as clients_total,
+          (SELECT COUNT(*) FROM client_needs WHERE agency_id = $1::uuid AND matched_caregiver_id IS NULL AND status != 'closed') as clients_unmatched,
+          (SELECT COUNT(*) FROM airecruit_campaigns WHERE agency_id = $1 AND status = 'active') as airecruit_active,
+          (SELECT name FROM agencies WHERE id = $1) as agency_name,
+          (SELECT plan_tier FROM agencies WHERE id = $1) as plan_tier,
+          (SELECT subscription_status FROM agencies WHERE id = $1) as subscription_status,
+          (SELECT COALESCE(onboarding_step * 10, 0) FROM agencies WHERE id = $1) as profile_completion,
+          (SELECT trial_ends_at FROM agencies WHERE id = $1) as trial_ends_at
       `, [agencyId, userId])
       response.stats = statsResult.rows[0] || {}
     } catch (e: any) {
@@ -183,8 +183,8 @@ export async function GET(request: NextRequest) {
     // Recent activity from AuditLog
     try {
       const activityResult = await pool.query(`
-        SELECT action, newValue, createdAt FROM "AuditLog"
-        WHERE adminId = $1
+        SELECT action, "newValue", "createdAt" FROM "AuditLog"
+        WHERE "adminId" = $1
         ORDER BY "createdAt" DESC
         LIMIT 10
       `, [userId])
