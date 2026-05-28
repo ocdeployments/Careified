@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { pool } from '@/lib/db'
+import AgencyLayoutClient from './AgencyLayoutClient'
 
 export default async function AgencyLayout({ children }: { children: React.ReactNode }) {
   // Check for demo session first
@@ -16,8 +17,8 @@ export default async function AgencyLayout({ children }: { children: React.React
     )
 
     if (rows.length > 0 && (rows[0].status === 'approved' || rows[0].status === 'active')) {
-      // Demo session valid - allow access
-      return <>{children}</>
+      // Demo session valid - render with sidebar
+      return <AgencyLayoutClient>{children}</AgencyLayoutClient>
     }
   }
 
@@ -47,8 +48,8 @@ export default async function AgencyLayout({ children }: { children: React.React
       redirect('/agency/signup')
     }
 
-    // Team member - allow access
-    return <>{children}</>
+    // Team member - allow access with sidebar
+    return <AgencyLayoutClient>{children}</AgencyLayoutClient>
   }
 
   // Agency owner
@@ -56,5 +57,5 @@ export default async function AgencyLayout({ children }: { children: React.React
     redirect('/agency/pending-approval')
   }
 
-  return <>{children}</>
+  return <AgencyLayoutClient>{children}</AgencyLayoutClient>
 }
