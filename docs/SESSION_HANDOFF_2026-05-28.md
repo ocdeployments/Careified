@@ -283,3 +283,59 @@ Inline styles only — zero Tailwind classes
 - WhatsApp digest (Phase 3 — after Telegram proven)
 - Schedule calendar view (Phase 2)
 - Stripe billing live (Phase 2)
+## LATE ADDITIONS — S8, S9, S10 + CNAM
+
+### S8 — Bulk upload → AIRecruit auto-launch
+Extend /agency/roster/import confirmation step:
+- Add checkbox "Start AIRecruit screening calls for these caregivers automatically"
+- If checked: create campaign + queue calls for tonight's calling window
+Add upload option to /agency/airecruit/new:
+- "Add candidates manually" OR "Upload spreadsheet"
+- Upload routes to campaign creation not roster
+Update /api/roster/template with prescribed format:
+- Name, Phone, Email (optional), Specialty (optional), Location (optional)
+Mobile compatible from start.
+Files: agency/roster/import/page.tsx · agency/airecruit/new/page.tsx · api/roster/template/route.ts
+
+### S9 — AIRecruit mobile responsive pass
+Single-column layout on /agency/airecruit/new below 768px
+Score cards stack vertically on mobile
+Full-width action buttons on campaign results
+Screening question builder usable on touch
+Campaign list readable on small screens
+Files: agency/airecruit/new/page.tsx · agency/airecruit/page.tsx · agency/airecruit/[campaignId]/page.tsx
+
+### S10 — Pre-call SMS + CNAM branding
+Pre-call SMS 2-3 min before every AIRecruit outbound call via Twilio:
+"Hi [first_name], this is Careified — Canada's verified home care platform.
+We're calling in the next few minutes about a caregiver opportunity
+that matches your profile. Please answer — it takes about 5 minutes.
+Reply STOP to opt out."
+New consent type: pre_call_sms
+STOP → add to AIRecruitSuppression table
+2-3 min delay between SMS send and Vapi call initiation
+Rate: $0.0075/SMS — negligible
+Caregiver-facing calls: CNAM = "CAREIFIED JOBS"
+Reference/employer calls: CNAM = "CAREIFIED"
+Dependency: Twilio account setup — ROMY ACTION REQUIRED FIRST
+Files: lib/airecruit/vapi.ts · lib/airecruit/consent-gate.ts · new lib/sms/twilio.ts
+
+### ROMY IMMEDIATE ACTION (no code required)
+Register CNAM on Vapi phone number:
+1. console.vapi.ai → Phone Numbers → select number
+2. Register CNAM as "CAREIFIED JOBS"
+3. Propagates in 1-3 business days
+4. Also set up Twilio account for SMS before S10 builds
+
+### Complete build sequence (final)
+S1: Sidebar + layout restructure
+S2: Dashboard 5-zone redesign
+S3: Client triage panel (find coverage workflow)
+S4: Bench strength intelligence
+S5: Overnight triage narrative
+S6: Conversational search Phase 1
+S7: Telegram bot
+S8: Bulk upload → AIRecruit auto-launch
+S9: AIRecruit mobile responsive
+S10: Pre-call SMS + CNAM branding
+Then E-L: operational features backlog
