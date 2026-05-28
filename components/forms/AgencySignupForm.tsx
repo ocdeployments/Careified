@@ -84,6 +84,10 @@ export function AgencySignupForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
+  if (!userLoaded) {
+    return <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: S, padding: '40px 24px' }}><div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', color: '#64748B' }}>Loading...</div></div>
+  }
+
   // Pre-fill email from Clerk
   useEffect(() => {
     if (userLoaded && user?.primaryEmailAddress) {
