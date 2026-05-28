@@ -1,6 +1,6 @@
 # CLAUDE.md — Careified
 # Purpose: Technical rules, stack details, conventions, and session protocols
-# Updated: May 9 2026
+# Updated: May 28 2026
 # Update trigger: When a technical rule or convention changes
 # Owner: Claude
 # DO NOT DUPLICATE: Decisions (CONTEXT.md), standards (BEST_PRACTICES.md), identity (SOUL.md)
@@ -514,6 +514,34 @@ Compliance hours: see AI_PLAYBOOK.md
 - Runs async after webhook receives transcript
 - Outputs: overallScore, recommendation, summary, questionScores, flags, confidence
 - Recommendation values: advance, review, pass
+
+## 14. Seed Scripts
+
+### seed-test-agency.js (May 28 2026)
+Creates a complete test agency "Sunrise Senior Care Ontario" with:
+- 10 caregivers (8 active, 2 stubs with various specializations)
+- 6 client needs (3 matched, 3 unmatched)
+- 9 shortlist pipeline entries (3 placed, 2 interviewing, 1 contacted, 3 discovered)
+- 1 AIRecruit campaign with 4 results
+- 5 placement outcomes
+- 5 recent audit log entries
+- Agency updated to Growth tier, trial status
+
+Run: `node scripts/seed-test-agency.js`
+
+## 14b. Recent Dashboard Changes
+
+### Three-Mode Layout (May 27 2026)
+- **Today view** — Current placements, today's tasks
+- **Command view** — Quick actions, keyboard shortcuts
+- **Week view** — Weekly schedule, upcoming shifts
+- Warm design system with DM Serif Display typography
+
+### Badge Tier System (May 27 2026)
+- **Red tier** — Critical alerts (expiring certs, urgent items)
+- **Gold tier** — Attention needed (upcoming expirations, pending actions)
+- Badge counts shown on AIRecruit and Roster nav items only
+- Zero badges hidden
 
 ## 14. Session Commands
 
