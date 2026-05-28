@@ -437,8 +437,7 @@ export default function Navbar() {
               const isActive = currentPath.startsWith(link.href)
               const isAIRecruit = link.href === '/agency/airecruit'
               const isRoster = link.href === '/agency/roster'
-              const badgeCount = isAIRecruit ? navCounts?.airecruit_ready : isRoster ? navCounts?.credentials_expiring : 0
-              const showBadge = badgeCount && badgeCount > 0
+              const badgeCount = isAIRecruit ? navCounts?.airecruit_ready : isRoster ? navCounts?.credentials_expiring : null
 
               return (
                 <Link
@@ -460,7 +459,7 @@ export default function Navbar() {
                   }}
                 >
                   {link.label}
-                  {showBadge && (
+                  {badgeCount !== null && badgeCount !== undefined && badgeCount > 0 && (
                     <span
                       style={{
                         display: 'inline-flex',
@@ -750,13 +749,18 @@ export default function Navbar() {
           {userRole === 'agency' ? (
             agencyNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
+              const isAIRecruit = link.href === '/agency/airecruit'
+              const isRoster = link.href === '/agency/roster'
+              const badgeCount = isAIRecruit ? navCounts?.airecruit_ready : isRoster ? navCounts?.credentials_expiring : null
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
-                    display: 'block',
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     padding: '10px 12px',
                     borderRadius: '8px',
                     fontSize: '14px',
@@ -767,6 +771,27 @@ export default function Navbar() {
                   }}
                 >
                   {link.label}
+                  {badgeCount !== null && badgeCount !== undefined && badgeCount > 0 && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '16px',
+                        height: '16px',
+                        background: isRoster ? '#F59E0B' : '#C9973A',
+                        color: '#0D1B3E',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        borderRadius: '8px',
+                        padding: '0 4px',
+                        marginLeft: '5px',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {badgeCount}
+                    </span>
+                  )}
                 </Link>
               )
             })
