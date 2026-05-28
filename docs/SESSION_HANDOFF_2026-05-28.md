@@ -202,3 +202,59 @@
 - After P1: db6a44e
 - After P2: (hash when committed)
 - After P3: (hash when committed)
+
+## FINAL SESSION STATE — 2026-05-28
+
+### All commits landed on main (3552c09)
+
+| Hash | What |
+|------|------|
+| db6a44e | fix(assistant): platform-aware system prompt, action blocks, suggested prompts |
+| e02029c | fix(cron): optimistic locking on call_retry_queue |
+| b9dd5ff | feat(dashboard): operations-first redesign |
+| a8a10e2 | fix(dashboard): agency name, plan tier, profile completion, unmatched clients |
+| a461813 | fix(nav): Caregivers, Intelligence, removed Shortlist |
+| a23d320 | feat(roster): Onboarding / Credentials / Availability tabs |
+| cecd9b4 | feat(caregivers): /agency/caregivers — 4 tabs |
+| 1385eab | feat(intelligence): /agency/intelligence Phase 1 |
+| bbd6c54 | fix(dashboard): mobile responsive breakpoints |
+| af0dbbf | fix(signup): blank page — Clerk useUser loading guard |
+| 3552c09 | main merge — all above |
+
+### Safe revert: dd99f0c (pre-mobile/signup fixes)
+
+---
+
+## NEXT SESSION — START HERE
+
+### Manual testing needed first (do before any new builds)
+1. careified.com/agency/dashboard — confirm agency name shows, alert strip, AI assistant works
+2. careified.com/agency/caregivers — confirm 4 tabs load
+3. careified.com/agency/roster — confirm Onboarding/Credentials/Availability tabs
+4. careified.com/agency/intelligence — confirm ROI summary loads
+5. careified.com/agency/signup — confirm no longer blank
+6. Test AI assistant — type "find caregivers with dementia experience"
+
+### Build queue (priority order)
+1. Find coverage panel — 5-step funnel on /agency/clients/[id]
+2. Urgency flag — boolean on client_needs + UI
+3. Placement track record — aggregate placement_reviews on /profile/[id]
+4. QuickFill blast UI — /agency/airecruit?tab=quickfill
+5. Shortlist absorbed into Clients as a tab
+6. Caregiver engagement — profile views count + percentile signal
+7. Verify slug CTA — "Get verified on Careified" for logged-out visitors
+
+### Docs to update next session
+- PRICING.md — update to $149/$349/$699
+- ROADMAP.md — tick completed items, add Intelligence section
+- CAREIFIED_STATUS.md — add this session's commits
+- CONTEXT.md — IA decisions, pricing decisions
+
+### Launch blockers still open
+- PHI encryption (AES-256-GCM) — plain text currently
+- Clerk production keys
+- Lawyer review lib/legal/text.ts
+- SSL cert Render DB
+- careified.ca in Vercel
+- Copy session (placeholder text everywhere)
+- Both test agencies onboarded
