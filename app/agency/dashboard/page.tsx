@@ -85,17 +85,28 @@ export default function AgencyDashboard() {
   const planBadge = stats?.plan_tier ? `${stats.plan_tier} · ${stats.subscription_status || 'Active'}` : 'Growth · Trial'
   const profilePct = stats?.profile_completion || 0
 
-  // Zone 2: Alert strip
+  // Zone 2: Alert strip (3 tiers: red=critical, amber=attention, green=all-clear)
+  const A = '#F59E0B' // amber/gold for attention needed
   const alerts: { type: string; count: number; accent: string; icon: string; text: string; href: string }[] = []
+
+  // Unmatched clients: amber (not critical until flagged urgent)
   if (stats?.clients_unmatched && stats.clients_unmatched > 0) {
-    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: R, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
+    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: A, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
   }
+
+  // AIRecruit results: gold accent
   if (stats?.airecruit_active && stats.airecruit_active > 0) {
     alerts.push({ type: 'airecruit_results', count: stats.airecruit_active, accent: G, icon: '📋', text: `${stats.airecruit_active} AIRecruit results ready`, href: '/agency/airecruit' })
   }
+
+  // Expiring credentials: red if <=7 days, amber if 8-30 days
   if (dashboardData?.expiring_credentials && dashboardData.expiring_credentials.length > 0) {
-    alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: '#F59E0B', icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
+    const soonestExpiry = dashboardData.expiring_credentials[0]?.expiry_date
+    const daysUntilExpiry = soonestExpiry ? Math.ceil((new Date(soonestExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 99
+    const credentialAccent = daysUntilExpiry <= 7 ? R : A
+    alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: credentialAccent, icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
   }
+
   const showAllClear = alerts.length === 0
 
   return (
