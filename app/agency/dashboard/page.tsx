@@ -100,25 +100,44 @@ export default function AgencyDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: S, fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @media (max-width: 1024px) {
+          .dash-cols { grid-template-columns: 1fr 1fr !important; }
+          .dash-ai-col { display: none !important; }
+        }
+        @media (max-width: 768px) {
+          .dash-cols { grid-template-columns: 1fr !important; }
+          .dash-bottom { grid-template-columns: 1fr !important; }
+          .dash-status-stats { display: none !important; }
+          .dash-status-bar { flex-wrap: wrap !important; gap: 8px !important; padding: 10px 16px !important; }
+          .dash-alert-strip { padding: 10px 16px !important; }
+          .dash-cols { padding: 16px !important; }
+          .dash-bottom { padding: 0 16px 16px !important; }
+        }
+        @media (max-width: 480px) {
+          .dash-profile-pct { display: none !important; }
+        }
+      `}</style>
+
       {/* ZONE 1: TOP STATUS BAR */}
-      <div style={{ background: W, borderBottom: `1px solid ${B}`, padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
+      <div className="dash-status-bar" style={{ background: W, borderBottom: `1px solid ${B}`, padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={{ fontSize: 20, fontWeight: 700, color: N }}>{stats?.agency_name || 'Your Agency'}</span>
           <span style={{ border: `1px solid ${G}`, color: G, fontSize: 11, padding: '2px 8px', borderRadius: 12, marginLeft: 12 }}>{planBadge}</span>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div className="dash-status-stats" style={{ display: 'flex', gap: 16 }}>
             <span style={{ fontSize: 11, color: M }}>CAREGIVERS <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
             <span style={{ fontSize: 11, color: M }}>PLACEMENTS <b style={{ color: N }}>{pipeline?.placed || 0}</b></span>
             <span style={{ fontSize: 11, color: M }}>SHORTLISTED <b style={{ color: N }}>{stats?.shortlist_total || 0}</b></span>
             <span style={{ fontSize: 11, color: M }}>AIRECRUIT <b style={{ color: N }}>{stats?.airecruit_active || 0}</b></span>
           </div>
-          <span style={{ fontSize: 12, color: G, cursor: 'pointer' }} onClick={() => router.push('/agency/settings')}>Profile {profilePct}% complete →</span>
+          <span className="dash-profile-pct" style={{ fontSize: 12, color: G, cursor: 'pointer' }} onClick={() => router.push('/agency/settings')}>Profile {profilePct}% complete →</span>
         </div>
       </div>
 
       {/* ZONE 2: ALERT STRIP */}
-      <div style={{ background: S, borderBottom: `1px solid ${B}`, padding: '12px 32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <div className="dash-alert-strip" style={{ background: S, borderBottom: `1px solid ${B}`, padding: '12px 32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {showAllClear ? (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: W, borderRadius: 8, padding: '10px 14px', minWidth: 220, cursor: 'default' }}>
             <div style={{ width: 3, height: '100%', minHeight: 32, background: GR, borderRadius: '3px 0 0 3px' }} />
@@ -137,7 +156,7 @@ export default function AgencyDashboard() {
       </div>
 
       {/* ZONE 3: THREE WORKFLOW COLUMNS */}
-      <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
+      <div className="dash-cols" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
 
         {/* COLUMN 1: CLIENTS & COVERAGE */}
         <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
@@ -210,7 +229,7 @@ export default function AgencyDashboard() {
         </div>
 
         {/* COLUMN 3: AI ASSISTANT */}
-        <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
+        <div className="dash-ai-col" style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
           <div style={{ marginBottom: 16 }}>
             <span style={{ fontSize: 16, fontWeight: 700, color: N }}>Careified AI</span>
             <div style={{ fontSize: 12, color: M }}>Your operations co-pilot</div>
@@ -220,7 +239,7 @@ export default function AgencyDashboard() {
       </div>
 
       {/* ZONE 4: ROSTER + ACTIVITY */}
-      <div style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="dash-bottom" style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
 
         {/* LEFT: Roster health */}
         <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
