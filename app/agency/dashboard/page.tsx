@@ -27,9 +27,11 @@ type DashboardData = {
     clients_total: number
     clients_unmatched: number
     airecruit_active: number
-    profile_completion?: number
+    agency_name?: string
     plan_tier?: string
     subscription_status?: string
+    profile_completion?: number
+    trial_ends_at?: string
   }
   action_items: { priority: string; title: string; cta_href: string }[]
   pipeline: { discovered: number; contacted: number; interviewing: number; placed: number; inactive: number } | null
@@ -101,7 +103,7 @@ export default function AgencyDashboard() {
       {/* ZONE 1: TOP STATUS BAR */}
       <div style={{ background: W, borderBottom: `1px solid ${B}`, padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: N }}>Your Agency</span>
+          <span style={{ fontSize: 20, fontWeight: 700, color: N }}>{stats?.agency_name || 'Your Agency'}</span>
           <span style={{ border: `1px solid ${G}`, color: G, fontSize: 11, padding: '2px 8px', borderRadius: 12, marginLeft: 12 }}>{planBadge}</span>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
