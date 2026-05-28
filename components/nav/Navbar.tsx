@@ -432,7 +432,7 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-          {userRole === 'agency' ? (
+          {userRole === 'agency' && !currentPath.startsWith('/agency/') ? (
             agencyNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
               const isAIRecruit = link.href === '/agency/airecruit'
@@ -483,7 +483,7 @@ export default function Navbar() {
                 </Link>
               )
             })
-          ) : userRole === 'admin' ? (
+          ) : userRole === 'agency' ? null : userRole === 'admin' ? (
             adminNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
               return (
@@ -746,7 +746,7 @@ export default function Navbar() {
       {/* ── Mobile menu ── */}
       {mobileOpen && (
         <div style={{ display: 'block', background: '#0D1B3E', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '16px 24px' }}>
-          {userRole === 'agency' ? (
+          {userRole === 'agency' && !currentPath.startsWith('/agency/') ? (
             agencyNavLinks.map(link => {
               const isActive = currentPath.startsWith(link.href)
               const isAIRecruit = link.href === '/agency/airecruit'
