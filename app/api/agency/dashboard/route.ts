@@ -44,22 +44,35 @@ export async function GET(request: NextRequest) {
     // Stats queries
     try {
       console.log('[dashboard] agencyId:', agencyId, '| type:', typeof agencyId)
-    const statsResult = await pool.query(`
-        SELECT
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1) as roster_total,
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'claimed') as roster_claimed,
-          (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'agency_built') as roster_pending,
-          (SELECT COUNT(*) FROM agency_shortlist WHERE agency_clerk_id = $2) as shortlist_total,
-          (SELECT COUNT(*) FROM client_needs WHERE agency_id::text = $1 AND status != 'closed') as clients_total,
-          (SELECT COUNT(*) FROM client_needs WHERE agency_id::text = $1 AND matched_caregiver_id IS NULL AND status != 'closed') as clients_unmatched,
-          (SELECT COUNT(*) FROM airecruit_campaigns WHERE agency_id = $1) as airecruit_active,
-          (SELECT name FROM agencies WHERE id = $1) as agency_name,
-          (SELECT plan_tier FROM agencies WHERE id = $1) as plan_tier,
-          (SELECT subscription_status FROM agencies WHERE id = $1) as subscription_status,
-          (SELECT COALESCE(onboarding_step * 10, 0) FROM agencies WHERE id = $1) as profile_completion,
-          (SELECT trial_ends_at FROM agencies WHERE id = $1) as trial_ends_at
-      `, [agencyId, userId])
-      response.stats = statsResult.rows[0] || {}
+
+      const s1 = await pool.query('SELECT COUNT(*) as c FROM caregivers WHERE created_by_agency_id = $1', [agencyId])
+      console.log('[stats] caregivers:', s1.rows[0].c)
+
+      const s2 = await pool.query('SELECT COUNT(*) as c FROM agency_shortlist WHERE agency_clerk_id = $2', [agencyId, userId])
+      console.log('[stats] shortlist:', s2.rows[0].c)
+
+      const s3 = await pool.query("SELECT COUNT(*) as c FROM client_needs WHERE agency_id::text = $1 AND status != 'closed'", [agencyId])
+      console.log('[stats] clients:', s3.rows[0].c)
+
+      const s4 = await pool.query("SELECT COUNT(*) as c FROM airecruit_campaigns WHERE agency_id = $1", [agencyId])
+      console.log('[stats] airecruit:', s4.rows[0].c)
+
+      const s5 = await pool.query('SELECT name, plan_tier, subscription_status FROM agencies WHERE id = $1', [agencyId])
+      console.log('[stats] agency:', s5.rows[0])
+
+      response.stats = {
+        roster_total: parseInt(s1.rows[0].c),
+        roster_claimed: 0,
+        roster_pending: 0,
+        shortlist_total: parseInt(s2.rows[0].c),
+        clients_total: parseInt(s3.rows[0].c),
+        clients_unmatched: 0,
+        airecruit_active: parseInt(s4.rows[0].c),
+        agency_name: s5.rows[0]?.name,
+        plan_tier: s5.rows[0]?.plan_tier,
+        subscription_status: s5.rows[0]?.subscription_status,
+        profile_completion: 30,
+      }
     } catch (e: any) {
       console.error('Stats query failed:', e.message)
     }
