@@ -339,3 +339,47 @@ S8: Bulk upload → AIRecruit auto-launch
 S9: AIRecruit mobile responsive
 S10: Pre-call SMS + CNAM branding
 Then E-L: operational features backlog
+
+## AGENCY PLAYBOOK — POST-LAUNCH
+
+### Decision
+Build the playbook AFTER the platform is stable (post S1-S10 and E-L).
+Writing against a moving UI wastes effort.
+
+### Format (three layers)
+Layer 1 — In-app empty state guidance (already partially built, extend with S1-S10)
+Layer 2 — 6 short Loom screen recordings (Romy records, 3-5 min each, after UI is stable)
+Layer 3 — /agency/help searchable page built in the platform (Prompt P1)
+
+### Video topics (record in this order)
+1. Getting started — first login to first caregiver (5 min)
+2. Adding caregivers and importing your roster (5 min)
+3. Adding a client and finding a match (5 min)
+4. Starting your first AIRecruit campaign (5 min)
+5. Using QuickFill for emergency coverage (3 min)
+6. Reading your Intelligence dashboard (3 min)
+
+### /agency/help page spec (Prompt P1)
+- Searchable, mobile-friendly, dark glass aesthetic
+- Organised by "How do I..." questions not feature names
+- Written in plain English, first person, outcome-focused
+- Screenshots at each step
+- Links to Loom videos per topic
+- Language must match platform exactly (triage, alignment score, Find coverage →)
+
+### Content to write (one dedicated session after UI stable)
+- How do I find a caregiver for a new client?
+- How do I screen candidates without calling them myself?
+- What do I do when a caregiver doesn't show up?
+- How do I add my existing team to Careified?
+- What does the AIRecruit score mean?
+- How do I use the Telegram bot?
+- How do I read my bench strength gaps?
+- How do I use QuickFill for emergency coverage?
+- How do I track credential expiries?
+- What is triage and how does Careified do it for me?
+(~15-20 articles total)
+
+### Build sequence position
+Prompt P1 comes AFTER S1-S10 and E-L are complete and stable.
+Do not start until UI is frozen.
