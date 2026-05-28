@@ -1,26 +1,41 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import AgencyShell from '@/components/shells/AgencyShell'
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 const STARTER_PROMPTS = [
-  "Who's furthest along in my pipeline?",
-  "Find caregivers available Monday mornings",
-  "Summarize my recent AIRecruit results",
-  "Which clients need urgent matches?"
+  "Find caregivers with dementia experience",
+  "Which clients don't have a caregiver yet?",
+  "Start a screening campaign",
+  "Show me my AIRecruit results"
 ]
 
+interface ParsedMessage {
+  role: 'user' | 'assistant'
+  content: string
+  actionUrl?: string
+}
+
 export default function AgencyAssistantClient({ agencyName }: { agencyName: string }) {
-  const [messages, setMessages] = useState<Message[]>([])
+  const router = useRouter()
+  const [messages, setMessages] = useState<ParsedMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [hoveredChip, setHoveredChip] = useState<number | null>(null)
+
+  function parseActionBlock(text: string): { content: string; actionUrl?: string } {
+    const actionRegex = /<action>{"type":"navigate","url":"([^"]+)"}<\/action>/
+    const match = text.match(actionRegex)
+    if (match) {
+      return {
+        content: text.replace(actionRegex, '').trim(),
+        actionUrl: match[1]
+      }
+    }
+    return { content: text }
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -40,7 +55,7 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          history: messages
+          history: messages.map(m => ({ role: m.role, content: m.content }))
         })
       })
       const data = await res.json()
@@ -56,9 +71,11 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
           content: data.error || 'AI temporarily unavailable. Please try again in a moment.'
         }])
       } else {
+        const parsed = parseActionBlock(data.response)
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: data.response
+          content: parsed.content,
+          actionUrl: parsed.actionUrl
         }])
       }
     } catch {
@@ -112,6 +129,24 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
               }}
             >
               {msg.content}
+              {msg.role === 'assistant' && msg.actionUrl && (
+                <button
+                  onClick={() => router.push(msg.actionUrl!)}
+                  style={{
+                    background: '#C9973A',
+                    color: 'white',
+                    border: 'none',
+                    padding: '6px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    marginTop: '8px',
+                    display: 'inline-block'
+                  }}
+                >
+                  Go →
+                </button>
+              )}
             </div>
           ))}
           {loading && (
@@ -140,18 +175,19 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
             {STARTER_PROMPTS.map((prompt, idx) => (
               <button
                 key={idx}
-                onClick={() => setInput(prompt)}
+                onClick={() => sendMessage(prompt)}
                 onMouseEnter={() => setHoveredChip(idx)}
                 onMouseLeave={() => setHoveredChip(null)}
                 style={{
-                  border: '1px solid #0D1B3E',
-                  color: hoveredChip === idx ? 'white' : '#0D1B3E',
-                  backgroundColor: hoveredChip === idx ? '#0D1B3E' : 'white',
-                  fontSize: 13,
+                  background: '#F1F5F9',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '20px',
                   padding: '6px 14px',
-                  borderRadius: 20,
+                  fontSize: '12px',
                   cursor: 'pointer',
-                  fontWeight: 500,
+                  color: '#0D1B3E',
+                  margin: '4px',
+                  fontFamily: '"DM Sans", sans-serif',
                   transition: 'all 0.15s ease'
                 }}
               >
