@@ -89,7 +89,7 @@ export default function AgencyDashboard() {
     Promise.all([
       fetch('/api/agency/dashboard', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
-      fetch('/api/agency/roster', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ caregivers: [] })),
+      fetch('/api/roster/list', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ caregivers: [] })),
     ]).then(([dashResp, clientsResp, rosterResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
 
