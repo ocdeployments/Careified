@@ -166,7 +166,7 @@ export default function ShortlistPage() {
                     {[c.job_title, c.city && c.state ? `${c.city}, ${c.state}` : c.city || c.state].filter(Boolean).join(' · ')}
                   </div>
                   {c.aggregate_score > 0 && (
-                    <div className="text-xs text-gold font-semibold mt-1">{c.aggregate_score.toFixed(1)} alignment</div>
+                    <div className="text-xs text-gold font-semibold mt-1">{Number(c.aggregate_score || 0).toFixed(1)} alignment</div>
                   )}
                   {c.specializations.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
