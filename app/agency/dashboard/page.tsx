@@ -4,21 +4,21 @@ import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-// Design tokens
-const N = '#0D1B3E'      // navy
-const G = '#C9973A'      // gold
-const GL = '#FEF3E2'     // gold light
-const W = '#FFFFFF'      // white
-const WW = '#FFFDF9'     // warm white (cards)
-const S = '#FAF8F5'      // warm cream (page bg)
-const B = '#EDE8E0'      // warm sand border
-const M = '#7A6F5E'      // warm grey text
-const MT = '#94A3B8'     // tertiary text
-const R = '#E24B4A'      // red critical
-const RL = '#FEF2F2'     // red light
-const AM = '#F59E0B'     // amber warning
-const GR = '#22C55E'    // green healthy
-const GRL = '#F0FDF4'    // green light
+const PAGE_BG = '#080F1E'
+const NAV_BG = '#0D1B3E'
+const CARD_BG = 'rgba(255,255,255,0.04)'
+const CARD_BG_HOVER = 'rgba(255,255,255,0.07)'
+const CARD_BORDER = 'rgba(255,255,255,0.08)'
+const CARD_BORDER_GOLD = 'rgba(201,151,58,0.35)'
+const G = '#C9973A'
+const GL = '#E8B86D'
+const GLX = 'rgba(201,151,58,0.15)'
+const W = '#F5F0E8'
+const M = 'rgba(255,255,255,0.55)'
+const MT = 'rgba(255,255,255,0.3)'
+const R = '#E24B4A'
+const AM = '#F59E0B'
+const GR = '#22C55E'
 const SERIF = "'DM Serif Display', Georgia, serif"
 const SANS = "'DM Sans', sans-serif"
 
@@ -61,6 +61,10 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+function formatCondition(condition: string): string {
+  return condition.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
 export default function AgencyDashboard() {
   const router = useRouter()
   const { userId } = useAuth()
@@ -68,7 +72,6 @@ export default function AgencyDashboard() {
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'today'|'command'|'week'>('today')
 
-  // Load mode from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('dashboard_mode')
     if (saved === 'today' || saved === 'command' || saved === 'week') {
@@ -76,7 +79,6 @@ export default function AgencyDashboard() {
     }
   }, [])
 
-  // Save mode to localStorage
   useEffect(() => {
     localStorage.setItem('dashboard_mode', mode)
   }, [mode])
@@ -99,40 +101,33 @@ export default function AgencyDashboard() {
   const pipeline = dashboardData?.pipeline
   const unmatchedClients = dashboardData?.unmatched_clients || []
 
-  // Zone 1: Top Status Bar
   const planBadge = stats?.plan_tier ? `${stats.plan_tier} · ${stats.subscription_status || 'Active'}` : 'Growth · Trial'
   const profilePct = stats?.profile_completion || 0
 
-  // Zone 2: Alert strip (3 tiers: red=critical, amber=attention, green=all-clear)
-  const A = AM // amber/gold for attention needed
   const alerts: { type: string; count: number; accent: string; icon: string; text: string; href: string }[] = []
 
-  // Unmatched clients: amber (not critical until flagged urgent)
   if (stats?.clients_unmatched && stats.clients_unmatched > 0) {
-    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: A, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
+    alerts.push({ type: 'unmatched_clients', count: stats.clients_unmatched, accent: AM, icon: '⚠', text: `${stats.clients_unmatched} clients need coverage`, href: '/agency/clients?tab=unmatched' })
   }
 
-  // AIRecruit results: gold accent
   if (stats?.airecruit_active && stats.airecruit_active > 0) {
     alerts.push({ type: 'airecruit_results', count: stats.airecruit_active, accent: G, icon: '📋', text: `${stats.airecruit_active} AIRecruit results ready`, href: '/agency/airecruit' })
   }
 
-  // Expiring credentials: red if <=7 days, amber if 8-30 days
   if (dashboardData?.expiring_credentials && dashboardData.expiring_credentials.length > 0) {
     const soonestExpiry = dashboardData.expiring_credentials[0]?.expiry_date
     const daysUntilExpiry = soonestExpiry ? Math.ceil((new Date(soonestExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 99
-    const credentialAccent = daysUntilExpiry <= 7 ? R : A
+    const credentialAccent = daysUntilExpiry <= 7 ? R : AM
     alerts.push({ type: 'expiring_credentials', count: dashboardData.expiring_credentials.length, accent: credentialAccent, icon: '⏰', text: `${dashboardData.expiring_credentials.length} credentials expiring soon`, href: '/agency/roster?tab=credentials' })
   }
 
   const showAllClear = alerts.length === 0
 
-  // Greeting
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <div style={{ minHeight: '100vh', background: S, fontFamily: SANS, lineHeight: 1.65 }}>
+    <div style={{ minHeight: '100vh', background: PAGE_BG, fontFamily: SANS, lineHeight: 1.65 }}>
       <style>{`
         @media (max-width: 1024px) {
           .dash-cols { grid-template-columns: 1fr 1fr !important; }
@@ -157,36 +152,36 @@ export default function AgencyDashboard() {
         }
       `}</style>
 
-      {/* ZONE 1: TOP STATUS BAR */}
-      <div className="dash-status-bar" style={{ background: W, borderBottom: `1px solid ${B}`, padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
+      {/* ZONE 1: STATUS BAR */}
+      <div className="dash-status-bar" style={{ background: NAV_BG, borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '12px 32px', display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: N }}>{stats?.agency_name || 'Your Agency'}</span>
-          <span style={{ border: `1px solid ${G}`, color: G, fontSize: 11, padding: '2px 8px', borderRadius: 12, marginLeft: 12 }}>{planBadge}</span>
+          <span style={{ fontFamily: SERIF, fontSize: 20, color: W }}>{stats?.agency_name || 'Your Agency'}</span>
+          <span style={{ border: '1px solid rgba(201,151,58,0.4)', color: GL, fontSize: 11, padding: '2px 8px', borderRadius: 12, marginLeft: 12, background: 'rgba(201,151,58,0.1)' }}>{planBadge}</span>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
           <div className="dash-status-stats" style={{ display: 'flex', gap: 16 }}>
-            <span style={{ fontSize: 11, color: M }}>CAREGIVERS <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
-            <span style={{ fontSize: 11, color: M }}>PLACEMENTS <b style={{ color: N }}>{pipeline?.placed || 0}</b></span>
-            <span style={{ fontSize: 11, color: M }}>SHORTLISTED <b style={{ color: N }}>{stats?.shortlist_total || 0}</b></span>
-            <span style={{ fontSize: 11, color: M }}>AIRECRUIT <b style={{ color: N }}>{stats?.airecruit_active || 0}</b></span>
+            <span style={{ fontSize: 11, color: MT }}>CAREGIVERS <b style={{ color: GL }}>{stats?.roster_total || 0}</b></span>
+            <span style={{ fontSize: 11, color: MT }}>PLACEMENTS <b style={{ color: GL }}>{pipeline?.placed || 0}</b></span>
+            <span style={{ fontSize: 11, color: MT }}>SHORTLISTED <b style={{ color: GL }}>{stats?.shortlist_total || 0}</b></span>
+            <span style={{ fontSize: 11, color: MT }}>AIRECRUIT <b style={{ color: GL }}>{stats?.airecruit_active || 0}</b></span>
           </div>
-          <span className="dash-profile-pct" style={{ fontSize: 12, color: G, cursor: 'pointer' }} onClick={() => router.push('/agency/settings')}>Profile {profilePct}% complete →</span>
+          <span className="dash-profile-pct" style={{ fontSize: 12, color: GL, cursor: 'pointer' }} onClick={() => router.push('/agency/settings')}>Profile {profilePct}% complete →</span>
         </div>
       </div>
 
-      {/* MODE TOGGLE */}
-      <div className="dash-mode-toggle" style={{ display: 'flex', gap: 4, padding: '12px 32px', background: S, borderBottom: `1px solid ${B}` }}>
+      {/* ZONE 2: MODE TOGGLE */}
+      <div className="dash-mode-toggle" style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '10px 32px', display: 'flex', gap: 8, alignItems: 'center' }}>
         {(['today', 'command', 'week'] as const).map(m => (
           <button
             key={m}
             onClick={() => setMode(m)}
             style={{
-              padding: '8px 16px',
+              padding: '5px 16px',
               borderRadius: 20,
-              border: mode === m ? 'none' : `1px solid ${B}`,
-              background: mode === m ? N : 'transparent',
-              color: mode === m ? W : M,
-              fontSize: 13,
+              border: mode === m ? '1px solid rgba(201,151,58,0.4)' : '1px solid rgba(255,255,255,0.1)',
+              background: mode === m ? GLX : 'transparent',
+              color: mode === m ? GL : MT,
+              fontSize: 12,
               fontWeight: 500,
               cursor: 'pointer',
               textTransform: 'capitalize',
@@ -196,151 +191,150 @@ export default function AgencyDashboard() {
             {m}
           </button>
         ))}
+        <div style={{ marginLeft: 'auto', fontFamily: SERIF, fontSize: 13, color: MT, fontStyle: 'italic' }}>
+          {greeting} — here's your agency at a glance
+        </div>
       </div>
 
-      {/* ZONE 2: ALERT STRIP */}
-      <div className="dash-alert-strip" style={{ background: S, borderBottom: `1px solid ${B}`, padding: '12px 32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      {/* ZONE 3: ALERT STRIP */}
+      <div className="dash-alert-strip" style={{ padding: '10px 32px', background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {showAllClear ? (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: WW, borderRadius: 8, padding: '10px 14px', minWidth: 220, cursor: 'default', border: `1px solid ${B}` }}>
-            <div style={{ width: 3, height: '100%', minHeight: 32, background: GR, borderRadius: '3px 0 0 3px' }} />
-            <span style={{ color: GR }}>✓</span>
-            <span style={{ fontSize: 13, color: N }}>Everything is on track today</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 14px', minWidth: 200, border: '1px solid rgba(255,255,255,0.08)', borderLeft: '3px solid #22C55E' }}>
+            <span style={{ color: GR, fontSize: 13 }}>✓</span>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Everything is on track today</span>
           </div>
         ) : (
           alerts.map((alert, i) => (
-            <Link key={i} href={alert.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: WW, borderRadius: 8, padding: '10px 14px', minWidth: 220, border: `1px solid ${B}`, cursor: 'pointer', textDecoration: 'none', marginRight: 12 }}>
-              <div style={{ width: 3, height: '100%', minHeight: 32, background: alert.accent, borderRadius: '3px 0 0 3px' }} />
-              <span style={{ color: alert.accent }}>{alert.icon}</span>
-              <span style={{ fontSize: 13, color: N }}>{alert.text}</span>
+            <Link key={i} href={alert.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 14px', minWidth: 200, border: '1px solid rgba(255,255,255,0.08)', borderLeft: `3px solid ${alert.accent}`, cursor: 'pointer', textDecoration: 'none', marginRight: 10 }}>
+              <span style={{ color: alert.accent, fontSize: 12 }}>{alert.icon}</span>
+              <span style={{ fontSize: 12, color: W }}>{alert.text}</span>
             </Link>
           ))
         )}
       </div>
 
-      {/* GREETING */}
-      <div className="dash-greeting" style={{ padding: '0 32px 12px', fontFamily: SERIF, fontSize: 15, color: M }}>
-        {greeting} — here's what needs your attention today
-      </div>
-
       {/* MODE: TODAY */}
       {mode === 'today' && (
         <>
-          {/* ZONE 3: THREE WORKFLOW COLUMNS */}
-          <div className="dash-cols" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 360px', gap: 24 }}>
+          <div className="dash-cols" style={{ padding: '20px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr 320px', gap: 20 }}>
 
             {/* COLUMN 1: CLIENTS & COVERAGE */}
-            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+            <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 24, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Clients & Coverage</span>
-                <Link href="/agency/clients" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View all →</Link>
+                <span style={{ fontFamily: SERIF, fontSize: 17, color: W }}>Clients & Coverage</span>
+                <Link href="/agency/clients" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>View all →</Link>
               </div>
 
               {unmatchedClients.length > 0 ? (
                 <>
                   {unmatchedClients.slice(0, 4).map((client, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < 3 ? `1px solid ${B}` : 'none' }}>
-                      <div>
-                        <div style={{ fontSize: 14, color: N, fontWeight: 500 }}>{client.first_name}</div>
-                        <div style={{ fontSize: 11, color: M }}>{client.care_level}</div>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: GLX, border: '1px solid rgba(201,151,58,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: GL, flexShrink: 0 }}>
+                        {client.first_name.charAt(0)}
                       </div>
-                      <button onClick={() => router.push(`/agency/clients/${client.id}`)} style={{ background: G, color: W, border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>Find coverage →</button>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: W }}>{client.first_name}</div>
+                        <div style={{ fontSize: 11, color: MT }}>{formatCondition(client.care_level)}</div>
+                      </div>
+                      <button onClick={() => router.push(`/agency/clients/${client.id}`)} style={{ background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '5px 12px', fontSize: 11, color: GL, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>Find coverage →</button>
                     </div>
                   ))}
                   {unmatchedClients.length > 4 && (
-                    <Link href="/agency/clients?tab=unmatched" style={{ fontSize: 12, color: G, textDecoration: 'none', display: 'block', marginTop: 8 }}>View {unmatchedClients.length - 4} more →</Link>
+                    <Link href="/agency/clients?tab=unmatched" style={{ fontSize: 12, color: GL, textDecoration: 'none', display: 'block', marginTop: 8 }}>View {unmatchedClients.length - 4} more →</Link>
                   )}
                 </>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: GR }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: GR, fontSize: 13 }}>
                   <span>✓</span>
-                  <span style={{ fontSize: 13 }}>All clients have coverage</span>
+                  <span>All clients have coverage</span>
                 </div>
               )}
 
-              <div style={{ borderTop: `1px solid ${B}`, marginTop: 16, paddingTop: 16 }}>
-                <div style={{ fontSize: 13, color: N, marginBottom: 8 }}>Available on your roster</div>
-                <div style={{ fontSize: 12, color: M }}>{stats?.roster_claimed || 0} active caregivers</div>
-                <Link href="/agency/roster" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>View available →</Link>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 12, paddingTop: 12 }}>
+                <div style={{ fontSize: 12, color: MT, marginBottom: 4 }}>Available on your roster</div>
+                <div style={{ fontSize: 13, color: W, fontWeight: 500 }}>{stats?.roster_claimed || 0} active caregivers</div>
+                <Link href="/agency/roster" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>See who's available →</Link>
               </div>
             </div>
 
             {/* COLUMN 2: RECRUITMENT PIPELINE */}
-            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+            <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 24, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Recruitment Pipeline</span>
-                <Link href="/agency/shortlist" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View shortlist →</Link>
+                <span style={{ fontFamily: SERIF, fontSize: 17, color: W }}>Recruitment Pipeline</span>
+                <Link href="/agency/shortlist" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>View shortlist →</Link>
               </div>
 
-              {/* Pipeline bar */}
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
                 {[
-                  { label: 'Discovered', count: pipeline?.discovered || 0, bg: '#E6F1FB', color: '#185FA5' },
-                  { label: 'Contacted', count: pipeline?.contacted || 0, bg: '#E6F1FB', color: '#185FA5' },
-                  { label: 'Interviewing', count: pipeline?.interviewing || 0, bg: GL, color: G },
-                  { label: 'Placed', count: pipeline?.placed || 0, bg: GRL, color: '#16A34A' },
-                  { label: 'Inactive', count: pipeline?.inactive || 0, bg: '#F1F5F9', color: M },
+                  { label: 'Discovered', count: pipeline?.discovered || 0, bg: 'rgba(30,58,138,0.5)', color: '#93C5FD' },
+                  { label: 'Contacted', count: pipeline?.contacted || 0, bg: 'rgba(30,58,138,0.4)', color: '#A5B4FC' },
+                  { label: 'Interviewing', count: pipeline?.interviewing || 0, bg: 'rgba(120,53,15,0.5)', color: GL },
+                  { label: 'Placed', count: pipeline?.placed || 0, bg: 'rgba(20,83,45,0.5)', color: '#86EFAC' },
+                  { label: 'Inactive', count: pipeline?.inactive || 0, bg: 'rgba(255,255,255,0.05)', color: MT },
                 ].map((stage, i) => (
-                  <div key={i} style={{ flex: 1, textAlign: 'center', background: stage.bg, borderRadius: 12, padding: '3px 8px' }}>
-                    <div style={{ fontSize: 11, color: stage.color }}>{stage.label}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: stage.color }}>{stage.count}</div>
+                  <div key={i} style={{ flex: 1, borderRadius: 10, padding: '8px 6px', textAlign: 'center', background: stage.bg, cursor: 'pointer' }}>
+                    <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1, marginBottom: 2, color: stage.color }}>{stage.count}</div>
+                    <div style={{ fontSize: 9, letterSpacing: '0.04em', textTransform: 'uppercase', color: stage.color }}>{stage.label}</div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ borderTop: `1px solid ${B}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: N, marginBottom: 8 }}>AIRecruit</div>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', margin: '16px 0', paddingTop: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 500, color: GL, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>AIRecruit</div>
                 {stats?.airecruit_active && stats.airecruit_active > 0 ? (
-                  <div style={{ fontSize: 12, color: M }}>{stats.airecruit_active} active campaigns</div>
+                  <div style={{ fontSize: 12, color: M }}>{stats.airecruit_active} campaigns · results ready</div>
                 ) : (
                   <div style={{ fontSize: 12, color: M }}>No campaigns yet</div>
                 )}
-                <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Start new campaign →</Link>
+                <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>Start AI screening →</Link>
               </div>
             </div>
 
             {/* COLUMN 3: AI ASSISTANT */}
-            <div className="dash-ai-col" style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24, position: 'sticky', top: 20, height: 'fit-content' }}>
-              <div style={{ marginBottom: 16 }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Careified AI</span>
-                <div style={{ fontSize: 12, color: M }}>Your operations co-pilot</div>
+            <div className="dash-ai-col" style={{ background: 'rgba(201,151,58,0.05)', border: '1px solid rgba(201,151,58,0.2)', borderRadius: 16, padding: 20, position: 'sticky', top: 20, height: 'fit-content' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: NAV_BG }}>AI</div>
+                <div>
+                  <div style={{ fontFamily: SERIF, fontSize: 16, color: W }}>Careified AI</div>
+                  <div style={{ fontSize: 11, color: MT }}>Your operations co-pilot</div>
+                </div>
               </div>
               <MiniAssistant />
             </div>
           </div>
 
           {/* ZONE 4: ROSTER + ACTIVITY */}
-          <div className="dash-bottom" style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div className="dash-bottom" style={{ padding: '0 32px 40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
 
-            {/* LEFT: Roster health */}
-            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Roster Health</span>
-                <Link href="/agency/roster" style={{ fontSize: 13, color: G, textDecoration: 'none' }}>View roster →</Link>
+            <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <span style={{ fontFamily: SERIF, fontSize: 17, color: W }}>Roster Health</span>
+                <Link href="/agency/roster" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>View roster →</Link>
               </div>
 
-              <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-                <span style={{ fontSize: 12, color: M }}>Total <b style={{ color: N }}>{stats?.roster_total || 0}</b></span>
-                <span style={{ fontSize: 12, color: M }}>Active <b style={{ color: N }}>{stats?.roster_claimed || 0}</b></span>
-                <span style={{ fontSize: 12, color: M }}>Incomplete <b style={{ color: N }}>{stats?.roster_pending || 0}</b></span>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+                <span style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '4px 12px', fontSize: 12 }}><span style={{ color: MT }}>Total</span> <b style={{ color: W, fontWeight: 600 }}>{stats?.roster_total || 0}</b></span>
+                <span style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '4px 12px', fontSize: 12 }}><span style={{ color: MT }}>Active</span> <b style={{ color: W, fontWeight: 600 }}>{stats?.roster_claimed || 0}</b></span>
+                <span style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '4px 12px', fontSize: 12 }}><span style={{ color: MT }}>Incomplete</span> <b style={{ color: W, fontWeight: 600 }}>{stats?.roster_pending || 0}</b></span>
               </div>
 
               <div style={{ display: 'flex', gap: 16 }}>
-                <Link href="/agency/roster/add" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Add caregiver →</Link>
-                <Link href="/agency/roster/import" style={{ fontSize: 12, color: G, textDecoration: 'none' }}>Import CSV →</Link>
+                <Link href="/agency/roster/add" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>Add caregiver →</Link>
+                <Link href="/agency/roster/import" style={{ fontSize: 12, color: GL, textDecoration: 'none' }}>Import CSV →</Link>
               </div>
             </div>
 
-            {/* RIGHT: Recent activity */}
-            <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-              <div style={{ marginBottom: 16 }}>
-                <span style={{ fontFamily: SERIF, fontSize: 18, color: N }}>Recent Activity</span>
-              </div>
+            <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 24 }}>
+              <div style={{ fontFamily: SERIF, fontSize: 17, color: W, marginBottom: 14 }}>Recent Activity</div>
 
               {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 ? (
                 dashboardData.recent_activity.slice(0, 5).map((activity, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < 4 ? `1px solid ${B}` : 'none' }}>
-                    <span style={{ fontSize: 11, color: MT }}>{formatRelativeTime(activity.timestamp)}</span>
-                    <span style={{ fontSize: 12, color: N }}>{activity.action}</span>
+                  <div key={i} style={{ display: 'flex', gap: 10, padding: '7px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <span style={{ fontSize: 11, color: MT, minWidth: 50 }}>{formatRelativeTime(activity.timestamp)}</span>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 4, background: activity.action.includes('shortlist') ? GL : activity.action.includes('claimed') ? GR : activity.action.includes('import') ? '#93C5FD' : MT }} />
+                    <span style={{ fontSize: 12, color: M }}>{activity.action}</span>
                   </div>
                 ))
               ) : (
@@ -353,86 +347,70 @@ export default function AgencyDashboard() {
 
       {/* MODE: COMMAND */}
       {mode === 'command' && (
-        <div className="dash-cmd-grid" style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        <div className="dash-cmd-grid" style={{ padding: '20px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
 
-          {/* 1. Clients */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,151,58,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>👥</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Clients & Coverage</div>
-            <div style={{ fontSize: 12, color: M }}>{stats?.clients_total || 0} active · {stats?.clients_unmatched || 0} need coverage</div>
-            <button onClick={() => router.push('/agency/clients')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View clients →</button>
+          <div onClick={() => router.push('/agency/clients')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,151,58,0.1)', marginBottom: 14, fontSize: 22 }}>👥</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>Clients & Coverage</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>{stats?.clients_total || 0} active · {stats?.clients_unmatched || 0} need coverage</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>View clients →</button>
           </div>
 
-          {/* 2. Find Caregivers */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,139,221,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>🔍</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Find Caregivers</div>
-            <div style={{ fontSize: 12, color: M }}>Search {'>'}500 verified caregivers</div>
-            <button onClick={() => router.push('/agency/caregivers')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Search now →</button>
+          <div onClick={() => router.push('/agency/caregivers')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,139,221,0.1)', marginBottom: 14, fontSize: 22 }}>🔍</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>Find Caregivers</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>Search {'>'}500 verified caregivers</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>Search now →</button>
           </div>
 
-          {/* 3. Roster */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(34,197,94,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>📋</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Your Roster</div>
-            <div style={{ fontSize: 12, color: M }}>{stats?.roster_total || 0} caregivers · {stats?.roster_pending || 0} need attention</div>
-            <button onClick={() => router.push('/agency/roster')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Manage roster →</button>
+          <div onClick={() => router.push('/agency/roster')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(34,197,94,0.1)', marginBottom: 14, fontSize: 22 }}>📋</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>Your Roster</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>{stats?.roster_total || 0} caregivers · {stats?.roster_pending || 0} need attention</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>Manage roster →</button>
           </div>
 
-          {/* 4. AIRecruit */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,92,246,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>🤖</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>AIRecruit</div>
-            <div style={{ fontSize: 12, color: M }}>{stats?.airecruit_active || 0} campaigns · calls tonight</div>
-            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View results →</button>
+          <div onClick={() => router.push('/agency/airecruit')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,92,246,0.1)', marginBottom: 14, fontSize: 22 }}>🤖</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>AIRecruit</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>{stats?.airecruit_active || 0} campaigns · calls tonight</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>View results →</button>
           </div>
 
-          {/* 5. QuickFill */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>⚡</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>QuickFill</div>
-            <div style={{ fontSize: 12, color: M }}>Emergency coverage blast</div>
-            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Send blast →</button>
+          <div onClick={() => router.push('/agency/airecruit')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.1)', marginBottom: 14, fontSize: 22 }}>⚡</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>QuickFill</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>Emergency coverage blast</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>Send blast →</button>
           </div>
 
-          {/* 6. Intelligence */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(20,184,166,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>📊</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Intelligence</div>
-            <div style={{ fontSize: 12, color: M }}>ROI summary · placement outcomes</div>
-            <button onClick={() => router.push('/agency/intelligence')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>View report →</button>
+          <div onClick={() => router.push('/agency/intelligence')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(20,184,166,0.1)', marginBottom: 14, fontSize: 22 }}>📊</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>Intelligence</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>ROI summary · placement outcomes</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>View report →</button>
           </div>
 
-          {/* 7. References */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,158,11,0.1)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>📞</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>References & Verify</div>
-            <div style={{ fontSize: 12, color: M }}>AI calls references automatically</div>
-            <button onClick={() => router.push('/agency/airecruit')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Start calls →</button>
+          <div onClick={() => router.push('/agency/airecruit')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,158,11,0.1)', marginBottom: 14, fontSize: 22 }}>📞</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>References & Verify</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>AI calls references automatically</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>Start calls →</button>
           </div>
 
-          {/* 8. Compliance */}
-          <div style={{ background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.08)', marginBottom: 12 }}>
-              <span style={{ fontSize: 20 }}>🛡️</span>
-            </div>
-            <div style={{ fontFamily: SERIF, fontSize: 16, color: N, marginBottom: 4 }}>Compliance Check</div>
-            <div style={{ fontSize: 12, color: M }}>{dashboardData?.expiring_credentials?.length || 0} credentials need attention</div>
-            <button onClick={() => router.push('/agency/roster?tab=credentials')} style={{ width: '100%', marginTop: 16, padding: 10, background: G, color: W, border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Review now →</button>
+          <div onClick={() => router.push('/agency/roster?tab=credentials')} onMouseEnter={e => e.currentTarget.style.borderColor = CARD_BORDER_GOLD} onMouseLeave={e => e.currentTarget.style.borderColor = CARD_BORDER} style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 22, cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #C9973A, transparent)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(226,75,74,0.08)', marginBottom: 14, fontSize: 22 }}>🛡️</div>
+            <div style={{ fontFamily: SERIF, fontSize: 16, color: W, marginBottom: 4 }}>Compliance Check</div>
+            <div style={{ fontSize: 12, color: M, marginBottom: 14, lineHeight: 1.5 }}>{dashboardData?.expiring_credentials?.length || 0} credentials need attention</div>
+            <button style={{ width: '100%', background: GLX, border: '1px solid rgba(201,151,58,0.3)', borderRadius: 8, padding: '9px', fontSize: 12, color: GL, cursor: 'pointer', fontWeight: 500 }}>Review now →</button>
           </div>
 
         </div>
@@ -441,9 +419,9 @@ export default function AgencyDashboard() {
       {/* MODE: WEEK */}
       {mode === 'week' && (
         <div style={{ padding: '40px 32px', textAlign: 'center' }}>
-          <div style={{ maxWidth: 500, margin: '0 auto', background: WW, border: `1px solid ${B}`, borderRadius: 16, padding: 40 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 20, color: N, marginBottom: 12 }}>Week view coming soon</div>
-            <div style={{ fontSize: 14, color: M, lineHeight: 1.65 }}>You'll see a 7-day coverage calendar, upcoming placement endings, and credential deadlines.</div>
+          <div style={{ maxWidth: 500, margin: '0 auto', background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 16, padding: 40 }}>
+            <div style={{ fontFamily: SERIF, fontSize: 20, color: W, marginBottom: 12 }}>Week view</div>
+            <div style={{ fontSize: 13, color: M, lineHeight: 1.7 }}>A 7-day coverage calendar, upcoming placement endings, and credential deadlines. Coming in the next update.</div>
           </div>
         </div>
       )}
@@ -451,7 +429,6 @@ export default function AgencyDashboard() {
   )
 }
 
-// Mini AI Assistant component (inline)
 function MiniAssistant() {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([])
   const [input, setInput] = useState('')
@@ -506,7 +483,7 @@ function MiniAssistant() {
       {messages.length === 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
           {suggestions.map((s, i) => (
-            <button key={i} onClick={() => sendMessage(s)} style={{ background: '#F1F5F9', border: `1px solid ${B}`, borderRadius: 20, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: N, margin: 2 }}>
+            <button key={i} onClick={() => sendMessage(s)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: M, margin: 2 }}>
               {s}
             </button>
           ))}
@@ -514,13 +491,13 @@ function MiniAssistant() {
       )}
 
       {messages.map((m, i) => (
-        <div key={i} style={{ marginBottom: 8, padding: '8px 12px', borderRadius: m.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px', background: m.role === 'user' ? G : '#F1F5F9', color: m.role === 'user' ? W : N, fontSize: 12 }}>
+        <div key={i} style={{ marginBottom: 8, padding: '8px 12px', borderRadius: m.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px', background: m.role === 'user' ? G : 'rgba(255,255,255,0.05)', color: m.role === 'user' ? NAV_BG : W, fontSize: 12 }}>
           {m.content}
         </div>
       ))}
 
       {loading && (
-        <div style={{ fontSize: 11, color: M }}>Thinking...</div>
+        <div style={{ fontSize: 11, color: MT }}>Thinking...</div>
       )}
 
       <div ref={messagesEndRef} />
@@ -532,9 +509,9 @@ function MiniAssistant() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())}
           placeholder="Ask about your roster..."
-          style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: `1px solid ${B}`, fontSize: 12, outline: 'none' }}
+          style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', fontSize: 12, outline: 'none', background: 'rgba(255,255,255,0.03)', color: W }}
         />
-        <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: input.trim() && !loading ? G : B, color: input.trim() && !loading ? W : M, fontSize: 12, cursor: input.trim() && !loading ? 'pointer' : 'default' }}>
+        <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: input.trim() && !loading ? G : 'rgba(255,255,255,0.1)', color: input.trim() && !loading ? NAV_BG : MT, fontSize: 12, cursor: input.trim() && !loading ? 'pointer' : 'default' }}>
           →
         </button>
       </div>
