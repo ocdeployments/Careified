@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import AgencySidebar from '@/components/nav/AgencySidebar'
+import AgencySidebar, { SIDEBAR_WIDTHS } from '@/components/nav/AgencySidebar'
 
 interface AgencyLayoutClientProps {
   children: React.ReactNode
@@ -10,6 +10,7 @@ interface AgencyLayoutClientProps {
 
 export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps) {
   const pathname = usePathname()
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
   const [counts, setCounts] = useState({
     unmatched_clients: 0,
     pipeline: 0,
@@ -20,6 +21,24 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
   // Check excluded paths
   const excludedPaths = ['/agency/signup', '/agency/pending-approval', '/agency/join']
   const isExcluded = excludedPaths.some(path => pathname.startsWith(path))
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Responsive breakpoints
+  const isMobile = windowWidth < 768
+  const isTablet = windowWidth >= 768 && windowWidth < 1024
+
+  // Calculate sidebar width based on breakpoint
+  const sidebarWidth = isMobile
+    ? SIDEBAR_WIDTHS.mobile
+    : isTablet
+    ? SIDEBAR_WIDTHS.tablet
+    : SIDEBAR_WIDTHS.desktop
 
   // Fetch nav counts
   useEffect(() => {
@@ -45,7 +64,7 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#080F1E' }}>
       <AgencySidebar counts={counts} currentPath={pathname} />
-      <main style={{ marginLeft: 220, flex: 1, minHeight: '100vh' }}>
+      <main style={{ marginLeft: sidebarWidth, flex: 1, minHeight: '100vh' }}>
         {children}
       </main>
     </div>
