@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       const s1 = await pool.query('SELECT COUNT(*) as c FROM caregivers WHERE created_by_agency_id = $1', [agencyId])
       console.log('[stats] caregivers:', s1.rows[0].c)
 
-      const s2 = await pool.query('SELECT COUNT(*) as c FROM agency_shortlist WHERE agency_clerk_id = $2', [agencyId, userId])
+      const s2 = await pool.query('SELECT COUNT(*) as c FROM agency_shortlist WHERE agency_clerk_id = $1', [userId])
       console.log('[stats] shortlist:', s2.rows[0].c)
 
       const s3 = await pool.query("SELECT COUNT(*) as c FROM client_needs WHERE agency_id::text = $1 AND status != 'closed'", [agencyId])
