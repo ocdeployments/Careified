@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Thu 28 May 2026 00:39:51 EDT
+Generated: Thu 28 May 2026 14:02:16 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -24,12 +24,16 @@ app/agency/airecruit/page.tsx
 app/agency/assistant/AgencyAssistantClient.tsx
 app/agency/assistant/page.tsx
 app/agency/billing/page.tsx
+app/agency/caregivers/CaregiversTabsClient.tsx
+app/agency/caregivers/page.tsx
 app/agency/clients/[id]/page.tsx
 app/agency/clients/[id]/review/page.tsx
 app/agency/clients/[id]/review/ReviewForm.tsx
 app/agency/clients/new/page.tsx
 app/agency/clients/page.tsx
 app/agency/dashboard/page.tsx
+app/agency/intelligence/IntelligenceClient.tsx
+app/agency/intelligence/page.tsx
 app/agency/join/[token]/page.tsx
 app/agency/layout.tsx
 app/agency/pending-approval/page.tsx
@@ -59,6 +63,7 @@ app/api/agency/command/route.ts
 app/api/agency/consent-status/route.ts
 app/api/agency/consent/route.ts
 app/api/agency/dashboard/route.ts
+app/api/agency/nav-counts/route.ts
 app/api/agency/profile-completion/route.ts
 app/api/agency/register/route.ts
 app/api/agency/review/route.ts
@@ -331,11 +336,13 @@ app/agency/airecruit/new/page.tsx
 app/agency/airecruit/page.tsx
 app/agency/assistant/page.tsx
 app/agency/billing/page.tsx
+app/agency/caregivers/page.tsx
 app/agency/clients/[id]/page.tsx
 app/agency/clients/[id]/review/page.tsx
 app/agency/clients/new/page.tsx
 app/agency/clients/page.tsx
 app/agency/dashboard/page.tsx
+app/agency/intelligence/page.tsx
 app/agency/join/[token]/page.tsx
 app/agency/pending-approval/page.tsx
 app/agency/reviews/new/page.tsx
@@ -363,6 +370,7 @@ app/api/agency/command/route.ts
 app/api/agency/consent-status/route.ts
 app/api/agency/consent/route.ts
 app/api/agency/dashboard/route.ts
+app/api/agency/nav-counts/route.ts
 app/api/agency/profile-completion/route.ts
 app/api/agency/register/route.ts
 app/api/agency/review/route.ts
@@ -510,7 +518,6 @@ lib/airecruit/retry.ts  ::  async function cancelRetries(caregiverId: string, ca
 lib/airecruit/retry.ts  ::  async function getPendingRetries(limit: number
 lib/airecruit/retry.ts  ::  async function markRetryCompleted(retryId: string): Promise
 lib/airecruit/retry.ts  ::  async function markRetryFailed(retryId: string, error: string): Promise
-lib/airecruit/retry.ts  ::  async function markRetryProcessing(retryId: string): Promise
 lib/airecruit/retry.ts  ::  async function scheduleRetry(
 lib/airecruit/retry.ts  ::  interface RetryConfig
 lib/airecruit/score-employer.ts  ::  async function scoreEmployerCall(
@@ -934,6 +941,7 @@ lib/wallet/apple-wallet.ts  ::  interface PassGenerationResult
   last_error : text ?
   created_at : timestamp without time zone ?
   processed_at : timestamp without time zone ?
+  processing_at : timestamp without time zone ?
 === caregiver_attributes ===
   id : uuid
   caregiver_id : character varying
