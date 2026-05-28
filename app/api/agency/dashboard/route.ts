@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       }
 
       const agencyResult = await pool.query(
-        "SELECT id FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
+        "SELECT id::text as id FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
         [userId]
       )
 
@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
 
     // Stats queries
     try {
-      const statsResult = await pool.query(`
+      console.log('[dashboard] agencyId:', agencyId, '| type:', typeof agencyId)
+    const statsResult = await pool.query(`
         SELECT
           (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1) as roster_total,
           (SELECT COUNT(*) FROM caregivers WHERE created_by_agency_id = $1 AND claim_status = 'claimed') as roster_claimed,
