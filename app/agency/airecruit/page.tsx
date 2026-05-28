@@ -172,7 +172,7 @@ export default async function AIRecruitPage() {
           <h2 style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontSize: '24px',
-            color: '#0D1B3E'
+            color: '#F5F0E8'
           }}>
             Your Campaigns
           </h2>
@@ -218,14 +218,14 @@ export default async function AIRecruitPage() {
             <h3 style={{
               fontFamily: "'DM Serif Display', Georgia, serif",
               fontSize: '20px',
-              color: '#0D1B3E',
+              color: '#F5F0E8',
               marginBottom: '8px'
             }}>
               No campaigns yet
             </h3>
             <p style={{
               fontSize: '14px',
-              color: '#64748B',
+              color: 'rgba(255,255,255,0.55)',
               marginBottom: '24px'
             }}>
               Create your first campaign to start screening candidates
@@ -425,7 +425,7 @@ export default async function AIRecruitPage() {
 
       {/* How It Works */}
       <div style={{
-        background: '#F5F3EE',
+        background: '#080F1E',
         padding: '64px 24px',
         textAlign: 'center'
       }}>
@@ -433,7 +433,7 @@ export default async function AIRecruitPage() {
           <h2 style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontSize: '32px',
-            color: '#0D1B3E',
+            color: '#F5F0E8',
             marginBottom: '48px'
           }}>
             How It Works
@@ -465,14 +465,14 @@ export default async function AIRecruitPage() {
               <h3 style={{
                 fontSize: '15px',
                 fontWeight: 600,
-                color: '#0D1B3E',
+                color: '#F5F0E8',
                 marginBottom: '8px'
               }}>
                 Select candidates
               </h3>
               <p style={{
                 fontSize: '13px',
-                color: '#64748B',
+                color: 'rgba(255,255,255,0.55)',
                 lineHeight: 1.5
               }}>
                 From your Careified shortlist
@@ -504,14 +504,14 @@ export default async function AIRecruitPage() {
               <h3 style={{
                 fontSize: '15px',
                 fontWeight: 600,
-                color: '#0D1B3E',
+                color: '#F5F0E8',
                 marginBottom: '8px'
               }}>
                 AIRecruit calls
               </h3>
               <p style={{
                 fontSize: '13px',
-                color: '#64748B',
+                color: 'rgba(255,255,255,0.55)',
                 lineHeight: 1.5
               }}>
                 Each candidate automatically
@@ -543,14 +543,14 @@ export default async function AIRecruitPage() {
               <h3 style={{
                 fontSize: '15px',
                 fontWeight: 600,
-                color: '#0D1B3E',
+                color: '#F5F0E8',
                 marginBottom: '8px'
               }}>
                 AI interviews
               </h3>
               <p style={{
                 fontSize: '13px',
-                color: '#64748B',
+                color: 'rgba(255,255,255,0.55)',
                 lineHeight: 1.5
               }}>
                 Conducts structured screening
@@ -582,14 +582,14 @@ export default async function AIRecruitPage() {
               <h3 style={{
                 fontSize: '15px',
                 fontWeight: 600,
-                color: '#0D1B3E',
+                color: '#F5F0E8',
                 marginBottom: '8px'
               }}>
                 You receive results
               </h3>
               <p style={{
                 fontSize: '13px',
-                color: '#64748B',
+                color: 'rgba(255,255,255,0.55)',
                 lineHeight: 1.5
               }}>
                 Scores, transcripts, next steps
@@ -609,14 +609,14 @@ export default async function AIRecruitPage() {
           <h2 style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-            color: '#0D1B3E',
+            color: '#F5F0E8',
             marginBottom: '12px'
           }}>
             Ready to automate your hiring?
           </h2>
           <p style={{
             fontSize: '15px',
-            color: '#0D1B3E',
+            color: '#F5F0E8',
             opacity: 0.8,
             marginBottom: '24px'
           }}>
