@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       const unmatchedResult = await pool.query(`
         SELECT id, client_first_name as first_name, primary_condition as care_level
         FROM client_needs
-        WHERE agency_id = $1
+        WHERE agency_id = $1::uuid
           AND matched_caregiver_id IS NULL
           AND status != 'closed'
         ORDER BY created_at ASC
