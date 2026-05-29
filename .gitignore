@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+scripts/qa-report-*.md
 
 # debug
 npm-debug.log*
