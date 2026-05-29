@@ -7,6 +7,21 @@ import CareifiedHero from '@/components/CareifiedHero'
 export default function HomePage() {
   return (
     <div className="font-sans bg-[#F7F4F0]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Careified",
+              "url": "https://careified.com",
+              "logo": "https://careified.com/logo.png",
+              "description": "Two-sided caregiver credentialing and placement platform connecting verified caregivers with home care agencies in Canada and the US.",
+              "areaServed": ["Canada", "United States"],
+              "knowsAbout": ["caregiver credentialing", "PSW placement", "home care staffing", "caregiver background checks"]
+            })
+          }}
+        />
 
         {/* ── Hero (dark navy) ── */}
         <CareifiedHero />
