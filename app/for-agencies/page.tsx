@@ -3,6 +3,16 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Search, Shield, Star, Calendar, FileText, Headphones, Users, ArrowRight, CheckCircle } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'For Agencies — Hire Verified Caregivers Faster',
+  description: 'Search, screen, and shortlist credentialed caregivers without the staffing agency markup. Careified gives Ontario home care agencies a faster, safer way to hire.',
+  openGraph: {
+    title: 'For Agencies — Hire Verified Caregivers Faster',
+    description: 'Search, screen, and shortlist credentialed caregivers without the staffing agency markup. Careified gives Ontario home care agencies a faster, safer way to hire.',
+  },
+}
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -29,6 +39,41 @@ export default function ForAgenciesPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: CREAM }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "How does Careified verify caregiver credentials?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Careified collects self-reported credentials and cross-references them against a four-tier verification framework — from system-verified documents to agency-validated references."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Careified a staffing agency?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Careified is a platform that connects agencies directly with caregivers. Agencies make all hiring decisions. Careified presents information — it does not recommend or place caregivers."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What provinces does Careified serve?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Careified currently serves Ontario, Canada, with US expansion underway in Texas."
+                }
+              }
+            ]
+          })
+        }}
+      />
       {/* Hero */}
       <section style={{
         padding: '140px 20px 80px',
