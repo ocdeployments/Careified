@@ -689,7 +689,7 @@ function ConsentModal({ onAccept, acknowledgedPlatform, setAcknowledgedPlatform,
           { checked: acknowledgedPlatform, set: setAcknowledgedPlatform, title: 'Platform, not recommender.', body: 'I acknowledge that Careified organizes and displays information provided by caregivers and third parties. Careified does NOT recommend, vouch for, endorse, or employ any caregiver. All hiring decisions are solely my responsibility.' },
           { checked: acknowledgedEmployer, set: setAcknowledgedEmployer, title: 'Employer responsibility.', body: 'If I engage any caregiver through Careified, I (or my agency) am the employer or engaging party and am solely responsible for background checks, qualification verification, employment law compliance, supervision, insurance, and healthcare regulation compliance.' },
         ].map(({ checked, set, title, body }) => (
-          <div key={title} style={{ background: '#F7F4F0', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <div key={title} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 20, marginBottom: 16, border: '1px solid rgba(255,255,255,0.1)' }}>
             <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
               <input type="checkbox" checked={checked} onChange={e => set(e.target.checked)} style={{ marginTop: 3 }} />
               <div style={{ fontSize: 13, color: '#F5F0E8', lineHeight: 1.6 }}>
