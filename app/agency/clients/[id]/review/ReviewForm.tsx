@@ -555,7 +555,7 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
             width: 20,
             height: 20,
             borderRadius: 10,
-            background: 'white',
+            background: '#F5F0E8',
             position: 'absolute',
             top: 2,
             left: checked ? 22 : 2,
@@ -564,14 +564,14 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
           }}
         />
       </div>
-      <span style={{ fontSize: 14, color: '#0D1B3E' }}>{label}</span>
+      <span style={{ fontSize: 14, color: '#F5F0E8' }}>{label}</span>
     </label>
   )
 }
 
 const cardStyle: React.CSSProperties = {
-  background: 'white',
-  border: '1px solid #E2E8F0',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: 16,
   padding: 24,
 }
@@ -580,12 +580,14 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '12px 14px',
   borderRadius: 10,
-  border: '1.5px solid #E2E8F0',
+  border: '1.5px solid rgba(255,255,255,0.12)',
   fontSize: 14,
   fontFamily: FONT_SANS,
   outline: 'none',
   transition: 'border-color 150ms',
   boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.06)',
+  color: '#F5F0E8',
 }
 
 const primaryButtonStyle: React.CSSProperties = {
@@ -600,11 +602,11 @@ const primaryButtonStyle: React.CSSProperties = {
 }
 
 const secondaryButtonStyle: React.CSSProperties = {
-  background: 'white',
-  color: '#0D1B3E',
+  background: 'rgba(255,255,255,0.06)',
+  color: '#F5F0E8',
   padding: '14px 28px',
   borderRadius: 10,
-  border: '1.5px solid #E2E8F0',
+  border: '1.5px solid rgba(255,255,255,0.12)',
   fontSize: 14,
   fontWeight: 500,
   cursor: 'pointer',
