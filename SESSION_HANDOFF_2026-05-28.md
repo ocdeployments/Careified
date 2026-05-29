@@ -26,3 +26,34 @@ All 17 agency pages converted to dark theme with inline styles.
 ### NEXT SESSION START
 - Check for any remaining light-theme pages in the codebase
 - Look for components that may still use Tailwind light backgrounds
+
+## SESSION UPDATE — 2026-05-29
+
+### Dark Theme — FULLY COMPLETE ✅
+All agency pages clean. Final verification grep returned zero results.
+Last commits: 5d3a972, 4031c37, 62a946d
+
+Additional files fixed this session:
+- app/agency/clients/new/page.tsx — consent modal card
+- app/agency/clients/[id]/review/ReviewForm.tsx — toggle, labels, cards, inputs, buttons
+- app/agency/reviews/new/page.tsx — dropdown popover
+
+### NEXT SESSION — START HERE
+Gate: QA pass on careified.com before S3 starts.
+
+Pages to spot-check live:
+1. /agency/clients — list + status badges
+2. /agency/clients/[id] — match cards, sidebar
+3. /agency/roster — tabs, table
+4. /agency/airecruit — campaign list
+5. /agency/airecruit/new — form, inputs
+
+If QA passes → start S3 (Client triage panel).
+
+S3 spec (from handoff):
+- Right-side panel on /agency/clients/[id]
+- 5-step find coverage funnel: roster → re-engage → search → QuickFill → AIRecruit
+- Urgency flag (boolean on client_needs + DB migration)
+- Client aging indicator (amber 7 days, red 14 days)
+- Revenue implication (~$X/mo not activated)
+- Never abandons coordinator
