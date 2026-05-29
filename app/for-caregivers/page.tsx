@@ -4,6 +4,16 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'For Caregivers — Build Your Verified Profile Once',
+  description: 'Create your professional caregiver profile once. Be discovered by top home care agencies in Ontario without applying to every job posting.',
+  openGraph: {
+    title: 'For Caregivers — Build Your Verified Profile Once',
+    description: 'Create your professional caregiver profile once. Be discovered by top home care agencies in Ontario without applying to every job posting.',
+  },
+}
 
 const SERIF = "'DM Serif Display', Georgia, serif"
 const SANS = "'DM Sans', system-ui, -apple-system, sans-serif"
@@ -53,6 +63,42 @@ function CaregiversContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: C.cream }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is Careified free for caregivers?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Building and maintaining a basic profile on Careified is free. Premium visibility features are available on paid tiers."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What credentials can I add to my Careified profile?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "PSW certificates, HCA credentials, First Aid and CPR, VSC, TB test results, immunization records, and more."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do agencies find me on Careified?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Agencies search by specialization, availability, location, language, and credential status. A complete profile increases your chances of being shortlisted."
+                }
+              }
+            ]
+          })
+        }}
+      />
+
       {/* SECTION 1 — Hero */}
       <section style={{
         position: 'relative',
