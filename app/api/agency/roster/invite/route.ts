@@ -103,11 +103,6 @@ This link expires in 30 days.
     }
 
     // Console log email for testing
-    console.log('=== AGENCY ROSTER INVITE EMAIL ===')
-    console.log('TO:', emailContent.to)
-    console.log('SUBJECT:', emailContent.subject)
-    console.log('BODY:', emailContent.body)
-    console.log('===================================')
 
     // Update profile status to invited
     await pool.query(
