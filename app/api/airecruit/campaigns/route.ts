@@ -141,7 +141,6 @@ export async function POST(req: NextRequest) {
            WHERE id = $1`,
           [call.id]
         )
-        console.log('SUPPRESSED:', call.phoneNumber)
       } else {
         phoneNumbersToCall.push(call)
       }
@@ -163,7 +162,6 @@ export async function POST(req: NextRequest) {
            WHERE id = $2`,
           [hoursCheck.reason, call.id]
         )
-        console.log('OUTSIDE CALLING HOURS:', call.phoneNumber, hoursCheck.reason)
       } else {
         allowedCalls.push(call)
       }
