@@ -65,7 +65,6 @@ type MatchRow = {
       attributes_used: string[]
     }>
   }
-  // deprecated aliases for backcompat
   match?: any
   gap_analysis?: Array<{ category: string; text: string; priority: string }>
 }
@@ -84,25 +83,14 @@ export default function ClientDetailPage() {
 
   useEffect(() => {
     if (!params.id) return
-
     async function load() {
       const cr = await fetch(`/api/agency/clients/${params.id}`)
-      if (!cr.ok) {
-        setLoading(false)
-        return
-      }
+      if (!cr.ok) { setLoading(false); return }
       const cd = await cr.json()
       setClient(cd.client)
-
-      // Build need payload from client
       const need = { ...cd.client }
-      delete need.id
-      delete need.agency_id
-      delete need.status
-      delete need.matched_caregiver_id
-      delete need.created_at
-      delete need.updated_at
-
+      delete need.id; delete need.agency_id; delete need.status
+      delete need.matched_caregiver_id; delete need.created_at; delete need.updated_at
       const rr = await fetch('/api/match/rank', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,17 +102,10 @@ export default function ClientDetailPage() {
         setExcluded(rd.excluded_count || 0)
         setDisclaimer(rd.disclaimer || '')
       }
-
-      // Load interested caregivers
       const ir = await fetch(`/api/agency/clients/${params.id}/interested`)
-      if (ir.ok) {
-        const id = await ir.json()
-        setInterested(id.interested || [])
-      }
-
+      if (ir.ok) { const id = await ir.json(); setInterested(id.interested || []) }
       setLoading(false)
     }
-
     load()
   }, [params.id])
 
@@ -137,191 +118,173 @@ export default function ClientDetailPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: 40, fontFamily: FONT_SANS, color: '#64748B' }}>Loading…</div>
+    return <div style={{ padding: 40, fontFamily: FONT_SANS, color: 'rgba(255,255,255,0.55)', background: '#080F1E', minHeight: '100vh' }}>Loading…</div>
   }
 
   if (!client) {
     return (
-      <div style={{ padding: 40, fontFamily: FONT_SANS }}>
-        <h1 style={{ color: '#0D1B3E' }}>Client not found</h1>
+      <div style={{ padding: 40, fontFamily: FONT_SANS, background: '#080F1E', minHeight: '100vh' }}>
+        <h1 style={{ color: '#F5F0E8' }}>Client not found</h1>
         <Link href="/agency/clients" style={{ color: '#C9973A' }}>Back to clients</Link>
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px', fontFamily: FONT_SANS }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 32 }}>
-        <div>
-          <Link href="/agency/clients" style={{ color: '#64748B', fontSize: 13, textDecoration: 'none' }}>
-            ← All clients
-          </Link>
-          <h1 style={{ fontFamily: FONT_SERIF, fontSize: 32, color: '#0D1B3E', margin: '8px 0 4px 0' }}>
-            {client.client_first_name || 'Unnamed'}
-            {client.client_age ? `, ${client.client_age}` : ''}
-          </h1>
-          <p style={{ color: '#64748B', margin: 0 }}>
-            {[client.primary_condition, client.placement_type, client.city && `${client.city}, ${client.state}`]
-              .filter(Boolean).join(' · ')}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          {client.matched_caregiver_id && (
-            <Link
-              href={`/agency/clients/${params.id}/review`}
+    <div style={{ background: '#080F1E', minHeight: '100vh', fontFamily: FONT_SANS }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 32 }}>
+          <div>
+            <Link href="/agency/clients" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, textDecoration: 'none' }}>
+              ← All clients
+            </Link>
+            <h1 style={{ fontFamily: FONT_SERIF, fontSize: 32, color: '#F5F0E8', margin: '8px 0 4px 0' }}>
+              {client.client_first_name || 'Unnamed'}
+              {client.client_age ? `, ${client.client_age}` : ''}
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.55)', margin: 0 }}>
+              {[client.primary_condition, client.placement_type, client.city && `${client.city}, ${client.state}`]
+                .filter(Boolean).join(' · ')}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {client.matched_caregiver_id && (
+              <Link
+                href={`/agency/clients/${params.id}/review`}
+                style={{
+                  padding: '10px 20px', borderRadius: 10,
+                  border: '1.5px solid #C9973A',
+                  background: 'rgba(201,151,58,0.1)',
+                  color: '#C9973A', fontSize: 13, fontWeight: 600,
+                  textDecoration: 'none', fontFamily: FONT_SANS,
+                }}
+              >
+                Submit Placement Review
+              </Link>
+            )}
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
               style={{
-                padding: '10px 20px',
-                borderRadius: 10,
-                border: '1.5px solid #C9973A',
-                background: 'white',
-                color: '#C9973A',
-                fontSize: 13,
-                fontWeight: 600,
-                textDecoration: 'none',
-                cursor: 'pointer',
-                fontFamily: FONT_SANS,
+                padding: '10px 16px', borderRadius: 10,
+                border: '1.5px solid rgba(226,75,74,0.4)',
+                background: 'rgba(226,75,74,0.1)',
+                color: '#E24B4A', fontSize: 13, fontWeight: 500,
+                cursor: 'pointer', fontFamily: FONT_SANS,
               }}
             >
-              Submit Placement Review
-            </Link>
-          )}
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 10,
-              border: '1.5px solid #FCA5A5',
-              background: 'white',
-              color: '#DC2626',
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: 'pointer',
-              fontFamily: FONT_SANS,
-            }}
-          >
-            {deleting ? 'Deleting…' : 'Delete client'}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24 }}>
-        {/* Client summary sidebar */}
-        <div style={{
-          background: 'white',
-          border: '1px solid #E2E8F0',
-          borderRadius: 16,
-          padding: 24,
-          height: 'fit-content',
-          position: 'sticky',
-          top: 24,
-        }}>
-          <h3 style={{ fontFamily: FONT_SERIF, fontSize: 18, color: '#0D1B3E', margin: '0 0 16px 0' }}>
-            Client details
-          </h3>
-          <DetailRow label="Care intensity" value={client.care_intensity} />
-          <DetailRow label="Hours/week" value={client.hours_per_week} />
-          <DetailRow label="Start date" value={client.start_date} />
-          <DetailRow label="Duration" value={client.duration_expected} />
-          <DetailRow label="Language required" value={client.language_required} />
-          <DetailRow label="Gender preference" value={client.gender_preference} />
-          <DetailRow label="Home condition" value={client.home_condition} />
-          <DetailRow label="Family" value={client.family_dynamics} />
-          <DetailRow label="Max rate" value={client.hourly_rate_max ? `$${client.hourly_rate_max}/hr` : null} />
-          {client.pets_present && client.pets_present.length > 0 && (
-            <DetailRow label="Pets" value={client.pets_present.join(', ')} />
-          )}
-          {client.personality_desired && client.personality_desired.length > 0 && (
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 12, color: '#64748B', marginBottom: 6 }}>Desired personality</div>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {client.personality_desired.map(p => (
-                  <span key={p} style={{ fontSize: 11, background: '#F1F5F9', color: '#0D1B3E', padding: '4px 8px', borderRadius: 12 }}>
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+              {deleting ? 'Deleting…' : 'Delete client'}
+            </button>
+          </div>
         </div>
 
-        {/* Match results */}
-        <div>
-          {disclaimer && (
-            <div style={{ marginBottom: 16 }}>
-              <AlignmentDisclaimerBanner disclaimer={disclaimer} compact />
-            </div>
-          )}
-
-          {/* Interested caregivers */}
-          {interested.length > 0 && (
-            <div style={{
-              background: '#FDF6EC',
-              border: '1px solid #C9973A',
-              borderRadius: 16,
-              padding: 20,
-              marginBottom: 16,
-            }}>
-              <div style={{ fontSize: 11, color: '#92400E', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-                {interested.length} caregiver{interested.length === 1 ? '' : 's'} expressed interest
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24 }}>
+          {/* Client summary sidebar */}
+          <div style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 16, padding: 24,
+            height: 'fit-content', position: 'sticky', top: 24,
+          }}>
+            <h3 style={{ fontFamily: FONT_SERIF, fontSize: 18, color: '#F5F0E8', margin: '0 0 16px 0' }}>
+              Client details
+            </h3>
+            <DetailRow label="Care intensity" value={client.care_intensity} />
+            <DetailRow label="Hours/week" value={client.hours_per_week} />
+            <DetailRow label="Start date" value={client.start_date} />
+            <DetailRow label="Duration" value={client.duration_expected} />
+            <DetailRow label="Language required" value={client.language_required} />
+            <DetailRow label="Gender preference" value={client.gender_preference} />
+            <DetailRow label="Home condition" value={client.home_condition} />
+            <DetailRow label="Family" value={client.family_dynamics} />
+            <DetailRow label="Max rate" value={client.hourly_rate_max ? `$${client.hourly_rate_max}/hr` : null} />
+            {client.pets_present && client.pets_present.length > 0 && (
+              <DetailRow label="Pets" value={client.pets_present.join(', ')} />
+            )}
+            {client.personality_desired && client.personality_desired.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>Desired personality</div>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {client.personality_desired.map(p => (
+                    <span key={p} style={{ fontSize: 11, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', padding: '4px 8px', borderRadius: 12 }}>
+                      {p}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div style={{ display: 'grid', gap: 8 }}>
-                {interested.map((i) => (
-                  <Link
-                    key={i.caregiver_id}
-                    href={`/profile/${i.caregiver_id}`}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: 12,
-                      background: 'white',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      color: 'inherit',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#0D1B3E' }}>{i.first_name} {i.last_name}</div>
-                      <div style={{ fontSize: 12, color: '#64748B' }}>
-                        {i.city}, {i.state} · {i.years_experience} yrs
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 14, color: '#C9973A', fontWeight: 600 }}>
-                      {i.alignment_score_at_expression ?? '—'}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <h2 style={{ fontFamily: FONT_SERIF, fontSize: 22, color: '#0D1B3E', margin: 0 }}>
-              Matched caregivers ({results.length})
-            </h2>
-            {excluded > 0 && (
-              <span style={{ fontSize: 12, color: '#64748B' }}>
-                {excluded} excluded by hard filters
-              </span>
             )}
           </div>
 
-          {results.length === 0 && (
-            <div style={{
-              background: 'white',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: 48,
-              textAlign: 'center',
-              color: '#64748B',
-            }}>
-              No caregivers match. Try relaxing your requirements.
-            </div>
-          )}
+          {/* Match results */}
+          <div>
+            {disclaimer && (
+              <div style={{ marginBottom: 16 }}>
+                <AlignmentDisclaimerBanner disclaimer={disclaimer} compact />
+              </div>
+            )}
 
-          <div style={{ display: 'grid', gap: 12 }}>
-            {results.map(r => <CaregiverMatchCard key={r.caregiver_id} row={r} />)}
+            {interested.length > 0 && (
+              <div style={{
+                background: 'rgba(201,151,58,0.1)',
+                border: '1px solid rgba(201,151,58,0.35)',
+                borderRadius: 16, padding: 20, marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, color: '#E8B86D', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                  {interested.length} caregiver{interested.length === 1 ? '' : 's'} expressed interest
+                </div>
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {interested.map((i) => (
+                    <Link
+                      key={i.caregiver_id}
+                      href={`/profile/${i.caregiver_id}`}
+                      style={{
+                        display: 'flex', justifyContent: 'space-between',
+                        padding: 12, background: 'rgba(255,255,255,0.06)',
+                        borderRadius: 10, textDecoration: 'none', color: 'inherit',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#F5F0E8' }}>{i.first_name} {i.last_name}</div>
+                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                          {i.city}, {i.state} · {i.years_experience} yrs
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 14, color: '#C9973A', fontWeight: 600 }}>
+                        {i.alignment_score_at_expression ?? '—'}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <h2 style={{ fontFamily: FONT_SERIF, fontSize: 22, color: '#F5F0E8', margin: 0 }}>
+                Matched caregivers ({results.length})
+              </h2>
+              {excluded > 0 && (
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                  {excluded} excluded by hard filters
+                </span>
+              )}
+            </div>
+
+            {results.length === 0 && (
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: 48,
+                textAlign: 'center', color: 'rgba(255,255,255,0.55)',
+              }}>
+                No caregivers match. Try relaxing your requirements.
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gap: 12 }}>
+              {results.map(r => <CaregiverMatchCard key={r.caregiver_id} row={r} />)}
+            </div>
           </div>
         </div>
       </div>
@@ -332,9 +295,9 @@ export default function ClientDetailPage() {
 function DetailRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   if (value == null || value === '') return null
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13 }}>
-      <span style={{ color: '#64748B' }}>{label}</span>
-      <span style={{ color: '#0D1B3E', fontWeight: 500, textTransform: 'capitalize' }}>{String(value).replace(/_/g, ' ')}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: 13 }}>
+      <span style={{ color: 'rgba(255,255,255,0.55)' }}>{label}</span>
+      <span style={{ color: '#F5F0E8', fontWeight: 500, textTransform: 'capitalize' }}>{String(value).replace(/_/g, ' ')}</span>
     </div>
   )
 }
@@ -348,26 +311,20 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
   const dimensions = row.alignment?.dimensions ?? null
 
   return (
-    <div
-      style={{
-        background: 'white',
-        border: '1px solid #E2E8F0',
-        borderRadius: 16,
-        padding: 24,
-        transition: 'all 150ms ease',
-      }}
-    >
-      <Link
-        href={`/profile/${row.caregiver_id}`}
-        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-      >
+    <div style={{
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 16, padding: 24,
+      transition: 'all 150ms ease',
+    }}>
+      <Link href={`/profile/${row.caregiver_id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-              <div style={{ fontSize: 18, fontWeight: 600, color: '#0D1B3E' }}>
+              <div style={{ fontSize: 18, fontWeight: 600, color: '#F5F0E8' }}>
                 {row.first_name} {row.last_name}
               </div>
-              <div style={{ fontSize: 13, color: '#64748B' }}>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
                 {row.city}, {row.state} · {row.years_experience} yrs
                 {row.hourly_rate && ` · $${row.hourly_rate}/hr`}
               </div>
@@ -375,10 +332,10 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
 
             {aligned.length > 0 && (
               <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
                   Criteria aligned
                 </div>
-                <div style={{ fontSize: 13, color: '#0D1B3E' }}>
+                <div style={{ fontSize: 13, color: '#F5F0E8' }}>
                   {aligned.slice(0, 3).join(' · ')}
                 </div>
               </div>
@@ -386,35 +343,34 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
 
             {notAligned.length > 0 && (
               <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 11, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
                   Criteria not aligned
                 </div>
-                <div style={{ fontSize: 13, color: '#B45309' }}>
+                <div style={{ fontSize: 13, color: '#F59E0B' }}>
                   {notAligned.slice(0, 2).join(' · ')}
                 </div>
               </div>
             )}
 
             {unknowns.length > 0 && (
-              <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
                 Data unavailable: {unknowns.map(u => u.replace(/_/g, ' ')).join(', ')}
               </div>
             )}
           </div>
-
           <AlignmentScoreBadge score={score} confidence={confidence} size="md" />
         </div>
       </Link>
 
       {dimensions && (
-        <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 4 }}>
+        <div style={{ marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4 }}>
           <DimensionBreakdown dimensions={dimensions as any} />
         </div>
       )}
 
       {row.gap_analysis && row.gap_analysis.length > 0 && (
-        <div style={{ marginTop: 12, borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+        <div style={{ marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
             Verify in your call
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -422,13 +378,13 @@ function CaregiverMatchCard({ row }: { row: MatchRow }) {
               <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                 <span style={{
                   fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, flexShrink: 0, marginTop: 1,
-                  background: g.priority === 'high' ? '#FEF2F2' : '#FEF9C3',
-                  color: g.priority === 'high' ? '#DC2626' : '#D97706',
-                  border: g.priority === 'high' ? '1px solid #FECACA' : '1px solid #FDE68A',
+                  background: g.priority === 'high' ? 'rgba(226,75,74,0.15)' : 'rgba(245,158,11,0.15)',
+                  color: g.priority === 'high' ? '#E24B4A' : '#F59E0B',
+                  border: g.priority === 'high' ? '1px solid rgba(226,75,74,0.3)' : '1px solid rgba(245,158,11,0.3)',
                 }}>
                   {g.priority === 'high' ? 'High' : 'Check'}
                 </span>
-                <span style={{ fontSize: 12, color: '#475569', lineHeight: 1.5 }}>{g.text}</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{g.text}</span>
               </div>
             ))}
           </div>
