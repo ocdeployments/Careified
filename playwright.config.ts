@@ -52,6 +52,13 @@ export default defineConfig({
       },
       testMatch: '**/agency-pages.spec.ts',
     },
+    {
+      name: 'api-smoke',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: '**/api-smoke.spec.ts',
+    },
   ],
   /*
   webServer: {
