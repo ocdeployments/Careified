@@ -222,13 +222,13 @@ export default function NewReviewPage() {
               top: '100%',
               left: 0,
               right: 0,
-              background: 'white',
-              border: '1px solid #E2E8F0',
+              background: '#0D1B3E',
+              border: '1px solid rgba(255,255,255,0.12)',
               borderRadius: '8px',
               maxHeight: '200px',
               overflowY: 'auto',
               zIndex: 10,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
             }}>
               {filteredCaregivers.map(c => (
                 <div
