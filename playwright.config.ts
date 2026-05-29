@@ -45,6 +45,13 @@ export default defineConfig({
       testMatch: '**/agency-flow.spec.ts',
       dependencies: ['agency-setup'],
     },
+    {
+      name: 'agency-pages',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: '**/agency-pages.spec.ts',
+    },
   ],
   /*
   webServer: {
