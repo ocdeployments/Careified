@@ -1,5 +1,6 @@
 import './globals.css'
 import { DM_Serif_Display, DM_Sans } from 'next/font/google'
+import { Metadata } from 'next'
 import NavbarWrapper from '@/components/nav/NavbarWrapper'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
@@ -19,9 +20,18 @@ const dmSans = DM_Sans({
   display: 'swap',
 })
 
-export const metadata = {
-  title: 'Careified™ — Qualified. Recognized. Verified.',
-  description: 'The decision engine for agencies choosing caregivers. Verified profiles, match scores, and placement outcomes — all in one platform.',
+export const metadata: Metadata = {
+  title: { default: 'Careified', template: '%s | Careified' },
+  description: 'Verified caregiver credentialing and placement for home care agencies across Canada and the US.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://careified.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_CA',
+    siteName: 'Careified',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Careified' }]
+  },
+  robots: { index: true, follow: true },
+  twitter: { card: 'summary_large_image', site: '@careified' },
   icons: {
     icon: '/Careified_logo.svg',
   },

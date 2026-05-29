@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { pool } from '@/lib/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://careified.ca'
+  const baseUrl = 'https://careified.com'
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

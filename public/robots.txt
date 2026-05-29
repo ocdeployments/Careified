@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /agency
+Disallow: /profile/build
+Disallow: /api
+Disallow: /gate
+Sitemap: https://careified.com/sitemap.xml
