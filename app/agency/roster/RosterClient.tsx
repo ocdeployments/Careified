@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Users, Plus, Upload, RefreshCw, Eye, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
 interface Caregiver {
   id: string
@@ -22,23 +23,21 @@ interface Caregiver {
   certifications: { certification: string; expiry_date: string }[]
 }
 
-interface Certification {
-  certification: string
-  expiry_date: string
-}
-
 interface RosterClientProps {
   agencyId: string
   agencyName: string
 }
 
-const N = '#0D1B3E'
-const G = '#C9973A'
-const G_LIGHT = '#E8B86D'
-const WHITE = '#FFFFFF'
-const GREY = '#6B7280'
-const GREEN = '#16A34A'
-const S = "'DM Sans', sans-serif"
+const PAGE_BG = '#080F1E'
+const CARD_BG = 'rgba(255,255,255,0.04)'
+const CARD_BORDER = 'rgba(255,255,255,0.08)'
+const GOLD = '#C9973A'
+const GOLD_LIGHT = '#E8B86D'
+const NAVY = '#0D1B3E'
+const TEXT = '#F5F0E8'
+const MUTED = 'rgba(255,255,255,0.55)'
+const FONT = "'DM Sans', sans-serif"
+const SERIF = "'DM Serif Display', serif"
 
 export default function RosterClient({ agencyId, agencyName }: RosterClientProps) {
   const [caregivers, setCaregivers] = useState<Caregiver[]>([])
@@ -47,9 +46,7 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
   const [success, setSuccess] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'all' | 'onboarding' | 'credentials' | 'availability'>('all')
 
-  useEffect(() => {
-    fetchRoster()
-  }, [agencyId])
+  useEffect(() => { fetchRoster() }, [agencyId])
 
   const fetchRoster = async () => {
     try {
@@ -81,7 +78,7 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
         const data = await res.json()
         setSuccess(data.message || 'Failed to send invite')
       }
-    } catch (err) {
+    } catch {
       setSuccess('Failed to send invite')
     } finally {
       setActionLoading(null)
@@ -91,165 +88,84 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
   const getStatusBadge = (status: string, tokenStatus?: string) => {
     const isPending = status === 'agency_built' || tokenStatus === 'pending'
     const isClaimed = status === 'claimed'
-
-    if (isClaimed) {
-      return { label: 'Profile Claimed', bg: GREEN, color: WHITE }
-    }
-    if (isPending) {
-      return { label: 'Invite Sent', bg: G, color: WHITE }
-    }
-    return { label: 'Link Expired', bg: GREY, color: WHITE }
+    if (isClaimed) return { label: 'Profile Claimed', bg: 'rgba(34,197,94,0.15)', color: '#22C55E', border: 'rgba(34,197,94,0.3)' }
+    if (isPending) return { label: 'Invite Sent', bg: 'rgba(201,151,58,0.15)', color: GOLD, border: 'rgba(201,151,58,0.3)' }
+    return { label: 'Link Expired', bg: 'rgba(255,255,255,0.06)', color: MUTED, border: CARD_BORDER }
   }
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-CA', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })
 
-  const daysUntil = (dateStr: string) => {
-    const diff = new Date(dateStr).getTime() - Date.now()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
-  }
+  const daysUntil = (dateStr: string) =>
+    Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 
-  const isOnboarding = (cg: Caregiver) => {
-    const ps = cg.profile_status
-    return ps === 'stub' || ps === 'invited' || ps === 'incomplete'
-  }
+  const isOnboarding = (cg: Caregiver) =>
+    cg.profile_status === 'stub' || cg.profile_status === 'invited' || cg.profile_status === 'incomplete'
 
-  const hasExpiringCerts = (cg: Caregiver) => {
-    return cg.certifications && cg.certifications.length > 0
-  }
+  const hasExpiringCerts = (cg: Caregiver) =>
+    cg.certifications && cg.certifications.length > 0
 
   const hasRecentAvailabilityChange = (cg: Caregiver) => {
     if (!cg.updated_at) return false
-    const updated = new Date(cg.updated_at)
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    return updated > sevenDaysAgo
-  }
-
-  const getOnboardingChecklist = (cg: Caregiver) => {
-    const isComplete = cg.claim_status === 'claimed'
-    const profilePct = isComplete ? '100%' : '25%'
-    const vsc = 'missing'
-    const refs = 0
-    const ready = isComplete ? 'yes' : 'no'
-    return { profile: profilePct, vsc, refs, ready }
-  }
-
-  const getCertExpiryInfo = (cg: Caregiver) => {
-    if (!cg.certifications || cg.certifications.length === 0) return []
-    return cg.certifications.map(cert => ({
-      name: cert.certification,
-      expiry: cert.expiry_date,
-      days: daysUntil(cert.expiry_date)
-    })).sort((a, b) => a.days - b.days)
-  }
-
-  const getCertColor = (days: number) => {
-    if (days < 14) return '#E24B4A' // red
-    if (days < 30) return '#F59E0B' // amber
-    return '#16A34A' // green
-  }
-
-  const getAvailabilityChange = (cg: Caregiver) => {
-    if (!cg.updated_at) return null
-    const what = cg.availability_status || cg.days_available ? `Changed: ${cg.availability_status || cg.days_available}` : 'Updated'
-    return { what, when: formatDate(cg.updated_at) }
-  }
-
-  const handleNudge = async (caregiverId: string) => {
-    setActionLoading(caregiverId)
-    try {
-      const res = await fetch('/api/roster/regenerate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caregiver_id: caregiverId }),
-      })
-      if (res.ok) {
-        setSuccess('Nudge sent successfully')
-      }
-    } catch {
-      setSuccess('Failed to send nudge')
-    } finally {
-      setActionLoading(null)
-    }
+    return new Date(cg.updated_at) > sevenDaysAgo
   }
 
   if (loading) {
     return (
-      <>
-        <div style={{ background: N, padding: '32px 24px' }}>
+      <div style={{ background: PAGE_BG, minHeight: '100vh', fontFamily: FONT }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '32px 24px', borderBottom: `1px solid ${CARD_BORDER}` }}>
           <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-            <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', margin: '0 0 8px' }}>
-              Your Roster
-            </h1>
+            <h1 style={{ fontFamily: SERIF, fontSize: 32, color: TEXT, margin: '0 0 8px' }}>Your Roster</h1>
           </div>
         </div>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}>
-          <Loader2 size={32} style={{ color: G, animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={32} style={{ color: GOLD, animation: 'spin 1s linear infinite' }} />
           <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
-      </>
+      </div>
     )
   }
 
   return (
-    <>
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } }
-      `}</style>
+    <div style={{ background: PAGE_BG, minHeight: '100vh', fontFamily: FONT }}>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
       {/* Header */}
-      <div style={{ background: N, padding: '32px 24px' }}>
+      <div style={{ background: 'rgba(255,255,255,0.03)', padding: '32px 24px', borderBottom: `1px solid ${CARD_BORDER}` }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', margin: '0 0 8px' }}>
-            Your Roster
-          </h1>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', margin: '0 0 20px' }}>
+          <h1 style={{ fontFamily: SERIF, fontSize: 32, color: TEXT, margin: '0 0 8px' }}>Your Roster</h1>
+          <p style={{ fontSize: 16, color: MUTED, margin: '0 0 20px' }}>
             Manage your caregivers and track their profile claims
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
-            <a
+            <Link
               href="/agency/roster/add"
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
+                display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '10px 20px',
-                background: `linear-gradient(135deg, ${G}, ${G_LIGHT})`,
-                color: N,
-                textDecoration: 'none',
-                borderRadius: 8,
-                fontWeight: 600,
-                fontSize: 14,
+                background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
+                color: NAVY, textDecoration: 'none', borderRadius: 8,
+                fontWeight: 600, fontSize: 14,
               }}
             >
               <Plus size={18} />
               Add Caregiver
-            </a>
-            <a
+            </Link>
+            <Link
               href="/agency/roster/import"
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '10px 20px',
-                background: 'transparent',
-                color: WHITE,
-                textDecoration: 'none',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.3)',
-                fontWeight: 500,
-                fontSize: 14,
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '10px 20px', background: 'transparent',
+                color: TEXT, textDecoration: 'none', borderRadius: 8,
+                border: `1px solid rgba(255,255,255,0.2)`,
+                fontWeight: 500, fontSize: 14,
               }}
             >
               <Upload size={18} />
               Import CSV
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -257,7 +173,7 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
       {/* Main content */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px' }}>
         {/* Tab Bar */}
-        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E2E8F0', marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 0, borderBottom: `1px solid ${CARD_BORDER}`, marginBottom: 24 }}>
           {[
             { key: 'all', label: 'All' },
             { key: 'onboarding', label: 'Onboarding' },
@@ -268,16 +184,11 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
               key={tab.key}
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
               style={{
-                padding: '12px 20px',
-                fontSize: 14,
-                fontWeight: 500,
-                fontFamily: S,
-                background: 'none',
-                border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid #C9973A' : '2px solid transparent',
-                color: activeTab === tab.key ? '#C9973A' : '#64748B',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                padding: '12px 20px', fontSize: 14, fontWeight: 500,
+                fontFamily: FONT, background: 'none', border: 'none',
+                borderBottom: activeTab === tab.key ? `2px solid ${GOLD}` : '2px solid transparent',
+                color: activeTab === tab.key ? GOLD : MUTED,
+                cursor: 'pointer', transition: 'all 0.15s ease',
               }}
             >
               {tab.label}
@@ -288,11 +199,10 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
         {success && (
           <div style={{
             padding: '12px 16px',
-            background: GREEN,
-            color: WHITE,
-            borderRadius: 8,
-            marginBottom: 20,
-            fontSize: 14,
+            background: 'rgba(34,197,94,0.15)',
+            color: '#22C55E',
+            border: '1px solid rgba(34,197,94,0.3)',
+            borderRadius: 8, marginBottom: 20, fontSize: 14,
           }}>
             {success}
           </div>
@@ -300,69 +210,56 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
 
         {caregivers.length === 0 ? (
           <div style={{
-            background: WHITE,
-            borderRadius: 16,
-            padding: '48px 24px',
-            textAlign: 'center',
-            border: '1px solid #E2E8F0',
+            background: CARD_BG, borderRadius: 16,
+            padding: '48px 24px', textAlign: 'center',
+            border: `1px solid ${CARD_BORDER}`,
           }}>
-            <Users size={48} style={{ color: '#CBD5E1', marginBottom: 16 }} />
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, color: N, margin: '0 0 8px' }}>
+            <Users size={48} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: 16 }} />
+            <h2 style={{ fontFamily: SERIF, fontSize: 20, color: TEXT, margin: '0 0 8px' }}>
               No caregivers yet
             </h2>
-            <p style={{ color: GREY, fontSize: 14, margin: '0 0 24px' }}>
+            <p style={{ color: MUTED, fontSize: 14, margin: '0 0 24px' }}>
               Add your first caregiver or import your existing roster.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <a
+              <Link
                 href="/agency/roster/add"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
                   padding: '10px 20px',
-                  background: `linear-gradient(135deg, ${G}, ${G_LIGHT})`,
-                  color: N,
-                  textDecoration: 'none',
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  fontSize: 14,
+                  background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
+                  color: NAVY, textDecoration: 'none', borderRadius: 8,
+                  fontWeight: 600, fontSize: 14,
                 }}
               >
                 <Plus size={18} />
                 Add Caregiver
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/agency/roster/import"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 20px',
-                  background: 'transparent',
-                  color: N,
-                  textDecoration: 'none',
-                  borderRadius: 8,
-                  border: `1px solid ${N}`,
-                  fontWeight: 500,
-                  fontSize: 14,
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '10px 20px', background: 'transparent',
+                  color: TEXT, textDecoration: 'none', borderRadius: 8,
+                  border: `1px solid rgba(255,255,255,0.2)`,
+                  fontWeight: 500, fontSize: 14,
                 }}
               >
                 <Upload size={18} />
                 Import CSV
-              </a>
+              </Link>
             </div>
           </div>
         ) : (
-          <div style={{ background: WHITE, borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+          <div style={{ background: CARD_BG, borderRadius: 16, border: `1px solid ${CARD_BORDER}`, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Name</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Role</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Added</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: GREY, textTransform: 'uppercase' }}>Actions</th>
+                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${CARD_BORDER}` }}>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase' }}>Name</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase' }}>Role</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase' }}>Added</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -375,66 +272,51 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
                 }).map((cg) => {
                   const badge = getStatusBadge(cg.claim_status, cg.token_status)
                   return (
-                    <tr key={cg.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <tr key={cg.id} style={{ borderBottom: `1px solid rgba(255,255,255,0.05)` }}>
                       <td style={{ padding: '16px 20px' }}>
-                        <div style={{ fontWeight: 600, color: N, fontSize: 14 }}>
+                        <div style={{ fontWeight: 600, color: TEXT, fontSize: 14 }}>
                           {cg.first_name} {cg.last_name}
                         </div>
-                        <div style={{ fontSize: 12, color: GREY }}>{cg.email}</div>
+                        <div style={{ fontSize: 12, color: MUTED }}>{cg.email}</div>
                       </td>
-                      <td style={{ padding: '16px 20px', fontSize: 14, color: '#475569' }}>
+                      <td style={{ padding: '16px 20px', fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
                         {cg.claim_status === 'claimed' ? 'Active' : 'Pending'}
                       </td>
-                      <td style={{ padding: '16px 20px', fontSize: 14, color: GREY }}>
+                      <td style={{ padding: '16px 20px', fontSize: 14, color: MUTED }}>
                         {formatDate(cg.created_at)}
                       </td>
                       <td style={{ padding: '16px 20px' }}>
                         <span style={{
-                          display: 'inline-block',
-                          padding: '4px 12px',
-                          borderRadius: 20,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          background: badge.bg,
-                          color: badge.color,
+                          display: 'inline-block', padding: '4px 12px', borderRadius: 20,
+                          fontSize: 12, fontWeight: 600,
+                          background: badge.bg, color: badge.color, border: `1px solid ${badge.border}`,
                         }}>
                           {badge.label}
                         </span>
                       </td>
                       <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                         {cg.claim_status === 'claimed' ? (
-                          <a
+                          <Link
                             href={`/profile/${cg.id}`}
                             style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 6,
-                              padding: '6px 12px',
-                              fontSize: 13,
-                              color: N,
-                              textDecoration: 'none',
-                              fontWeight: 500,
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '6px 12px', fontSize: 13,
+                              color: GOLD, textDecoration: 'none', fontWeight: 500,
                             }}
                           >
                             <Eye size={16} />
                             View Profile
-                          </a>
+                          </Link>
                         ) : (
                           <button
                             onClick={() => handleResendInvite(cg.id)}
                             disabled={actionLoading === cg.id}
                             style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 6,
-                              padding: '6px 12px',
-                              fontSize: 13,
-                              color: G,
-                              background: 'transparent',
-                              border: 'none',
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '6px 12px', fontSize: 13,
+                              color: GOLD, background: 'transparent', border: 'none',
                               cursor: actionLoading === cg.id ? 'not-allowed' : 'pointer',
-                              fontWeight: 500,
-                              opacity: actionLoading === cg.id ? 0.6 : 1,
+                              fontWeight: 500, opacity: actionLoading === cg.id ? 0.6 : 1,
                             }}
                           >
                             {actionLoading === cg.id ? (
@@ -454,6 +336,6 @@ export default function RosterClient({ agencyId, agencyName }: RosterClientProps
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }
