@@ -51,8 +51,6 @@ async function scoreCallTranscript(
        WHERE id = $4`,
       [result.overallScore, JSON.stringify(result), result.recommendation, callId]
     )
-    console.log('SCORING COMPLETE:', { callId, score: result.overallScore, recommendation: result.recommendation })
-
     // Check for opt-out phrases in transcript
     const optOutPhrases = [
       'remove me', 'take me off', 'do not call',
@@ -80,7 +78,6 @@ async function scoreCallTranscript(
          WHERE id = $1`,
         [callId]
       )
-      console.log('OPT OUT RECORDED:', phoneNumber)
     }
   } catch (error) {
     console.error('SCORE CALL ERROR:', error)
@@ -122,13 +119,6 @@ export async function POST(req: NextRequest) {
       : null
     const endedReason = message?.endedReason || null
 
-    console.log('CALL ENDED:', {
-      vapiCallId,
-      duration,
-      endedReason,
-      hasTranscript: !!transcript
-    })
-
     if (!vapiCallId) {
       console.error('No vapiCallId in webhook payload')
       return NextResponse.json({ received: true })
@@ -152,7 +142,6 @@ export async function POST(req: NextRequest) {
        WHERE id = $3`,
       [transcript, duration, callRecord.id]
     )
-    console.log('CALL RECORD UPDATED:', callRecord.id)
 
     await pool.query(
       `UPDATE "AIRecruitCampaign"
@@ -160,7 +149,6 @@ export async function POST(req: NextRequest) {
        WHERE id = $1`,
       [callRecord.campaignId]
     )
-    console.log('CAMPAIGN COUNTERS UPDATED')
 
     // Get agencyId for scoring and opt-out detection
     const { rows: campaignRows } = await pool.query(
@@ -300,7 +288,6 @@ export async function POST(req: NextRequest) {
           ]
         )
 
-        console.log('REFERENCE CALL SCORED:', { refCallId: refCall.id, wouldReengage: score.would_reengage })
       }
     }
 
@@ -405,7 +392,6 @@ export async function POST(req: NextRequest) {
           ]
         )
 
-        console.log('EMPLOYER CALL SCORED:', { empCallId: empCall.id, employmentConfirmed: score.employment_confirmed })
       }
     }
 
