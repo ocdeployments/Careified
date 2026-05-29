@@ -272,12 +272,10 @@ export async function POST(req: NextRequest) {
 
     // TODO: Write employers to separate table (caregiver_work_history) - follow-up commit
     if (parsed.employers?.length) {
-      console.log('[resume] employers not written:', parsed.employers.length, 'entries')
     }
 
     // TODO: Write certifications to caregiver_certifications table - follow-up commit
     if (parsed.certifications?.length) {
-      console.log('[resume] certifications not written to caregiver_certifications:', parsed.certifications.length, 'entries')
     }
 
     return NextResponse.json({
