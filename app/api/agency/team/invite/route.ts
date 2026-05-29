@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
       [agency.id, email, role || 'coordinator', first_name, last_name]
     )
 
-    console.log(`[TEAM INVITE] Email: ${email}, Role: ${role || 'coordinator'}, Agency: ${agency.id}`)
 
     return NextResponse.json({
       success: true,
