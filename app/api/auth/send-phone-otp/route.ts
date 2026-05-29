@@ -82,7 +82,6 @@ export async function POST(request: NextRequest) {
     const isDev = process.env.NODE_ENV === 'development'
 
     if (isDev) {
-      console.log(`[DEV] OTP for ${formatPhoneForDisplay(phoneNumber)}: ${code}`)
       return NextResponse.json({
         success: true,
         devCode: code, // Remove in production
