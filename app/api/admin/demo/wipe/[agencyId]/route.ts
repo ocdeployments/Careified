@@ -41,7 +41,6 @@ export async function POST(
     await pool.query('DELETE FROM caregivers WHERE source_agency_id = $1', [agencyId])
     await pool.query('DELETE FROM agencies WHERE id = $1', [agencyId])
 
-    console.log(`Wiped demo agency: ${agencyName} (${agencyId})`)
 
     return NextResponse.json({ success: true, message: `Demo agency ${agencyName} wiped` })
   } catch (error) {
