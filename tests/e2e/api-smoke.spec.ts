@@ -18,7 +18,10 @@ test.describe('API Routes - Unauthenticated', () => {
 
   for (const route of PROTECTED_ROUTES) {
     test(`${route.method} ${route.path} - should return 401`, async ({ request }) => {
-      const response = await request.get(route.path)
+      // Create a fresh context with no cookies to ensure unauthenticated request
+      const freshContext = await request.newContext()
+      const response = await freshContext.get(route.path)
+      await freshContext.dispose()
 
       // Assert: 401, not 200 or 500
       expect(response.status()).toBe(401)
