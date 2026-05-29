@@ -2,6 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Contact Careified',
+  description: 'Get in touch with the Careified team. We support agencies and caregivers across Ontario and the US.',
+}
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)

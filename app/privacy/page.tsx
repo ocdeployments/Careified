@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  robots: { index: false },
+}
 
 export default function PrivacyPage() {
   return (

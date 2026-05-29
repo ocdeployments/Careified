@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'For Families — Find Trusted Home Care',
+  description: 'Careified helps families understand caregiver credentials and find agencies they can trust.',
+}
 
 export default function ForFamiliesPage() {
   return (

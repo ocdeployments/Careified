@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About Careified',
+  description: 'Careified was built to fix broken caregiver hiring — credential chaos, slow screening, no accountability. We make verified reputations visible.',
+}
 
 export default function AboutPage() {
   return (
