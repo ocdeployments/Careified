@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Users, Plus, MapPin, Clock } from 'lucide-react'
+import { Users, Plus, MapPin } from 'lucide-react'
 import AgencyShell from '@/components/shells/AgencyShell'
 
 type ClientSummary = {
@@ -18,11 +18,11 @@ type ClientSummary = {
   matched_caregiver_id: string | null
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  active:   'bg-green-50 text-green-700 border-green-200',
-  pending:  'bg-amber-50 text-amber-700 border-amber-200',
-  matched:  'bg-blue-50 text-blue-700 border-blue-200',
-  closed:   'bg-slate-100 text-slate-500 border-slate-200',
+const STATUS_STYLES: Record<string, { bg: string; color: string; border: string }> = {
+  active:  { bg: 'rgba(34,197,94,0.15)',   color: '#22C55E', border: 'rgba(34,197,94,0.3)' },
+  matched: { bg: 'rgba(99,102,241,0.15)',  color: '#818CF8', border: 'rgba(99,102,241,0.3)' },
+  pending: { bg: 'rgba(245,158,11,0.15)',  color: '#F59E0B', border: 'rgba(245,158,11,0.3)' },
+  closed:  { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: 'rgba(255,255,255,0.1)' },
 }
 
 export default function ClientsListPage() {
@@ -53,13 +53,19 @@ export default function ClientsListPage() {
       subtitle="Manage client needs and find matching caregivers"
     >
       {/* Header actions */}
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-slate-500">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
           {loading ? 'Loading...' : `${clients.length} client${clients.length !== 1 ? 's' : ''}`}
         </p>
         <Link
           href="/agency/clients/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-gold to-gold-warm text-navy text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '8px 16px', borderRadius: 12,
+            background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+            color: '#0D1B3E', fontSize: 13, fontWeight: 700,
+            textDecoration: 'none',
+          }}
         >
           <Plus size={15} />
           Add Client
@@ -68,20 +74,20 @@ export default function ClientsListPage() {
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-slate-200 animate-pulse" aria-hidden="true" />
+            <div key={i} style={{ height: 96, borderRadius: 16, background: 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} aria-hidden="true" />
           ))}
         </div>
       )}
 
       {/* Error state */}
       {!loading && error && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm text-red-600 mb-4">{error}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: '#E24B4A', marginBottom: 16 }}>{error}</p>
           <button
             onClick={fetchClients}
-            className="px-5 py-2.5 rounded-xl bg-navy text-white text-sm font-semibold hover:bg-navy-light transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+            style={{ padding: '10px 20px', borderRadius: 12, background: '#1E3A8A', color: '#F5F0E8', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}
           >
             Try again
           </button>
@@ -90,15 +96,21 @@ export default function ClientsListPage() {
 
       {/* Empty state */}
       {!loading && !error && clients.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-slate-100">
-          <Users size={32} className="text-slate-300 mb-4" />
-          <h2 className="text-base font-bold text-navy mb-2">No clients yet</h2>
-          <p className="text-sm text-slate-500 mb-6 max-w-xs">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', textAlign: 'center', background: 'rgba(255,255,255,0.04)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Users size={32} color="rgba(255,255,255,0.2)" style={{ marginBottom: 16 }} />
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#F5F0E8', marginBottom: 8 }}>No clients yet</h2>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 24, maxWidth: 280 }}>
             Add your first client to start finding matched caregivers.
           </p>
           <Link
             href="/agency/clients/new"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-br from-gold to-gold-warm text-navy text-sm font-bold hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 24px', borderRadius: 12,
+              background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+              color: '#0D1B3E', fontSize: 13, fontWeight: 700,
+              textDecoration: 'none',
+            }}
           >
             <Plus size={15} />
             Add First Client
@@ -108,40 +120,46 @@ export default function ClientsListPage() {
 
       {/* Client list */}
       {!loading && !error && clients.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {clients.map(c => {
-            const statusCls = STATUS_STYLES[c.status] ?? STATUS_STYLES.pending
+            const st = STATUS_STYLES[c.status] ?? STATUS_STYLES.pending
             const location = [c.city, c.state].filter(Boolean).join(', ')
             return (
               <div
                 key={c.id}
-                className="bg-white rounded-2xl border border-slate-100 p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-gold/30 hover:shadow-sm transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.04)', borderRadius: 16,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  padding: '16px 20px', display: 'flex',
+                  alignItems: 'center', gap: 16,
+                  transition: 'border-color 0.15s',
+                }}
               >
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                  <Users size={18} className="text-slate-400" />
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Users size={18} color="rgba(255,255,255,0.3)" />
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[15px] font-semibold text-navy">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: '#F5F0E8' }}>
                       {c.client_first_name || 'Unnamed client'}
                       {c.client_age ? `, age ${c.client_age}` : ''}
                     </span>
-                    <span className={`inline-block px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wide ${statusCls}`}>
+                    <span style={{
+                      padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700,
+                      letterSpacing: '0.06em', textTransform: 'uppercase',
+                      background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+                    }}>
                       {c.status}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                    {c.primary_condition && (
-                      <span className="text-xs text-slate-500">{c.primary_condition}</span>
-                    )}
-                    {c.placement_type && (
-                      <span className="text-xs text-slate-500">{c.placement_type}</span>
-                    )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 12px', marginTop: 4 }}>
+                    {c.primary_condition && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{c.primary_condition}</span>}
+                    {c.placement_type && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{c.placement_type}</span>}
                     {location && (
-                      <span className="flex items-center gap-1 text-xs text-slate-500">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
                         <MapPin size={10} />
                         {location}
                       </span>
@@ -150,25 +168,25 @@ export default function ClientsListPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   {c.matched_caregiver_id ? (
                     <Link
                       href={`/profile/${c.matched_caregiver_id}`}
-                      className="px-4 py-2 rounded-xl bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                      style={{ padding: '7px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.15)', color: '#22C55E', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(34,197,94,0.3)' }}
                     >
                       View Match
                     </Link>
                   ) : (
                     <Link
                       href={`/agency/search?clientId=${c.id}`}
-                      className="px-4 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                      style={{ padding: '7px 14px', borderRadius: 10, background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: '#0D1B3E', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}
                     >
                       Find Match
                     </Link>
                   )}
                   <Link
                     href={`/agency/clients/${c.id}`}
-                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-500 text-xs font-semibold hover:bg-slate-50 transition-colors focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
+                    style={{ padding: '7px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)' }}
                   >
                     Details
                   </Link>
