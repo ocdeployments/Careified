@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
-const W = '#FFFFFF'
-const S = '#F8F9FC'
-const B = '#E2E8F0'
-const M = '#64748B'
+const W = '#F5F0E8'
+const S = '#080F1E'
+const B = 'rgba(255,255,255,0.08)'
+const M = 'rgba(255,255,255,0.55)'
+const C = 'rgba(255,255,255,0.04)'
 
 interface DashboardData {
   stats: {
@@ -66,35 +67,33 @@ export default function IntelligenceClient() {
         <div style={{ display: 'grid', gap: 24 }}>
           {/* Section A: Key numbers */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: N }}>{stats.roster_total ?? 0}</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.roster_total ?? 0}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>Caregivers on platform</div>
             </div>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: N }}>{pipelineTotal}</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{pipelineTotal}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>Active pipeline</div>
             </div>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: N }}>{pipeline?.placed ?? 0}</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{pipeline?.placed ?? 0}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>Placements confirmed</div>
             </div>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: N }}>{stats.airecruit_active ?? 0}</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.airecruit_active ?? 0}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>AIRecruit campaigns</div>
             </div>
           </div>
 
           {/* Section B: What Careified caught */}
-          <div style={{ background: W, borderRadius: 12, border: `1px solid ${B}`, borderLeft: `4px solid ${G}`, padding: 24 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 16 }}>Careified is monitoring your roster</div>
+          <div style={{ background: C, borderRadius: 12, border: `1px solid ${B}`, borderLeft: `4px solid ${G}`, padding: 24 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: W, marginBottom: 16 }}>Careified is monitoring your roster</div>
             {isHealthy ? (
-              <div style={{ fontSize: 13, color: '#16A34A', padding: '6px 0' }}>✓ Everything looks healthy — no issues detected</div>
+              <div style={{ fontSize: 13, color: '#22C55E', padding: '6px 0' }}>✓ Everything looks healthy — no issues detected</div>
             ) : (
               <div style={{ display: 'grid', gap: 4 }}>
                 {signals.map((signal, i) => (
-                  <div key={i} style={{ fontSize: 13, color: N, padding: '6px 0', borderBottom: i < signals.length - 1 ? `1px solid ${B}` : 'none' }}>
-                    {signal}
-                  </div>
+                  <div key={i} style={{ fontSize: 13, color: W, padding: '6px 0', borderBottom: i < signals.length - 1 ? `1px solid ${B}` : 'none' }}>{signal}</div>
                 ))}
               </div>
             )}
@@ -102,8 +101,8 @@ export default function IntelligenceClient() {
 
           {/* Section C: Platform usage */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 16 }}>Roster activity</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: W, marginBottom: 16 }}>Roster activity</div>
               <div style={{ display: 'grid', gap: 12 }}>
                 {[
                   { label: 'Total caregivers', value: stats.roster_total ?? 0 },
@@ -113,13 +112,13 @@ export default function IntelligenceClient() {
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: M }}>{item.label}</span>
-                    <span style={{ fontWeight: 600, color: N }}>{item.value}</span>
+                    <span style={{ fontWeight: 600, color: W }}>{item.value}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div style={{ background: W, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: N, marginBottom: 16 }}>Client activity</div>
+            <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: W, marginBottom: 16 }}>Client activity</div>
               <div style={{ display: 'grid', gap: 12 }}>
                 {[
                   { label: 'Total clients', value: stats.clients_total ?? 0 },
@@ -128,7 +127,7 @@ export default function IntelligenceClient() {
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: M }}>{item.label}</span>
-                    <span style={{ fontWeight: 600, color: N }}>{item.value}</span>
+                    <span style={{ fontWeight: 600, color: W }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -145,7 +144,7 @@ export default function IntelligenceClient() {
 
     // Placeholder for other tabs
     return (
-      <div style={{ padding: 64, textAlign: 'center', background: W, borderRadius: 12, border: `1px solid ${B}` }}>
+      <div style={{ padding: 64, textAlign: 'center', background: C, borderRadius: 12, border: `1px solid ${B}` }}>
         <div style={{ fontSize: 14, color: M }}>Coming soon</div>
       </div>
     )
@@ -165,7 +164,7 @@ export default function IntelligenceClient() {
       </div>
 
       {/* Tab Bar */}
-      <div style={{ background: W, borderBottom: `1px solid ${B}` }}>
+      <div style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${B}` }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', gap: 0 }}>
           {[
             { key: 'roi', label: 'ROI summary' },
@@ -183,7 +182,7 @@ export default function IntelligenceClient() {
                 background: 'none',
                 border: 'none',
                 borderBottom: activeTab === tab.key ? '2px solid #C9973A' : '2px solid transparent',
-                color: activeTab === tab.key ? '#C9973A' : '#64748B',
+                color: activeTab === tab.key ? '#C9973A' : M,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}

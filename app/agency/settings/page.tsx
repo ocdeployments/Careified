@@ -5,6 +5,9 @@ import { toast } from 'sonner'
 const N = '#0D1B3E'
 const G = '#C9973A'
 const S = "'DM Sans', sans-serif"
+const M = 'rgba(255,255,255,0.55)'
+const B = 'rgba(255,255,255,0.08)'
+const C = 'rgba(255,255,255,0.04)'
 
 const CA_PROVINCES = ['Alberta','British Columbia','Manitoba','New Brunswick',
   'Newfoundland and Labrador','Nova Scotia','Ontario','Prince Edward Island',
@@ -23,8 +26,8 @@ const CURRENT_TOOLS = ['AlayaCare','ClearCare','WellSky','HHAeXchange',
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: 10,
-  border: '1.5px solid rgba(255,255,255,0.08)', fontSize: 14, color: '#F5F0E8',
-  outline: 'none', boxSizing: 'border-box', fontFamily: S, background: 'rgba(255,255,255,0.04)',
+  border: '1.5px solid rgba(255,255,255,0.12)', fontSize: 14, color: '#F5F0E8',
+  outline: 'none', boxSizing: 'border-box', fontFamily: S, background: 'rgba(255,255,255,0.06)',
 }
 
 function toggle(arr: string[], val: string) {
@@ -141,14 +144,14 @@ export default function AgencySettingsPage() {
     }
   }
 
-  if (loading) return <div style={{ padding: 40, fontFamily: S, color: '#64748B' }}>Loading...</div>
-  if (!agency) return <div style={{ padding: 40, fontFamily: S, color: '#64748B' }}>Agency not found</div>
+  if (loading) return <div style={{ padding: 40, fontFamily: S, color: M }}>Loading...</div>
+  if (!agency) return <div style={{ padding: 40, fontFamily: S, color: M }}>Agency not found</div>
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: S, padding: '32px 24px' }}>
+    <div style={{ minHeight: '100vh', background: '#080F1E', fontFamily: S, padding: '32px 24px' }}>
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: N, margin: '0 0 4px' }}>Agency Settings</h1>
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 28px' }}>Changes take effect immediately.</p>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', margin: '0 0 4px' }}>Agency Settings</h1>
+        <p style={{ fontSize: 13, color: M, margin: '0 0 28px' }}>Changes take effect immediately.</p>
 
         {/* Identity */}
         <Section title="Identity" desc="How your agency appears to caregivers and on the platform.">
@@ -159,22 +162,15 @@ export default function AgencySettingsPage() {
             { label: 'Website URL', key: 'website_url', placeholder: 'https://youragency.ca' },
           ].map(f => (
             <div key={f.key} style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>{f.label}</label>
-              <input
-                style={inp}
-                defaultValue={agency[f.key] || ''}
-                placeholder={f.placeholder}
-                onBlur={e => save({ [f.key]: e.target.value })}
-              />
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>{f.label}</label>
+              <input style={inp} defaultValue={agency[f.key] || ''} placeholder={f.placeholder} onBlur={e => save({ [f.key]: e.target.value })} />
             </div>
           ))}
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>Brand colour</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Brand colour</label>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input type="color" defaultValue={agency.brand_color || '#0D1B3E'}
-                onBlur={e => save({ brand_color: e.target.value })}
-                style={{ width: 44, height: 44, borderRadius: 8, border: '1.5px solid #E2E8F0', cursor: 'pointer', padding: 2 }} />
-              <span style={{ fontSize: 12, color: '#64748B' }}>Used in caregiver communications and AIRecruit calls</span>
+              <input type="color" defaultValue={agency.brand_color || '#0D1B3E'} onBlur={e => save({ brand_color: e.target.value })} style={{ width: 44, height: 44, borderRadius: 8, border: '1.5px solid rgba(255,255,255,0.15)', cursor: 'pointer', padding: 2 }} />
+              <span style={{ fontSize: 12, color: M }}>Used in caregiver communications and AIRecruit calls</span>
             </div>
           </div>
         </Section>
@@ -183,11 +179,11 @@ export default function AgencySettingsPage() {
         <Section title="Operations" desc="Where you operate and what services you offer.">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>City</label>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>City</label>
               <input style={inp} defaultValue={agency.city || ''} onBlur={e => save({ city: e.target.value })} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>Province</label>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Province</label>
               <select style={inp} defaultValue={agency.state || ''} onBlur={e => save({ state: e.target.value })}>
                 <option value="">Select...</option>
                 {CA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
@@ -195,35 +191,29 @@ export default function AgencySettingsPage() {
             </div>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 8 }}>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 8 }}>
               Service areas
-              <span style={{ fontSize: 11, color: '#64748B', fontWeight: 400, marginLeft: 8 }}>Only caregivers in these areas will appear in your search</span>
+              <span style={{ fontSize: 11, color: M, fontWeight: 400, marginLeft: 8 }}>Only caregivers in these areas will appear in your search</span>
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {CA_CITIES.map(c => (
-                <Chip key={c} label={c}
-                  active={(agency.service_areas || []).includes(c)}
-                  onClick={() => {
-                    const updated = toggle(agency.service_areas || [], c)
-                    setAgency((a: any) => ({ ...a, service_areas: updated }))
-                    save({ service_areas: updated })
-                  }}
-                />
+                <Chip key={c} label={c} active={(agency.service_areas || []).includes(c)} onClick={() => {
+                  const updated = toggle(agency.service_areas || [], c)
+                  setAgency((a: any) => ({ ...a, service_areas: updated }))
+                  save({ service_areas: updated })
+                }} />
               ))}
             </div>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 8 }}>Care types offered</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 8 }}>Care types offered</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {CARE_TYPES.map(t => (
-                <Chip key={t} label={t}
-                  active={(agency.care_types || []).includes(t)}
-                  onClick={() => {
-                    const updated = toggle(agency.care_types || [], t)
-                    setAgency((a: any) => ({ ...a, care_types: updated }))
-                    save({ care_types: updated })
-                  }}
-                />
+                <Chip key={t} label={t} active={(agency.care_types || []).includes(t)} onClick={() => {
+                  const updated = toggle(agency.care_types || [], t)
+                  setAgency((a: any) => ({ ...a, care_types: updated }))
+                  save({ care_types: updated })
+                }} />
               ))}
             </div>
           </div>
@@ -232,26 +222,22 @@ export default function AgencySettingsPage() {
         {/* Team */}
         <Section title="Team & tools" desc="Helps us tailor AIRecruit and workflow features.">
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>Number of care coordinators</label>
-            <select style={{ ...inp, maxWidth: 200 }} defaultValue={agency.coordinator_count || ''}
-              onBlur={e => save({ coordinator_count: e.target.value ? parseInt(e.target.value) : null })}>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Number of care coordinators</label>
+            <select style={{ ...inp, maxWidth: 200 }} defaultValue={agency.coordinator_count || ''} onBlur={e => save({ coordinator_count: e.target.value ? parseInt(e.target.value) : null })}>
               <option value="">Select...</option>
               {['1','2','3','4','5','6','7','8','9','10'].map(n => <option key={n} value={n}>{n}</option>)}
               <option value="11">10+</option>
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 8 }}>Scheduling / ATS software</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 8 }}>Scheduling / ATS software</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {CURRENT_TOOLS.map(t => (
-                <Chip key={t} label={t}
-                  active={(agency.current_tools || []).includes(t)}
-                  onClick={() => {
-                    const updated = toggle(agency.current_tools || [], t)
-                    setAgency((a: any) => ({ ...a, current_tools: updated }))
-                    save({ current_tools: updated })
-                  }}
-                />
+                <Chip key={t} label={t} active={(agency.current_tools || []).includes(t)} onClick={() => {
+                  const updated = toggle(agency.current_tools || [], t)
+                  setAgency((a: any) => ({ ...a, current_tools: updated }))
+                  save({ current_tools: updated })
+                }} />
               ))}
             </div>
           </div>
@@ -267,68 +253,61 @@ export default function AgencySettingsPage() {
             { label: 'Background check provider', key: 'background_check_provider', placeholder: 'e.g. Certn, Sterling, in-house' },
           ].map(f => (
             <div key={f.key} style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>{f.label}</label>
-              <input style={inp} defaultValue={agency[f.key] || ''} placeholder={f.placeholder}
-                onBlur={e => save({ [f.key]: e.target.value })} />
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>{f.label}</label>
+              <input style={inp} defaultValue={agency[f.key] || ''} placeholder={f.placeholder} onBlur={e => save({ [f.key]: e.target.value })} />
             </div>
           ))}
         </Section>
 
         {/* Billing */}
         <Section title="Billing" desc="Subscription and payment management.">
-          <div style={{ padding: '20px', background: '#FDF6EC', borderRadius: 12, border: '1px solid #E8B86D' }}>
-            <p style={{ fontSize: 14, color: '#0D1B3E', marginBottom: 12, fontWeight: 500 }}>
-              Billing and subscription management coming June 2026.
-            </p>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 12 }}>
-              During beta: all features included free.
-            </p>
-            <p style={{ fontSize: 13, color: '#64748B' }}>
-              Questions? Contact <a href="mailto:hello@careified.ca" style={{ color: '#C9973A' }}>hello@careified.ca</a>
-            </p>
+          <div style={{ padding: 20, background: 'rgba(201,151,58,0.1)', borderRadius: 12, border: '1px solid rgba(201,151,58,0.25)' }}>
+            <p style={{ fontSize: 14, color: '#F5F0E8', marginBottom: 12, fontWeight: 500 }}>Billing and subscription management coming June 2026.</p>
+            <p style={{ fontSize: 13, color: M, marginBottom: 12 }}>During beta: all features included free.</p>
+            <p style={{ fontSize: 13, color: M }}>Questions? Contact <a href="mailto:hello@careified.ca" style={{ color: '#C9973A' }}>hello@careified.ca</a></p>
           </div>
         </Section>
 
         {/* Team Members */}
         <Section title="Team Members" desc="Invite team members to share access. Owner cannot be removed.">
           {team.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>Just you for now. Invite a coordinator to share the workload.</p>
+            <p style={{ fontSize: 13, color: M, marginBottom: 20 }}>Just you for now. Invite a coordinator to share the workload.</p>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 20 }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Name</th>
-                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Email</th>
-                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Role</th>
-                  <th style={{ textAlign: 'left', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Status</th>
-                  <th style={{ textAlign: 'right', padding: '8px 0', color: '#64748B', fontWeight: 500 }}>Action</th>
+                <tr style={{ borderBottom: `1px solid ${B}` }}>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: M, fontWeight: 500 }}>Name</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: M, fontWeight: 500 }}>Email</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: M, fontWeight: 500 }}>Role</th>
+                  <th style={{ textAlign: 'left', padding: '8px 0', color: M, fontWeight: 500 }}>Status</th>
+                  <th style={{ textAlign: 'right', padding: '8px 0', color: M, fontWeight: 500 }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                  <td style={{ padding: '12px 0', fontWeight: 500, color: N }}>{agency?.first_name} {agency?.last_name}</td>
-                  <td style={{ padding: '12px 0', color: '#64748B' }}>{agency?.email}</td>
-                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#FDF6EC', color: '#92400E' }}>Owner</span></td>
-                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#DCFCE7', color: '#166534' }}>Active</span></td>
+                <tr style={{ borderBottom: `1px solid ${B}` }}>
+                  <td style={{ padding: '12px 0', fontWeight: 500, color: '#F5F0E8' }}>{agency?.first_name} {agency?.last_name}</td>
+                  <td style={{ padding: '12px 0', color: M }}>{agency?.email}</td>
+                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: 'rgba(201,151,58,0.15)', color: '#C9973A' }}>Owner</span></td>
+                  <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>Active</span></td>
                   <td style={{ padding: '12px 0', textAlign: 'right' }}>-</td>
                 </tr>
                 {team.map(m => (
-                  <tr key={m.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '12px 0', fontWeight: 500, color: N }}>{m.first_name} {m.last_name}</td>
-                    <td style={{ padding: '12px 0', color: '#64748B' }}>{m.email}</td>
-                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.role === 'coordinator' ? '#0D1B3E' : '#F1F5F9', color: m.role === 'coordinator' ? 'white' : '#64748B' }}>{m.role === 'coordinator' ? 'Coordinator' : 'Viewer'}</span></td>
-                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.status === 'active' ? '#DCFCE7' : m.status === 'pending' ? '#FEF3C7' : '#FEE2E2', color: m.status === 'active' ? '#166534' : m.status === 'pending' ? '#92400E' : '#DC2626' }}>{m.status === 'active' ? 'Active' : m.status === 'pending' ? 'Pending' : 'Suspended'}</span></td>
-                    <td style={{ padding: '12px 0', textAlign: 'right' }}><button onClick={() => remove(m.id, m.first_name + ' ' + m.last_name)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', color: '#DC2626', fontSize: 12, cursor: 'pointer' }}>Remove</button></td>
+                  <tr key={m.id} style={{ borderBottom: `1px solid ${B}` }}>
+                    <td style={{ padding: '12px 0', fontWeight: 500, color: '#F5F0E8' }}>{m.first_name} {m.last_name}</td>
+                    <td style={{ padding: '12px 0', color: M }}>{m.email}</td>
+                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.role === 'coordinator' ? '#0D1B3E' : 'rgba(255,255,255,0.06)', color: m.role === 'coordinator' ? 'white' : M }}>{m.role === 'coordinator' ? 'Coordinator' : 'Viewer'}</span></td>
+                    <td style={{ padding: '12px 0' }}><span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: m.status === 'active' ? 'rgba(34,197,94,0.15)' : m.status === 'pending' ? 'rgba(202,138,4,0.15)' : 'rgba(239,68,68,0.15)', color: m.status === 'active' ? '#22C55E' : m.status === 'pending' ? '#CA8A04' : '#EF4444' }}>{m.status === 'active' ? 'Active' : m.status === 'pending' ? 'Pending' : 'Suspended'}</span></td>
+                    <td style={{ padding: '12px 0', textAlign: 'right' }}><button onClick={() => remove(m.id, m.first_name + ' ' + m.last_name)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#EF4444', fontSize: 12, cursor: 'pointer' }}>Remove</button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
           <form onSubmit={invite} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>First name</label><input required value={inviteForm.first_name} onChange={e => setInviteForm(f => ({ ...f, first_name: e.target.value }))} style={inp} placeholder="Jane" /></div>
-            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Last name</label><input required value={inviteForm.last_name} onChange={e => setInviteForm(f => ({ ...f, last_name: e.target.value }))} style={inp} placeholder="Smith" /></div>
-            <div style={{ gridColumn: '1 / -1' }}><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Email</label><input required type="email" value={inviteForm.email} onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} style={inp} placeholder="jane@agency.com" /></div>
-            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: N, marginBottom: 4 }}>Role</label><select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))} style={inp}><option value="coordinator">Coordinator</option><option value="viewer">Viewer</option></select></div>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#F5F0E8', marginBottom: 4 }}>First name</label><input required value={inviteForm.first_name} onChange={e => setInviteForm(f => ({ ...f, first_name: e.target.value }))} style={inp} placeholder="Jane" /></div>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#F5F0E8', marginBottom: 4 }}>Last name</label><input required value={inviteForm.last_name} onChange={e => setInviteForm(f => ({ ...f, last_name: e.target.value }))} style={inp} placeholder="Smith" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#F5F0E8', marginBottom: 4 }}>Email</label><input required type="email" value={inviteForm.email} onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} style={inp} placeholder="jane@agency.com" /></div>
+            <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#F5F0E8', marginBottom: 4 }}>Role</label><select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))} style={inp}><option value="coordinator">Coordinator</option><option value="viewer">Viewer</option></select></div>
             <div style={{ display: 'flex', alignItems: 'flex-end' }}><button type="submit" disabled={inviting} style={{ width: '100%', padding: '11px 16px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: N, fontWeight: 600, fontSize: 14, cursor: inviting ? 'not-allowed' : 'pointer', opacity: inviting ? 0.7 : 1 }}>{inviting ? 'Sending...' : 'Send Invitation'}</button></div>
           </form>
         </Section>

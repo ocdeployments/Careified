@@ -39,7 +39,7 @@ export default async function AgencyRosterPage() {
   if (!agency) redirect('/agency/pending-approval')
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F4F0', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: '#080F1E', fontFamily: "'DM Sans', sans-serif" }}>
       <RosterClient agencyId={agency.id} agencyName={agency.name} />
     </div>
   )

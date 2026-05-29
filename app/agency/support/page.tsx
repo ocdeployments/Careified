@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
+const M = 'rgba(255,255,255,0.55)'
+const B = 'rgba(255,255,255,0.08)'
+const C = 'rgba(255,255,255,0.04)'
 
 const TICKET_TYPES = [
   { value: 'billing', label: 'Billing' },
@@ -32,28 +35,16 @@ export default function AgencySupportPage() {
   const [fetching, setFetching] = useState(true)
   const [showSuccess, setShowSuccess] = useState(false)
   const [successNumber, setSuccessNumber] = useState('')
-  const [form, setForm] = useState({
-    type: '',
-    subject: '',
-    description: '',
-  })
+  const [form, setForm] = useState({ type: '', subject: '', description: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in?redirect_url=/agency/support')
-    }
+    if (isLoaded && !user) router.push('/sign-in?redirect_url=/agency/support')
   }, [isLoaded, user, router])
 
   useEffect(() => {
     if (user) {
-      fetch('/api/tickets/list')
-        .then(r => r.json())
-        .then(data => {
-          if (data.tickets) setTickets(data.tickets)
-        })
-        .catch(console.error)
-        .finally(() => setFetching(false))
+      fetch('/api/tickets/list').then(r => r.json()).then(data => { if (data.tickets) setTickets(data.tickets) }).catch(console.error).finally(() => setFetching(false))
     }
   }, [user])
 
@@ -69,22 +60,14 @@ export default function AgencySupportPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
-
     setLoading(true)
     try {
-      const res = await fetch('/api/tickets/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
+      const res = await fetch('/api/tickets/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
       const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create ticket')
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to create ticket')
       setSuccessNumber(data.ticket_number)
       setShowSuccess(true)
       setForm({ type: '', subject: '', description: '' })
-      // Refresh tickets
       const ticketsRes = await fetch('/api/tickets/list')
       const ticketsData = await ticketsRes.json()
       if (ticketsData.tickets) setTickets(ticketsData.tickets)
@@ -95,127 +78,79 @@ export default function AgencySupportPage() {
     }
   }
 
-  if (!isLoaded) {
-    return <div style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Loading...</div>
-  }
+  if (!isLoaded) return <div style={{ padding: 40, textAlign: 'center', color: M }}>Loading...</div>
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F4F0', padding: '40px 20px' }}>
+    <div style={{ minHeight: '100vh', background: '#080F1E', padding: '40px 20px' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: N, marginBottom: 24 }}>
-          Agency Support
-        </h1>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, color: '#F5F0E8', marginBottom: 24 }}>Agency Support</h1>
 
         {showSuccess && (
-          <div style={{ background: '#F0FDF4', border: '1px solid #16A34A', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-            <p style={{ fontSize: 16, color: '#15803D', fontWeight: 600, marginBottom: 8 }}>
-              Ticket {successNumber} submitted. We'll respond within 5 business days.
-            </p>
+          <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12, padding: 24, marginBottom: 24 }}>
+            <p style={{ fontSize: 16, color: '#22C55E', fontWeight: 600, marginBottom: 8 }}>Ticket {successNumber} submitted. We'll respond within 5 business days.</p>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button
-                onClick={() => setShowSuccess(false)}
-                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', color: N, fontSize: 14, cursor: 'pointer' }}
-              >
-                Submit another
-              </button>
+              <button onClick={() => setShowSuccess(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${B}`, background: 'transparent', color: '#F5F0E8', fontSize: 14, cursor: 'pointer' }}>Submit another</button>
             </div>
           </div>
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
           {/* Submit form */}
-          <div style={{ background: 'white', borderRadius: 16, padding: 24, border: '1px solid #E2E8F0' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: N, marginBottom: 20 }}>Submit a ticket</h2>
+          <div style={{ background: C, borderRadius: 16, padding: 24, border: `1px solid ${B}` }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: '#F5F0E8', marginBottom: 20 }}>Submit a ticket</h2>
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>
-                  Type <span style={{ color: '#EF4444' }}>*</span>
-                </label>
-                <select
-                  value={form.type}
-                  onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                  style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.type ? '1px solid #DC2626' : '1.5px solid #E2E8F0', fontSize: 14, outline: 'none' }}
-                >
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Type <span style={{ color: '#EF4444' }}>*</span></label>
+                <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.type ? '1px solid #EF4444' : `1.5px solid ${B}`, fontSize: 14, outline: 'none', background: 'rgba(255,255,255,0.06)', color: '#F5F0E8' }}>
                   <option value="">Select...</option>
-                  {TICKET_TYPES.map(t => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
+                  {TICKET_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
-                {errors.type && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{errors.type}</p>}
+                {errors.type && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.type}</p>}
               </div>
 
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>
-                  Subject <span style={{ color: '#EF4444' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.subject}
-                  onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                  style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.subject ? '1px solid #DC2626' : '1.5px solid #E2E8F0', fontSize: 14, outline: 'none' }}
-                  placeholder="Brief description of the issue"
-                />
-                {errors.subject && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{errors.subject}</p>}
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Subject <span style={{ color: '#EF4444' }}>*</span></label>
+                <input type="text" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.subject ? '1px solid #EF4444' : `1.5px solid ${B}`, fontSize: 14, outline: 'none', background: 'rgba(255,255,255,0.06)', color: '#F5F0E8' }} placeholder="Brief description of the issue" />
+                {errors.subject && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.subject}</p>}
               </div>
 
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: N, marginBottom: 6 }}>
-                  Description <span style={{ color: '#EF4444' }}>*</span>
-                </label>
-                <textarea
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.description ? '1px solid #DC2626' : '1.5px solid #E2E8F0', fontSize: 14, outline: 'none', minHeight: 120, resize: 'vertical' }}
-                  placeholder="Please provide details about your issue..."
-                />
-                {errors.description && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 4 }}>{errors.description}</p>}
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#F5F0E8', marginBottom: 6 }}>Description <span style={{ color: '#EF4444' }}>*</span></label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: errors.description ? '1px solid #EF4444' : `1.5px solid ${B}`, fontSize: 14, outline: 'none', minHeight: 120, resize: 'vertical', background: 'rgba(255,255,255,0.06)', color: '#F5F0E8' }} placeholder="Please provide details about your issue..." />
+                {errors.description && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.description}</p>}
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                style={{ width: '100%', padding: '12px 24px', borderRadius: 10, border: 'none', background: loading ? '#E2E8F0' : `linear-gradient(135deg, ${G}, #E8B86D)`, color: loading ? '#94A3B8' : N, fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}
-              >
+              <button type="submit" disabled={loading} style={{ width: '100%', padding: '12px 24px', borderRadius: 10, border: 'none', background: loading ? 'rgba(255,255,255,0.1)' : `linear-gradient(135deg, ${G}, #E8B86D)`, color: loading ? M : N, fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
                 {loading ? 'Submitting...' : 'Submit Ticket'}
               </button>
             </form>
           </div>
 
           {/* Ticket list */}
-          <div style={{ background: 'white', borderRadius: 16, padding: 24, border: '1px solid #E2E8F0' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: N, marginBottom: 20 }}>My Tickets</h2>
+          <div style={{ background: C, borderRadius: 16, padding: 24, border: `1px solid ${B}` }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: '#F5F0E8', marginBottom: 20 }}>My Tickets</h2>
             {fetching ? (
-              <p style={{ color: '#64748B', fontSize: 14 }}>Loading...</p>
+              <p style={{ color: M, fontSize: 14 }}>Loading...</p>
             ) : tickets.length === 0 ? (
-              <p style={{ color: '#64748B', fontSize: 14 }}>No tickets yet.</p>
+              <p style={{ color: M, fontSize: 14 }}>No tickets yet.</p>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748B', paddingBottom: 8, textTransform: 'uppercase' }}>Ticket</th>
-                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748B', paddingBottom: 8, textTransform: 'uppercase' }}>Subject</th>
-                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748B', paddingBottom: 8, textTransform: 'uppercase' }}>Type</th>
-                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#64748B', paddingBottom: 8, textTransform: 'uppercase' }}>Status</th>
+                  <tr style={{ borderBottom: `1px solid ${B}` }}>
+                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: M, paddingBottom: 8, textTransform: 'uppercase' }}>Ticket</th>
+                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: M, paddingBottom: 8, textTransform: 'uppercase' }}>Subject</th>
+                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: M, paddingBottom: 8, textTransform: 'uppercase' }}>Type</th>
+                    <th style={{ textAlign: 'left', fontSize: 11, fontWeight: 600, color: M, paddingBottom: 8, textTransform: 'uppercase' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tickets.map(ticket => (
-                    <tr key={ticket.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <td style={{ padding: '12px 0', fontSize: 13, fontFamily: 'monospace' }}>{ticket.ticket_number}</td>
-                      <td style={{ padding: '12px 0', fontSize: 13 }}>{ticket.subject}</td>
-                      <td style={{ padding: '12px 0', fontSize: 13, textTransform: 'capitalize' }}>{ticket.type}</td>
+                    <tr key={ticket.id} style={{ borderBottom: `1px solid ${B}` }}>
+                      <td style={{ padding: '12px 0', fontSize: 13, fontFamily: 'monospace', color: '#F5F0E8' }}>{ticket.ticket_number}</td>
+                      <td style={{ padding: '12px 0', fontSize: 13, color: '#F5F0E8' }}>{ticket.subject}</td>
+                      <td style={{ padding: '12px 0', fontSize: 13, color: '#F5F0E8', textTransform: 'capitalize' }}>{ticket.type}</td>
                       <td style={{ padding: '12px 0' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '4px 10px',
-                          borderRadius: 12,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          background: STATUS_COLORS[ticket.status] + '20',
-                          color: STATUS_COLORS[ticket.status],
-                        }}>
-                          {ticket.status.replace('_', ' ')}
-                        </span>
+                        <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: STATUS_COLORS[ticket.status] + '20', color: STATUS_COLORS[ticket.status] }}>{ticket.status.replace('_', ' ')}</span>
                       </td>
                     </tr>
                   ))}
