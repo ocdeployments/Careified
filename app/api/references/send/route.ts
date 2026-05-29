@@ -52,12 +52,6 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://careified.vercel.app'
     const referenceUrl = `${appUrl}/reference/${ref.token}`
 
-    console.log(`[EMAIL] Sending reference request to ${ref.reference_email}:`, {
-      to: ref.reference_email,
-      subject: `${caregiver.first_name} ${caregiver.last_name} has requested a reference from you`,
-      body: `Please take a moment to provide a reference for ${caregiver.first_name}.\n\nClick here to respond: ${referenceUrl}\n\nThis link expires in 30 days.`,
-    })
-
     return NextResponse.json({ success: true, referenceUrl })
   }
 
@@ -94,12 +88,6 @@ export async function POST(req: NextRequest) {
     // Send reminder email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://careified.vercel.app'
     const referenceUrl = `${appUrl}/reference/${ref.token}`
-
-    console.log(`[EMAIL] Sending reminder to ${ref.reference_email}:`, {
-      to: ref.reference_email,
-      subject: `Reminder: Reference for ${caregiver.first_name} ${caregiver.last_name}`,
-      body: `This is a friendly reminder to complete your reference for ${caregiver.first_name}.\n\nComplete it here: ${referenceUrl}`,
-    })
 
     return NextResponse.json({ success: true, message: 'Reminder sent' })
   }
