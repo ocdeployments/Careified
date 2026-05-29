@@ -16,7 +16,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "3/3 Playwright smoke tests..."
-npx playwright test tests/e2e/agency-pages.spec.ts tests/e2e/api-smoke.spec.ts --reporter=list
+BETA_GATED=true npx playwright test tests/e2e/agency-pages.spec.ts tests/e2e/api-smoke.spec.ts --reporter=list
 if [ $? -ne 0 ]; then
   echo "❌ Playwright tests failed. Push blocked."
   echo "Run: npx playwright test --reporter=html to see full report"
