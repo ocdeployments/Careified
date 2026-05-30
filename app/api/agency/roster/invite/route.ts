@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       caregiver.claim_token = newToken
     }
 
-    // Send email (console.log for now — real email = post-launch)
+    // Prepare email content
     const emailContent = {
       to: caregiver.email,
       subject: `${agency.name} started your Careified profile — complete it now`,
@@ -101,8 +101,6 @@ This link expires in 30 days.
 — The Careified Team
       `.trim(),
     }
-
-    // Console log email for testing
 
     // Update profile status to invited
     await pool.query(
