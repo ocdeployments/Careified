@@ -1,14 +1,10 @@
 import { test, expect } from '@playwright/test'
 
 const PRODUCTION_URL = 'https://www.careified.com'
-const isBetaGated = process.env.BETA_GATED === 'true'
-
-console.log('API auth tests skipped — beta gate active on target environment')
 
 test.describe('API Routes - Unauthenticated', () => {
   test.use({ baseURL: PRODUCTION_URL })
 
-  // All of these should return 401 when unauthenticated
   const PROTECTED_ROUTES = [
     { method: 'GET', path: '/api/agency/dashboard' },
     { method: 'GET', path: '/api/agency/clients' },
@@ -19,11 +15,11 @@ test.describe('API Routes - Unauthenticated', () => {
     { method: 'GET', path: '/api/caregiver/notifications' },
   ]
 
-  // Skip auth tests when beta gate is active
-  const shouldSkip = isBetaGated
-
   for (const route of PROTECTED_ROUTES) {
-    test.skip(shouldSkip, 'API auth tests skipped — beta gate active on target environment')
+    test.skip(
+      process.env.BETA_GATED === 'true',
+      'API auth tests skipped — beta gate active on target environment'
+    )
 
     test(`${route.method} ${route.path} - should return 401`, async ({ page }) => {
       // Navigate to the route directly (not via API) to avoid auth session
