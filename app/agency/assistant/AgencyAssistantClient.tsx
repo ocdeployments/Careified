@@ -8,7 +8,10 @@ const STARTER_PROMPTS = [
   "Find caregivers with dementia experience",
   "Which clients don't have a caregiver yet?",
   "Start a screening campaign",
-  "Show me my AIRecruit results"
+  "Show me my AIRecruit results",
+  "Find a French-speaking live-in caregiver in Scarborough",
+  "Find an overnight caregiver available urgently",
+  "Find a caregiver specialising in dementia"
 ]
 
 const M = 'rgba(255,255,255,0.55)'
