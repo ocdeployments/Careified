@@ -139,6 +139,9 @@ export default clerkMiddleware(
   // Role-based route protection
   const role = (sessionClaims?.publicMetadata as any)?.role as string | undefined
 
+  // Admin bypass — admins can access everything
+  if (role === 'admin') return NextResponse.next()
+
   // Block agencies from caregiver routes
   if (isCaregiverRoute(request) && role === 'agency') {
     return NextResponse.redirect(new URL('/agency/dashboard', request.url))
