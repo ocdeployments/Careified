@@ -12,13 +12,12 @@ const C = 'rgba(255,255,255,0.04)'
 
 interface DashboardData {
   stats: {
-    roster_total?: number
+    total_caregivers?: number
     roster_claimed?: number
-    roster_pending?: number
-    shortlist_total?: number
-    clients_total?: number
-    clients_unmatched?: number
-    airecruit_active?: number
+    total_clients?: number
+    unmatched_clients?: number
+    pipeline_count?: number
+    airecruit_results?: number
   }
   pipeline?: { discovered?: number; contacted?: number; interviewing?: number; placed?: number; inactive?: number } | null
   expiring_credentials?: { caregiver_id: string; caregiver_name: string; certification: string; expiry_date: string }[]
@@ -55,11 +54,12 @@ export default function IntelligenceClient() {
       if (expiringCredentials.length > 0) {
         signals.push(`⏰ ${expiringCredentials.length} credentials expiring in the next 60 days`)
       }
-      if ((stats.roster_pending || 0) > 0) {
-        signals.push(`${stats.roster_pending} caregivers haven't claimed their profiles yet`)
+      const rosterPending = (stats.total_caregivers || 0) - (stats.roster_claimed || 0)
+      if (rosterPending > 0) {
+        signals.push(`${rosterPending} caregivers haven't claimed their profiles yet`)
       }
-      if ((stats.clients_unmatched || 0) > 0) {
-        signals.push(`${stats.clients_unmatched} clients currently unmatched`)
+      if ((stats.unmatched_clients || 0) > 0) {
+        signals.push(`${stats.unmatched_clients} clients currently unmatched`)
       }
       const isHealthy = signals.length === 0
 
@@ -68,7 +68,7 @@ export default function IntelligenceClient() {
           {/* Section A: Key numbers */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.roster_total ?? 0}</div>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.total_caregivers ?? 0}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>Caregivers on platform</div>
             </div>
             <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
@@ -80,7 +80,7 @@ export default function IntelligenceClient() {
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>Placements confirmed</div>
             </div>
             <div style={{ background: C, border: `1px solid ${B}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.airecruit_active ?? 0}</div>
+              <div style={{ fontSize: 36, fontWeight: 700, color: W }}>{stats.airecruit_results ?? 0}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: M, textTransform: 'uppercase', marginTop: 4 }}>AIRecruit campaigns</div>
             </div>
           </div>
@@ -105,10 +105,10 @@ export default function IntelligenceClient() {
               <div style={{ fontSize: 14, fontWeight: 700, color: W, marginBottom: 16 }}>Roster activity</div>
               <div style={{ display: 'grid', gap: 12 }}>
                 {[
-                  { label: 'Total caregivers', value: stats.roster_total ?? 0 },
+                  { label: 'Total caregivers', value: stats.total_caregivers ?? 0 },
                   { label: 'Claimed profiles', value: stats.roster_claimed ?? 0 },
-                  { label: 'Pending claim', value: stats.roster_pending ?? 0 },
-                  { label: 'Shortlisted', value: stats.shortlist_total ?? 0 },
+                  { label: 'Pending claim', value: (stats.total_caregivers || 0) - (stats.roster_claimed || 0) },
+                  { label: 'Shortlisted', value: stats.pipeline_count ?? 0 },
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: M }}>{item.label}</span>
@@ -121,9 +121,9 @@ export default function IntelligenceClient() {
               <div style={{ fontSize: 14, fontWeight: 700, color: W, marginBottom: 16 }}>Client activity</div>
               <div style={{ display: 'grid', gap: 12 }}>
                 {[
-                  { label: 'Total clients', value: stats.clients_total ?? 0 },
-                  { label: 'Unmatched', value: stats.clients_unmatched ?? 0 },
-                  { label: 'AIRecruit active', value: stats.airecruit_active ?? 0 },
+                  { label: 'Total clients', value: stats.total_clients ?? 0 },
+                  { label: 'Unmatched', value: stats.unmatched_clients ?? 0 },
+                  { label: 'AIRecruit campaigns', value: stats.airecruit_results ?? 0 },
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: M }}>{item.label}</span>
