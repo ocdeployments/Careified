@@ -271,7 +271,7 @@ export default function HomePage() {
               <span className="text-[13px] font-semibold text-white">Careified</span>
             </div>
             <p className="text-xs text-white/60 max-w-[200px] leading-relaxed mb-8">
-              Verified reputations for the caregiving profession. Texas-first.
+              Verified reputations for the caregiving profession. Ontario-first.
             </p>
             <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label="Footer navigation">
               {[
