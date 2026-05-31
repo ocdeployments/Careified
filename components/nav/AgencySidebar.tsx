@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
+import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
 export const SIDEBAR_WIDTHS = {
   desktop: 220,
@@ -20,6 +21,7 @@ interface AgencySidebarProps {
     trial_ends_at: string | null
   }
   currentPath: string
+  isTablet?: boolean
 }
 
 interface NavItem {
@@ -90,8 +92,10 @@ function getBadgeCount(counts: AgencySidebarProps['counts'], badge?: string): nu
   return 0
 }
 
-export default function AgencySidebar({ counts, currentPath }: AgencySidebarProps) {
+export default function AgencySidebar({ counts, currentPath, isTablet: propIsTablet }: AgencySidebarProps) {
   const pathname = usePathname()
+  const { isTablet: hookIsTablet } = useWindowSize()
+  const isTablet = propIsTablet ?? hookIsTablet
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   const isActive = (href: string) => {
@@ -102,7 +106,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
   }
 
   const containerStyle: React.CSSProperties = {
-    width: 220,
+    width: isTablet ? 60 : 220,
     background: '#0D1B3E',
     borderRight: '1px solid rgba(255,255,255,0.07)',
     paddingTop: '0',
@@ -113,17 +117,20 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
     top: 0,
     left: 0,
     overflowY: 'auto',
+    overflowX: 'hidden',
     zIndex: 100,
   }
 
   const logoAreaStyle: React.CSSProperties = {
-    padding: '20px 20px 16px',
+    padding: isTablet ? '16px 8px' : '20px 20px 16px',
     borderBottom: '1px solid rgba(255,255,255,0.07)',
     marginBottom: '8px',
+    display: 'flex',
+    justifyContent: 'center',
   }
 
   const logoTextStyle: React.CSSProperties = {
-    fontSize: 16,
+    fontSize: isTablet ? 18 : 16,
     fontWeight: 700,
     color: '#F5F0E8',
     fontFamily: "'DM Serif Display', serif",
@@ -131,31 +138,35 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
   }
 
   const sectionLabelStyle: React.CSSProperties = {
-    fontSize: 10,
+    fontSize: isTablet ? 0 : 10,
     fontWeight: 700,
     letterSpacing: '0.12em',
     color: 'rgba(255,255,255,0.35)',
     textTransform: 'uppercase',
-    padding: '24px 20px 8px',
+    padding: isTablet ? '24px 4px 8px' : '24px 20px 8px',
     fontFamily: "'DM Sans', sans-serif",
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
   }
 
   const navItemStyle = (item: NavItem, active: boolean): React.CSSProperties => ({
-    fontSize: 14,
+    fontSize: isTablet ? 0 : 14,
     fontWeight: active ? 600 : 400,
     fontFamily: "'DM Sans', sans-serif",
-    padding: '9px 20px',
+    padding: isTablet ? '12px 8px' : '9px 20px',
     color: item.disabled ? 'rgba(255,255,255,0.25)' : (active || hoveredItem === item.href ? '#F5F0E8' : 'rgba(255,255,255,0.65)'),
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: isTablet ? 'center' : 'space-between',
     borderLeft: active ? '2px solid #C9973A' : (hoveredItem === item.href && !item.disabled ? '2px solid rgba(201,151,58,0.4)' : '2px solid transparent'),
     transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
     cursor: item.disabled ? 'not-allowed' : 'pointer',
     textDecoration: 'none',
     borderRadius: '0 6px 6px 0',
-    marginRight: '8px',
+    marginRight: isTablet ? '0' : '8px',
     background: active ? 'rgba(201,151,58,0.1)' : (hoveredItem === item.href && !item.disabled ? 'rgba(255,255,255,0.06)' : 'transparent'),
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
   })
 
   const soonTextStyle: React.CSSProperties = {
@@ -190,8 +201,9 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
 
   const bottomSectionStyle: React.CSSProperties = {
     borderTop: '1px solid rgba(255,255,255,0.07)',
-    padding: '16px 20px',
+    padding: isTablet ? '16px 4px' : '16px 20px',
     marginTop: 'auto',
+    display: isTablet ? 'none' : 'block',
   }
 
   const planLabelStyle: React.CSSProperties = {
@@ -227,7 +239,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
       {/* Top Logo Area */}
       <div style={logoAreaStyle}>
         <Link href="/agency/dashboard" style={{ textDecoration: 'none' }}>
-          <span style={logoTextStyle}>Careified</span>
+          <span style={logoTextStyle}>{isTablet ? 'C' : 'Careified'}</span>
         </Link>
       </div>
 

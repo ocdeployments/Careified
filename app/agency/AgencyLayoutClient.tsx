@@ -1,16 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import AgencySidebar, { SIDEBAR_WIDTHS } from '@/components/nav/AgencySidebar'
+import { useWindowSize } from '@/lib/hooks/useWindowSize'
+import { LayoutDashboard, Users, Briefcase, Zap, MoreHorizontal } from 'lucide-react'
 
 interface AgencyLayoutClientProps {
   children: React.ReactNode
 }
 
+const MOBILE_TABS = [
+  { label: 'Dashboard', href: '/agency/dashboard', icon: LayoutDashboard },
+  { label: 'Clients', href: '/agency/clients', icon: Users },
+  { label: 'Caregivers', href: '/agency/caregivers', icon: Briefcase },
+  { label: 'AIRecruit', href: '/agency/airecruit', icon: Zap },
+  { label: 'More', href: '/agency/settings', icon: MoreHorizontal },
+]
+
 export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps) {
   const pathname = usePathname()
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
+  const router = useRouter()
+  const { width: windowWidth, isMobile, isTablet } = useWindowSize()
   const [counts, setCounts] = useState({
     unmatched_clients: 0,
     pipeline: 0,
@@ -23,20 +35,9 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
   const excludedPaths = ['/agency/signup', '/agency/pending-approval', '/agency/join']
   const isExcluded = excludedPaths.some(path => pathname.startsWith(path))
 
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // Responsive breakpoints
-  const isMobile = windowWidth < 768
-  const isTablet = windowWidth >= 768 && windowWidth < 1024
-
   // Calculate sidebar width based on breakpoint
   const sidebarWidth = isMobile
-    ? SIDEBAR_WIDTHS.mobile
+    ? 0
     : isTablet
     ? SIDEBAR_WIDTHS.tablet
     : SIDEBAR_WIDTHS.desktop
@@ -64,11 +65,51 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#080F1E' }}>
-      <AgencySidebar counts={counts} currentPath={pathname} />
-      <main style={{ marginLeft: sidebarWidth, flex: 1, minHeight: '100vh' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#080F1E', paddingBottom: isMobile ? 64 : 0 }}>
+      {!isMobile && <AgencySidebar counts={counts} currentPath={pathname} isTablet={isTablet} />}
+      <main style={{ marginLeft: sidebarWidth, flex: 1, minHeight: '100vh', paddingBottom: isMobile ? 64 : 0 }}>
         {children}
       </main>
+      {/* Mobile bottom tab bar */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          background: '#0D1B3E',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          zIndex: 100,
+        }}>
+          {MOBILE_TABS.map(tab => {
+            const isActive = pathname.startsWith(tab.href)
+            const Icon = tab.icon
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  textDecoration: 'none',
+                  padding: '8px 12px',
+                }}
+              >
+                <Icon size={20} color={isActive ? '#C9973A' : 'rgba(255,255,255,0.5)'} />
+                <span style={{ fontSize: 10, color: isActive ? '#C9973A' : 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+                  {tab.label}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
