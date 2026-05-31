@@ -12,7 +12,7 @@ export function generateCaregiverCode(
   country: string,
   state: string
 ): { code: string; slug: string } {
-  const countryCode = (country || 'US').toUpperCase().slice(0, 2)
+  const countryCode = (country || 'CA').toUpperCase().slice(0, 2)
   const stateCode = (state || 'TX').toUpperCase().slice(0, 2)
   const year = new Date().getFullYear()
   const slug = generateSlug(5)
