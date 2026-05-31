@@ -12,3 +12,10 @@ CREATE TABLE IF NOT EXISTS telegram_connect_codes (
 );
 CREATE INDEX IF NOT EXISTS idx_telegram_codes_agency ON telegram_connect_codes(agency_id);
 CREATE INDEX IF NOT EXISTS idx_telegram_codes_code ON telegram_connect_codes(code);
+
+CREATE TABLE IF NOT EXISTS telegram_usage (
+  agency_id uuid NOT NULL,
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  count integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (agency_id, date)
+);
