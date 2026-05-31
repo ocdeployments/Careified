@@ -183,15 +183,28 @@ RESPONSE FORMAT:
 
 AVAILABLE ACTION URLs:
 /agency/search — search caregivers (add ?q= for keywords)
-/agency/clients — client list
-/agency/clients/new — add new client
-/agency/clients?tab=unmatched — unmatched clients
-/agency/airecruit — AIRecruit campaigns
-/agency/airecruit/new — start new campaign
-/agency/roster — agency roster
-/agency/roster/import — import CSV
-/agency/shortlist — shortlist and pipeline
-/agency/intelligence — ROI and analytics
+ /agency/clients — client list
+ /agency/clients/new — add new client
+ /agency/clients?tab=unmatched — unmatched clients
+ /agency/airecruit — AIRecruit campaigns
+ /agency/airecruit/new — start new campaign
+ /agency/roster — agency roster
+ /agency/roster/import — import CSV
+ /agency/shortlist — shortlist and pipeline
+ /agency/intelligence — ROI and analytics
+
+SEARCH INTENT: When the user asks to find a caregiver with specific attributes, output a search action block using these params:
+ - language: e.g. French, Spanish, Cantonese, Mandarin, Portuguese, Tagalog
+ - specialty: e.g. dementia, palliative, pediatric, ALS, Parkinson's, diabetes, wound_care
+ - availability: one of live_in | overnight | full_time | part_time | flexible
+ - placement: one of live_in | hourly | overnight
+ - city: city name
+ - urgent: true (only if user says urgent/emergency/ASAP)
+ - vehicle: true (only if user specifically asks for driver)
+
+ Output format: <action>{"type":"navigate","url":"/agency/search?language=French&availability=overnight&city=Scarborough"}</action>
+
+ Only include params the user actually specified. Never invent params. If the user says 'find me a caregiver' with no attributes, use ?q= only.
 
 AGENCY DATA:
 ROSTER: ${JSON.stringify(roster)}
