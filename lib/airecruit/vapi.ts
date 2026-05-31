@@ -169,6 +169,9 @@ Call ID: ${callId}`
       },
       body: JSON.stringify({
         assistantId: VAPI_ASSISTANT_ID,
+        maxDurationSeconds: 360,
+        endCallMessage: "Thank you for speaking with us today. We will be in touch shortly. Goodbye.",
+        endCallPhrases: ["goodbye", "bye", "take care", "talk soon", "that's all", "no thank you", "not interested"],
         assistantOverrides: {
           firstMessage,
           silenceTimeoutSeconds: 8,
