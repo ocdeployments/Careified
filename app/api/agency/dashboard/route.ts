@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build response
-    const response: any = { stats: {}, action_items: [], pipeline: null, recent_activity: [], top_matches: [], expiring_credentials: [] }
+    const response: any = { stats: {}, action_items: [], pipeline: null, recent_activity: [], top_matches: [], expiring_credentials: [], bench_strength: null }
 
     // Stats queries - single consolidated query
     try {
@@ -297,7 +297,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Dashboard API error:', error)
     return NextResponse.json(
-      { error: 'internal_error', stats: {}, action_items: [], pipeline: null, recent_activity: [], top_matches: [], expiring_credentials: [] },
+      { error: 'internal_error', stats: {}, action_items: [], pipeline: null, recent_activity: [], top_matches: [], expiring_credentials: [], bench_strength: null },
       { status: 200 }
     )
   }
