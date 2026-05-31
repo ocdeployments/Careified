@@ -134,25 +134,6 @@ export default function ContactCard({ phone, email }: ContactCardProps) {
           </a>
         )}
       </div>
-
-      <button
-        style={{
-          width: '100%',
-          marginTop: 16,
-          padding: '12px 20px',
-          background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-          color: C.navy,
-          border: 'none',
-          borderRadius: 10,
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: 'pointer',
-        }}
-        disabled
-        title="Coming soon"
-      >
-        Request Introduction
-      </button>
     </div>
   )
 }
