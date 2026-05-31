@@ -1,12 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function GatePage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -19,7 +17,7 @@ export default function GatePage() {
     })
     if (res.ok) {
       const { redirect } = await res.json()
-      router.push(redirect || '/')
+      window.location.href = redirect || '/'
     } else {
       setError(true)
       setLoading(false)
