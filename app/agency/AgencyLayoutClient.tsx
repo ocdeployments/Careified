@@ -16,6 +16,7 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
     pipeline: 0,
     expiring_credentials: 0,
     airecruit_results: 0,
+    trial_ends_at: null as string | null,
   })
 
   // Check excluded paths
@@ -52,6 +53,7 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
           pipeline: data.pipeline || 0,
           expiring_credentials: data.credentials_expiring || 0,
           airecruit_results: data.airecruit_ready || 0,
+          trial_ends_at: data.trial_ends_at || null,
         })
       })
       .catch(() => {})

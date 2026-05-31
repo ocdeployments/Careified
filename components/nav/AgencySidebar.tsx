@@ -17,6 +17,7 @@ interface AgencySidebarProps {
     pipeline: number
     expiring_credentials: number
     airecruit_results: number
+    trial_ends_at: string | null
   }
   currentPath: string
 }
@@ -205,6 +206,22 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
     marginTop: 3,
   }
 
+  // Compute days remaining from trial_ends_at
+  const trialEndsAt = counts?.trial_ends_at
+  const daysLeft = trialEndsAt ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)) : null
+  const daysText = daysLeft === null
+    ? '28 days remaining'
+    : daysLeft <= 0
+    ? 'Trial expired'
+    : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining`
+  const daysColor = daysLeft === null
+    ? 'rgba(255,255,255,0.25)'
+    : daysLeft <= 0
+    ? '#E24B4A'
+    : daysLeft <= 7
+    ? '#F59E0B'
+    : 'rgba(255,255,255,0.25)'
+
   return (
     <aside style={containerStyle}>
       {/* Top Logo Area */}
@@ -264,7 +281,7 @@ export default function AgencySidebar({ counts, currentPath }: AgencySidebarProp
       {/* Bottom Section */}
       <div style={bottomSectionStyle}>
         <div style={planLabelStyle}>Growth Plan</div>
-        <div style={daysRemainingStyle}>28 days remaining</div>
+        <div style={{ ...daysRemainingStyle, color: daysColor }}>{daysText}</div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: 12 }}>
           <UserButton
             appearance={{

@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
     clients_unmatched: 0,
     airecruit_ready: 0,
     credentials_expiring: 0,
+    trial_ends_at: null,
   }
 
   // Clients unmatched
@@ -82,6 +83,17 @@ export async function GET(request: NextRequest) {
     result.credentials_expiring = parseInt(credsRes.rows[0]?.c || '0')
   } catch (e) {
     console.error('credentials_expiring query failed:', e)
+  }
+
+  // Trial end date
+  try {
+    const agencyRes = await pool.query(
+      'SELECT trial_ends_at FROM agencies WHERE id = $1',
+      [agencyId]
+    )
+    result.trial_ends_at = agencyRes.rows[0]?.trial_ends_at || null
+  } catch (e) {
+    console.error('trial_ends_at query failed:', e)
   }
 
   return NextResponse.json(result, {
