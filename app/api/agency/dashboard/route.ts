@@ -263,6 +263,34 @@ export async function GET(request: NextRequest) {
       response.expiring_credentials = []
     }
 
+    // Bench strength - compute from caregiver roster
+    try {
+      const benchResult = await pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE specializations::text ILIKE '%dementia%') as dementia_count,
+          COUNT(*) FILTER (WHERE languages::text ILIKE '%french%') as french_count,
+          COUNT(*) FILTER (WHERE willing_live_in = true) as livein_count,
+          COUNT(*) FILTER (WHERE specializations::text ILIKE '%wound%') as wound_count,
+          COUNT(*) FILTER (WHERE availability_status IN ('available_now', 'available')) as available_count,
+          COUNT(*) FILTER (WHERE claim_status = 'claimed') as claimed_count
+        FROM caregivers
+        WHERE created_by_agency_id = $1::uuid
+      `, [agencyId])
+
+      const bench = benchResult.rows[0]
+      response.bench_strength = {
+        dementia: parseInt(bench.dementia_count) || 0,
+        french: parseInt(bench.french_count) || 0,
+        livein: parseInt(bench.livein_count) || 0,
+        wound: parseInt(bench.wound_count) || 0,
+        available: parseInt(bench.available_count) || 0,
+        claimed: parseInt(bench.claimed_count) || 0,
+      }
+    } catch (e) {
+      console.error('Bench strength query failed:', e)
+      response.bench_strength = null
+    }
+
     return NextResponse.json(response, {
       headers: { 'Cache-Control': 'no-store' }
     })
