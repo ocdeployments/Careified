@@ -90,12 +90,18 @@ export default function AgencyDashboard() {
     if (!isLoaded) return
 
     Promise.all([
-      fetch('/api/agency/dashboard', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/agency/dashboard', { cache: 'no-store' }).then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      }),
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
     ]).then(([dashResp, clientsResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }).catch((e) => {
+      console.error('Dashboard fetch error:', e)
+      setLoading(false)
+    })
   }, [isLoaded])
 
   if (!isLoaded || loading) {

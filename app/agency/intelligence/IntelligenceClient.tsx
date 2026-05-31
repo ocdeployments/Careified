@@ -31,12 +31,18 @@ export default function IntelligenceClient() {
 
   useEffect(() => {
     fetch('/api/agency/dashboard')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then(d => {
         setData(d)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((e) => {
+        console.error('Intelligence fetch error:', e)
+        setLoading(false)
+      })
   }, [])
 
   const stats = data?.stats || {}

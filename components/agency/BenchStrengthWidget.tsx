@@ -44,12 +44,20 @@ export default function BenchStrengthWidget({ compact = false }: BenchStrengthWi
 
   useEffect(() => {
     fetch('/api/agency/dashboard', { cache: 'no-store' })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}`)
+        }
+        return r.json()
+      })
       .then(d => {
-        setData(d.bench_strength || null)
+        setData(d && d.bench_strength ? d.bench_strength : null)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((e) => {
+        console.error('BenchStrengthWidget fetch error:', e)
+        setLoading(false)
+      })
   }, [])
 
   const getColorForCount = (count: number): string => {
