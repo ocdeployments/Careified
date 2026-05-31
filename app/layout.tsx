@@ -1,7 +1,6 @@
 import './globals.css'
 import { DM_Serif_Display, DM_Sans } from 'next/font/google'
 import { Metadata } from 'next'
-import { headers } from 'next/headers'
 import NavbarWrapper from '@/components/nav/NavbarWrapper'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
@@ -44,11 +43,7 @@ export const viewport = {
   maximumScale: 1,
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const headersList = await headers()
-  const pathname = headersList.get('x-invoke-path') || headersList.get('x-pathname') || ''
-  const isMinimalPage = pathname.startsWith('/gate') || pathname.startsWith('/waitlist')
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${dmSerif.variable} ${dmSans.variable}`}>
       <body className="font-sans m-0 bg-white text-navy antialiased">
@@ -60,27 +55,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-          {!isMinimalPage && <NavbarWrapper />}
-          <main id="main-content" className={isMinimalPage ? '' : 'pt-16'}>
+          <NavbarWrapper />
+          <main id="main-content" className="pt-16">
             {children}
           </main>
-        {!isMinimalPage && <footer style={{
-          background: '#0D1B3E',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          padding: '32px 24px',
-          fontFamily: "'DM Sans', sans-serif",
-        }}>
-          <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-              © 2026 Careified. All rights reserved.
+          <footer style={{
+            background: '#0D1B3E',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            padding: '32px 24px',
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
+                © 2026 Careified. All rights reserved.
+              </div>
+              <div style={{ display: 'flex', gap: '24px' }}>
+                <a href="/privacy" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Privacy Policy</a>
+                <a href="/terms" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Terms of Use</a>
+                <a href="/contact" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Contact</a>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '24px' }}>
-              <a href="/privacy" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Privacy Policy</a>
-              <a href="/terms" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Terms of Use</a>
-              <a href="/contact" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Contact</a>
-            </div>
-          </div>
-        </footer>}
+          </footer>
         </ClerkProvider>
         <Toaster
           position="bottom-right"
