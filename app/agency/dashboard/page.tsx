@@ -62,6 +62,14 @@ type DashboardData = {
   action_items: ActionItem[]
   clients?: Client[]
   expiring_credentials?: { expiry_date: string }[]
+  bench_strength?: {
+    dementia: number
+    french: number
+    livein: number
+    wound: number
+    available: number
+    claimed: number
+  }
 }
 
 export default function AgencyDashboard() {
@@ -89,23 +97,17 @@ export default function AgencyDashboard() {
     Promise.all([
       fetch('/api/agency/dashboard', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
-      fetch('/api/roster/list', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ caregivers: [] })),
-    ]).then(([dashResp, clientsResp, rosterResp]) => {
+    ]).then(([dashResp, clientsResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
 
-      // Compute bench strength from roster
-      if (rosterResp.caregivers) {
-        const skills = { dementia: 0, french: 0, livein: 0, wound: 0 }
-        rosterResp.caregivers.forEach((c: any) => {
-          const specs = c.specializations || []
-          const langs = c.languages || []
-          const avail = c.availability_status
-          if (specs.some((s: string) => s.toLowerCase().includes('dementia'))) skills.dementia++
-          if (langs.some((l: string) => l.toLowerCase().includes('french'))) skills.french++
-          if (avail === 'live_in' || avail === 'live-in') skills.livein++
-          if (specs.some((s: string) => s.toLowerCase().includes('wound'))) skills.wound++
+      // Use bench_strength from API
+      if (dashResp.bench_strength) {
+        setRosterSkills({
+          dementia: dashResp.bench_strength.dementia || 0,
+          french: dashResp.bench_strength.french || 0,
+          livein: dashResp.bench_strength.livein || 0,
+          wound: dashResp.bench_strength.wound || 0,
         })
-        setRosterSkills(skills)
       }
 
       setLoading(false)
