@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import TelegramIntegration from '@/components/agency/TelegramIntegration'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -310,6 +311,11 @@ export default function AgencySettingsPage() {
             <div><label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#F5F0E8', marginBottom: 4 }}>Role</label><select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))} style={inp}><option value="coordinator">Coordinator</option><option value="viewer">Viewer</option></select></div>
             <div style={{ display: 'flex', alignItems: 'flex-end' }}><button type="submit" disabled={inviting} style={{ width: '100%', padding: '11px 16px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #C9973A, #E8B86D)', color: N, fontWeight: 600, fontSize: 14, cursor: inviting ? 'not-allowed' : 'pointer', opacity: inviting ? 0.7 : 1 }}>{inviting ? 'Sending...' : 'Send Invitation'}</button></div>
           </form>
+        </Section>
+
+        {/* Integrations */}
+        <Section title="Integrations" desc="Connect external services to enhance your workflow.">
+          <TelegramIntegration />
         </Section>
 
         {saving && (
