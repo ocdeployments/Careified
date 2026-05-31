@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, X, HelpCircle } from 'lucide-react'
 import AgencyShell from '@/components/shells/AgencyShell'
@@ -13,8 +13,20 @@ const MUTED = 'rgba(255,255,255,0.55)'
 
 interface Candidate { firstName: string; lastName: string; phone: string; email: string; notes: string }
 
+const SKILL_DEFAULTS: Record<string, { title: string; description: string }> = {
+  dementia: { title: 'Recruit: Dementia Care', description: 'Seeking experienced PSW with dementia care specialization for ongoing placement.' },
+  palliative: { title: 'Recruit: Palliative Care', description: 'Seeking PSW with palliative care experience for end-of-life support placement.' },
+  live_in: { title: 'Recruit: Live-in Care', description: 'Seeking live-in caregiver for full-time residential placement.' },
+  french: { title: 'Recruit: French-Speaking', description: 'Seeking bilingual French/English PSW for client requiring French-language care.' },
+  overnight: { title: 'Recruit: Overnight Shift', description: 'Seeking PSW available for overnight shifts, 11pm-7am.' },
+  complex_care: { title: 'Recruit: Complex Care', description: 'Seeking experienced PSW for complex care needs including medical support.' },
+  mobility: { title: 'Recruit: Mobility Support', description: 'Seeking PSW with mobility support and transfer experience.' },
+  medication: { title: 'Recruit: Medication Admin', description: 'Seeking PSW qualified for medication administration.' },
+}
+
 export default function NewCampaignPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [title, setTitle] = useState('')
   const [roleDescription, setRoleDescription] = useState('')
   const [questions, setQuestions] = useState<string[]>(['', '', ''])
@@ -22,6 +34,18 @@ export default function NewCampaignPage() {
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [prefilledSkill, setPrefilledSkill] = useState<string | null>(null)
+
+  // Pre-fill from ?skill= param
+  useEffect(() => {
+    const skill = searchParams.get('skill')
+    if (skill && SKILL_DEFAULTS[skill]) {
+      const defaults = SKILL_DEFAULTS[skill]
+      setTitle(defaults.title)
+      setRoleDescription(defaults.description)
+      setPrefilledSkill(skill)
+    }
+  }, [searchParams])
 
   const addQuestion = () => { if (questions.length < 5) setQuestions([...questions, '']) }
   const removeQuestion = (i: number) => { if (questions.length > 1) { const q = [...questions]; q.splice(i, 1); setQuestions(q) } }
@@ -51,6 +75,11 @@ export default function NewCampaignPage() {
     <AgencyShell title="New Campaign" subtitle="AIRecruit">
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         <form onSubmit={handleSubmit}>
+          {prefilledSkill && (
+            <div style={{ borderLeft: '3px solid #C9973A', paddingLeft: '12px', color: '#C9973A', fontSize: '13px', marginBottom: '16px', background: 'rgba(201,151,58,0.08)', padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>
+              Pre-filled from bench strength gap: {SKILL_DEFAULTS[prefilledSkill]?.title || prefilledSkill}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '32px' }}>
 
             {/* LEFT COLUMN */}
