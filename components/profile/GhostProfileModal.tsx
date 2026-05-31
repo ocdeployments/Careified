@@ -75,7 +75,7 @@ export default function GhostProfileModal({ onDismiss }: Props) {
             <div>
               <div className="text-sm font-bold text-navy">Maria Santos</div>
               <div className="text-xs text-slate-500">Certified Personal Support Worker</div>
-              <div className="text-[11px] text-slate-400 mt-1">📍 McKinney, TX · 📅 8 years · 🟢 Available now</div>
+              <div className="text-[11px] text-slate-400 mt-1">Mississauga, ON  ·  8 years  ·  Available now</div>
             </div>
           </div>
         </div>
