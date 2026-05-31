@@ -38,6 +38,7 @@ model Caregiver {
   address                        String?
   status                         String?                       @default("incomplete") @db.VarChar(50)
   availability_status            String?                       @default("available_now") @db.VarChar(50)
+  is_visible                    Boolean                      @default(true)
   services                       String[]
   specializations                String[]
   credentials                    String[]
