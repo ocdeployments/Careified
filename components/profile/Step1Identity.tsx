@@ -303,7 +303,7 @@ export default function Step1Identity() {
             <input
               type="text"
               value={formData.state || ''}
-              placeholder="TX"
+              placeholder="ON"
               style={getInputStyle('state')}
               onChange={e => handleChange('state', e.target.value.toUpperCase())}
               onFocus={() => setFocused('state')}
@@ -318,7 +318,7 @@ export default function Step1Identity() {
             <input
               type="text"
               value={formData.city || ''}
-              placeholder="Frisco"
+              placeholder="Toronto"
               style={getInputStyle('city')}
               onChange={e => handleChange('city', e.target.value)}
               onFocus={() => setFocused('city')}
