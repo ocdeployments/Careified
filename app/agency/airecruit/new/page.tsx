@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, X, HelpCircle } from 'lucide-react'
+import { Plus, X, HelpCircle, Upload } from 'lucide-react'
 import AgencyShell from '@/components/shells/AgencyShell'
+import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
 const CARD = { background: 'rgba(255,255,255,0.04)', borderRadius: '16px', padding: '32px', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.08)' }
 const INPUT: React.CSSProperties = { width: '100%', padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', color: '#F5F0E8', fontFamily: 'inherit' }
@@ -24,17 +25,28 @@ const SKILL_DEFAULTS: Record<string, { title: string; description: string }> = {
   medication: { title: 'Recruit: Medication Admin', description: 'Seeking PSW qualified for medication administration.' },
 }
 
+const DEFAULT_QUESTIONS = [
+  'Can you tell me about your experience with dementia or memory care clients?',
+  'Are you available for the shift times listed in this role?',
+  'Do you have valid first aid certification and a clear background check?',
+  'How do you handle a situation where a client becomes agitated or upset?',
+  'Are you comfortable with personal care tasks including bathing and toileting?',
+]
+
 export default function NewCampaignPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { isMobile } = useWindowSize()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState('')
   const [roleDescription, setRoleDescription] = useState('')
-  const [questions, setQuestions] = useState<string[]>(['', '', ''])
+  const [questions, setQuestions] = useState<string[]>([...DEFAULT_QUESTIONS])
   const [candidates, setCandidates] = useState<Candidate[]>([{ firstName: '', lastName: '', phone: '', email: '', notes: '' }])
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [prefilledSkill, setPrefilledSkill] = useState<string | null>(null)
+  const [importedCount, setImportedCount] = useState<number | null>(null)
 
   // Pre-fill from ?skill= param
   useEffect(() => {
@@ -50,6 +62,31 @@ export default function NewCampaignPage() {
   const addQuestion = () => { if (questions.length < 5) setQuestions([...questions, '']) }
   const removeQuestion = (i: number) => { if (questions.length > 1) { const q = [...questions]; q.splice(i, 1); setQuestions(q) } }
   const updateQuestion = (i: number, v: string) => { const q = [...questions]; q[i] = v; setQuestions(q) }
+  const resetQuestions = () => { setQuestions([...DEFAULT_QUESTIONS]); setImportedCount(null) }
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const text = event.target?.result as string
+      const lines = text.split('\n').filter(l => l.trim())
+      // Skip header if it contains "question"
+      const startIdx = lines[0]?.toLowerCase().includes('question') ? 1 : 0
+      const parsed = lines.slice(startIdx).map(l => {
+        // Simple CSV: first column is question
+        const parts = l.split(',')
+        return parts[0]?.replace(/^"|"$/g, '').trim()
+      }).filter(q => q && q.length > 5)
+      if (parsed.length > 0) {
+        setQuestions(parsed.slice(0, 10))
+        setImportedCount(parsed.length)
+      }
+    }
+    reader.readAsText(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const addCandidate = () => { if (candidates.length < 20) setCandidates([...candidates, { firstName: '', lastName: '', phone: '', email: '', notes: '' }]) }
   const removeCandidate = (i: number) => setCandidates(candidates.filter((_, idx) => idx !== i))
   const updateCandidate = (i: number, field: keyof Candidate, v: string) => { const u = [...candidates]; u[i] = { ...u[i], [field]: v }; setCandidates(u) }
@@ -80,7 +117,7 @@ export default function NewCampaignPage() {
               Pre-filled from bench strength gap: {SKILL_DEFAULTS[prefilledSkill]?.title || prefilledSkill}
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', gap: isMobile ? '16px' : '32px' }}>
 
             {/* LEFT COLUMN */}
             <div>
@@ -100,7 +137,10 @@ export default function NewCampaignPage() {
 
               {/* Screening Questions */}
               <div style={CARD}>
-                <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '20px', color: '#F5F0E8', marginBottom: '8px' }}>Screening Questions</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '20px', color: '#F5F0E8', margin: 0 }}>Screening Questions</h2>
+                  <button type="button" onClick={resetQuestions} style={{ background: 'none', border: 'none', color: '#C9973A', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Reset to defaults</button>
+                </div>
                 <p style={{ fontSize: '13px', color: MUTED, marginBottom: '24px' }}>Add up to 5 screening questions. The AI agent will ask these in order during the call.</p>
                 {questions.map((q, i) => (
                   <div key={i} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -120,19 +160,32 @@ export default function NewCampaignPage() {
                     <Plus size={14} /> Add Question
                   </button>
                 )}
+
+                {/* CSV Upload */}
+                <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <input type="file" accept=".csv" ref={fileInputRef} onChange={handleCSVUpload} style={{ display: 'none' }} id="csv-upload" />
+                  <label htmlFor="csv-upload" style={{ display: 'block', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                    <Upload size={16} color={MUTED} style={{ marginBottom: '8px' }} />
+                    <div style={{ fontSize: '13px', color: MUTED }}>Or upload questions from a spreadsheet (.csv)</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>First column = question text</div>
+                  </label>
+                  {importedCount !== null && (
+                    <div style={{ fontSize: '12px', color: '#22C55E', marginTop: '8px' }}>{importedCount} questions imported</div>
+                  )}
+                </div>
               </div>
 
               {/* Candidates */}
               <div style={{ ...CARD, borderRadius: '12px', padding: '20px' }}>
                 <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '20px', color: '#F5F0E8', marginBottom: '8px' }}>Candidates</h2>
                 <p style={{ fontSize: '13px', color: MUTED, marginBottom: '20px' }}>Add candidates to screen. First name and phone are required. You must have prior consent to contact each person.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr 1fr 2fr auto', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
+                <div style={{ display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr 1fr 1.2fr 1fr 2fr auto', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
                   {['First Name *', 'Last Name', 'Phone *', '', 'Email', 'Notes'].map((h, i) => (
                     <span key={i} style={{ fontSize: '11px', fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
                   ))}
                 </div>
                 {candidates.map((c, i) => (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr 1fr 2fr auto', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '12px' }}>
+                  <div key={i} style={{ display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr 1fr 1.2fr 1fr 2fr auto', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '12px' }}>
                     <input type="text" value={c.firstName} onChange={e => updateCandidate(i, 'firstName', e.target.value)} placeholder="First name" style={INPUT} />
                     <input type="text" value={c.lastName} onChange={e => updateCandidate(i, 'lastName', e.target.value)} placeholder="Last name" style={INPUT} />
                     <input type="tel" value={c.phone} onChange={e => updateCandidate(i, 'phone', e.target.value)} placeholder="+1 (416) 555-0123" style={INPUT} />
@@ -166,7 +219,7 @@ export default function NewCampaignPage() {
               </div>
 
               {/* Submit */}
-              <button type="submit" disabled={disabled} style={{ width: '100%', padding: '16px 32px', background: disabled ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #C9973A, #E8B86D)', color: disabled ? MUTED : '#0D1B3E', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}>
+              <button type="submit" disabled={disabled} style={{ width: isMobile ? '100%' : 'auto', padding: '16px 32px', background: disabled ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #C9973A, #E8B86D)', color: disabled ? MUTED : '#0D1B3E', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}>
                 {isSubmitting ? 'Launching...' : 'Launch Campaign'}
               </button>
               {error && <p style={{ color: '#E24B4A', fontSize: '14px', marginTop: '16px', textAlign: 'center' }}>{error}</p>}
