@@ -17,7 +17,7 @@ npm run build 2>&1 | tail -5 >> $REPORT
 echo "" >> $REPORT
 
 echo "## Playwright Results" >> $REPORT
-npx playwright test tests/e2e/agency-pages.spec.ts tests/e2e/api-smoke.spec.ts --reporter=list 2>&1 >> $REPORT
+BETA_GATED=true npx playwright test tests/e2e/agency-pages.spec.ts tests/e2e/api-smoke.spec.ts --reporter=list 2>&1 >> $REPORT
 echo "" >> $REPORT
 
 echo "## Light Theme Audit" >> $REPORT
@@ -26,6 +26,16 @@ echo "" >> $REPORT
 
 echo "## Console.log Audit" >> $REPORT
 grep -rn "console.log" app/ --include="*.tsx" --include="*.ts" -l >> $REPORT 2>&1
+echo "" >> $REPORT
+
+echo "## Dead Button Audit" >> $REPORT
+# Find buttons in React components that have no onClick handler
+for file in $(find app/components -name "*.tsx" 2>/dev/null || find app -name "*.tsx" 2>/dev/null); do
+  # Look for <button> tags without onClick
+  if grep -q '<button' "$file" && ! grep -q 'onClick=' "$file"; then
+    echo "$file" >> $REPORT
+  fi
+done
 
 echo "Report written to $REPORT"
 cat $REPORT
