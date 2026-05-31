@@ -149,7 +149,7 @@ export default function NewClientPage() {
     start_date: '',
     duration_expected: '',
     city: '',
-    state: 'TX',
+    state: 'ON',
     postal_code: '',
     pets_present: [] as string[],
     smoking_household: false,
