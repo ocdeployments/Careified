@@ -74,7 +74,7 @@ export default function ClaimCompletePage() {
             {error}
           </p>
           <a
-            href="/support"
+            href="/caregiver/support"
             style={{
               display: 'inline-block',
               padding: '12px 24px',
