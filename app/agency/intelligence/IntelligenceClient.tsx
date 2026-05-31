@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import BenchStrengthWidget from '@/components/agency/BenchStrengthWidget'
 
 const N = '#0D1B3E'
 const G = '#C9973A'
@@ -24,7 +25,7 @@ interface DashboardData {
 }
 
 export default function IntelligenceClient() {
-  const [activeTab, setActiveTab] = useState<'roi' | 'placements' | 'learning' | 'trends'>('roi')
+  const [activeTab, setActiveTab] = useState<'roi' | 'placements' | 'learning' | 'trends' | 'bench'>('roi')
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -142,6 +143,14 @@ export default function IntelligenceClient() {
       )
     }
 
+    if (activeTab === 'bench') {
+      return (
+        <div>
+          <BenchStrengthWidget compact={false} />
+        </div>
+      )
+    }
+
     // Placeholder for other tabs
     return (
       <div style={{ padding: 64, textAlign: 'center', background: C, borderRadius: 12, border: `1px solid ${B}` }}>
@@ -171,6 +180,7 @@ export default function IntelligenceClient() {
             { key: 'placements', label: 'Placement outcomes' },
             { key: 'learning', label: 'Match learning' },
             { key: 'trends', label: 'Trends' },
+            { key: 'bench', label: 'Bench Strength' },
           ].map(tab => (
             <button
               key={tab.key}
