@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import BenchStrengthWidget from '@/components/agency/BenchStrengthWidget'
 import {
   LayoutDashboard,
   Users,
@@ -76,12 +77,6 @@ export default function AgencyDashboard() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
   const [data, setData] = useState<DashboardData | null>(null)
-  const [rosterSkills, setRosterSkills] = useState<{
-    dementia: number
-    french: number
-    livein: number
-    wound: number
-  }>({ dementia: 0, french: 0, livein: 0, wound: 0 })
   const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
 
@@ -99,17 +94,6 @@ export default function AgencyDashboard() {
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
     ]).then(([dashResp, clientsResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
-
-      // Use bench_strength from API
-      if (dashResp.bench_strength) {
-        setRosterSkills({
-          dementia: dashResp.bench_strength.dementia || 0,
-          french: dashResp.bench_strength.french || 0,
-          livein: dashResp.bench_strength.livein || 0,
-          wound: dashResp.bench_strength.wound || 0,
-        })
-      }
-
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [isLoaded])
@@ -290,33 +274,7 @@ export default function AgencyDashboard() {
           </div>
 
           {/* RIGHT: BENCH STRENGTH */}
-          <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 16 }}>Bench Strength</div>
-
-            {[
-              { label: 'Dementia Care', count: rosterSkills.dementia, key: 'dementia' },
-              { label: 'French-Speaking', count: rosterSkills.french, key: 'french' },
-              { label: 'Live-in Available', count: rosterSkills.livein, key: 'livein' },
-              { label: 'Wound Care', count: rosterSkills.wound, key: 'wound' },
-            ].map(skill => {
-              const pct = stats?.roster_claimed ? Math.min((skill.count / stats.roster_claimed) * 100, 100) : 0
-
-              return (
-                <div key={skill.key} style={{ marginBottom: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: TEXT_MUTED }}>{skill.label}</span>
-                    <span style={{ fontSize: 12, color: skill.count > 0 ? GOLD : TEXT_TERTIARY, background: skill.count > 0 ? GLX : 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 10 }}>{skill.count}</span>
-                  </div>
-                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)' }}>
-                    <div style={{ height: '100%', borderRadius: 3, background: GOLD, width: `${pct}%`, transition: 'width 0.3s' }} />
-                  </div>
-                  {skill.count === 0 && (
-                    <Link href="/agency/airecruit/new" style={{ fontSize: 12, color: GL, textDecoration: 'none', marginTop: 4, display: 'inline-block' }}>Recruit now</Link>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+          <BenchStrengthWidget compact={true} />
         </div>
       </div>
 
