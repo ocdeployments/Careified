@@ -57,7 +57,7 @@ export default function ForAgenciesClient() {
                 "name": "What provinces does Careified serve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Careified currently serves Ontario, Canada, with US expansion underway in Texas."
+                  "text": "Careified currently serves Ontario, Canada, with US expansion coming soon."
                 }
               }
             ]
