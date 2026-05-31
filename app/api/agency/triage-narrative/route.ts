@@ -26,7 +26,7 @@ async function getAgencyId(userId: string): Promise<string | null> {
   return agencyResult.rows[0].id
 }
 
-async function generateNarrative(agencyId: string): Promise<string> {
+async function generateNarrative(agencyId: string): Promise<{ narrative: string; empty?: boolean }> {
   // Gather all data in parallel queries
   const [airecruitData, expiringCreds, unmatchedClients, benchGaps] = await Promise.all([
     // AIRecruit results from last 24h
@@ -79,6 +79,16 @@ async function generateNarrative(agencyId: string): Promise<string> {
   if (parseInt(bench?.french_count || '0') === 0) criticalGaps.push('French')
   if (parseInt(bench?.livein_count || '0') === 0) criticalGaps.push('Live-in')
   if (parseInt(bench?.wound_count || '0') === 0) criticalGaps.push('Wound care')
+
+  // Check for empty state - skip LLM if no activity
+  const hasActivity = airecruitResults.length > 0 || expiringCount > 0 || unmatchedList.length > 0 || criticalGaps.length > 0
+
+  if (!hasActivity) {
+    return {
+      narrative: 'No overnight activity to report. Check back tomorrow morning after AIRecruit runs.',
+      empty: true,
+    }
+  }
 
   // Build user prompt
   const airecruitSummary = airecruitResults.length > 0
@@ -158,15 +168,18 @@ export async function GET(request: NextRequest) {
   // Cache miss - generate narrative
   let narrative: string
   let fallback = false
+  let empty = false
 
   try {
-    narrative = await generateNarrative(agencyId)
+    const result = await generateNarrative(agencyId)
+    narrative = result.narrative
+    empty = result.empty || false
   } catch (error) {
     narrative = 'Your triage summary is being prepared — check back shortly.'
     fallback = true
   }
 
-  // Cache the result
+  // Cache the result (including empty state)
   try {
     await pool.query(
       `INSERT INTO triage_narrative_cache (agency_id, date, narrative) VALUES ($1::uuid, CURRENT_DATE, $2) ON CONFLICT (agency_id, date) DO NOTHING`,
@@ -180,5 +193,32 @@ export async function GET(request: NextRequest) {
     narrative,
     cached: false,
     fallback,
+    empty,
   })
+}
+
+export async function DELETE(request: NextRequest) {
+  // Auth check
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
+  const agencyId = await getAgencyId(userId)
+  if (!agencyId) {
+    return NextResponse.json({ error: 'agency_not_found' }, { status: 403 })
+  }
+
+  // Clear today's cache
+  try {
+    await pool.query(
+      'DELETE FROM triage_narrative_cache WHERE agency_id = $1::uuid AND date = CURRENT_DATE',
+      [agencyId]
+    )
+  } catch (e) {
+    console.error('[TRIDGE_NARRATIVE] Cache clear failed:', e)
+    return NextResponse.json({ error: 'clear_failed' }, { status: 500 })
+  }
+
+  return NextResponse.json({ cleared: true })
 }
