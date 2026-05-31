@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, X, HelpCircle, Upload } from 'lucide-react'
+import { Plus, X, HelpCircle, Upload, ChevronDown, ChevronUp } from 'lucide-react'
 import AgencyShell from '@/components/shells/AgencyShell'
 import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
@@ -33,6 +33,60 @@ const DEFAULT_QUESTIONS = [
   'Are you comfortable with personal care tasks including bathing and toileting?',
 ]
 
+const QUESTION_LIBRARY = [
+  {
+    category: 'Motivation & Character',
+    questions: [
+      'Why did you choose caregiving, and what keeps you going?',
+      'What do you think makes someone a great caregiver?',
+      "What's the caregiving achievement you're most proud of?",
+      'Where do you see your caregiving career in 3–5 years?',
+    ],
+  },
+  {
+    category: 'Experience & Background',
+    questions: [
+      'Describe your previous caregiving experience — client types and conditions.',
+      'Which personal care tasks have you performed, and which are you most comfortable with?',
+      'Have you worked with dementia or memory care clients? How did you approach it?',
+      'What disabilities or chronic conditions have you provided care for?',
+      'How much supervision did you have in past roles? Are you comfortable working independently?',
+      'What was the hardest part about leaving your last caregiving position?',
+    ],
+  },
+  {
+    category: 'Skills & Certifications',
+    questions: [
+      'Are you CPR and First Aid certified? If not, are you willing to get certified?',
+      'Do you have a valid driver\'s license, reliable transportation, and auto insurance?',
+      'What certifications do you hold — PSW, HHA, CNA — and what are you working toward?',
+      'Can you safely lift and physically assist clients with transfers and repositioning?',
+      'Are you comfortable with light housekeeping, meal prep, and special dietary needs?',
+    ],
+  },
+  {
+    category: 'Behavioral & Situational',
+    questions: [
+      'Tell me about a time you handled a difficult or uncooperative client.',
+      'What would you do if a client refuses to eat, bathe, or take medication?',
+      'How do you manage your emotions when a client declines or passes away?',
+      'Tell me about a mistake you made on the job and what you learned from it.',
+      'How do you handle a hostile or interfering family member?',
+      'If a client told you their family was mistreating them, what would you do?',
+      'How do you build rapport with a new client who resists receiving care?',
+    ],
+  },
+  {
+    category: 'Logistics & Availability',
+    questions: [
+      'Are you available for the shift times, including evenings, weekends, or holidays?',
+      'Are you comfortable with rotating or overnight shifts if needed?',
+      'What are your pay expectations for this role?',
+      'Do you have any scheduling constraints, and when can you start?',
+    ],
+  },
+]
+
 export default function NewCampaignPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,6 +95,27 @@ export default function NewCampaignPage() {
   const [title, setTitle] = useState('')
   const [roleDescription, setRoleDescription] = useState('')
   const [questions, setQuestions] = useState<string[]>([...DEFAULT_QUESTIONS])
+  const [libraryOpen, setLibraryOpen] = useState(false)
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({})
+
+  function toggleCategory(cat: string) {
+    setOpenCategories(prev => ({ ...prev, [cat]: !prev[cat] }))
+  }
+
+  function addFromLibrary(q: string) {
+    if (questions.filter(x => x.trim() !== '').length >= 6) return
+    if (questions.includes(q)) return
+    const emptyIdx = questions.findIndex(x => x.trim() === '')
+    if (emptyIdx !== -1) {
+      const updated = [...questions]
+      updated[emptyIdx] = q
+      setQuestions(updated)
+    } else {
+      setQuestions(prev => [...prev, q])
+    }
+  }
+
+  const selectedCount = questions.filter(q => q.trim() !== '').length
   const [candidates, setCandidates] = useState<Candidate[]>([{ firstName: '', lastName: '', phone: '', email: '', notes: '' }])
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -141,7 +216,7 @@ export default function NewCampaignPage() {
                   <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '20px', color: '#F5F0E8', margin: 0 }}>Screening Questions</h2>
                   <button type="button" onClick={resetQuestions} style={{ background: 'none', border: 'none', color: '#C9973A', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Reset to defaults</button>
                 </div>
-                <p style={{ fontSize: '13px', color: MUTED, marginBottom: '24px' }}>Add up to 5 screening questions. The AI agent will ask these in order during the call.</p>
+                <p style={{ fontSize: '13px', color: MUTED, marginBottom: '24px' }}>Add up to 6 screening questions. The AI agent will ask these in order during the call.</p>
                 {questions.map((q, i) => (
                   <div key={i} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '13px', color: '#C9973A', fontWeight: 600, minWidth: '24px' }}>Q{i + 1}:</span>
@@ -155,7 +230,7 @@ export default function NewCampaignPage() {
                     )}
                   </div>
                 ))}
-                {questions.length < 5 && (
+                {questions.length < 6 && (
                   <button type="button" onClick={addQuestion} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid #C9973A', borderRadius: '9999px', background: 'transparent', color: '#C9973A', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
                     <Plus size={14} /> Add Question
                   </button>
@@ -171,6 +246,132 @@ export default function NewCampaignPage() {
                   </label>
                   {importedCount !== null && (
                     <div style={{ fontSize: '12px', color: '#22C55E', marginTop: '8px' }}>{importedCount} questions imported</div>
+                  )}
+                </div>
+
+                {/* Question library */}
+                <div style={{ marginTop: '20px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setLibraryOpen(prev => !prev)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'rgba(201,151,58,0.06)',
+                      border: '1px solid rgba(201,151,58,0.2)',
+                      borderRadius: libraryOpen ? '10px 10px 0 0' : '10px',
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      color: '#F5F0E8',
+                    }}
+                  >
+                    <span style={{ fontSize: '13px', fontWeight: 500 }}>
+                      Question library — 30 suggested questions
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: '12px', color: '#C9973A' }}>
+                        {selectedCount}/6 selected
+                      </span>
+                      {libraryOpen
+                        ? <ChevronUp size={16} color="rgba(255,255,255,0.55)" />
+                        : <ChevronDown size={16} color="rgba(255,255,255,0.55)" />
+                      }
+                    </div>
+                  </button>
+
+                  {libraryOpen && (
+                    <div style={{
+                      border: '1px solid rgba(201,151,58,0.2)',
+                      borderTop: 'none',
+                      borderRadius: '0 0 10px 10px',
+                      overflow: 'hidden',
+                    }}>
+                      {QUESTION_LIBRARY.map(group => (
+                        <div key={group.category}>
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory(group.category)}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 16px',
+                              background: 'rgba(255,255,255,0.03)',
+                              border: 'none',
+                              borderBottom: '1px solid rgba(255,255,255,0.06)',
+                              cursor: 'pointer',
+                              color: '#F5F0E8',
+                            }}
+                          >
+                            <span style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.55)' }}>
+                              {group.category}
+                            </span>
+                            {openCategories[group.category]
+                              ? <ChevronUp size={14} color="rgba(255,255,255,0.3)" />
+                              : <ChevronDown size={14} color="rgba(255,255,255,0.3)" />
+                            }
+                          </button>
+
+                          {openCategories[group.category] && (
+                            <div>
+                              {group.questions.map(q => {
+                                const alreadyAdded = questions.includes(q)
+                                const atLimit = selectedCount >= 6
+                                return (
+                                  <div
+                                    key={q}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      gap: 12,
+                                      padding: isMobile ? '10px 12px' : '8px 16px',
+                                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                      background: alreadyAdded ? 'rgba(201,151,58,0.06)' : 'transparent',
+                                      minHeight: 44,
+                                    }}
+                                  >
+                                    <span style={{
+                                      fontSize: '13px',
+                                      color: alreadyAdded ? '#C9973A' : atLimit ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.75)',
+                                      lineHeight: 1.4,
+                                      flex: 1,
+                                    }}>
+                                      {q}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => addFromLibrary(q)}
+                                      disabled={alreadyAdded || atLimit}
+                                      style={{
+                                        flexShrink: 0,
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: '50%',
+                                        border: `1px solid ${alreadyAdded ? '#C9973A' : atLimit ? 'rgba(255,255,255,0.1)' : 'rgba(201,151,58,0.4)'}`,
+                                        background: alreadyAdded ? 'rgba(201,151,58,0.15)' : 'transparent',
+                                        cursor: alreadyAdded || atLimit ? 'default' : 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: alreadyAdded ? '#C9973A' : atLimit ? 'rgba(255,255,255,0.15)' : '#C9973A',
+                                        fontSize: 18,
+                                        lineHeight: 1,
+                                      }}
+                                    >
+                                      {alreadyAdded ? '✓' : '+'}
+                                    </button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
