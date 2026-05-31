@@ -42,6 +42,11 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
     ? SIDEBAR_WIDTHS.tablet
     : SIDEBAR_WIDTHS.desktop
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname])
+
   // Fetch nav counts
   useEffect(() => {
     if (isExcluded) return
