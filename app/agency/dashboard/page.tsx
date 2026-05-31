@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BenchStrengthWidget from '@/components/agency/BenchStrengthWidget'
+import TriageNarrative from '@/components/agency/TriageNarrative'
 import {
   LayoutDashboard,
   Users,
@@ -289,9 +290,7 @@ export default function AgencyDashboard() {
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: TEXT_TERTIARY, textTransform: 'uppercase', marginBottom: 16 }}>OVERNIGHT TRIAGE</div>
 
         <div style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER_GOLD}`, borderRadius: 12, padding: '20px 24px' }}>
-          <div style={{ fontSize: 15, color: TEXT_PRIMARY, lineHeight: 1.65 }}>
-            Triage ran overnight. <strong>{stats?.airecruit_results || 0}</strong> caregivers were screened via AIRecruit — <strong>0</strong> scored above threshold. <strong>{stats?.unmatched_clients || 0}</strong> client placements are pending review.
-          </div>
+          <TriageNarrative />
         </div>
       </div>
 
