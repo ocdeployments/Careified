@@ -37,5 +37,14 @@ for file in $(find app/components -name "*.tsx" 2>/dev/null || find app -name "*
   fi
 done
 
+echo "" >> $REPORT
+
+echo "## Orphaned Pages Audit" >> $REPORT
+bash scripts/audit-orphaned-pages.sh >> $REPORT 2>&1
+echo "" >> $REPORT
+
+echo "## Broken Links Audit" >> $REPORT
+bash scripts/audit-broken-links.sh >> $REPORT 2>&1
+
 echo "Report written to $REPORT"
 cat $REPORT
