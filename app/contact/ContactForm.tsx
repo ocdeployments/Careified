@@ -5,11 +5,28 @@ import Link from 'next/link'
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', type: 'general', message: '' })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setLoading(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, email: form.email, subject: form.type, message: form.message }),
+      })
+      if (!res.ok) throw new Error('failed')
+      setSubmitted(true)
+    } catch {
+      setError('Something went wrong — please email support@careified.com directly.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -196,8 +213,14 @@ export default function ContactForm() {
                   />
                 </div>
 
+                {error && (
+                  <div style={{ fontSize: '14px', color: '#DC2626', marginBottom: '8px' }}>
+                    {error}
+                  </div>
+                )}
                 <button
                   type="submit"
+                  disabled={loading}
                   style={{
                     padding: '16px',
                     background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
@@ -206,11 +229,12 @@ export default function ContactForm() {
                     borderRadius: '12px',
                     fontSize: '16px',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: loading ? 'wait' : 'pointer',
+                    opacity: loading ? 0.7 : 1,
                     boxShadow: '0 4px 14px rgba(201, 151, 58, 0.4)'
                   }}
                 >
-                  Send Message →
+                  {loading ? 'Sending...' : 'Send Message →'}
                 </button>
               </form>
             )}
