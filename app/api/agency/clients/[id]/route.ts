@@ -25,7 +25,7 @@ export async function GET(
   const { id } = await params
 
   const { rows } = await pool.query(
-    `SELECT * FROM client_needs WHERE id = $1 AND agency_id = $2`,
+    `SELECT * FROM client_needs WHERE id = $1::uuid AND agency_id = $2::text`,
     [id, agencyId]
   )
 
@@ -95,7 +95,7 @@ export async function DELETE(
   const { id } = await params
 
   const result = await pool.query(
-    `DELETE FROM client_needs WHERE id = $1 AND agency_id = $2`,
+    `DELETE FROM client_needs WHERE id = $1::uuid AND agency_id = $2::text`,
     [id, agencyId]
   )
 

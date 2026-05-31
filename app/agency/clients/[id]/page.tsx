@@ -78,14 +78,16 @@ export default function ClientDetailPage() {
   const [excluded, setExcluded] = useState(0)
   const [disclaimer, setDisclaimer] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [interested, setInterested] = useState<any[]>([])
 
   useEffect(() => {
     if (!params.id) return
     async function load() {
+      window.scrollTo({ top: 0, behavior: 'instant' })
       const cr = await fetch(`/api/agency/clients/${params.id}`)
-      if (!cr.ok) { setLoading(false); return }
+      if (!cr.ok) { setError('Client not found or you do not have access.'); setLoading(false); return }
       const cd = await cr.json()
       setClient(cd.client)
       const need = { ...cd.client }
@@ -123,9 +125,10 @@ export default function ClientDetailPage() {
 
   if (!client) {
     return (
-      <div style={{ padding: 40, fontFamily: FONT_SANS, background: '#080F1E', minHeight: '100vh' }}>
-        <h1 style={{ color: '#F5F0E8' }}>Client not found</h1>
-        <Link href="/agency/clients" style={{ color: '#C9973A' }}>Back to clients</Link>
+      <div style={{ padding: 40, fontFamily: FONT_SANS, background: '#080F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+        <h1 style={{ color: '#F5F0E8', fontSize: 24, marginBottom: 16 }}>Client not found</h1>
+        {error && <p style={{ color: '#E24B4A', fontSize: 14, marginBottom: 24, maxWidth: 300 }}>{error}</p>}
+        <Link href="/agency/clients" style={{ color: '#C9973A', fontSize: 14, textDecoration: 'none', padding: '12px 24px', border: '1px solid #C9973A', borderRadius: 8 }}>Back to clients</Link>
       </div>
     )
   }
