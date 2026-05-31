@@ -372,7 +372,7 @@ export default function WaitlistPage() {
           color: 'rgba(255,255,255,0.4)',
           marginTop: 32,
         }}>
-          No spam. Invite only. Launching in Ontario and Texas.
+          No spam. Invite only. Launching in Ontario, Canada.
         </p>
       </div>
     </div>
