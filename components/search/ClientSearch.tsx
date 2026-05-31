@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { SearchFilters, SearchResponse, CaregiverSearchResult } from '@/lib/types/search'
 import { FilterPanel } from '@/components/search/FilterPanel'
 import { SearchResults } from '@/components/search/SearchResults'
@@ -152,12 +153,62 @@ interface ClientSearchProps {
 }
 
 export function ClientSearch({ initialFilters, isDemo = false }: ClientSearchProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [excludedCount, setExcludedCount] = useState(0)
   const [disclaimer, setDisclaimer] = useState('')
+  const [filtersFromSearch, setFiltersFromSearch] = useState(false)
+
+  // Parse URL params into filters on mount
+  useEffect(() => {
+    const urlFilters: Partial<SearchFilters> = {}
+    let hasParams = false
+
+    const city = searchParams.get('city')
+    const language = searchParams.get('language')
+    const specialty = searchParams.get('specialty')
+    const availability = searchParams.get('availability')
+    const placement = searchParams.get('placement')
+    const q = searchParams.get('q')
+    const urgent = searchParams.get('urgent')
+    const vehicle = searchParams.get('vehicle')
+
+    if (city) { urlFilters.city = city; hasParams = true }
+    if (language) { urlFilters.languages = [language]; hasParams = true }
+    if (specialty) { urlFilters.specialties = [specialty]; hasParams = true }
+    if (availability) {
+      const availMap: Record<string, string> = {
+        'live_in': 'Live-in care',
+        'overnight': 'Overnight care',
+        'full_time': 'Permanent placement',
+        'part_time': 'Part-time',
+        'flexible': 'Casual / relief shifts',
+      }
+      urlFilters.placementTypes = [availMap[availability] || availability]
+      hasParams = true
+    }
+    if (placement) {
+      urlFilters.placementTypes = [...(urlFilters.placementTypes || []), placement]
+      hasParams = true
+    }
+    if (urgent === 'true') { urlFilters.openToUrgent = true; hasParams = true }
+    if (vehicle === 'true') { urlFilters.hasVehicle = true; hasParams = true }
+
+    if (hasParams) {
+      setFilters(prev => ({ ...prev, ...urlFilters }))
+      setFiltersFromSearch(true)
+    }
+  }, [searchParams])
+
+  const clearSearchFilters = () => {
+    setFilters(initialFilters)
+    setFiltersFromSearch(false)
+    router.replace('/agency/search')
+  }
 
   // Debounce: defer filter changes by 300ms before firing search
   const deferredFilters = useDeferredValue(filters)
@@ -315,6 +366,12 @@ export function ClientSearch({ initialFilters, isDemo = false }: ClientSearchPro
       {/* Page header */}
       <div className="bg-navy px-4 md:px-6 py-8">
         <div className="max-w-7xl mx-auto">
+          {filtersFromSearch && (
+            <div style={{ background: 'rgba(255,255,255,0.04)', borderLeft: '3px solid #C9973A', borderRadius: 4, padding: '10px 14px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13, color: '#F5F0E8' }}>Filters applied from assistant search.</span>
+              <button onClick={clearSearchFilters} style={{ background: 'none', border: 'none', fontSize: 13, color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>Clear</button>
+            </div>
+          )}
           <h1 className="text-2xl md:text-3xl font-serif font-normal text-white tracking-tight mb-1">
             Find Caregivers
           </h1>
