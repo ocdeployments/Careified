@@ -23,10 +23,16 @@ export default async function AgencyLayout({ children }: { children: React.React
   }
 
   // Normal Clerk auth flow
-  const { userId } = await auth()
+  const { userId, sessionClaims } = await auth()
 
   if (!userId) {
     redirect('/sign-in?redirect_url=/agency')
+  }
+
+  // Admin bypass - allow admin users without agency record
+  const role = (sessionClaims?.publicMetadata as any)?.role
+  if (role === 'admin') {
+    return <>{children}</>
   }
 
   // Check agency exists and is approved
