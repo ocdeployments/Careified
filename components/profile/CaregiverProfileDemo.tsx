@@ -720,6 +720,10 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   const [isShortlisted, setIsShortlisted] = useState(false)
   const [shortlistLoading, setShortlistLoading] = useState(false)
 
+  // Contact request state
+  const [contactRequested, setContactRequested] = useState(false)
+  const [contactLoading, setContactLoading] = useState(false)
+
   async function handleShortlist() {
     if (shortlistLoading) return
     setShortlistLoading(true)
@@ -739,6 +743,27 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
       console.error('Shortlist error:', e)
     } finally {
       setShortlistLoading(false)
+    }
+  }
+
+  async function handleContactRequest() {
+    if (contactLoading || contactRequested) return
+    setContactLoading(true)
+    try {
+      const res = await fetch('/api/agency/contact-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caregiverId: dm.id })
+      })
+      if (res.ok) {
+        setContactRequested(true)
+      } else if (res.status === 401) {
+        window.location.href = '/sign-in'
+      }
+    } catch (e) {
+      console.error('Contact request error:', e)
+    } finally {
+      setContactLoading(false)
     }
   }
 
@@ -970,19 +995,23 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             </button>
             <button
               type="button"
+              onClick={handleContactRequest}
+              disabled={contactLoading || contactRequested}
               style={{
                 background: 'transparent',
-                color: '#F5F0E8',
-                border: '1.5px solid rgba(201,151,58,0.55)',
+                color: contactRequested ? '#4a9a4a' : '#F5F0E8',
+                border: contactRequested ? '1.5px solid #4a9a4a' : '1.5px solid rgba(201,151,58,0.55)',
                 borderRadius: 10,
                 padding: '12px 20px',
                 fontFamily: SANS,
                 fontSize: 14,
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: contactLoading ? 'not-allowed' : contactRequested ? 'default' : 'pointer',
+                opacity: contactLoading ? 0.7 : 1,
+                transition: 'all 150ms ease',
               }}
             >
-              Request contact
+              {contactLoading ? 'Sending...' : contactRequested ? '✓ Request sent' : 'Request contact'}
             </button>
           </aside>
         </div>
