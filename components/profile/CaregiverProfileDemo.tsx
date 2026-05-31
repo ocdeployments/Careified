@@ -463,6 +463,7 @@ export interface CaregiverProfileProps {
   profileCompletion?: number
   aggregateScore?: number | string | null
   ratingCount?: number
+  id?: string
   // Clinical
   services?: string[]
   specializations?: string[]
@@ -715,6 +716,32 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
   const [openOpenQs, setOpenOpenQs] = useState(true)
   const [selectedClaim, setSelectedClaim] = useState<VerifiedClaim | null>(null)
 
+  // Shortlist state
+  const [isShortlisted, setIsShortlisted] = useState(false)
+  const [shortlistLoading, setShortlistLoading] = useState(false)
+
+  async function handleShortlist() {
+    if (shortlistLoading) return
+    setShortlistLoading(true)
+    try {
+      const method = isShortlisted ? 'DELETE' : 'POST'
+      const res = await fetch('/api/agency/shortlist', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caregiverId: dm.id })
+      })
+      if (res.ok) {
+        setIsShortlisted(!isShortlisted)
+      } else if (res.status === 401) {
+        window.location.href = '/sign-in'
+      }
+    } catch (e) {
+      console.error('Shortlist error:', e)
+    } finally {
+      setShortlistLoading(false)
+    }
+  }
+
   const initials = dm.firstName ? `${dm.firstName[0]}${dm.lastName?.[0] || ''}` : '?'
   const fullName = dm.firstName ? `${dm.firstName} ${dm.lastName || ''}` : '—'
 
@@ -921,21 +948,25 @@ export default function CaregiverProfileDemo(props: CaregiverProfileProps = {} a
             {/* CTAs */}
             <button
               type="button"
+              onClick={handleShortlist}
+              disabled={shortlistLoading}
               style={{
-                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
-                color: C.navy,
-                border: 'none',
+                background: isShortlisted ? '#1a3a1a' : 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                color: isShortlisted ? '#4a9a4a' : C.navy,
+                border: isShortlisted ? '1.5px solid #4a9a4a' : 'none',
                 borderRadius: 10,
                 padding: '12px 20px',
                 fontFamily: SANS,
                 fontSize: 14,
                 fontWeight: 700,
                 letterSpacing: '0.02em',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(201,151,58,0.35)',
+                cursor: shortlistLoading ? 'not-allowed' : 'pointer',
+                boxShadow: isShortlisted ? 'none' : '0 4px 16px rgba(201,151,58,0.35)',
+                opacity: shortlistLoading ? 0.7 : 1,
+                transition: 'all 150ms ease',
               }}
             >
-              Add to shortlist
+              {shortlistLoading ? 'Saving...' : isShortlisted ? '✓ Shortlisted' : 'Add to shortlist'}
             </button>
             <button
               type="button"

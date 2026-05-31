@@ -228,6 +228,7 @@ export default async function CaregiverProfilePage({ params }: { params: Promise
 
   return (
     <CaregiverProfileDemo
+      id={id}
       firstName={caregiver.preferred_name || caregiver.first_name}
       lastName={caregiver.last_name}
       jobTitle={caregiver.job_title}
