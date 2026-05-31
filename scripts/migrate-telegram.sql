@@ -19,3 +19,16 @@ CREATE TABLE IF NOT EXISTS telegram_usage (
   count integer NOT NULL DEFAULT 0,
   PRIMARY KEY (agency_id, date)
 );
+
+CREATE TABLE IF NOT EXISTS telegram_connected_users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  agency_id uuid NOT NULL,
+  telegram_user_id bigint NOT NULL,
+  telegram_username varchar(255),
+  label varchar(100) DEFAULT 'Team Member',
+  connected_at timestamptz NOT NULL DEFAULT now(),
+  last_active_at timestamptz,
+  UNIQUE(telegram_user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_telegram_users_agency ON telegram_connected_users(agency_id);
+CREATE INDEX IF NOT EXISTS idx_telegram_users_telegram_id ON telegram_connected_users(telegram_user_id);

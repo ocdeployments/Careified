@@ -10,6 +10,13 @@ const PLAN_LIMITS: Record<string, number> = {
   scale: 100,
 }
 
+const USER_LIMITS: Record<string, number> = {
+  starter: 0,
+  growth: 2,
+  scale: 5,
+  enterprise: 999,
+}
+
 async function sendTelegram(chatId: number, text: string): Promise<void> {
   await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: 'POST',
@@ -34,13 +41,23 @@ async function checkRateLimit(agencyId: string, planTier: string): Promise<boole
 
 async function getAgencyByTelegramUserId(telegramUserId: number) {
   const result = await pool.query(
-    'SELECT id, name, plan_tier, telegram_user_id FROM agencies WHERE telegram_user_id = $1',
+    `SELECT a.id, a.name, a.plan_tier
+     FROM agencies a
+     JOIN telegram_connected_users tcu ON tcu.agency_id = a.id
+     WHERE tcu.telegram_user_id = $1`,
     [telegramUserId]
   )
   return result.rows[0] || null
 }
 
-async function handleConnect(chatId: number, code: string): Promise<void> {
+async function updateLastActive(telegramUserId: number) {
+  pool.query(
+    `UPDATE telegram_connected_users SET last_active_at = now() WHERE telegram_user_id = $1`,
+    [telegramUserId]
+  ).catch(() => {})
+}
+
+async function handleConnect(chatId: number, code: string, username?: string): Promise<void> {
   const codeResult = await pool.query(
     `SELECT * FROM telegram_connect_codes WHERE code = $1 AND used_at IS NULL AND expires_at > now()`,
     [code]
@@ -54,16 +71,33 @@ async function handleConnect(chatId: number, code: string): Promise<void> {
   const connectCode = codeResult.rows[0]
   const agencyId = connectCode.agency_id
 
+  // Get agency plan tier
+  const agencyResult = await pool.query('SELECT plan_tier FROM agencies WHERE id = $1::uuid', [agencyId])
+  const planTier = agencyResult.rows[0]?.plan_tier || 'starter'
+  const userLimit = USER_LIMITS[planTier] ?? 0
+
+  // Check current user count
+  const countResult = await pool.query('SELECT COUNT(*)::int as count FROM telegram_connected_users WHERE agency_id = $1::uuid', [agencyId])
+  const currentCount = countResult.rows[0]?.count || 0
+
+  if (userLimit > 0 && currentCount >= userLimit) {
+    await sendTelegram(chatId, `Your plan allows ${userLimit} Telegram users. Upgrade at https://careified.com/agency/billing`)
+    return
+  }
+
+  // Insert into connected users table
   await pool.query(
-    `UPDATE agencies SET telegram_user_id = $1, telegram_connected_at = now() WHERE id = $2`,
-    [chatId, agencyId]
+    `INSERT INTO telegram_connected_users (agency_id, telegram_user_id, telegram_username)
+     VALUES ($1::uuid, $2, $3)
+     ON CONFLICT (telegram_user_id) DO UPDATE SET agency_id = $1::uuid, connected_at = now()`,
+    [agencyId, chatId, username || null]
   )
   await pool.query(
     `UPDATE telegram_connect_codes SET used_at = now() WHERE code = $1`,
     [code]
   )
 
-  await sendTelegram(chatId, `✅ Connected! Your Careified account is now linked.\n\nTry /morning for your triage briefing or /help for all commands.`)
+  await sendTelegram(chatId, `✅ Connected! Welcome to Careified.\n\nTry /morning for your triage briefing or /help for all commands.`)
 }
 
 async function handleMorning(agencyId: string, chatId: number): Promise<void> {
@@ -267,6 +301,7 @@ export async function POST(request: NextRequest) {
   const chatId = message.chat.id
   const text = (message.text || '').trim()
   const telegramUserId = message.from.id
+  const username = message.from?.username
 
   // Step 1: Look up agency
   const agency = await getAgencyByTelegramUserId(telegramUserId)
@@ -278,13 +313,16 @@ export async function POST(request: NextRequest) {
         await sendTelegram(chatId, 'Please send /connect followed by your 6-character code.')
         return NextResponse.json({ ok: true })
       }
-      await handleConnect(chatId, code)
+      await handleConnect(chatId, code, username)
       return NextResponse.json({ ok: true })
     }
 
     await sendTelegram(chatId, 'To connect your Careified account, send /connect [CODE] — generate your code in Settings → Integrations.')
     return NextResponse.json({ ok: true })
   }
+
+  // Update last active (fire and forget)
+  updateLastActive(telegramUserId)
 
   // Step 2: Rate limiting
   const allowed = await checkRateLimit(agency.id, agency.plan_tier)
@@ -302,7 +340,7 @@ export async function POST(request: NextRequest) {
       if (!code) {
         await sendTelegram(chatId, 'Please send /connect followed by your 6-character code.')
       } else {
-        await handleConnect(chatId, code)
+        await handleConnect(chatId, code, username)
       }
       break
     case '/morning':
