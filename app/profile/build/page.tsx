@@ -20,6 +20,7 @@ import Step8WorkHistory from './Step8WorkHistory'
 import Step6Review from './Step6Review'
 import { CheckCircle, Circle, ChevronRight, ChevronLeft } from 'lucide-react'
 import ProfilePreviewCard from '@/components/profile/ProfilePreviewCard'
+import { useWindowSize } from '@/lib/hooks/useWindowSize'
 import IDCardReveal from '@/components/profile/IDCardReveal'
 import GhostProfileModal from '@/components/profile/GhostProfileModal'
 import LiveBanner from '@/components/profile/LiveBanner'
@@ -331,6 +332,7 @@ function ProfileBuilder({ formData: contextFormData }: { formData?: any }) {
  const router = useRouter()
  const step = searchParams.get('step') || '0'
  const currentStep = parseInt(step)
+ const { isMobile, isTablet } = useWindowSize()
  const progress = PROGRESS[currentStep - 1]
  const tier = TIERS[currentStep - 1]
  const milestone = MILESTONES[currentStep]
@@ -463,7 +465,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
 
  {/* Mobile step dots */}
  <div className="pb-mobile-steps" style={{
- display: 'none',
+ display: isMobile ? 'flex' : 'none',
  position: 'fixed', top: '108px', left: 0, right: 0,
  zIndex: 39, background: 'white',
  padding: '12px 24px',
@@ -497,7 +499,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  <div className="pb-layout" style={{
  maxWidth: '1280px', margin: '0 auto',
  display: 'grid',
- gridTemplateColumns: '240px 560px 340px',
+ gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : '240px 560px 340px',
  gap: '40px', minHeight: 'calc(100vh - 108px)',
  padding: '120px 40px 160px',
  }}>
@@ -510,6 +512,7 @@ const StepPlaceholder = ({ title }: { title: string }) => (
  position: 'sticky', top: '108px',
  height: 'calc(100vh - 108px)',
  overflowY: 'auto',
+ display: isMobile || isTablet ? 'none' : undefined,
  }}>
  {/* Progress */}
  <div style={{
@@ -628,7 +631,7 @@ transition={{ duration: 0.15 }}
  </div>
 
  {/* Content area */}
- <div style={{ padding: '32px', overflowY: 'auto' }}>
+ <div style={{ overflowY: 'auto', width: isMobile || isTablet ? '100%' : undefined, maxWidth: isMobile || isTablet ? '100%' : undefined, padding: isMobile ? '16px' : isTablet ? '24px' : '32px' }}>
 
  {/* Step header */}
  <div style={{ marginBottom: '28px' }}>
@@ -831,7 +834,7 @@ transition={{ duration: 0.15 }}
  </div>
 
  {/* Live preview panel */}
- <div className="pb-preview" style={{ padding: '24px 16px 24px 0' }}>
+ <div className="pb-preview" style={{ padding: '24px 16px 24px 0', display: isMobile || isTablet ? 'none' : undefined }}>
  <ProfilePreviewCard data={formData as any} step={currentStep} />
  </div>
  </div>
