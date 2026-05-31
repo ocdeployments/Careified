@@ -36,7 +36,7 @@ export default function IDCardReveal({
 
   const initials = `${caregiverData.firstName?.[0] || ''}${caregiverData.lastName?.[0] || ''}`.toUpperCase()
 
-  const idCode = caregiverData.caregiverCode || 'CRF-US-TX-2026-?????'
+  const idCode = caregiverData.caregiverCode || 'CRF-CA-ON-2026-?????'
 
   useEffect(() => {
     // Sequence the animation
