@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useProfileForm } from '@/lib/context/ProfileFormContext'
 import { useProfileSave } from '@/lib/hooks/useProfileSave'
+import { useWindowSize } from '@/lib/hooks/useWindowSize'
 
 const COLORS = {
   navy: '#0D1B3E',
@@ -107,6 +108,7 @@ const styles = {
 export default function Step3Availability() {
   const { formData } = useProfileForm()
   const { saveField } = useProfileSave()
+  const { isMobile } = useWindowSize()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [focused, setFocused] = useState<string | null>(null)
@@ -289,7 +291,7 @@ export default function Step3Availability() {
 
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Hours & Placement</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={styles.label}>Min hours/week</label>
             <input
@@ -455,7 +457,7 @@ export default function Step3Availability() {
 
       <div style={styles.section}>
         <div style={styles.sectionHeader}>Hourly Rate Range (CAD/USD)</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
           <div>
             <label style={styles.label}>Minimum desired rate</label>
             <input
