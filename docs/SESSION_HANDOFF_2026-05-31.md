@@ -14,7 +14,7 @@
 ---
 
 ## CURRENT STATE
-- Branch: main (latest commit: 776e3c0)
+- Branch: main (latest commit: d338008)
 - Live: careified.com
 - DB: Render Oregon (production) — Supabase Toronto ready but not switched yet
 - Demo data: seeded on Render for agency c1444e1d (Sunrise Senior Care Ontario)
@@ -112,43 +112,33 @@ If these are not in git log, run the fix prompt from the previous session before
 - S2: Dashboard 5-zone redesign ✅
 - S3: Client triage panel ✅
 - S4: Bench strength intelligence ✅
+- S5: Overnight triage narrative ✅ (API + component built, renders in Zone 4)
+- S7: Telegram bot ✅ (webhook with 7 commands, multi-user connect API)
 
-### Next up — S5
-- S5: Overnight triage narrative (AI-generated, cached per day, max 3 sentences)
-- S6: Conversational search Phase 1
-- S7: Telegram bot (must have for June 15)
+### Not yet built
+- S6: Conversational search Phase 1 (NOT BUILT)
 - S8: Bulk upload → AIRecruit auto-launch
 - S9: AIRecruit mobile responsive
 - S10: Pre-call SMS + CNAM branding (Twilio — ROMY action required first)
 
 ---
 
-## S5 SPEC — Overnight Triage Narrative
+## S5 SPEC — Overnight Triage Narrative (BUILT)
 
 Location: Dashboard Zone 4
-Trigger: First load of /agency/dashboard each day
-Cache: 1 per agency per day (store in DB or Vercel KV)
-Model: OpenRouter — upstage/ring-2.6-1t:free or minimax-m2.5
+Status: ✅ BUILT
 
-Input data (read from existing dashboard API response):
-- AIRecruit results from overnight (calls completed, scores, recommendations)
-- Expiring credentials (next 60 days)
-- Unmatched clients (clients with no active placement)
-- Bench strength gaps (critical gaps only)
-
-Output: Plain English, max 3 sentences, named caregivers are clickable links
-Example: "AIRecruit completed 4 calls overnight — Maria Santos scored 92 and is ready to review. 
-3 clients remain unmatched, including Robert Chen who has been waiting 14 days. 
-Your French-speaking bench is critically low — 0 caregivers available."
+Files:
+- API: app/api/agency/triage-narrative/route.ts
+- Component: components/agency/TriageNarrative.tsx
 
 Implementation:
-- New API route: /api/agency/triage-narrative
-- GET handler: check cache → if fresh return cached → else generate via LLM → cache → return
+- GET /api/agency/triage-narrative: checks cache → if fresh return cached → else generate via LLM → cache → return
 - Cache key: agency_id + date (YYYY-MM-DD)
-- Cache table: triage_narrative_cache (agency_id, date, narrative, generated_at)
-- Dashboard fetches /api/agency/triage-narrative on load
-- Zone 4 renders narrative with skeleton loading state
-- Clickable caregiver names: parse [Name](caregiverId) markdown-style links
+- Uses OpenRouter with upstage/ring-2.6-1t:free
+- Input data: AIRecruit results (last 24h), expiring credentials (next 60 days), unmatched clients, bench gaps
+- Output: Plain English, max 3 sentences
+- Dashboard fetches on load, renders with skeleton loading state
 
 ---
 
@@ -164,19 +154,26 @@ Extend AI assistant (/agency/assistant) action blocks:
 
 ---
 
-## S7 SPEC — Telegram Bot (MUST HAVE JUNE 15)
+## S7 SPEC — Telegram Bot (BUILT)
 
-Tech: Telegram Bot API (free, no new packages needed — HTTP only)
-New route: /api/telegram/webhook/route.ts
-New column: telegram_user_id on agencies table
-Setup flow: /agency/settings → Integrations tab → "Connect Telegram" → shows /connect [CODE]
-Bot commands:
+Status: ✅ BUILT
+Tech: Telegram Bot API (HTTP only, no new packages)
+
+Files:
+- Webhook: app/api/telegram/webhook/route.ts
+- Connect API: app/api/telegram/connect/route.ts
+
+Bot commands implemented:
+- /connect — connect agency account
 - /morning — morning briefing (unmatched clients + AIRecruit results)
 - /search [query] — search caregivers
 - /unmatched — list unmatched clients
 - /airecruit — latest AIRecruit results
 - /creds — caregivers with expiring credentials
+- /help — list all commands
+
 Rate limits: Starter none, Growth 30/day, Scale 100/day
+Multi-user support via connect_codes table
 
 ---
 

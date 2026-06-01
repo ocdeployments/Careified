@@ -1,5 +1,5 @@
 # CODEBASE MAP — AUTO-GENERATED. Do not hand-edit. Regenerate via this script.
-Generated: Thu 28 May 2026 14:02:16 EDT
+Generated: Sun 31 May 2026 02:09:52 EDT
 
 ## FILE TREE (app, lib, components — depth 3, no node_modules)
 ```
@@ -17,6 +17,7 @@ app/admin/reviews/page.tsx
 app/admin/reviews/ReviewsClient.tsx
 app/admin/status/page.tsx
 app/admin/tickets/page.tsx
+app/agency/AgencyLayoutClient.tsx
 app/agency/airecruit/[campaignId]/[callId]/page.tsx
 app/agency/airecruit/[campaignId]/page.tsx
 app/agency/airecruit/new/page.tsx
@@ -62,6 +63,7 @@ app/api/agency/clients/route.ts
 app/api/agency/command/route.ts
 app/api/agency/consent-status/route.ts
 app/api/agency/consent/route.ts
+app/api/agency/contact-request/route.ts
 app/api/agency/dashboard/route.ts
 app/api/agency/nav-counts/route.ts
 app/api/agency/profile-completion/route.ts
@@ -148,13 +150,17 @@ app/caregiver/support/page.tsx
 app/claim/[token]/ClaimForm.tsx
 app/claim/[token]/complete/page.tsx
 app/claim/[token]/page.tsx
+app/contact/ContactForm.tsx
 app/contact/page.tsx
 app/demo/airecruit/page.tsx
 app/demo/assistant/page.tsx
 app/demo/login/page.tsx
+app/for-agencies/ForAgenciesClient.tsx
 app/for-agencies/page.tsx
+app/for-caregivers/ForCaregiversClient.tsx
 app/for-caregivers/page.tsx
 app/for-families/page.tsx
+app/gate/layout.tsx
 app/gate/page.tsx
 app/id/[caregiverId]/page.tsx
 app/layout.tsx
@@ -195,6 +201,7 @@ app/verify/[slug]/page.tsx
 app/waitlist/layout.tsx
 app/waitlist/page.tsx
 components/agency/AddToRosterModal.tsx
+components/agency/BenchStrengthWidget.tsx
 components/agency/CommandBar.tsx
 components/agency/PrivateRelationshipPanel.tsx
 components/agency/ProfileNudge.tsx
@@ -208,6 +215,7 @@ components/forms/AgencySignupForm.tsx
 components/id/QRCodeDisplay.tsx
 components/matching/AlignmentBadge.tsx
 components/matching/DimensionBreakdown.tsx
+components/nav/AgencySidebar.tsx
 components/nav/Navbar.tsx
 components/nav/NavbarWrapper.tsx
 components/notifications/NotificationBell.tsx
@@ -369,6 +377,7 @@ app/api/agency/clients/route.ts
 app/api/agency/command/route.ts
 app/api/agency/consent-status/route.ts
 app/api/agency/consent/route.ts
+app/api/agency/contact-request/route.ts
 app/api/agency/dashboard/route.ts
 app/api/agency/nav-counts/route.ts
 app/api/agency/profile-completion/route.ts
@@ -1252,6 +1261,13 @@ lib/wallet/apple-wallet.ts  ::  interface PassGenerationResult
   created_at : timestamp with time zone ?
   updated_at : timestamp with time zone ?
   locale : text ?
+=== contact_requests ===
+  id : uuid
+  agency_id : uuid
+  caregiver_id : uuid
+  message : text ?
+  status : text
+  created_at : timestamp without time zone
 === employment_verifications ===
   id : uuid
   caregiver_id : character varying
@@ -1533,6 +1549,7 @@ dotenv
 eslint
 eslint-config-next
 framer-motion
+husky
 jsdom
 leaflet
 lucide-react
