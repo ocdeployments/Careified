@@ -40,9 +40,12 @@ type DashboardStats = {
   total_clients: number
   unmatched_clients: number
   total_caregivers: number
+  available_caregivers?: number
   roster_claimed: number
   pipeline_count: number
+  shortlisted_count?: number
   airecruit_results: number
+  expiring_credentials?: number
   agency_name?: string
   plan_tier?: string
   subscription_status?: string

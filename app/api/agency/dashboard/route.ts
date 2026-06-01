@@ -46,11 +46,14 @@ export async function GET(request: NextRequest) {
       const statsResult = await pool.query(`
         SELECT
           (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1::uuid) as total_caregivers,
+          (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1::uuid AND availability_status = 'available_now') as available_caregivers,
           (SELECT COUNT(*)::int FROM caregivers WHERE created_by_agency_id = $1::uuid AND claim_status = 'claimed') as roster_claimed,
           (SELECT COUNT(*)::int FROM agency_shortlist WHERE agency_clerk_id = $2) as pipeline_count,
           (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND status != 'closed') as total_clients,
           (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND matched_caregiver_id IS NULL AND status != 'closed') as unmatched_clients,
-          (SELECT COUNT(*)::int FROM airecruit_campaigns WHERE agency_id = $1::uuid) as airecruit_results,
+          (SELECT COUNT(*)::int FROM agency_shortlist WHERE agency_clerk_id = $2) as shortlisted_count,
+          (SELECT COUNT(*)::int FROM caregiver_certifications cc JOIN caregivers c ON c.id = cc.caregiver_id WHERE c.created_by_agency_id = $1::uuid AND cc.expiry_date IS NOT NULL AND cc.expiry_date < NOW() + INTERVAL '60 days' AND cc.expiry_date > NOW()) as expiring_credentials,
+          (SELECT COUNT(*)::int FROM "AIRecruitCampaign" WHERE "agencyId" = $1::text) as airecruit_results,
           (SELECT name FROM agencies WHERE id = $1::uuid) as agency_name,
           (SELECT plan_tier FROM agencies WHERE id = $1::uuid) as plan_tier,
           (SELECT subscription_status FROM agencies WHERE id = $1::uuid) as subscription_status
@@ -61,9 +64,12 @@ export async function GET(request: NextRequest) {
         total_clients: row.total_clients || 0,
         unmatched_clients: row.unmatched_clients || 0,
         total_caregivers: row.total_caregivers || 0,
+        available_caregivers: row.available_caregivers || 0,
         roster_claimed: row.roster_claimed || 0,
         pipeline_count: row.pipeline_count || 0,
+        shortlisted_count: row.shortlisted_count || 0,
         airecruit_results: row.airecruit_results || 0,
+        expiring_credentials: row.expiring_credentials || 0,
         agency_name: row.agency_name,
         plan_tier: row.plan_tier,
         subscription_status: row.subscription_status,
