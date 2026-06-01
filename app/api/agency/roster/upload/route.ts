@@ -57,10 +57,10 @@ async function checkApprovedAgency(): Promise<{ agencyId: string; agencyName: st
     const user = await client.users.getUser(userId)
     const role = user.publicMetadata?.role as string
 
-    if (role !== 'agency') return null
+    if (role !== 'agency' && role !== 'admin') return null
 
     const result = await pool.query(
-      "SELECT id, name, locale FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
+      "SELECT id, name, locale FROM agencies WHERE clerk_user_id = $1 AND status IN ('approved', 'active')",
       [userId]
     )
 

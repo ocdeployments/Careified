@@ -16,12 +16,12 @@ export async function GET(request: NextRequest) {
     const user = await client.users.getUser(userId)
     const role = user.publicMetadata?.role as string
 
-    if (role !== 'agency') {
+    if (role !== 'agency' && role !== 'admin') {
       return NextResponse.json({ error: 'not_agency' }, { status: 403 })
     }
 
     const agencyResult = await pool.query(
-      "SELECT id::text as id FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
+      "SELECT id::text as id FROM agencies WHERE clerk_user_id = $1 AND status IN ('approved', 'active')",
       [userId]
     )
 

@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Agency registered but not approved yet
-      if (agency.status !== 'approved') {
+      if (!['approved', 'active'].includes(agency.status)) {
         return NextResponse.redirect(new URL('/agency/pending-approval', req.url))
       }
 
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', req.url))
+      return NextResponse.redirect(new URL('/agency/dashboard', req.url))
     }
 
     // No role set — send to landing page to pick entry point

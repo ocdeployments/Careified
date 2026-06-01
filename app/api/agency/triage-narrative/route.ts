@@ -10,12 +10,12 @@ async function getAgencyId(userId: string): Promise<string | null> {
   const user = await client.users.getUser(userId)
   const role = user.publicMetadata?.role as string
 
-  if (role !== 'agency') {
+  if (role !== 'agency' && role !== 'admin') {
     return null
   }
 
   const agencyResult = await pool.query(
-    "SELECT id::text as id FROM agencies WHERE clerk_user_id = $1 AND status = 'approved'",
+    "SELECT id::text as id FROM agencies WHERE clerk_user_id = $1 AND status IN ('approved', 'active')",
     [userId]
   )
 

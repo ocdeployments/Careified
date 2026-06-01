@@ -36,7 +36,7 @@ export async function GET(
  c.years_experience, c.hourly_rate
  FROM caregiver_opportunity_interest i
  JOIN caregivers c ON c.id = i.caregiver_id
- WHERE i.client_needs_id = $1 AND i.status = 'interested' AND c.status = 'approved'
+ WHERE i.client_needs_id = $1 AND i.status = 'interested' AND c.status IN ('approved', 'active')
  ORDER BY i.alignment_score_at_expression DESC NULLS LAST, i.created_at DESC`,
  [id]
  )
