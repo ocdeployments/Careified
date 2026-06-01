@@ -1,10 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
 import { useWindowSize } from '@/lib/hooks/useWindowSize'
+import {
+  LayoutDashboard,
+  Users,
+  Bookmark,
+  BookOpen,
+  Search,
+  PhoneCall,
+  TrendingUp,
+  Settings,
+  HelpCircle,
+} from 'lucide-react'
 
 export const SIDEBAR_WIDTHS = {
   desktop: 220,
@@ -22,13 +32,15 @@ interface AgencySidebarProps {
   }
   currentPath: string
   isTablet?: boolean
+  agencyName?: string
+  agencyPlan?: string
 }
 
 interface NavItem {
   label: string
   href: string
   badge?: 'unmatched' | 'pipeline' | 'credentials' | 'airecruit'
-  disabled?: boolean
+  icon: React.ComponentType<{ size?: number; color?: string }>
 }
 
 interface NavSection {
@@ -38,42 +50,32 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: 'TRIAGE',
+    title: 'Find coverage',
     items: [
-      { label: 'Dashboard', href: '/agency/dashboard' },
+      { label: 'Dashboard', href: '/agency/dashboard', icon: LayoutDashboard },
+      { label: 'Clients', href: '/agency/clients', badge: 'unmatched', icon: Users },
+      { label: 'Shortlist', href: '/agency/shortlist', badge: 'pipeline', icon: Bookmark },
     ],
   },
   {
-    title: 'CLIENT OPERATIONS',
+    title: 'Build your team',
     items: [
-      { label: 'Clients', href: '/agency/clients', badge: 'unmatched' },
-      { label: 'Placements', href: '/agency/placements', disabled: true },
-      { label: 'Shortlist', href: '/agency/shortlist', badge: 'pipeline' },
+      { label: 'Roster', href: '/agency/roster', badge: 'credentials', icon: BookOpen },
+      { label: 'Find Caregivers', href: '/agency/caregivers', icon: Search },
+      { label: 'AIRecruit', href: '/agency/airecruit', badge: 'airecruit', icon: PhoneCall },
     ],
   },
   {
-    title: 'TALENT ACQUISITION',
+    title: 'Intelligence',
     items: [
-      { label: 'Find Caregivers', href: '/agency/caregivers' },
-      { label: 'Roster', href: '/agency/roster', badge: 'credentials' },
-      { label: 'AIRecruit', href: '/agency/airecruit', badge: 'airecruit' },
-      { label: 'QuickFill', href: '/agency/quickfill', disabled: true },
+      { label: 'Performance', href: '/agency/intelligence', icon: TrendingUp },
     ],
   },
-  {
-    title: 'INTELLIGENCE',
-    items: [
-      { label: 'Performance', href: '/agency/intelligence' },
-      { label: 'Bench Strength', href: '/agency/intelligence?tab=bench', disabled: true },
-    ],
-  },
-  {
-    title: 'ADMIN',
-    items: [
-      { label: 'Settings', href: '/agency/settings' },
-      { label: 'Support', href: '/agency/support' },
-    ],
-  },
+]
+
+const bottomItems = [
+  { label: 'Settings', href: '/agency/settings', icon: Settings },
+  { label: 'Support', href: '/agency/support', icon: HelpCircle },
 ]
 
 function getBadgeHref(item: NavItem): string {
@@ -92,7 +94,32 @@ function getBadgeCount(counts: AgencySidebarProps['counts'], badge?: string): nu
   return 0
 }
 
-export default function AgencySidebar({ counts, currentPath, isTablet: propIsTablet }: AgencySidebarProps) {
+function getBadgeStyle(badge?: string): React.CSSProperties {
+  if (badge === 'unmatched') {
+    return {
+      background: 'rgba(226,75,74,0.18)',
+      color: '#E24B4A',
+    }
+  }
+  if (badge === 'pipeline' || badge === 'airecruit') {
+    return {
+      background: 'rgba(129,140,248,0.15)',
+      color: '#818CF8',
+    }
+  }
+  if (badge === 'credentials') {
+    return {
+      background: 'rgba(245,158,11,0.15)',
+      color: '#F59E0B',
+    }
+  }
+  return {
+    background: 'rgba(201,151,58,0.15)',
+    color: '#C9973A',
+  }
+}
+
+export default function AgencySidebar({ counts, currentPath, isTablet: propIsTablet, agencyName, agencyPlan }: AgencySidebarProps) {
   const pathname = usePathname()
   const { isTablet: hookIsTablet } = useWindowSize()
   const isTablet = propIsTablet ?? hookIsTablet
@@ -105,11 +132,14 @@ export default function AgencySidebar({ counts, currentPath, isTablet: propIsTab
     return pathname.startsWith(href)
   }
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  }
+
   const containerStyle: React.CSSProperties = {
     width: isTablet ? 60 : 220,
-    background: '#0D1B3E',
-    borderRight: '1px solid rgba(255,255,255,0.07)',
-    paddingTop: '0',
+    background: '#0D1728',
+    borderRight: '0.5px solid rgba(255,255,255,0.06)',
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
@@ -121,153 +151,87 @@ export default function AgencySidebar({ counts, currentPath, isTablet: propIsTab
     zIndex: 100,
   }
 
-  const logoAreaStyle: React.CSSProperties = {
-    padding: isTablet ? '16px 8px' : '20px 20px 16px',
-    borderBottom: '1px solid rgba(255,255,255,0.07)',
-    marginBottom: '8px',
-    display: 'flex',
-    justifyContent: 'center',
-  }
-
-  const logoTextStyle: React.CSSProperties = {
-    fontSize: isTablet ? 18 : 16,
-    fontWeight: 700,
-    color: '#F5F0E8',
-    fontFamily: "'DM Serif Display', serif",
-    letterSpacing: '-0.01em',
-  }
-
   const sectionLabelStyle: React.CSSProperties = {
-    fontSize: isTablet ? 0 : 10,
-    fontWeight: 700,
-    letterSpacing: '0.12em',
-    color: 'rgba(255,255,255,0.35)',
+    fontSize: 9,
+    letterSpacing: '0.1em',
+    color: 'rgba(255,255,255,0.25)',
     textTransform: 'uppercase',
-    padding: isTablet ? '24px 4px 8px' : '24px 20px 8px',
-    fontFamily: "'DM Sans', sans-serif",
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
+    padding: isTablet ? '24px 4px 8px' : '14px 8px 4px',
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontWeight: 600,
   }
 
   const navItemStyle = (item: NavItem, active: boolean): React.CSSProperties => ({
-    fontSize: isTablet ? 0 : 14,
-    fontWeight: active ? 600 : 400,
-    fontFamily: "'DM Sans', sans-serif",
-    padding: isTablet ? '12px 8px' : '9px 20px',
-    color: item.disabled ? 'rgba(255,255,255,0.25)' : (active || hoveredItem === item.href ? '#F5F0E8' : 'rgba(255,255,255,0.65)'),
+    padding: isTablet ? '12px 8px' : '7px 8px',
+    borderRadius: 7,
+    borderLeft: active ? '2px solid #C9973A' : '2px solid transparent',
+    marginBottom: 2,
+    cursor: 'pointer' as const,
+    transition: 'background 150ms ease',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: isTablet ? 'center' : 'space-between',
-    borderLeft: active ? '2px solid #C9973A' : (hoveredItem === item.href && !item.disabled ? '2px solid rgba(201,151,58,0.4)' : '2px solid transparent'),
-    transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-    cursor: item.disabled ? 'not-allowed' : 'pointer',
+    gap: 10,
+    background: active ? 'rgba(201,151,58,0.1)' : (hoveredItem === item.href ? 'rgba(255,255,255,0.04)' : 'transparent'),
     textDecoration: 'none',
-    borderRadius: '0 6px 6px 0',
-    marginRight: isTablet ? '0' : '8px',
-    background: active ? 'rgba(201,151,58,0.1)' : (hoveredItem === item.href && !item.disabled ? 'rgba(255,255,255,0.06)' : 'transparent'),
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
   })
 
-  const soonTextStyle: React.CSSProperties = {
+  const iconStyle = (active: boolean): React.CSSProperties => ({
+    width: 15,
+    height: 15,
+    color: active ? '#C9973A' : 'rgba(255,255,255,0.32)',
+    flexShrink: 0,
+  })
+
+  const textStyle = (active: boolean): React.CSSProperties => ({
+    fontSize: 12,
+    color: active ? '#F8FAFC' : 'rgba(255,255,255,0.42)',
+    fontWeight: active ? 500 : 400,
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  })
+
+  const badgeStyle: React.CSSProperties = {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.2)',
-    marginLeft: 6,
-    fontStyle: 'italic',
-  }
-
-  const redBadgeStyle: React.CSSProperties = {
-    background: '#E24B4A',
-    color: 'white',
-    fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 600,
+    borderRadius: 99,
     padding: '2px 7px',
-    borderRadius: '10px',
-    minWidth: '20px',
-    textAlign: 'center',
-  }
-
-  const goldBadgeStyle: React.CSSProperties = {
-    background: 'rgba(201,151,58,0.15)',
-    color: '#E8B86D',
-    border: '1px solid rgba(201,151,58,0.5)',
-    fontSize: 11,
-    fontWeight: 700,
-    padding: '2px 7px',
-    borderRadius: '10px',
-    minWidth: '20px',
-    textAlign: 'center',
+    marginLeft: 'auto',
+    ...getBadgeStyle(undefined),
   }
 
   const bottomSectionStyle: React.CSSProperties = {
-    borderTop: '1px solid rgba(255,255,255,0.07)',
-    padding: isTablet ? '16px 4px' : '16px 20px',
+    borderTop: '0.5px solid rgba(255,255,255,0.06)',
+    paddingTop: 10,
     marginTop: 'auto',
     display: isTablet ? 'none' : 'block',
   }
 
-  const planLabelStyle: React.CSSProperties = {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
-    fontWeight: 500,
-  }
-
-  const daysRemainingStyle: React.CSSProperties = {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.25)',
-    marginTop: 3,
-  }
-
-  // Compute days remaining from trial_ends_at
-  const trialEndsAt = counts?.trial_ends_at
-  const daysLeft = trialEndsAt ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)) : null
-  const daysText = daysLeft === null
-    ? '28 days remaining'
-    : daysLeft <= 0
-    ? 'Trial expired'
-    : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining`
-  const daysColor = daysLeft === null
-    ? 'rgba(255,255,255,0.25)'
-    : daysLeft <= 0
-    ? '#E24B4A'
-    : daysLeft <= 7
-    ? '#F59E0B'
-    : 'rgba(255,255,255,0.25)'
+  const bottomItemStyle = (active: boolean): React.CSSProperties => ({
+    padding: '7px 8px',
+    borderRadius: 7,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    cursor: 'pointer' as const,
+    transition: 'background 150ms ease',
+    background: active ? 'rgba(201,151,58,0.1)' : (hoveredItem ? 'rgba(255,255,255,0.04)' : 'transparent'),
+    textDecoration: 'none',
+  })
 
   return (
     <aside style={containerStyle}>
-      {/* Top Logo Area */}
-      <div style={logoAreaStyle}>
-        <Link href="/agency/dashboard" style={{ textDecoration: 'none' }}>
-          <span style={logoTextStyle}>{isTablet ? 'C' : 'Careified'}</span>
-        </Link>
-      </div>
-
       {/* Navigation Sections */}
-      <nav style={{ flex: 1 }}>
+      <nav style={{ flex: 1, paddingTop: 16 }}>
         {navSections.map((section) => (
           <div key={section.title}>
-            <div style={sectionLabelStyle}>{section.title}</div>
+            {!isTablet && <div style={sectionLabelStyle}>{section.title}</div>}
             {section.items.map((item) => {
               const active = isActive(item.href)
               const badgeCount = getBadgeCount(counts, item.badge)
-              const showBadge = item.badge && !item.disabled && badgeCount > 0
-
-              if (item.disabled) {
-                return (
-                  <div
-                    key={item.href}
-                    style={navItemStyle(item, active)}
-                    onMouseEnter={() => setHoveredItem(item.href)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                  >
-                    <span>
-                      {item.label}
-                      <span style={soonTextStyle}>(soon)</span>
-                    </span>
-                  </div>
-                )
-              }
+              const showBadge = item.badge && badgeCount > 0
+              const Icon = item.icon
 
               return (
                 <Link
@@ -277,9 +241,10 @@ export default function AgencySidebar({ counts, currentPath, isTablet: propIsTab
                   onMouseEnter={() => setHoveredItem(item.href)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <span>{item.label}</span>
-                  {showBadge && (
-                    <span style={item.badge === 'unmatched' ? redBadgeStyle : goldBadgeStyle}>
+                  <Icon size={15} color={active ? '#C9973A' : 'rgba(255,255,255,0.32)'} />
+                  {!isTablet && <span style={textStyle(active)}>{item.label}</span>}
+                  {showBadge && !isTablet && (
+                    <span style={{ ...badgeStyle, ...getBadgeStyle(item.badge) }}>
                       {badgeCount}
                     </span>
                   )}
@@ -290,21 +255,57 @@ export default function AgencySidebar({ counts, currentPath, isTablet: propIsTab
         ))}
       </nav>
 
-      {/* Bottom Section */}
-      <div style={bottomSectionStyle}>
-        <div style={planLabelStyle}>Growth Plan</div>
-        <div style={{ ...daysRemainingStyle, color: daysColor }}>{daysText}</div>
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: 12 }}>
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: { width: 32, height: 32 },
-                userButtonTrigger: { padding: 4 },
-              },
-            }}
-          />
-        </div>
+      {/* Bottom Items */}
+      <div style={{ padding: isTablet ? '16px 8px' : '0 8px' }}>
+        {bottomItems.map((item) => {
+          const active = isActive(item.href)
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={bottomItemStyle(active)}
+              onMouseEnter={() => setHoveredItem(item.href)}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <Icon size={15} color={active ? '#C9973A' : 'rgba(255,255,255,0.32)'} />
+              {!isTablet && <span style={textStyle(active)}>{item.label}</span>}
+            </Link>
+          )
+        })}
       </div>
+
+      {/* Agency Block */}
+      {!isTablet && (agencyName || true) && (
+        <div style={bottomSectionStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #C9973A, #E8B86D)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 10,
+                fontWeight: 600,
+                color: '#0D1728',
+              }}
+            >
+              {getInitials(agencyName || 'Agency')}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+                {agencyName || 'Your Agency'}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)' }}>
+                {agencyPlan || 'Growth Plan'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }
