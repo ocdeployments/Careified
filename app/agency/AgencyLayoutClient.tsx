@@ -29,6 +29,8 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
     expiring_credentials: 0,
     airecruit_results: 0,
     trial_ends_at: null as string | null,
+    agency_name: null as string | null,
+    agency_plan: null as string | null,
   })
 
   // Check excluded paths
@@ -60,6 +62,8 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
           expiring_credentials: data.credentials_expiring || 0,
           airecruit_results: data.airecruit_ready || 0,
           trial_ends_at: data.trial_ends_at || null,
+          agency_name: data.agency_name || null,
+          agency_plan: data.plan_tier || null,
         })
       })
       .catch(() => {})
@@ -71,7 +75,7 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#080F1E', paddingBottom: isMobile ? 64 : 0 }}>
-      {!isMobile && <AgencySidebar counts={counts} currentPath={pathname} isTablet={isTablet} />}
+      {!isMobile && <AgencySidebar counts={counts} currentPath={pathname} isTablet={isTablet} agencyName={counts.agency_name || undefined} agencyPlan={counts.agency_plan || undefined} />}
       <main style={{ marginLeft: sidebarWidth, flex: 1, minHeight: '100vh', paddingBottom: isMobile ? 64 : 0 }}>
         {children}
       </main>

@@ -127,11 +127,17 @@ export default function AgencyDashboard() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
 
+  const formatCareLevel = (raw: string | null | undefined): string => {
+    if (!raw) return 'Standard care'
+    return raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  }
+
   // Skeleton loading state
   if (!isLoaded || loading) {
     return (
       <div style={{ minHeight: '100vh', background: PAGE_BG, padding: isMobile ? '16px' : '24px 32px', fontFamily: SANS }}>
         <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
           @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
           .skeleton { background: linear-gradient(90deg, #111827 25%, #1a2332 50%, #111827 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 6px; }
           .hover-row:hover { background: rgba(255,255,255,0.03) !important; cursor: pointer; }
@@ -165,11 +171,11 @@ export default function AgencyDashboard() {
 
   if (unmatchedClients.length > 0) {
     const mostUrgent = unmatchedClients[0]
-    const daysWaiting = Math.floor((now.getTime() - new Date(mostUrgent.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    const daysWaiting = mostUrgent.created_at ? Math.floor((now.getTime() - new Date(mostUrgent.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0
     priorities.push({
       type: 'unmatched',
-      title: `${mostUrgent.first_name} — ${mostUrgent.care_level || 'Standard care'}, ${daysWaiting} days unmatched`,
-      meta: 'X caregivers match their criteria',
+      title: `${mostUrgent.first_name} — ${formatCareLevel(mostUrgent.care_level)}, ${daysWaiting} days unmatched`,
+      meta: `${stats?.total_caregivers || 0} caregivers in platform`,
       action: 'Find match →',
       actionHref: '/agency/caregivers',
       color: RED,
@@ -212,6 +218,7 @@ export default function AgencyDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: PAGE_BG, padding: isMobile ? '16px' : '24px 32px', fontFamily: SANS }}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .skeleton { background: linear-gradient(90deg, #111827 25%, #1a2332 50%, #111827 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 6px; }
         .hover-row:hover { background: rgba(255,255,255,0.03) !important; cursor: pointer; }
@@ -267,7 +274,7 @@ export default function AgencyDashboard() {
             </div>
             {unmatchedClients.length > 0 && (
               <div style={{ fontSize: 12, color: TEXT_MUTED, marginTop: 4 }}>
-                Most urgent: <span style={{ color: TEXT_PRIMARY }}>{unmatchedClients[0].first_name}</span> — {unmatchedClients[0].care_level || 'Standard care'}, {Math.floor((now.getTime() - new Date(unmatchedClients[0].created_at).getTime()) / (1000 * 60 * 60 * 24))} days waiting
+                Most urgent: <span style={{ color: TEXT_PRIMARY }}>{unmatchedClients[0].first_name}</span> — {formatCareLevel(unmatchedClients[0].care_level)}, {unmatchedClients[0].created_at ? Math.floor((now.getTime() - new Date(unmatchedClients[0].created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0} days waiting
               </div>
             )}
           </div>
@@ -430,7 +437,7 @@ export default function AgencyDashboard() {
           {unmatchedClients.length > 0 ? (
             <div>
               {unmatchedClients.slice(0, 5).map((client, i) => {
-                const daysWaiting = Math.floor((now.getTime() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                const daysWaiting = client.created_at ? Math.floor((now.getTime() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0
                 const urgencyPct = Math.min((daysWaiting / 30) * 100, 100)
                 return (
                   <Link
@@ -445,7 +452,7 @@ export default function AgencyDashboard() {
                   >
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_PRIMARY }}>{client.first_name}</div>
-                      <div style={{ fontSize: 11, color: TEXT_MUTED }}>{client.care_level || 'Standard care'} · {daysWaiting}d</div>
+                      <div style={{ fontSize: 11, color: TEXT_MUTED }}>{formatCareLevel(client.care_level)} · {daysWaiting}d</div>
                     </div>
                     <div style={{ width: 48, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginRight: 8 }}>
                       <div style={{ height: '100%', width: `${urgencyPct}%`, background: daysWaiting > 14 ? RED : AMBER, borderRadius: 2 }} />

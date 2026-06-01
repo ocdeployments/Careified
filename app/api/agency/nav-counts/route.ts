@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
     airecruit_ready: 0,
     credentials_expiring: 0,
     trial_ends_at: null,
+    agency_name: null as string | null,
+    plan_tier: null as string | null,
   }
 
   // Clients unmatched
@@ -85,13 +87,15 @@ export async function GET(request: NextRequest) {
     console.error('credentials_expiring query failed:', e)
   }
 
-  // Trial end date
+  // Trial end date + agency info
   try {
     const agencyRes = await pool.query(
-      'SELECT trial_ends_at FROM agencies WHERE id = $1',
+      'SELECT trial_ends_at, name, plan_tier FROM agencies WHERE id = $1',
       [agencyId]
     )
     result.trial_ends_at = agencyRes.rows[0]?.trial_ends_at || null
+    result.agency_name = agencyRes.rows[0]?.name || null
+    result.plan_tier = agencyRes.rows[0]?.plan_tier || null
   } catch (e) {
     console.error('trial_ends_at query failed:', e)
   }

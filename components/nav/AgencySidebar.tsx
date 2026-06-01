@@ -29,6 +29,8 @@ interface AgencySidebarProps {
     expiring_credentials: number
     airecruit_results: number
     trial_ends_at: string | null
+    agency_name?: string | null
+    agency_plan?: string | null
   }
   currentPath: string
   isTablet?: boolean
@@ -276,7 +278,7 @@ export default function AgencySidebar({ counts, currentPath, isTablet: propIsTab
       </div>
 
       {/* Agency Block */}
-      {!isTablet && (agencyName || true) && (
+      {!isTablet && (
         <div style={bottomSectionStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
