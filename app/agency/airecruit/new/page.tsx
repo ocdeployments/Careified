@@ -87,6 +87,39 @@ const QUESTION_LIBRARY = [
   },
 ]
 
+const ROLE_TYPES = [
+  { value: 'PSW', label: 'Personal Support Worker (PSW)' },
+  { value: 'HCA', label: 'Home Care Aide (HCA)' },
+  { value: 'Live-in Companion', label: 'Live-in Companion' },
+  { value: 'Respite Caregiver', label: 'Respite Caregiver' },
+  { value: 'Companion Care', label: 'Companion Care' },
+  { value: 'Overnight Caregiver', label: 'Overnight Caregiver' },
+  { value: 'Complex Care', label: 'Complex Care' },
+  { value: 'other', label: 'Other (specify below)' },
+]
+
+const SHIFT_TYPES = ['Days', 'Evenings', 'Overnights', 'Weekends', 'Live-in', 'Flexible']
+
+function generateCampaignCode(): string {
+  const num = Math.floor(1000 + Math.random() * 9000)
+  return `ARC-${num}`
+}
+
+function buildTitle(roleType: string, customRole: string, city: string): string {
+  const role = roleType === 'other' ? customRole : roleType
+  const month = new Date().toLocaleString('en-CA', { month: 'short', year: 'numeric' })
+  const parts = [role, city.trim(), month].filter(Boolean)
+  return parts.join(' — ')
+}
+
+function buildDescription(roleType: string, customRole: string, shifts: string[], city: string, keyReq: string): string {
+  const role = roleType === 'other' ? customRole : roleType
+  const shiftText = shifts.length > 0 ? shifts.join(', ').toLowerCase() + ' shifts' : ''
+  const locationText = city.trim() ? `in ${city.trim()}, ON` : ''
+  const parts = ['We are seeking a', role, locationText ? locationText : '', shiftText ? `for ${shiftText}` : ''].filter(Boolean).join(' ').trim() + '.'
+  return keyReq.trim() ? `${parts} ${keyReq.trim()}` : parts
+}
+
 export default function NewCampaignPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -121,7 +154,32 @@ export default function NewCampaignPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [prefilledSkill, setPrefilledSkill] = useState<string | null>(null)
+  const [campaignCode] = useState<string>(() => generateCampaignCode())
+  const [roleType, setRoleType] = useState('')
+  const [customRole, setCustomRole] = useState('')
+  const [selectedShifts, setSelectedShifts] = useState<string[]>([])
+  const [city, setCity] = useState('')
+  const [keyReq, setKeyReq] = useState('')
+  const [titleManuallyEdited, setTitleManuallyEdited] = useState(false)
+  const [descManuallyEdited, setDescManuallyEdited] = useState(false)
+
+  function toggleShift(shift: string) {
+    setSelectedShifts(prev =>
+      prev.includes(shift) ? prev.filter(s => s !== shift) : [...prev, shift]
+    )
+  }
   const [importedCount, setImportedCount] = useState<number | null>(null)
+
+  // Auto-generate title and description from structured fields
+  useEffect(() => {
+    if (!roleType) return
+    if (!titleManuallyEdited) {
+      setTitle(buildTitle(roleType, customRole, city))
+    }
+    if (!descManuallyEdited) {
+      setRoleDescription(buildDescription(roleType, customRole, selectedShifts, city, keyReq))
+    }
+  }, [roleType, customRole, selectedShifts, city, keyReq, titleManuallyEdited, descManuallyEdited])
 
   // Pre-fill from ?skill= param
   useEffect(() => {
@@ -172,7 +230,7 @@ export default function NewCampaignPage() {
     try {
       const res = await fetch('/api/airecruit/campaigns', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, roleDescription, screeningQuestions: questions.filter(q => q.trim()), candidates: validCandidates.map(c => ({ firstName: c.firstName.trim(), lastName: c.lastName.trim(), phone: c.phone.trim(), email: c.email.trim(), notes: c.notes.trim() })), consentConfirmed }),
+        body: JSON.stringify({ title, roleDescription, campaignCode, screeningQuestions: questions.filter(q => q.trim()), candidates: validCandidates.map(c => ({ firstName: c.firstName.trim(), lastName: c.lastName.trim(), phone: c.phone.trim(), email: c.email.trim(), notes: c.notes.trim() })), consentConfirmed }),
       })
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to create campaign') }
       router.push('/agency/airecruit')
@@ -199,14 +257,140 @@ export default function NewCampaignPage() {
               {/* Campaign Details */}
               <div style={CARD}>
                 <h2 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: '20px', color: '#F5F0E8', marginBottom: '24px' }}>Campaign Details</h2>
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={LABEL}>Campaign Title *</label>
-                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. PSW — Scarborough — Apr 2026 — Morning Shifts" required style={INPUT} />
-                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '8px', fontStyle: 'italic' }}>Use a descriptive name that includes role, location, and date so you can identify campaigns easily later.</p>
+                {/* Campaign code */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '20px' }}>
+                  <div style={{ background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.25)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, color: '#C9973A', letterSpacing: '0.05em' }}>{campaignCode}</div>
+                  <span style={{ fontSize: '12px', color: MUTED }}>Campaign code — shown in results and reports</span>
                 </div>
+
+                {/* Role type */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={LABEL}>Role Type *</label>
+                  <select
+                    value={roleType}
+                    onChange={e => { setRoleType(e.target.value); setTitleManuallyEdited(false); setDescManuallyEdited(false) }}
+                    required
+                    style={{ ...INPUT, cursor: 'pointer' }}
+                  >
+                    <option value="">Select a role type...</option>
+                    {ROLE_TYPES.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Custom role input */}
+                {roleType === 'other' && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={LABEL}>Role Title *</label>
+                    <input
+                      type="text"
+                      value={customRole}
+                      onChange={e => { setCustomRole(e.target.value); setTitleManuallyEdited(false); setDescManuallyEdited(false) }}
+                      placeholder="e.g. Wound Care Specialist"
+                      required
+                      style={INPUT}
+                    />
+                  </div>
+                )}
+
+                {/* City */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={LABEL}>City / Region</label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={e => { setCity(e.target.value); setTitleManuallyEdited(false); setDescManuallyEdited(false) }}
+                    placeholder="e.g. Toronto, Mississauga, Ottawa"
+                    style={INPUT}
+                  />
+                </div>
+
+                {/* Shift types */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={LABEL}>Shift Types</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {SHIFT_TYPES.map(shift => {
+                      const active = selectedShifts.includes(shift)
+                      return (
+                        <button
+                          key={shift}
+                          type="button"
+                          onClick={() => { toggleShift(shift); setTitleManuallyEdited(false); setDescManuallyEdited(false) }}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '99px',
+                            border: `1px solid ${active ? '#C9973A' : 'rgba(255,255,255,0.15)'}`,
+                            background: active ? 'rgba(201,151,58,0.15)' : 'transparent',
+                            color: active ? '#C9973A' : MUTED,
+                            fontSize: '13px',
+                            fontWeight: active ? 600 : 400,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {shift}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Key requirement */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={LABEL}>Key Requirement <span style={{ color: MUTED, fontWeight: 400 }}>(optional)</span></label>
+                  <input
+                    type="text"
+                    value={keyReq}
+                    onChange={e => { setKeyReq(e.target.value); setDescManuallyEdited(false) }}
+                    placeholder="e.g. Must have dementia experience, French preferred, Driver's license required"
+                    style={INPUT}
+                  />
+                </div>
+
+                {/* Auto-generated title — editable */}
+                <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <label style={LABEL}>Campaign Title *</label>
+                    {titleManuallyEdited && (
+                      <button type="button" onClick={() => { setTitleManuallyEdited(false); setTitle(buildTitle(roleType, customRole, city)) }} style={{ background: 'none', border: 'none', color: '#C9973A', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>
+                        Reset to generated
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={e => { setTitle(e.target.value); setTitleManuallyEdited(true) }}
+                    placeholder="Select role type above to auto-generate"
+                    required
+                    style={{ ...INPUT, borderColor: titleManuallyEdited ? 'rgba(201,151,58,0.4)' : 'rgba(255,255,255,0.12)' }}
+                  />
+                  {!titleManuallyEdited && title && (
+                    <p style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>Auto-generated — edit above to customise</p>
+                  )}
+                </div>
+
+                {/* Auto-generated description — editable */}
                 <div>
-                  <label style={LABEL}>Role Description *</label>
-                  <textarea value={roleDescription} onChange={e => setRoleDescription(e.target.value)} placeholder="Describe the role, required experience, shift types, client needs..." required rows={4} style={{ ...INPUT, resize: 'vertical' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <label style={LABEL}>Role Description *</label>
+                    {descManuallyEdited && (
+                      <button type="button" onClick={() => { setDescManuallyEdited(false); setRoleDescription(buildDescription(roleType, customRole, selectedShifts, city, keyReq)) }} style={{ background: 'none', border: 'none', color: '#C9973A', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>
+                        Reset to generated
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    value={roleDescription}
+                    onChange={e => { setRoleDescription(e.target.value); setDescManuallyEdited(true) }}
+                    placeholder="Select role type above to auto-generate"
+                    required
+                    rows={3}
+                    style={{ ...INPUT, resize: 'vertical', borderColor: descManuallyEdited ? 'rgba(201,151,58,0.4)' : 'rgba(255,255,255,0.12)' }}
+                  />
+                  {!descManuallyEdited && roleDescription && (
+                    <p style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>Auto-generated — edit above to customise</p>
+                  )}
                 </div>
               </div>
 

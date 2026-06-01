@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { title, roleDescription, screeningQuestions, candidates, consentConfirmed } = body
+    const { title, roleDescription, campaignCode, screeningQuestions, candidates, consentConfirmed } = body
 
     if (!title || !roleDescription || !screeningQuestions || !candidates) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
       `INSERT INTO "AIRecruitCampaign"
         (id, "agencyId", title, "roleDescription", "screeningQuestions",
          status, "totalCandidates", "callsPending", "callsCompleted",
-         "callsFailed", "createdAt", "updatedAt")
+         "callsFailed", "campaignCode", "createdAt", "updatedAt")
        VALUES
         (gen_random_uuid(), $1, $2, $3, $4,
-         'active', $5, $5, 0, 0, NOW(), NOW())
+         'active', $5, $5, 0, 0, $6, NOW(), NOW())
        RETURNING id`,
-      [agency.id, title, roleDescription, screeningQuestions, candidates.length]
+      [agency.id, title, roleDescription, screeningQuestions, candidates.length, campaignCode || null]
     )
     const campaignId = campaignResult.rows[0].id
 

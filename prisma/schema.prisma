@@ -409,6 +409,7 @@ model AIRecruitCampaign {
   roleDescription     String
   screeningQuestions  String[]
   status              String            @default("draft")
+  campaignCode        String?
   totalCandidates     Int               @default(0)
   callsCompleted      Int               @default(0)
   callsPending        Int               @default(0)
