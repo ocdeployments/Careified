@@ -358,20 +358,22 @@ export default function AgencyDashboard() {
               <HeartHandshake size={14} color={GOLD} />
               <span style={{ fontSize: 10, color: GOLD, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Caregivers</span>
             </div>
-            <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.total_caregivers || 0}</div>
-            <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 2 }}>on roster</div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, color: GREEN }}>{availableCount}</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>available</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.total_caregivers || 0}</div>
+              <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>on roster</div>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Available now</span>
+                <span style={{ color: (stats?.available_caregivers || 0) > 0 ? GREEN : TEXT_MUTED, fontWeight: 500 }}>{stats?.available_caregivers || 0}</span>
               </div>
-              <div>
-                <div style={{ fontSize: 14, color: TEXT_PRIMARY }}>{stats?.roster_claimed || 0}</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>placed</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Shortlisted</span>
+                <span style={{ color: PURPLE, fontWeight: 500 }}>{stats?.shortlisted_count || 0}</span>
               </div>
-              <div>
-                <div style={{ fontSize: 14, color: expiringCredCount > 0 ? RED : TEXT_MUTED }}>{expiringCredCount}</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>creds expiring</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Creds expiring</span>
+                <span style={{ color: expiringCredCount > 0 ? RED : TEXT_MUTED, fontWeight: 500 }}>{stats?.expiring_credentials || 0}</span>
               </div>
             </div>
             <div style={{ fontSize: 11, color: GOLD, marginTop: 14 }}>Manage roster →</div>
@@ -386,16 +388,22 @@ export default function AgencyDashboard() {
               <Building2 size={14} color={PURPLE} />
               <span style={{ fontSize: 10, color: PURPLE, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Operations</span>
             </div>
-            <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.pipeline_count || 0}</div>
-            <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 2 }}>shortlisted</div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, color: PURPLE }}>{stats?.airecruit_results || 0}</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>AI results</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.pipeline_count || 0}</div>
+              <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>shortlisted</div>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>AIRecruit campaigns</span>
+                <span style={{ color: PURPLE, fontWeight: 500 }}>{stats?.airecruit_results || 0}</span>
               </div>
-              <div>
-                <div style={{ fontSize: 14, color: fillRate > 50 ? GREEN : AMBER }}>{fillRate > 50 ? fillRate : '—'}%</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>fill rate</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Fill rate</span>
+                <span style={{ color: fillRate > 50 ? GREEN : AMBER, fontWeight: 500 }}>{fillRate || '—'}%</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Unmatched clients</span>
+                <span style={{ color: unmatchedClientsCount > 0 ? RED : TEXT_MUTED, fontWeight: 500 }}>{unmatchedClientsCount}</span>
               </div>
             </div>
             <div style={{ fontSize: 11, color: PURPLE, marginTop: 14 }}>View intelligence →</div>
@@ -410,19 +418,27 @@ export default function AgencyDashboard() {
               <Home size={14} color={GREEN} />
               <span style={{ fontSize: 10, color: GREEN, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Clients</span>
             </div>
-            <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.total_clients || 0}</div>
-            <div style={{ fontSize: 11, color: TEXT_MUTED, marginTop: 2 }}>active</div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, color: GREEN }}>{totalClients - unmatchedClientsCount}</div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>covered</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={{ fontSize: 24, fontWeight: 500, color: TEXT_PRIMARY }}>{stats?.total_clients || 0}</div>
+              <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>active</div>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Covered</span>
+                <span style={{ color: GREEN, fontWeight: 500 }}>{totalClients - unmatchedClientsCount}</span>
               </div>
-              <div>
-                <div style={{ fontSize: 14, color: unmatchedClientsCount > 0 ? RED : TEXT_MUTED, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Unmatched</span>
+                <span style={{ color: unmatchedClientsCount > 0 ? RED : TEXT_MUTED, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
                   {unmatchedClientsCount > 0 && <ArrowUpRight size={12} color={RED} />}
                   {unmatchedClientsCount}
-                </div>
-                <div style={{ fontSize: 10, color: TEXT_TERTIARY }}>unmatched</div>
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: TEXT_MUTED }}>Avg wait</span>
+                <span style={{ color: unmatchedClientsCount > 0 ? AMBER : TEXT_MUTED, fontWeight: 500 }}>
+                  {unmatchedClients.length > 0 ? `${Math.round(unmatchedClients.reduce((sum, c) => sum + (c.created_at ? Math.floor((now.getTime() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0), 0) / unmatchedClients.length)}d` : '—'}
+                </span>
               </div>
             </div>
             <div style={{ fontSize: 11, color: GREEN, marginTop: 14 }}>View all clients →</div>
@@ -523,8 +539,23 @@ export default function AgencyDashboard() {
       </div>
 
       {/* Bench Strength Widget */}
-      <div style={{ marginBottom: 24 }}>
-        <BenchStrengthWidget compact={true} />
+      <div style={{ marginBottom: 24, background: CARD_BG, border: `1px solid ${CARD_BORDER}`, borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderBottom: `1px solid ${CARD_BORDER}` }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: TEXT_PRIMARY, fontFamily: SERIF }}>Bench strength</span>
+          <Link href="/agency/intelligence" style={{ fontSize: 11, color: GOLD, textDecoration: 'none' }}>View full analysis →</Link>
+        </div>
+        <div style={{ maxHeight: 200, overflow: 'hidden' }}>
+          <BenchStrengthWidget compact={true} />
+        </div>
+        {data?.bench_strength && (
+          <Link href="/agency/caregivers" style={{
+            display: 'block', padding: '10px 18px', fontSize: 11, color: GOLD,
+            textDecoration: 'none', borderTop: `1px solid ${CARD_BORDER}`,
+            background: 'rgba(201,151,58,0.04)',
+          }}>
+            View all skill categories →
+          </Link>
+        )}
       </div>
 
       {/* ZONE 5: INTELLIGENCE + TRIAGE */}

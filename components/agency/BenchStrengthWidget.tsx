@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 interface BenchStrengthData {
   dementia: number
@@ -106,7 +107,19 @@ export default function BenchStrengthWidget({ compact = false }: BenchStrengthWi
         const barColor = getColorForCount(count)
 
         return (
-          <div key={skill.key} style={{ marginBottom: compact ? 8 : 14 }}>
+          <Link
+            key={skill.key}
+            href={`/agency/caregivers?specialization=${skill.key}`}
+            style={{
+              display: 'block',
+              marginBottom: compact ? 8 : 14,
+              textDecoration: 'none',
+              padding: compact ? '4px 0' : '6px 0',
+              borderRadius: 4,
+              cursor: 'pointer',
+            }}
+            className="hover-row"
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
               <span style={{ fontSize: compact ? 12 : 13, color: TEXT_MUTED }}>{skill.label}</span>
               <span style={{ fontSize: compact ? 11 : 12, fontWeight: 600, color: count > 0 ? barColor : TEXT_MUTED }}>
@@ -125,20 +138,18 @@ export default function BenchStrengthWidget({ compact = false }: BenchStrengthWi
               />
             </div>
             {count === 0 && !compact && (
-              <a
-                href="/agency/airecruit/new"
+              <span
                 style={{
                   fontSize: 11,
                   color: GL,
-                  textDecoration: 'none',
                   marginTop: 4,
                   display: 'inline-block',
                 }}
               >
                 Recruit →
-              </a>
+              </span>
             )}
-          </div>
+          </Link>
         )
       })}
 
