@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AgencySidebar, { SIDEBAR_WIDTHS } from '@/components/nav/AgencySidebar'
-import AgencyTopbar from '@/components/agency/AgencyTopbar'
 import { useWindowSize } from '@/lib/hooks/useWindowSize'
 import { LayoutDashboard, Users, Briefcase, Zap, MoreHorizontal } from 'lucide-react'
 
@@ -75,14 +74,11 @@ export default function AgencyLayoutClient({ children }: AgencyLayoutClientProps
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#080F1E', paddingBottom: isMobile ? 64 : 0 }}>
-      <AgencyTopbar agencyName={counts.agency_name || undefined} unreadCount={counts.airecruit_results} />
-      <div style={{ display: 'flex', flex: 1 }}>
-        {!isMobile && <AgencySidebar counts={counts} currentPath={pathname} isTablet={isTablet} agencyName={counts.agency_name || undefined} agencyPlan={counts.agency_plan || undefined} />}
-        <main style={{ marginLeft: isMobile ? 0 : sidebarWidth, flex: 1, minHeight: 'calc(100vh - 56px)', paddingBottom: isMobile ? 64 : 0 }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#080F1E', paddingBottom: isMobile ? 64 : 0 }}>
+      {!isMobile && <AgencySidebar counts={counts} currentPath={pathname} isTablet={isTablet} agencyName={counts.agency_name || undefined} agencyPlan={counts.agency_plan || undefined} />}
+      <main style={{ marginLeft: sidebarWidth, flex: 1, minHeight: '100vh', paddingBottom: isMobile ? 64 : 0 }}>
         {children}
       </main>
-      </div>
       {/* Mobile bottom tab bar */}
       {isMobile && (
         <div style={{

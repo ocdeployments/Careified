@@ -108,6 +108,7 @@ export default function AgencyDashboard() {
       }),
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
     ]).then(([dashResp, clientsResp]) => {
+      console.log('[dashboard] stats:', JSON.stringify(dashResp.stats))
       setData({ ...dashResp, clients: clientsResp.clients || [] })
       if (dashResp.stats?.show_onboarding !== false) setShowOnboarding(true)
       setLoading(false)
@@ -205,7 +206,7 @@ export default function AgencyDashboard() {
   if ((stats?.airecruit_results || 0) > 0) {
     priorities.push({
       type: 'airecruit',
-      title: `AIRecruit — ${stats?.airecruit_results} results ready to review`,
+      title: `Paracle — ${stats?.airecruit_results} results ready to review`,
       meta: 'Screening calls completed',
       action: 'Review now →',
       actionHref: '/agency/airecruit',
@@ -405,7 +406,7 @@ export default function AgencyDashboard() {
             </div>
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <span style={{ color: TEXT_MUTED }}>AIRecruit campaigns</span>
+                <span style={{ color: TEXT_MUTED }}>Paracle campaigns</span>
                 <span style={{ color: PURPLE, fontWeight: 500 }}>{stats?.airecruit_results || 0}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
@@ -534,7 +535,7 @@ export default function AgencyDashboard() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_PRIMARY }}>{cgiver.first_name} {cgiver.last_name?.[0]}.</div>
-                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>{cgiver.role || cgiver.specializations?.[0] || 'Caregiver'}</div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>{formatCareLevel(cgiver.role || cgiver.specializations?.[0]) || 'Caregiver'}</div>
                   </div>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN }} />
                 </Link>
@@ -592,7 +593,7 @@ export default function AgencyDashboard() {
           {/* AIRecruit results */}
           <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${CARD_BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
             <div style={{ fontSize: 22, fontWeight: 500, color: PURPLE }}>{stats?.airecruit_results || 0}</div>
-            <div style={{ fontSize: 10, color: TEXT_MUTED }}>AIRecruit results ready</div>
+            <div style={{ fontSize: 10, color: TEXT_MUTED }}>Paracle results ready</div>
           </div>
 
           {/* Fill rate */}
