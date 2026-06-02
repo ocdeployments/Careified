@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         agency_name: row.agency_name,
         plan_tier: row.plan_tier,
         subscription_status: row.subscription_status,
-        show_onboarding: row.show_onboarding ?? true,
+        show_onboarding: row.show_onboarding === null ? true : row.show_onboarding,
       }
     } catch (e: any) {
       console.error('Stats query failed:', e.message)

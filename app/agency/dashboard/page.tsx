@@ -109,7 +109,7 @@ export default function AgencyDashboard() {
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
     ]).then(([dashResp, clientsResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
-      if (dashResp.stats?.show_onboarding) setShowOnboarding(true)
+      if (dashResp.stats?.show_onboarding !== false) setShowOnboarding(true)
       setLoading(false)
     }).catch((e) => {
       console.error('Dashboard fetch error:', e)
