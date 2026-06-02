@@ -2,6 +2,8 @@ import './globals.css'
 import { DM_Serif_Display, DM_Sans } from 'next/font/google'
 import { Metadata } from 'next'
 import NavbarWrapper from '@/components/nav/NavbarWrapper'
+import MainWrapper from '@/components/nav/MainWrapper'
+import FooterWrapper from '@/components/nav/FooterWrapper'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import Script from 'next/script'
@@ -56,26 +58,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
           <NavbarWrapper />
-          <main id="main-content" className="pt-16">
+          <MainWrapper>
             {children}
-          </main>
-          <footer style={{
-            background: '#0D1B3E',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            padding: '32px 24px',
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
-            <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-                © 2026 Careified. All rights reserved.
+          </MainWrapper>
+          <FooterWrapper>
+            <footer style={{
+              background: '#0D1B3E',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              padding: '32px 24px',
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
+                  © 2026 Careified. All rights reserved.
+                </div>
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <a href="/privacy" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Privacy Policy</a>
+                  <a href="/terms" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Terms of Use</a>
+                  <a href="/contact" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Contact</a>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <a href="/privacy" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Privacy Policy</a>
-                <a href="/terms" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Terms of Use</a>
-                <a href="/contact" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Contact</a>
-              </div>
-            </div>
-          </footer>
+            </footer>
+          </FooterWrapper>
         </ClerkProvider>
         <Toaster
           position="bottom-right"

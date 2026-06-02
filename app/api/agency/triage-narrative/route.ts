@@ -31,11 +31,17 @@ async function generateNarrative(agencyId: string): Promise<{ narrative: string;
   const [airecruitData, expiringCreds, unmatchedClients, benchGaps] = await Promise.all([
     // AIRecruit results from last 24h
     pool.query(`
-      SELECT cr.caregiver_id, c.first_name, c.last_name, cr.overall_score, cr.recommendation
-      FROM airecruit_call_results cr
-      JOIN caregivers c ON c.id = cr.caregiver_id
-      WHERE cr.agency_id = $1::uuid AND cr.called_at > NOW() - INTERVAL '24 hours'
-      ORDER BY cr.overall_score DESC LIMIT 5
+      SELECT ac."caregiverId" as caregiver_id,
+             c.first_name, c.last_name,
+             ac."rawScore" as overall_score,
+             ac.recommendation
+      FROM "AIRecruitCall" ac
+      JOIN "AIRecruitCampaign" camp ON camp.id = ac."campaignId"
+      LEFT JOIN caregivers c ON c.id::text = ac."caregiverId"
+      WHERE camp."agencyId" = $1::uuid::text
+        AND ac."completedAt" > NOW() - INTERVAL '24 hours'
+        AND ac.recommendation IS NOT NULL
+      ORDER BY ac."rawScore" DESC NULLS LAST LIMIT 5
     `, [agencyId]),
 
     // Expiring credentials (next 60 days)

@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       }
 
       agencyId = agencyResult.rows[0].id
+      console.log('[dashboard] agencyId resolved:', agencyId, typeof agencyId)
     } catch (e: any) {
       if (e?.message?.includes('NEXT_REDIRECT')) {
         return NextResponse.json({ error: 'unauthorized' }, { status: 403 })
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
           (SELECT COUNT(*)::int FROM client_needs WHERE agency_id = $1::uuid AND matched_caregiver_id IS NULL AND status != 'closed') as unmatched_clients,
           (SELECT COUNT(*)::int FROM agency_shortlist WHERE agency_clerk_id = $2) as shortlisted_count,
           (SELECT COUNT(*)::int FROM caregiver_certifications cc JOIN caregivers c ON c.id = cc.caregiver_id WHERE c.created_by_agency_id = $1::uuid AND cc.expiry_date IS NOT NULL AND cc.expiry_date < NOW() + INTERVAL '60 days' AND cc.expiry_date > NOW()) as expiring_credentials,
-          (SELECT COUNT(*)::int FROM "AIRecruitCampaign" WHERE "agencyId" = $1::text) as airecruit_results,
+          (SELECT COUNT(*)::int FROM "AIRecruitCampaign" WHERE "agencyId" = $1::uuid::text) as airecruit_results,
           (SELECT name FROM agencies WHERE id = $1::uuid) as agency_name,
           (SELECT plan_tier FROM agencies WHERE id = $1::uuid) as plan_tier,
           (SELECT subscription_status FROM agencies WHERE id = $1::uuid) as subscription_status,

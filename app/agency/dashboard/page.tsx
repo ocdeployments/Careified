@@ -110,7 +110,8 @@ export default function AgencyDashboard() {
     ]).then(([dashResp, clientsResp]) => {
       console.log('[dashboard] stats:', JSON.stringify(dashResp.stats))
       setData({ ...dashResp, clients: clientsResp.clients || [] })
-      if (dashResp.stats?.show_onboarding !== false) setShowOnboarding(true)
+      const dismissed = (() => { try { return sessionStorage.getItem('paracle_onboarding_dismissed') === '1' } catch { return false } })()
+      if (dashResp.stats?.show_onboarding !== false && !dismissed) setShowOnboarding(true)
       setLoading(false)
     }).catch((e) => {
       console.error('Dashboard fetch error:', e)
