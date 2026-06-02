@@ -56,7 +56,8 @@ export async function GET(request: NextRequest) {
           (SELECT COUNT(*)::int FROM "AIRecruitCampaign" WHERE "agencyId" = $1::text) as airecruit_results,
           (SELECT name FROM agencies WHERE id = $1::uuid) as agency_name,
           (SELECT plan_tier FROM agencies WHERE id = $1::uuid) as plan_tier,
-          (SELECT subscription_status FROM agencies WHERE id = $1::uuid) as subscription_status
+          (SELECT subscription_status FROM agencies WHERE id = $1::uuid) as subscription_status,
+          (SELECT show_onboarding FROM agencies WHERE id = $1::uuid) as show_onboarding
       `, [agencyId, userId])
 
       const row = statsResult.rows[0]
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
         agency_name: row.agency_name,
         plan_tier: row.plan_tier,
         subscription_status: row.subscription_status,
+        show_onboarding: row.show_onboarding ?? true,
       }
     } catch (e: any) {
       console.error('Stats query failed:', e.message)

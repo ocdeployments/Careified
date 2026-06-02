@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import BenchStrengthWidget from '@/components/agency/BenchStrengthWidget'
 import TriageNarrative from '@/components/agency/TriageNarrative'
+import ParacleOnboarding from '@/components/agency/ParacleOnboarding'
 import {
   Bell,
   AlertTriangle,
@@ -49,6 +50,7 @@ type DashboardStats = {
   agency_name?: string
   plan_tier?: string
   subscription_status?: string
+  show_onboarding?: boolean
 }
 
 type Client = {
@@ -88,6 +90,7 @@ export default function AgencyDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
@@ -106,6 +109,7 @@ export default function AgencyDashboard() {
       fetch('/api/agency/clients', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ clients: [] })),
     ]).then(([dashResp, clientsResp]) => {
       setData({ ...dashResp, clients: clientsResp.clients || [] })
+      if (dashResp.stats?.show_onboarding) setShowOnboarding(true)
       setLoading(false)
     }).catch((e) => {
       console.error('Dashboard fetch error:', e)
@@ -218,8 +222,15 @@ export default function AgencyDashboard() {
   const fillRate = totalClients > 0 ? Math.round(((totalClients - unmatchedClientsCount) / totalClients) * 100) : 0
   const availableCount = data?.bench_strength?.available || 0
 
+  async function dismissOnboarding() {
+    setShowOnboarding(false)
+    await fetch('/api/agency/onboarding/dismiss', { method: 'POST' })
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: PAGE_BG, padding: isMobile ? '16px' : '24px 32px', fontFamily: SANS }}>
+    <>
+      {showOnboarding && <ParacleOnboarding onDismiss={dismissOnboarding} />}
+      <div style={{ minHeight: '100vh', background: PAGE_BG, padding: isMobile ? '16px' : '24px 32px', fontFamily: SANS }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -591,6 +602,7 @@ export default function AgencyDashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -237,6 +237,7 @@ model Agency {
   clerk_user_id                  String?                       @unique @db.VarChar(255)
   vapiAssistantId                String?
   vapiPhoneNumberId              String?
+  show_onboarding                Boolean                    @default(true)
   agency_caregiver_relationships AgencyCaregiverRelationship[]
   agency_ratings                 AgencyRating[]
   agency_saved_searches          AgencySavedSearch[]
