@@ -149,8 +149,8 @@ export default function AIRecruitPage() {
       {/* ZONE 1: HEADER ROW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
-          <div style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 500, color: TEXT_PRIMARY }}>AIRecruit</div>
-          <div style={{ fontSize: 12, color: TEXT_MUTED, marginTop: 2 }}>AI-powered hiring intelligence</div>
+          <div style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 500, color: TEXT_PRIMARY }}>Paracle</div>
+          <div style={{ fontSize: 12, color: TEXT_MUTED, marginTop: 2 }}>Called to act on your behalf</div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button style={{

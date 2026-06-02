@@ -30,7 +30,5 @@ export default async function AgencyAssistantPage() {
     }
   }
 
-  const agencyName = rows[0]?.name || 'Your Agency'
-
-  return <AgencyAssistantClient agencyName={agencyName} />
+  return <AgencyAssistantClient />
 }

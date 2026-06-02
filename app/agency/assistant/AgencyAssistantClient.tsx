@@ -24,7 +24,7 @@ interface ParsedMessage {
   actionUrl?: string
 }
 
-export default function AgencyAssistantClient({ agencyName }: { agencyName: string }) {
+export default function AgencyAssistantClient() {
   const router = useRouter()
   const [messages, setMessages] = useState<ParsedMessage[]>([])
   const [input, setInput] = useState('')
@@ -90,7 +90,7 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
   }
 
   return (
-    <AgencyShell title="AI Assistant" subtitle={`${agencyName}'s Careified assistant`}>
+    <AgencyShell title="Paracle" subtitle="Called alongside you">
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 200px)' }}>
         {/* Message Thread */}
         <div ref={messagesEndRef} style={{ overflowY: 'auto', flex: 1, minHeight: 300, maxHeight: 'calc(100vh - 380px)', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -148,7 +148,7 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
 
         {/* Input Area */}
         <div style={{ paddingTop: 12, paddingBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} disabled={loading} placeholder="Ask about your roster, clients, or matches..." style={{
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} disabled={loading} placeholder="Ask Paracle anything..." style={{
             flex: 1, fontSize: 15, padding: '12px 20px', border: `1px solid ${B}`, borderRadius: 24, outline: 'none', fontFamily: '"DM Sans", sans-serif', background: 'rgba(255,255,255,0.04)', color: '#F5F0E8'
           }} />
           <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{
@@ -158,8 +158,11 @@ export default function AgencyAssistantClient({ agencyName }: { agencyName: stri
           </button>
         </div>
 
-        {/* Footer */}
-        <div style={{ textAlign: 'center', fontSize: 12, color: M, padding: '8px 0 16px' }}>
+        {/* Footer hint */}
+        <div style={{ textAlign: 'center', fontSize: 11, color: M, padding: '4px 0 16px' }}>
+          Paracle knows your clients, roster, and open matches
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: M, padding: '0 0 16px' }}>
           This is a demo. Careified AI presents information for agency review — all hiring decisions are made independently. Not a recommendation engine.
         </div>
       </div>
