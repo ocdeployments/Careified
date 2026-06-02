@@ -85,7 +85,7 @@ async function generateNarrative(agencyId: string): Promise<{ narrative: string;
 
   if (!hasActivity) {
     return {
-      narrative: 'No overnight activity to report. Check back tomorrow morning after AIRecruit runs.',
+      narrative: 'No activity to report. Check back after business hours when Paracle completes its calls.',
       empty: true,
     }
   }
@@ -96,7 +96,7 @@ async function generateNarrative(agencyId: string): Promise<{ narrative: string;
     : 'No calls completed'
 
   const userPrompt = `Here is today's triage data for this agency:
-- AIRecruit calls completed overnight: ${airecruitResults.length} calls, top scorers: ${airecruitSummary}
+- AIRecruit calls completed during business hours: ${airecruitResults.length} calls, top scorers: ${airecruitSummary}
 - Expiring credentials in next 60 days: ${expiringCount}
 - Unmatched clients: ${unmatchedList.length} total, longest waiting: ${unmatchedList.map(c => `${c.client_first_name} (${c.days_waiting} days)`).join(', ') || 'none'}
 - Critical bench gaps: ${criticalGaps.length > 0 ? criticalGaps.join(', ') : 'none'}

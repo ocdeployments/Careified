@@ -55,14 +55,14 @@ const slides = [
     icon: LayoutDashboard,
     iconTint: GOLD,
     heading: "Your morning briefing, ready before you arrive.",
-    body: "The dashboard shows you what's urgent, who's available, and what Paracle handled overnight — before you've had your first coffee.",
+    body: "The dashboard shows you what's urgent, who's available, and what Paracle handled during business hours — ready when you need it.",
   },
   {
     icon: PhoneCall,
     iconTint: GOLD,
     heading: "Meet Paracle.",
     subheading: "Named from parakletos — called alongside you to help.",
-    body: "Paracle makes the calls you don't have time to make. Screening, references, verification, QuickFill — overnight, while you sleep. It's also on your dashboard, ready to answer questions and take action.",
+    body: "Paracle makes the calls you don't have time to make. Screening, references, verification, QuickFill — during business hours, so results are ready when you need them. It's also on your dashboard, ready to answer questions and take action.",
   },
   {
     icon: Shield,

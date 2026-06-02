@@ -206,7 +206,7 @@ export default function AgencyDashboard() {
     priorities.push({
       type: 'airecruit',
       title: `AIRecruit — ${stats?.airecruit_results} results ready to review`,
-      meta: 'Screening calls completed overnight',
+      meta: 'Screening calls completed',
       action: 'Review now →',
       actionHref: '/agency/airecruit',
       color: PURPLE,
