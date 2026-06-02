@@ -6,6 +6,7 @@ import Link from 'next/link'
 import BenchStrengthWidget from '@/components/agency/BenchStrengthWidget'
 import TriageNarrative from '@/components/agency/TriageNarrative'
 import ParacleOnboarding from '@/components/agency/ParacleOnboarding'
+import IntelCard from '@/components/agency/IntelCard'
 import {
   Bell,
   AlertTriangle,
@@ -139,6 +140,11 @@ export default function AgencyDashboard() {
   const formatCareLevel = (raw: string | null | undefined): string => {
     if (!raw) return 'Standard care'
     return raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  }
+
+  const formatSpecializations = (specs: string[] | null | undefined): string => {
+    if (!specs || specs.length === 0) return 'General care'
+    return specs.slice(0, 2).map(s => formatCareLevel(s)).join(', ')
   }
 
   // Skeleton loading state
@@ -536,7 +542,7 @@ export default function AgencyDashboard() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_PRIMARY }}>{cgiver.first_name} {cgiver.last_name?.[0]}.</div>
-                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>{formatCareLevel(cgiver.role || cgiver.specializations?.[0]) || 'Caregiver'}</div>
+                    <div style={{ fontSize: 11, color: TEXT_MUTED }}>{formatSpecializations(cgiver.specializations) || formatCareLevel(cgiver.role) || 'Caregiver'}</div>
                   </div>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN }} />
                 </Link>
@@ -580,28 +586,50 @@ export default function AgencyDashboard() {
             borderRadius: 12, padding: 20, gridColumn: isMobile ? '1' : 'span 1',
           }}>
             <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.08em', color: GOLD, textTransform: 'uppercase', marginBottom: 12 }}>
-              Overnight triage
+              Today's briefing
             </div>
             <TriageNarrative />
           </div>
 
           {/* Credentials expiring */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${CARD_BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 22, fontWeight: 500, color: TEXT_PRIMARY }}>{expiringCredCount}</div>
-            <div style={{ fontSize: 10, color: TEXT_MUTED }}>Credentials expiring (60d)</div>
-          </div>
+          <IntelCard
+            value={expiringCredCount}
+            label="Credentials due for renewal"
+            trend={expiringCredCount > 0 ? `${expiringCredCount} need attention` : 'All current'}
+            trendColor={expiringCredCount > 0 ? '#F59E0B' : '#22C55E'}
+            href="/agency/roster?tab=credentials"
+            color={expiringCredCount > 0 ? '#F59E0B' : '#F8FAFC'}
+          />
 
-          {/* AIRecruit results */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${CARD_BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 22, fontWeight: 500, color: PURPLE }}>{stats?.airecruit_results || 0}</div>
-            <div style={{ fontSize: 10, color: TEXT_MUTED }}>Paracle results ready</div>
-          </div>
+          {/* Paracle results */}
+          <IntelCard
+            value={stats?.airecruit_results ?? 0}
+            label="Paracle results ready"
+            trend="View screening results"
+            trendColor="#818CF8"
+            href="/agency/airecruit"
+            color="#818CF8"
+          />
 
           {/* Fill rate */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${CARD_BORDER}`, borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 22, fontWeight: 500, color: fillRate > 50 ? GREEN : AMBER }}>{fillRate}%</div>
-            <div style={{ fontSize: 10, color: TEXT_MUTED }}>Placement fill rate (30d)</div>
-          </div>
+          <IntelCard
+            value={(stats?.total_caregivers ?? 0) > 0 ? stats!.total_caregivers : (stats?.shortlisted_count || 0)}
+            label={(stats?.total_caregivers ?? 0) > 0 ? "Caregivers on your team" : "Caregivers shortlisted"}
+            trend={(stats?.total_caregivers ?? 0) > 0 ? "View your roster" : "Build your team"}
+            trendColor="#C9973A"
+            href={(stats?.total_caregivers ?? 0) > 0 ? "/agency/roster" : "/agency/shortlist"}
+            color="#C9973A"
+          />
+
+          {/* Clients */}
+          <IntelCard
+            value={(stats?.total_clients ?? 0) > 0 ? stats!.total_clients : (stats?.unmatched_clients || 0)}
+            label={(stats?.total_clients ?? 0) > 0 ? "Active clients" : "Clients waiting for care"}
+            trend={(stats?.unmatched_clients ?? 0) > 0 ? `${stats!.unmatched_clients} need coverage` : 'All covered'}
+            trendColor={(stats?.unmatched_clients ?? 0) > 0 ? '#E24B4A' : '#22C55E'}
+            href="/agency/clients"
+            color={(stats?.unmatched_clients ?? 0) > 0 ? '#E24B4A' : '#F8FAFC'}
+          />
         </div>
       </div>
       </div>

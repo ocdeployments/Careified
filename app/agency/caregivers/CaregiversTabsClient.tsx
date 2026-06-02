@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { ClientSearch } from '@/components/search/ClientSearch'
 import { SearchFilters } from '@/lib/types/search'
 
@@ -34,6 +35,7 @@ interface Caregiver {
   last_name: string
   photo_url?: string
   specializations?: string[]
+  placement_types?: string[]
   city?: string
   availability_status?: string
   claim_status?: string
@@ -55,6 +57,18 @@ export default function CaregiversTabsClient() {
   const [caregivers, setCaregivers] = useState<Caregiver[]>([])
   const [topMatches, setTopMatches] = useState<TopMatch[]>([])
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const specializationFilter = searchParams?.get('specialization')
+
+  const filteredCaregivers = specializationFilter
+    ? caregivers.filter(cg =>
+        cg.specializations?.some((s: string) =>
+          s.toLowerCase().includes(specializationFilter.toLowerCase())
+        ) || cg.placement_types?.some((p: string) =>
+          p.toLowerCase().includes(specializationFilter.toLowerCase())
+        )
+      )
+    : caregivers
 
   useEffect(() => {
     if (activeTab === 'available' || activeTab === 'atrisk') {
