@@ -52,3 +52,5 @@ next-env.d.ts
 .cleanup-phase-*.report.md
 tests/e2e/.auth/
 test-results/
+.claude/
+.env.local
